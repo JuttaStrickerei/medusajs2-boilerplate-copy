@@ -49,20 +49,20 @@ const medusaConfig = {
   modules: [
     {
       key: Modules.FULFILLMENT,
-      resolve: "@medusajs/medusa/fulfillment",
+      resolve: '@medusajs/medusa/fulfillment',
       options: {
         providers: [
           {
-            resolve: "./src/modules/sendcloud",
-            id: "sendcloud",
+            resolve: './src/modules/sendcloud',
+            id: 'sendcloud',
             options: {
               public_key: SENDCLOUD_PUBLIC_KEY,
               secret_key: SENDCLOUD_SECRET_KEY
             }
           },
           {
-            resolve: "@medusajs/medusa/fulfillment-manual",
-            id: "manual",
+            resolve: '@medusajs/medusa/fulfillment-manual',
+            id: 'manual',
           }
         ],
       },
