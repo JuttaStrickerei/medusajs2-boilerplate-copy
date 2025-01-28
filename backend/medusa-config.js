@@ -21,7 +21,9 @@ import {
   MINIO_SECRET_KEY,
   MINIO_BUCKET,
   MEILISEARCH_HOST,
-  MEILISEARCH_API_KEY
+  MEILISEARCH_API_KEY,
+  SENDCLOUD_PRIVATE_KEY,
+  SENDCLOUD_SECRET_KEY
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -45,6 +47,26 @@ const medusaConfig = {
     disable: SHOULD_DISABLE_ADMIN,
   },
   modules: [
+    {
+      key: Modules.FULFILLMENT,
+      resolve: "@medusajs/medusa/fulfillment",
+      options: {
+        providers: [
+          {
+            resolve: "./src/modules/sendcloud",
+            id: "sendcloud",
+            options: {
+              public_key: SENDCLOUD_PUBLIC_KEY,
+              secret_key: SENDCLOUD_SECRET_KEY
+            }
+          },
+          {
+            resolve: "@medusajs/medusa/fulfillment-manual",
+            id: "manual",
+          }
+        ],
+      },
+    },
     {
       key: Modules.FILE,
       resolve: '@medusajs/file',
