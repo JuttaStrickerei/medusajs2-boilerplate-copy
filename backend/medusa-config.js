@@ -61,7 +61,7 @@ const medusaConfig = {
             }
           },
           {
-            resolve: '@medusajs/medusa/fulfillment-manual',
+            resolve: '@medusajs/fulfillment-manual',
             id: 'manual',
           }
         ],
