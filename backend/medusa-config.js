@@ -49,7 +49,7 @@ const medusaConfig = {
   modules: [
     {
       key: Modules.FULFILLMENT,
-      resolve: '@medusajs/medusa/fulfillment',
+      resolve: '@medusajs/fulfillment',
       options: {
         providers: [
           {
