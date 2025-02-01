@@ -23,7 +23,11 @@ import {
   MEILISEARCH_HOST,
   MEILISEARCH_API_KEY,
   SENDCLOUD_PUBLIC_KEY,
-  SENDCLOUD_SECRET_KEY
+  SENDCLOUD_SECRET_KEY,
+  PAYPAL_SANDBOX,
+  PAYPAL_AUTH_WEBHOOK_ID,
+  PAYPAL_CLIENT_ID,
+  PAYPAL_CLIENT_SECRET,
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -145,6 +149,15 @@ const medusaConfig = {
             options: {
               apiKey: STRIPE_API_KEY,
               webhookSecret: STRIPE_WEBHOOK_SECRET,
+            },
+          },
+          {
+            resolve: `@medusajs/medusa-payment-paypal`,
+            options: {
+              sandbox: PAYPAL_SANDBOX,
+              clientId: PAYPAL_CLIENT_ID,
+              clientSecret: PAYPAL_CLIENT_SECRET,
+              authWebhookId: PAYPAL_AUTH_WEBHOOK_ID,
             },
           },
         ],

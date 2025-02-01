@@ -115,3 +115,12 @@ export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === 'true'
  */
 export const SENDCLOUD_PUBLIC_KEY = process.env.SENDCLOUD_PUBLIC_KEY;
 export const SENDCLOUD_SECRET_KEY = process.env.SENDCLOUD_SECRET_KEY;
+
+
+/**
+ * Paypal configuration
+ */
+export const PAYPAL_SANDBOX = process.env.PAYPAL_SANDBOX;
+export const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
+export const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+export const PAYPAL_AUTH_WEBHOOK_ID = process.env.PAYPAL_AUTH_WEBHOOK_ID;
