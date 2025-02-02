@@ -25,12 +25,11 @@
     "@headlessui/react": "^1.6.1",
     "@hookform/error-message": "^2.0.0",
     "@medusajs/js-sdk": "preview",
-    "@medusajs/medusa-js": "^6.1.10",
     "@medusajs/types": "preview",
     "@medusajs/ui": "preview",
     "@meilisearch/instant-meilisearch": "^0.7.1",
     "@paypal/paypal-js": "^5.0.6",
-    "@paypal/react-paypal-js": "^7.8.3",
+    "@paypal/react-paypal-js": "^7.8.1",
     "@stripe/react-stripe-js": "^1.7.2",
     "@stripe/stripe-js": "^1.29.0",
     "algoliasearch": "^4.20.0",
@@ -45,7 +44,6 @@
     "react-dom": "^18.2.0",
     "react-instantsearch-hooks-web": "^6.29.0",
     "react-intersection-observer": "^9.3.4",
-    "react-router-dom": "^7.1.5",
     "server-only": "^0.0.1",
     "tailwindcss-radix": "^2.8.0",
     "webpack": "^5"
@@ -72,3 +70,4 @@
     "typescript": "^5.3.2"
   }
 }
+
