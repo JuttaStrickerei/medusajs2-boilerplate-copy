@@ -151,6 +151,8 @@ const medusaConfig = {
               webhookSecret: STRIPE_WEBHOOK_SECRET,
             },
           },
+          // paypal Plugin-veraltet
+          /*
           {
             resolve: `@medusajs/medusa-payment-paypal`,
             options: {
@@ -160,6 +162,7 @@ const medusaConfig = {
               authWebhookId: PAYPAL_AUTH_WEBHOOK_ID,
             },
           },
+          */
         ],
       },
     }] : []),
