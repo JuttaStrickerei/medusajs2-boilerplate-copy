@@ -1,6 +1,12 @@
+// client.ts
 import { MedusaError } from "@medusajs/framework/utils"
 import { SendcloudOptions } from "./service"
-import { SendcloudShippingMethodsResponse } from "./types"
+import { 
+  SendcloudShippingMethodsResponse, 
+  SendcloudCreateParcelRequest,
+  SendcloudCreateParcelResponse,
+  SendcloudCancelParcelResponse
+} from "./types"
 
 export class SendcloudClient {
   private baseUrl = "https://panel.sendcloud.sc/api/v2"
@@ -14,12 +20,10 @@ export class SendcloudClient {
       )
     }
 
-    // Initialize auth token
     this.auth = Buffer.from(
       `${options.public_key}:${options.secret_key}`
     ).toString('base64')
 
-    // Log initialization only in development
     if (process.env.NODE_ENV === 'development') {
       console.log("Sendcloud client initialized")
     }
@@ -80,11 +84,6 @@ export class SendcloudClient {
     }
   }
 
-  /**
-   * Retrieves available shipping methods from Sendcloud.
-   * @param params Optional parameters to filter shipping methods
-   * @returns Promise<SendcloudShippingMethodsResponse>
-   */
   async getShippingMethods(params?: { 
     to_country?: string, 
     from_country?: string 
@@ -103,5 +102,18 @@ export class SendcloudClient {
     }`
     
     return await this.sendRequest<SendcloudShippingMethodsResponse>(endpoint)
+  }
+
+  async createParcel(data: SendcloudCreateParcelRequest): Promise<SendcloudCreateParcelResponse> {
+    return await this.sendRequest<SendcloudCreateParcelResponse>('/parcels', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async cancelParcel(id: number): Promise<SendcloudCancelParcelResponse> {
+    return await this.sendRequest<SendcloudCancelParcelResponse>(`/parcels/${id}/cancel`, {
+      method: 'POST'
+    })
   }
 }
