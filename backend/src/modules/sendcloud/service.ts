@@ -9,6 +9,9 @@ import {
 } from "@medusajs/framework/types"
 import { SendcloudClient } from "./client"
 
+
+import axios from 'axios';
+
 export type SendcloudOptions = {
   public_key: string
   secret_key: string
@@ -85,19 +88,82 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
     }
   }
 
+  
+
   async createFulfillment(
     data: Record<string, unknown>,
     items: Partial<Omit<FulfillmentItemDTO, "fulfillment">>[],
     order: Partial<FulfillmentOrderDTO> | undefined,
     fulfillment: Record<string, unknown>
   ): Promise<CreateFulfillmentResult> {
-    // TODO: Implement actual Sendcloud parcel creation
-    return {
-      data: {
-        provider_id: "sendcloud",
-        ...data
+    // Extract necessary data from the order and items
+    const { shipping_address, email, phone } = order as any;
+    const parcelItems = items.map(item => ({
+      description: item.title,
+      hs_code: "6109", // Example HS code, adjust as necessary
+      origin_country: "DE", // Example origin country, adjust as necessary
+      product_id: item.variant_id,
+      properties: {
+        color: "Blue", // Example property, adjust as necessary
+        size: "Medium" // Example property, adjust as necessary
       },
-      labels: []
+      quantity: item.quantity,
+      sku: item.variant_sku,
+      value: item.unit_price.toString(),
+      weight: "0.5" // Example weight, adjust as necessary
+    }));
+  
+    // Prepare the parcel data for SendCloud
+    const parcelData = {
+      parcel: {
+        name: shipping_address.first_name + " " + shipping_address.last_name,
+        company_name: shipping_address.company,
+        email: email,
+        telephone: phone,
+        address: shipping_address.address_1,
+        house_number: shipping_address.address_2,
+        city: shipping_address.city,
+        country: shipping_address.country_code,
+        postal_code: shipping_address.postal_code,
+        parcel_items: parcelItems,
+        weight: "1.5", // Total weight, adjust as necessary
+        length: "30", // Example length, adjust as necessary
+        width: "20", // Example width, adjust as necessary
+        height: "10", // Example height, adjust as necessary
+        total_order_value: order.total.toString(),
+        total_order_value_currency: order.currency_code,
+        shipment: {
+          id: 1316, // Example shipment ID, adjust as necessary
+          name: "POST AT Connect 2-5kg to ParcelShop"
+        },
+        request_label: true // Set to true to immediately request a label
+      }
+    };
+  
+    // Send the request to SendCloud API
+    try {
+      const response = await axios.post('https://panel.sendcloud.sc/api/v2/parcels', parcelData, {
+        headers: {
+          'Authorization': `Basic ${Buffer.from(`${process.env.SENDCLOUD_PUBLIC_KEY}:${process.env.SENDCLOUD_SECRET_KEY}`).toString('base64')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      // Extract the label URL from the response
+      const labelUrl = response.data.parcel.label.normal_printer[0];
+  
+      return {
+        data: {
+          provider_id: "sendcloud",
+          ...data,
+          parcel_id: response.data.parcel.id,
+          label_url: labelUrl
+        },
+        labels: [labelUrl]
+      };
+    } catch (error) {
+      console.error('Error creating parcel with SendCloud:', error);
+      throw new Error('Failed to create parcel with SendCloud');
     }
   }
 
