@@ -1,7 +1,6 @@
 import { getCategoriesList } from "@lib/data/categories"
 import { getCollectionsList } from "@lib/data/collections"
 import { Text, clx } from "@medusajs/ui"
-import Link from "next/link"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import MedusaCTA from "@modules/layout/components/medusa-cta"
@@ -131,12 +130,12 @@ export default async function Footer() {
                   </a>
                 </li>
                 <li>
-                <Link 
-                  href="/terms_services/pages/"
+                <LocalizedClientLink 
+                  href="/terms_services/"
                   className="hover:text-ui-fg-base"
                 >
                   Terms and Services
-                </Link>
+                </LocalizedClientLink>
               </li>
               </ul>
             </div>
