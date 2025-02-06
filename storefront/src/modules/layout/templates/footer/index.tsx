@@ -131,7 +131,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    href="/terms-and-services"
+                    href="../../../terms_services/terms-and-services.tsx"
                     className="hover:text-ui-fg-base"
                   >
                     Terms and Services
