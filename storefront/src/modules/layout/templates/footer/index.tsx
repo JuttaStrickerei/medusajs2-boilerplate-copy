@@ -116,7 +116,7 @@ export default async function Footer() {
                     rel="noreferrer"
                     className="hover:text-ui-fg-base"
                   >
-                    GitHub
+                      GitHub
                   </a>
                 </li>
                 <li>
@@ -130,9 +130,12 @@ export default async function Footer() {
                   </a>
                 </li>
                 <li>
-                <a href="/agb" className="hover:text-ui-fg-base">
-                    AGB
-                  </a>
+                  <LocalizedClientLink
+                    href="/terms-and-services"
+                    className="hover:text-ui-fg-base"
+                  >
+                    Terms and Services
+                  </LocalizedClientLink>
                 </li>
               </ul>
             </div>
