@@ -3,7 +3,6 @@ import { Button, Heading } from "@medusajs/ui"
 import Image from "next/image" // Import the Next.js Image component
 
 const Hero = () => {
-  
   const imageUrl = `${process.env.NEXT_PUBLIC_MINIO_URL}/._IMG_2722-01JP2HDRH327VZ71YQHKPGT2D1.jpg`
   
   return (
