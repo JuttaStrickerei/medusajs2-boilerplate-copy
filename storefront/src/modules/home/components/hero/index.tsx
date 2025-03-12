@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const Hero = () => {
   // Define the image URL (hardcoded for testing)
- const imageUrl = `${process.env.NEXT_PUBLIC_MINIO_URL}/DSC09710-01JKBCRRP1H777B1NRDXMJVJBB.jpg`
+ const imageUrl = `${process.env.NEXT_PUBLIC_MINIO_URL}/medusa-media/DSC09710-01JKBCRRP1H777B1NRDXMJVJBB.jpg`
   
   return (
     <div className="h-[75vh] w-full border-b border-ui-border-base relative">
