@@ -2,7 +2,7 @@ import React from "react";
 import { Heading } from "@medusajs/ui";
 
 const Hero = () => {
-  const imageUrl = `${process.env.NEXT_PUBLIC_MINIO_URL}/medusa-media/DSC09710-01JKBCRRP1H777B1NRDXMJVJBB.jpg`;
+  const imageUrl = `https://bucket-production-af40.up.railway.app/medusa-media/DSC09710-01JKBCRRP1H777B1NRDXMJVJBB.jpg`;
   
   return (
     <div className="flex flex-col items-center justify-center py-12 border-b border-ui-border-base">
