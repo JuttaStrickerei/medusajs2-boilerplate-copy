@@ -1,6 +1,5 @@
 import React from "react";
 import { Heading } from "@medusajs/ui";
-import Image from "next/image";
 
 const Hero = () => {
   const imageUrl = `${process.env.NEXT_PUBLIC_MINIO_URL}/medusa-media/DSC09710-01JKBCRRP1H777B1NRDXMJVJBB.jpg`;
@@ -11,13 +10,15 @@ const Hero = () => {
         <Heading level="h1">Welcome to the Store</Heading>
       </div>
       
-      <div className="w-full max-w-4xl relative h-[50vh]">
-        <Image
+      <div className="w-full max-w-2xl px-4">
+        <img
           src={imageUrl}
-          alt="Store showcase"
-          fill
-          className="object-contain"
-          priority
+          alt=""
+          className="w-full h-auto max-h-[80vh]"
+          style={{ 
+            objectFit: 'contain',
+            aspectRatio: '2/3' // Portrait orientation matching your image
+          }}
         />
       </div>
     </div>
