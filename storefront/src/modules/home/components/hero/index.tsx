@@ -1,21 +1,24 @@
 import React from "react";
 import { Heading } from "@medusajs/ui";
+import Image from "next/image";
 
 const Hero = () => {
   const imageUrl = `${process.env.NEXT_PUBLIC_MINIO_URL}/medusa-media/DSC09710-01JKBCRRP1H777B1NRDXMJVJBB.jpg`;
   
   return (
-    <div 
-      className="relative h-[75vh] w-full border-b border-ui-border-base"
-      style={{
-        backgroundImage: `url('${imageUrl}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center gap-6">
+    <div className="flex flex-col items-center justify-center py-12 border-b border-ui-border-base">
+      <div className="text-center mb-8">
         <Heading level="h1">Welcome to the Store</Heading>
+      </div>
+      
+      <div className="w-full max-w-4xl relative h-[50vh]">
+        <Image
+          src={imageUrl}
+          alt="Store showcase"
+          fill
+          className="object-contain"
+          priority
+        />
       </div>
     </div>
   );
