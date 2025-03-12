@@ -29,6 +29,8 @@ export interface MinioFileProviderOptions {
 }
 
 const DEFAULT_BUCKET = 'medusa-media'
+// Add delay constants
+const DELETE_DELAY_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 /**
  * Service to handle file storage using MinIO.
@@ -39,6 +41,8 @@ class MinioFileProviderService extends AbstractFileProviderService {
   protected readonly logger_: Logger
   protected client: Client
   protected readonly bucket: string
+  // Track pending deletions
+  protected pendingDeletions: Map<string, NodeJS.Timeout>
 
   constructor({ logger }: InjectedDependencies, options: MinioFileProviderOptions) {
     super()
@@ -62,6 +66,9 @@ class MinioFileProviderService extends AbstractFileProviderService {
       accessKey: this.config_.accessKey,
       secretKey: this.config_.secretKey
     })
+
+    // Initialize the pending deletions map
+    this.pendingDeletions = new Map()
 
     // Initialize bucket and policy
     this.initializeBucket().catch(error => {
@@ -194,6 +201,9 @@ class MinioFileProviderService extends AbstractFileProviderService {
     }
   }
 
+  /**
+   * Schedules file deletion after a delay instead of immediate deletion
+   */
   async delete(
     fileData: ProviderDeleteFileDTO
   ): Promise<void> {
@@ -204,13 +214,44 @@ class MinioFileProviderService extends AbstractFileProviderService {
       )
     }
 
-    try {
-      await this.client.removeObject(this.bucket, fileData.fileKey)
-      this.logger_.info(`Successfully deleted file ${fileData.fileKey} from MinIO bucket ${this.bucket}`)
-    } catch (error) {
-      // Log error but don't throw if file doesn't exist
-      this.logger_.warn(`Failed to delete file ${fileData.fileKey}: ${error.message}`)
+    // If a deletion is already scheduled for this file, cancel it
+    if (this.pendingDeletions.has(fileData.fileKey)) {
+      clearTimeout(this.pendingDeletions.get(fileData.fileKey)!)
+      this.pendingDeletions.delete(fileData.fileKey)
     }
+
+    // Log that deletion has been scheduled
+    this.logger_.info(`Scheduling deletion of file ${fileData.fileKey} in 5 minutes`)
+
+    // Schedule the deletion
+    const timeoutId = setTimeout(async () => {
+      try {
+        await this.client.removeObject(this.bucket, fileData.fileKey)
+        this.logger_.info(`Successfully deleted file ${fileData.fileKey} from MinIO bucket ${this.bucket} after delay`)
+        // Remove from pending deletions
+        this.pendingDeletions.delete(fileData.fileKey)
+      } catch (error) {
+        // Log error but don't throw if file doesn't exist
+        this.logger_.warn(`Failed to delete file ${fileData.fileKey} after delay: ${error.message}`)
+        this.pendingDeletions.delete(fileData.fileKey)
+      }
+    }, DELETE_DELAY_MS)
+
+    // Store the timeout ID
+    this.pendingDeletions.set(fileData.fileKey, timeoutId)
+  }
+
+  /**
+   * Optional: Add method to cancel a pending deletion
+   */
+  async cancelScheduledDeletion(fileKey: string): Promise<boolean> {
+    if (this.pendingDeletions.has(fileKey)) {
+      clearTimeout(this.pendingDeletions.get(fileKey)!)
+      this.pendingDeletions.delete(fileKey)
+      this.logger_.info(`Cancelled scheduled deletion for file ${fileKey}`)
+      return true
+    }
+    return false
   }
 
   async getPresignedDownloadUrl(
