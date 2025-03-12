@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const Hero = () => {
   // Define the image URL (hardcoded for testing)
-  const imageUrl = "/placeholder-image.jpg"; // Update this with your actual URL later
+ const imageUrl = `${process.env.NEXT_PUBLIC_MINIO_URL}/._IMG_2722-01JP2HDRH327VZ71YQHKPGT2D1.jpg`
   
   return (
     <div className="h-[75vh] w-full border-b border-ui-border-base relative">
