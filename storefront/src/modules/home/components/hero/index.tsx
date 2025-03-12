@@ -14,8 +14,9 @@ const Hero = () => {
         <Image 
           src={imageUrl}
           alt="Hero background"
-          fill
-          style={{ objectFit: "cover" }}
+          width={1920}  // Use appropriate dimensions
+          height={1080}
+          className="w-full h-full object-cover"
           priority
         />
       </div>
