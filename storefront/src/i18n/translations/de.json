@@ -1,0 +1,12 @@
+{
+  "common.cart": "Warenkorb",
+  "common.search": "Suche",
+  "common.menu": "Menü",
+  "common.home": "Startseite",
+  "common.store": "Shop",
+  "common.account": "Mein Konto",
+  "common.copyright": "Medusa Store. Alle Rechte vorbehalten.",
+  "product.addToCart": "In den Warenkorb",
+  "product.outOfStock": "Nicht auf Lager",
+  "home.welcome": "Willkommen in unserem Shop"
+}

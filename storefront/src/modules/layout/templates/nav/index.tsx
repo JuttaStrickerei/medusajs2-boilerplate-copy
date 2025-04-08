@@ -5,7 +5,7 @@ import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
-import ClientLanguageSwitcher from "../../../../components/ClientLanguageSwitcher" // Add this import
+import ClientLanguageSwitcher from "../../../../i18n/components/ClientLanguageSwitcher" // Add this import
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)

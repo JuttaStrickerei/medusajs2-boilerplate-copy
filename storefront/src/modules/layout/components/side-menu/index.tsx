@@ -9,7 +9,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
 import { useLanguage } from "../../../../i18n/LanguageContext" // Import the language hook
-import LanguageSwitcher from "../../../../components/LanguageSwitcher" // Import the language switcher component
+import LanguageSwitcher from "../../../../i18n/components/LanguageSwitcher" // Import the language switcher component
 
 // Define menu items with translation keys
 const SideMenuItems = {
