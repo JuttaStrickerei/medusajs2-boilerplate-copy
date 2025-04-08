@@ -1,4 +1,15 @@
 {
+  "account.edit": "Bearbeiten",
+  "account.cancel": "Abbrechen",
+  "account.saveChanges": "Änderungen speichern",
+  "account.updateSuccess": "{label} erfolgreich aktualisiert",
+  "account.title": "Konto",
+  "account.hello": "Hallo",
+  "account.profile": "Profil",
+  "account.addresses": "Adressen",
+  "account.orders": "Bestellungen",
+  "account.overview": "Übersicht",
+  "account.logout": "Abmelden",
   "common.cart": "Warenkorb",
   "common.search": "Suche",
   "common.menu": "Menü",
@@ -6,6 +17,7 @@
   "common.store": "Shop",
   "common.account": "Mein Konto",
   "common.copyright": "Medusa Store. Alle Rechte vorbehalten.",
+  "hero.welcometext": "Willkommen in unserem Shop",
   "product.addToCart": "In den Warenkorb",
   "product.outOfStock": "Nicht auf Lager",
   "home.welcome": "Willkommen in unserem Shop"

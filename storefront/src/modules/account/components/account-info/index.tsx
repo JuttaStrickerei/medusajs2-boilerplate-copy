@@ -4,6 +4,7 @@ import { useEffect } from "react"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
 import { useFormStatus } from "react-dom"
+import { useLanguage } from "../../../../i18n/LanguageContext" 
 
 type AccountInfoProps = {
   label: string
@@ -14,6 +15,13 @@ type AccountInfoProps = {
   clearState: () => void
   children?: React.ReactNode
   'data-testid'?: string
+  // Optional translation keys to override defaults
+  translationKeys?: {
+    editButton?: string
+    cancelButton?: string
+    saveButton?: string
+    successMessage?: string
+  }
 }
 
 const AccountInfo = ({
@@ -24,11 +32,23 @@ const AccountInfo = ({
   clearState,
   errorMessage = "An error occurred, please try again",
   children,
-  'data-testid': dataTestid
+  'data-testid': dataTestid,
+  translationKeys
 }: AccountInfoProps) => {
   const { state, close, toggle } = useToggleState()
-
   const { pending } = useFormStatus()
+  const { t } = useLanguage() // Get translation function
+
+  // Default translation keys
+  const defaultTranslationKeys = {
+    editButton: "account.edit",
+    cancelButton: "account.cancel",
+    saveButton: "account.saveChanges",
+    successMessage: "account.updateSuccess"
+  }
+
+  // Merge default translation keys with any overrides provided
+  const translations = { ...defaultTranslationKeys, ...translationKeys }
 
   const handleToggle = () => {
     clearState()
@@ -45,7 +65,7 @@ const AccountInfo = ({
     <div className="text-small-regular" data-testid={dataTestid}>
       <div className="flex items-end justify-between">
         <div className="flex flex-col">
-          <span className="uppercase text-ui-fg-base">{label}</span>
+          <span className="uppercase text-ui-fg-base">{t(label)}</span>
           <div className="flex items-center flex-1 basis-0 justify-end gap-x-4">
             {typeof currentInfo === "string" ? (
               <span className="font-semibold" data-testid="current-info">{currentInfo}</span>
@@ -63,7 +83,7 @@ const AccountInfo = ({
             data-testid="edit-button"
             data-active={state}
           >
-            {state ? "Cancel" : "Edit"}
+            {state ? t(translations.cancelButton) : t(translations.editButton)}
           </Button>
         </div>
       </div>
@@ -82,7 +102,7 @@ const AccountInfo = ({
           data-testid="success-message"
         >
           <Badge className="p-2 my-4" color="green">
-            <span>{label} updated succesfully</span>
+            <span>{t(translations.successMessage).replace("{label}", t(label))}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -101,7 +121,7 @@ const AccountInfo = ({
           data-testid="error-message"
         >
           <Badge className="p-2 my-4" color="red">
-            <span>{errorMessage}</span>
+            <span>{typeof errorMessage === "string" ? t(errorMessage) : errorMessage}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -126,7 +146,7 @@ const AccountInfo = ({
                 type="submit"
                 data-testid="save-button"
               >
-                Save changes
+                {t(translations.saveButton)}
               </Button>
             </div>
           </div>
