@@ -1,0 +1,18 @@
+{
+    "home": {
+      "welcome": "Willkommen in unserem Shop",
+      "featuredProducts": "Ausgewählte Produkte"
+    },
+    "product": {
+      "addToCart": "In den Warenkorb",
+      "description": "Beschreibung",
+      "details": "Produktdetails",
+      "relatedItems": "Das könnte Ihnen auch gefallen"
+    },
+    "nav": {
+      "home": "Startseite",
+      "products": "Produkte",
+      "cart": "Warenkorb",
+      "account": "Mein Konto"
+    }
+  }

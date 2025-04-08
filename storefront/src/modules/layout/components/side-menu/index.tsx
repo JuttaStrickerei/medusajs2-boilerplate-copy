@@ -8,17 +8,36 @@ import { Fragment } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
+import { useLanguage } from "../../../../i18n/LanguageContext" // Import the language hook
+import LanguageSwitcher from "../../../../components/LanguageSwitcher" // Import the language switcher component
 
+// Define menu items with translation keys
 const SideMenuItems = {
-  Home: "/",
-  Store: "/store",
-  Search: "/search",
-  Account: "/account",
-  Cart: "/cart",
+  Home: {
+    path: "/",
+    translationKey: "common.home", // Add translation key for Home
+  },
+  Store: {
+    path: "/store",
+    translationKey: "common.store", // Add translation key for Store
+  },
+  Search: {
+    path: "/search",
+    translationKey: "common.search", // Use existing translation key for Search
+  },
+  Account: {
+    path: "/account",
+    translationKey: "common.account", // Add translation key for Account
+  },
+  Cart: {
+    path: "/cart",
+    translationKey: "common.cart", // Use existing translation key for Cart
+  },
 }
 
 const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
   const toggleState = useToggleState()
+  const { t } = useLanguage() // Use the language hook to get translations
 
   return (
     <div className="h-full">
@@ -31,7 +50,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                   data-testid="nav-menu-button"
                   className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
                 >
-                  Menu
+                  {t("common.menu")} {/* Translate the Menu text */}
                 </Popover.Button>
               </div>
 
@@ -56,22 +75,27 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                       </button>
                     </div>
                     <ul className="flex flex-col gap-6 items-start justify-start">
-                      {Object.entries(SideMenuItems).map(([name, href]) => {
+                      {Object.entries(SideMenuItems).map(([name, item]) => {
                         return (
                           <li key={name}>
                             <LocalizedClientLink
-                              href={href}
+                              href={item.path}
                               className="text-3xl leading-10 hover:text-ui-fg-disabled"
                               onClick={close}
                               data-testid={`${name.toLowerCase()}-link`}
                             >
-                              {name}
+                              {t(item.translationKey)} {/* Translate menu items */}
                             </LocalizedClientLink>
                           </li>
                         )
                       })}
                     </ul>
                     <div className="flex flex-col gap-y-6">
+                      {/* Add Language Switcher */}
+                      <div className="flex justify-between mb-4">
+                        <LanguageSwitcher />
+                      </div>
+
                       <div
                         className="flex justify-between"
                         onMouseEnter={toggleState.open}
@@ -91,8 +115,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                         />
                       </div>
                       <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} Medusa Store. All rights
-                        reserved.
+                        © {new Date().getFullYear()} {t("common.copyright")} {/* Translate copyright */}
                       </Text>
                     </div>
                   </div>
