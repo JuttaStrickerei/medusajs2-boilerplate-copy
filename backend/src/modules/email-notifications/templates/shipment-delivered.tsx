@@ -3,31 +3,32 @@ import * as React from 'react'
 import { Base } from './base'
 import { OrderDTO, OrderAddressDTO, FulfillmentDTO } from '@medusajs/framework/types'
 
-export const SHIPMENT_SENT = 'shipment-sent'
+export const SHIPMENT_DELIVERED = 'shipment-delivered'
 
-interface ShipmentSentPreviewProps {
+interface ShipmentDeliveredPreviewProps {
   order: OrderDTO & { display_id: string; summary: { raw_current_order_total: { value: number } } }
   fulfillment: FulfillmentDTO
   shippingAddress: OrderAddressDTO
 }
 
-export interface ShipmentSentTemplateProps {
+export interface ShipmentDeliveredTemplateProps {
   order: OrderDTO & { display_id: string; summary: { raw_current_order_total: { value: number } } }
   fulfillment: FulfillmentDTO
   shippingAddress: OrderAddressDTO
   preview?: string
 }
 
-export const isShipmentSentTemplateData = (data: any): data is ShipmentSentTemplateProps =>
+export const isShipmentDeliveredTemplateData = (data: any): data is ShipmentDeliveredTemplateProps =>
  typeof data.order === 'object' && typeof data.shippingAddress === 'object'
-export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
-  PreviewProps: ShipmentSentPreviewProps
-} = ({ order, fulfillment, shippingAddress, preview = 'Your order has been shipped!' }) => {
+
+export const ShipmentDeliveredTemplate: React.FC<ShipmentDeliveredTemplateProps> & {
+  PreviewProps: ShipmentDeliveredPreviewProps
+} = ({ order, fulfillment, shippingAddress, preview = 'Your order has been delivered!' }) => {
   return (
     <Base preview={preview}>
       <Section>
         <Text style={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center', margin: '0 0 30px' }}>
-          Order Shipment Notification
+          Order Delivery Confirmation
         </Text>
 
         <Text style={{ margin: '0 0 15px' }}>
@@ -35,7 +36,7 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
         </Text>
 
         <Text style={{ margin: '0 0 30px' }}>
-          Great news! Your order has been shipped and is on its way to you.
+          Great news! Your order has been delivered to your shipping address.
         </Text>
 
         <Text style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 10px' }}>
@@ -48,14 +49,14 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
           Order Date: {new Date(order.created_at).toLocaleDateString()}
         </Text>
         <Text style={{ margin: '0 0 5px' }}>
-          Shipment Date: {new Date(fulfillment.created_at).toLocaleDateString()}
+          Delivery Date: {new Date().toLocaleDateString()}
         </Text>
         
 
         <Hr style={{ margin: '20px 0' }} />
 
         <Text style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 10px' }}>
-          Shipping Address
+          Delivery Address
         </Text>
         <Text style={{ margin: '0 0 5px' }}>
           {shippingAddress.address_1}
@@ -75,7 +76,7 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
         <Hr style={{ margin: '20px 0' }} />
 
         <Text style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 15px' }}>
-          Shipped Items
+          Delivered Items
         </Text>
 
         <div style={{
@@ -101,7 +102,11 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
         <Hr style={{ margin: '20px 0' }} />
 
         <Text style={{ margin: '0 0 15px' }}>
-          Thank you for shopping with us! If you have any questions about your shipment, please contact our customer service.
+          We hope you are satisfied with your purchase. If you have any questions or concerns about your delivered items, please contact our customer service.
+        </Text>
+
+        <Text style={{ margin: '0 0 15px' }}>
+          Thank you for shopping with us!
         </Text>
       </Section>
     </Base>
@@ -109,7 +114,7 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
 }
 
 // Define properly typed preview props
-ShipmentSentTemplate.PreviewProps = {
+ShipmentDeliveredTemplate.PreviewProps = {
     order: {
       id: 'test-order-id',
       display_id: 'ORD-123',
@@ -153,6 +158,6 @@ ShipmentSentTemplate.PreviewProps = {
       postal_code: '12345',
       country_code: 'US'
     } as OrderAddressDTO
-  } as ShipmentSentPreviewProps
+  } as ShipmentDeliveredPreviewProps
 
-export default ShipmentSentTemplate
+export default ShipmentDeliveredTemplate
