@@ -1,9 +1,22 @@
 // src/modules/sendcloud/types.ts
 
+// Price and Currency Types
 export type SendcloudPriceBreakdown = {
-  type: string
+  type: 'price_without_insurance' | 'fuel' | string
   label: string
   value: number
+}
+
+// Shipping Method Types
+export type SendcloudShippingMethod = {
+  id: number
+  name: string
+  carrier: string
+  min_weight: string
+  max_weight: string
+  service_point_input: 'required' | 'none'
+  price: number
+  countries: SendcloudCountry[]
 }
 
 export type SendcloudCountry = {
@@ -13,40 +26,22 @@ export type SendcloudCountry = {
   iso_2: string
   iso_3: string
   lead_time_hours: number | null
-  price_breakdown: SendcloudPriceBreakdown[]
-}
-
-export type SendcloudShippingMethod = {
-  id: number
-  name: string
-  carrier: string
-  min_weight: string
-  max_weight: string
-  service_point_input: string
-  price: number
-  countries: SendcloudCountry[]
+  price_breakdown?: SendcloudPriceBreakdown[]
 }
 
 export type SendcloudShippingMethodsResponse = {
   shipping_methods: SendcloudShippingMethod[]
 }
 
-// Added these to types.ts
-
+// Parcel Types
 export type SendcloudParcelStatus = {
   id: number
   message: string
 }
 
-export type SendcloudParcelLabel = {
+export type SendcloudLabel = {
   normal_printer: string[]
-  label_printer: string
-}
-
-export type SendcloudParcelDocument = {
-  type: string
-  size: string
-  link: string
+  label_printer?: string
 }
 
 export type SendcloudParcelResponse = {
@@ -62,25 +57,24 @@ export type SendcloudParcelResponse = {
   postal_code: string
   telephone?: string
   email?: string
-  tracking_number?: string
-  weight: string
-  label: SendcloudParcelLabel
-  documents: SendcloudParcelDocument[]
   status: SendcloudParcelStatus
-  country: {
-    iso_3: string
-    iso_2: string
-    name: string
+  tracking_number?: string
+  label?: SendcloudLabel
+  weight: string
+  carrier: {
+    code: string
   }
+  documents?: Array<{
+    type: string
+    size: string
+    link: string
+  }>
   shipment: {
     id: number
     name: string
   }
-  carrier: {
-    code: string
-  }
   order_number?: string
-  reference?: string
+  colli_uuid?: string
 }
 
 export type SendcloudCreateParcelRequest = {
@@ -88,7 +82,7 @@ export type SendcloudCreateParcelRequest = {
     name: string
     company_name?: string
     address: string
-    house_number?: string
+    house_number: string
     city: string
     postal_code: string
     telephone?: string
@@ -99,9 +93,7 @@ export type SendcloudCreateParcelRequest = {
     }
     weight: string
     order_number?: string
-    request_label?: boolean
-    shipping_method_checkout_name?: string
-    reference?: string
+    request_label: boolean
   }
 }
 
@@ -109,13 +101,18 @@ export type SendcloudCreateParcelResponse = {
   parcel: SendcloudParcelResponse
 }
 
-export type SendcloudCancelParcelResponse = {
+export type SendcloudCancelResponse = {
   status: string
   message: string
 }
 
-export type SendcloudParcelsResponse = {
-  next: string | null
-  previous: string | null
-  parcels: SendcloudParcelResponse[]
+// Error Types
+export type SendcloudError = {
+  message: string
+  code?: string
+}
+
+export type SendcloudErrorResponse = {
+  error: SendcloudError
+  errors?: SendcloudError[]
 }

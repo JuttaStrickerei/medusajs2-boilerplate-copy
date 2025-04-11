@@ -5,7 +5,7 @@ import {
   SendcloudShippingMethodsResponse, 
   SendcloudCreateParcelRequest,
   SendcloudCreateParcelResponse,
-  SendcloudCancelParcelResponse
+  SendcloudParcelResponse
 } from "./types"
 
 export class SendcloudClient {
@@ -111,8 +111,8 @@ export class SendcloudClient {
     })
   }
 
-  async cancelParcel(id: number): Promise<SendcloudCancelParcelResponse> {
-    return await this.sendRequest<SendcloudCancelParcelResponse>(`/parcels/${id}/cancel`, {
+  async cancelParcel(id: number): Promise<SendcloudCreateParcelResponse> {
+    return await this.sendRequest<SendcloudCreateParcelResponse>(`/parcels/${id}/cancel`, {
       method: 'POST'
     })
   }
