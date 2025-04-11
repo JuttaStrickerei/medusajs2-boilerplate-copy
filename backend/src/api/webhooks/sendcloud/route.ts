@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
+import FulfillmentModuleService from "@medusajs/fulfillment";
 
 // Helper function for safe property access
 const get = (obj: any, path: string, defaultValue: any = undefined) => {
@@ -21,12 +22,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   );
 
   try {
-    // Try to resolve the fulfillment module service
+    // Resolve fulfillment module service and try a simple operation
     try {
       const fulfillmentModuleService = req.scope.resolve(Modules.FULFILLMENT);
       console.log("Successfully resolved Fulfillment Module Service.");
+      
+      // Just check if we can access the service methods (without executing any)
+      if (typeof fulfillmentModuleService.listFulfillments === 'function') {
+        console.log("listFulfillments method is available");
+      }
     } catch (resolveError) {
-      console.error("Failed to resolve Fulfillment Module Service:", resolveError);
+      console.error("Failed to resolve or use Fulfillment Module Service:", resolveError);
     }
 
     // Extract basic info from payload
@@ -39,7 +45,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     // For now, just acknowledge receipt without further processing
     return res.status(200).json({
       success: true,
-      message: "Webhook received (with module resolution).",
+      message: "Webhook received (with fulfillment module import).",
       payload: req.body,
     });
 
