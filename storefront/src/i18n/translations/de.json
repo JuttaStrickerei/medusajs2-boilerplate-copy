@@ -20,5 +20,9 @@
   "hero.welcometext": "Willkommen in unserem Shop",
   "product.addToCart": "In den Warenkorb",
   "product.outOfStock": "Nicht auf Lager",
-  "home.welcome": "Willkommen in unserem Shop"
+  "home.welcome": "Willkommen in unserem Shop",
+  "store.sortBy": "Sortieren nach",
+  "store.latestarrivals": "Neueste Produkte",
+  "store.lowtohigh": "Preis: Niedrig -> Hoch",
+  "store.hightolow": "Preis: Hoch -> Niedrig"
 }

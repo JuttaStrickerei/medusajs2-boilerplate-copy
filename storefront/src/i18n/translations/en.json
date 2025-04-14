@@ -20,5 +20,10 @@
   "hero.welcometext": "Welcome to our Store",
   "product.addToCart": "Add to Cart",
   "product.outOfStock": "Out of Stock",
-  "home.welcome": "Welcome to our Store"
+  "home.welcome": "Welcome to our Store",
+  "store.sortBy": "Sort by",
+  "store.latestarrivals": "Latest Arrivals",
+  "store.lowtohigh": "Price: Low -> High",
+  "store.hightolow": "Price: High -> Low"
+
 }
