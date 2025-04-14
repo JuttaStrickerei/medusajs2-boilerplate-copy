@@ -1,3 +1,4 @@
+// cart-button.tsx
 import { notFound } from "next/navigation"
 import CartDropdown from "../cart-dropdown"
 import { enrichLineItems, retrieveCart } from "@lib/data/cart"
