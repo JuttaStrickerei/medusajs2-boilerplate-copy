@@ -17,8 +17,8 @@ type CountryOption = {
 }
 
 type CountrySelectProps = {
-  toggleState: StateType
-  regions: HttpTypes.StoreRegion[]
+    toggleState: StateType
+    regions: HttpTypes.StoreRegion[]
 }
 
 const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
