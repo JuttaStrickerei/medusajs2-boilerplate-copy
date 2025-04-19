@@ -14,6 +14,8 @@ import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 
+import { useLanguage } from "../../../../i18n/LanguageContext"
+
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
@@ -108,6 +110,8 @@ export default function ProductActions({
     setIsAdding(false)
   }
 
+  const { t } = useLanguage()
+
   return (
     <>
       <div className="flex flex-col gap-y-2" ref={actionsRef}>
@@ -144,10 +148,10 @@ export default function ProductActions({
           data-testid="add-product-button"
         >
           {!selectedVariant
-            ? "Select variant"
+            ? t("productbutton.selectvariant")
             : !inStock
-            ? "Out of stock"
-            : "Add to cart"}
+            ? t("productbutton.outOfStock")
+            : t("productbutton.addToCart")}
         </Button>
         <MobileActions
           product={product}
