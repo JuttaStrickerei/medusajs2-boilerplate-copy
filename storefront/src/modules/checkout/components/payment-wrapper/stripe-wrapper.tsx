@@ -17,9 +17,16 @@ const StripeWrapper: React.FC<StripeWrapperProps> = ({
   stripePromise,
   children,
 }) => {
-  const options: StripeElementsOptions = {
-    clientSecret: paymentSession!.data?.client_secret as string | undefined,
-  }
+  // Update the options to include payment_method_types
+const options: StripeElementsOptions = {
+  clientSecret: paymentSession!.data?.client_secret as string | undefined,
+  appearance: {
+    // Customize as needed
+    theme: 'stripe',
+  },
+  // This allows the widget to show multiple payment methods
+  loader: 'auto',
+}
 
   if (!stripeKey) {
     throw new Error(
