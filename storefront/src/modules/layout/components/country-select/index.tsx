@@ -1,14 +1,16 @@
 "use client"
 
 import { Listbox, Transition } from "@headlessui/react"
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { Fragment, use, useEffect, useMemo, useState } from "react"
 import ReactCountryFlag from "react-country-flag"
 
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { useParams, usePathname } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { useLanguage } from "../../../../i18n/LanguageContext"
+
+//import { useLanguage } from "../../../../i18n/LanguageContext"
+import { useTranslations } from "next-intl"
 
 type CountryOption = {
   country: string
@@ -57,7 +59,7 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
     close()
   }
 
-  const { t } = useLanguage()
+  const t  = useTranslations("countryselect")
 
   return (
     <div>
@@ -72,7 +74,7 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
       >
         <Listbox.Button className="py-1 w-full">
           <div className="txt-compact-small flex items-start gap-x-2">
-            <span> {t('countryselect.shipping')} </span>
+            <span> {t('shippingto')} </span>
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
                 <ReactCountryFlag

@@ -1,6 +1,7 @@
 "use client"
 
 import { useFormState } from "react-dom"
+import { useTranslations } from "next-intl" // <--- DIESEN IMPORT HINZUFÜGEN
 
 import Input from "@modules/common/components/input"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
@@ -15,6 +16,7 @@ type Props = {
 
 const Register = ({ setCurrentView }: Props) => {
   const [message, formAction] = useFormState(signup, null)
+  const t = useTranslations('register') // <--- DIESE ZEILE HINZUFÜGEN (oder 'account', je nach Ihrer Wahl)
 
   return (
     <div
@@ -22,30 +24,29 @@ const Register = ({ setCurrentView }: Props) => {
       data-testid="register-page"
     >
       <h1 className="text-large-semi uppercase mb-6">
-        Become a Medusa Store Member
+        {t("title")} {/* <--- ÜBERSETZT */}
       </h1>
       <p className="text-center text-base-regular text-ui-fg-base mb-4">
-        Create your Medusa Store Member profile, and get access to an enhanced
-        shopping experience.
+        {t("description")} {/* <--- ÜBERSETZT */}
       </p>
       <form className="w-full flex flex-col" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
-            label="First name"
+            label={t("first_name")} // <--- ÜBERSETZT
             name="first_name"
             required
             autoComplete="given-name"
             data-testid="first-name-input"
           />
           <Input
-            label="Last name"
+            label={t("last_name")} // <--- ÜBERSETZT
             name="last_name"
             required
             autoComplete="family-name"
             data-testid="last-name-input"
           />
           <Input
-            label="Email"
+            label={t("email")} // <--- ÜBERSETZT
             name="email"
             required
             type="email"
@@ -53,14 +54,14 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="email-input"
           />
           <Input
-            label="Phone"
+            label={t("phone")} // <--- ÜBERSETZT
             name="phone"
             type="tel"
             autoComplete="tel"
             data-testid="phone-input"
           />
           <Input
-            label="Password"
+            label={t("password")} // <--- ÜBERSETZT
             name="password"
             required
             type="password"
@@ -70,33 +71,33 @@ const Register = ({ setCurrentView }: Props) => {
         </div>
         <ErrorMessage error={message} data-testid="register-error" />
         <span className="text-center text-ui-fg-base text-small-regular mt-6">
-          By creating an account, you agree to Medusa Store&apos;s{" "}
+          {t("agreement_part1")} {/* <--- ÜBERSETZT */}
           <LocalizedClientLink
             href="/content/privacy-policy"
             className="underline"
           >
-            Privacy Policy
+            {t("agreement_privacy_policy")} {/* <--- ÜBERSETZT */}
           </LocalizedClientLink>{" "}
-          and{" "}
+          {t("agreement_and")} {/* <--- ÜBERSETZT */}
           <LocalizedClientLink
             href="/content/terms-of-use"
             className="underline"
           >
-            Terms of Use
+            {t("agreement_terms_of_use")} {/* <--- ÜBERSETZT */}
           </LocalizedClientLink>
           .
         </span>
         <SubmitButton className="w-full mt-6" data-testid="register-button">
-          Join
+          {t("join_button")} {/* <--- ÜBERSETZT */}
         </SubmitButton>
       </form>
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        Already a member?{" "}
+        {t("already_member_question")}{" "} {/* <--- ÜBERSETZT */}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
           className="underline"
         >
-          Sign in
+          {t("sign_in_button")} {/* <--- ÜBERSETZT */}
         </button>
         .
       </span>

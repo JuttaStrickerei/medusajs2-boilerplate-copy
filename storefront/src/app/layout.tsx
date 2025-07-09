@@ -1,20 +1,27 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import "styles/globals.css"
-import { LanguageProvider } from "../i18n/LanguageContext" 
+
+//import { LanguageProvider } from "../i18n/LanguageContext" 
+import {NextIntlClientProvider} from 'next-intl';
+import {getLocale} from 'next-intl/server';
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
 }
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  const locale = await getLocale();
+ 
   return (
-    <html lang="en" data-mode="light">
+    <html lang={locale}>
       <body>
-        <LanguageProvider> {/* Add this wrapper */}
-          <main className="relative">{props.children}</main>
-        </LanguageProvider>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
-  )
+  );
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo } from "react"
+import { useTranslations } from "next-intl" // <--- ADD THIS IMPORT
 
 import Input from "@modules/common/components/input"
 import NativeSelect from "@modules/common/components/native-select"
@@ -19,13 +20,15 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
   customer,
   regions,
 }) => {
+  const t = useTranslations('account') // <--- ADD THIS LINE
+
   const regionOptions = useMemo(() => {
     return (
       regions
         ?.map((region) => {
           return region.countries?.map((country) => ({
             value: country.iso_2,
-            label: country.display_name,
+            label: country.display_name, // country.display_name from Medusa is usually already localized
           }))
         })
         .flat() || []
@@ -53,7 +56,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
 
   const currentInfo = useMemo(() => {
     if (!billingAddress) {
-      return "No billing address"
+      return t("no_billing_address") // <--- TRANSLATE THIS
     }
 
     const country =
@@ -77,29 +80,31 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
         <span>{country}</span>
       </div>
     )
-  }, [billingAddress, regionOptions])
+  }, [billingAddress, regionOptions, t]) // <--- ADD t to dependency array
 
   return (
     <form action={formAction} onReset={() => clearState()} className="w-full">
       <AccountInfo
-        label="Billing address"
+        label="billing_address" // <--- TRANSLATE THIS KEY
         currentInfo={currentInfo}
         isSuccess={successState}
         isError={!!state.error}
+        // If state.error is a generic string, translate it, otherwise handle it as dynamic message
+        errorMessage={state.error ? t("error_occurred_please_try_again") : undefined} // <--- TRANSLATE OR HANDLE THIS
         clearState={clearState}
         data-testid="account-billing-address-editor"
       >
         <div className="grid grid-cols-1 gap-y-2">
           <div className="grid grid-cols-2 gap-x-2">
             <Input
-              label="First name"
+              label={t("first_name")} // <--- TRANSLATE THIS
               name="billing_address.first_name"
               defaultValue={billingAddress?.first_name || undefined}
               required
               data-testid="billing-first-name-input"
             />
             <Input
-              label="Last name"
+              label={t("last_name")} // <--- TRANSLATE THIS
               name="billing_address.last_name"
               defaultValue={billingAddress?.last_name || undefined}
               required
@@ -107,34 +112,34 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             />
           </div>
           <Input
-            label="Company"
+            label={t("company")} // <--- TRANSLATE THIS
             name="billing_address.company"
             defaultValue={billingAddress?.company || undefined}
             data-testid="billing-company-input"
           />
           <Input
-            label="Address"
+            label={t("address")} // <--- TRANSLATE THIS
             name="billing_address.address_1"
             defaultValue={billingAddress?.address_1 || undefined}
             required
             data-testid="billing-address-1-input"
           />
           <Input
-            label="Apartment, suite, etc."
+            label={t("apartment_suite_etc")} // <--- TRANSLATE THIS
             name="billing_address.address_2"
             defaultValue={billingAddress?.address_2 || undefined}
             data-testid="billing-address-2-input"
           />
           <div className="grid grid-cols-[144px_1fr] gap-x-2">
             <Input
-              label="Postal code"
+              label={t("postal_code")} // <--- TRANSLATE THIS
               name="billing_address.postal_code"
               defaultValue={billingAddress?.postal_code || undefined}
               required
               data-testid="billing-postcal-code-input"
             />
             <Input
-              label="City"
+              label={t("city")} // <--- TRANSLATE THIS
               name="billing_address.city"
               defaultValue={billingAddress?.city || undefined}
               required
@@ -142,7 +147,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             />
           </div>
           <Input
-            label="Province"
+            label={t("province")} // <--- TRANSLATE THIS
             name="billing_address.province"
             defaultValue={billingAddress?.province || undefined}
             data-testid="billing-province-input"
@@ -153,7 +158,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             required
             data-testid="billing-country-code-select"
           >
-            <option value="">-</option>
+            <option value="">{t("select_country_placeholder")}</option> {/* <--- TRANSLATE THIS */}
             {regionOptions.map((option, i) => {
               return (
                 <option key={i} value={option?.value}>

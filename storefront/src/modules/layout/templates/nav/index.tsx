@@ -3,10 +3,11 @@ import { StoreRegion } from "@medusajs/types";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import CartButton from "@modules/layout/components/cart-button";
 import SideMenu from "@modules/layout/components/side-menu";
-import NavLinks from "./nav-links";
+import { getTranslations } from "next-intl/server";
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions);
+  const t = await getTranslations("nav");
 
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
@@ -29,7 +30,24 @@ export default async function Nav() {
           </div>
 
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
-            <NavLinks />
+            <div className="hidden small:flex items-center gap-x-6 h-full">
+              <LocalizedClientLink
+              href="/search"
+              scroll={false}
+              data-testid="nav-search-link"
+              className="hover:text-ui-fg-base"
+              >
+                {t("search")}
+              </LocalizedClientLink>
+
+              <LocalizedClientLink
+                href="/account"
+                data-testid="nav-account-link"
+                className="hover:text-ui-fg-base"
+              >
+                {t("account")}
+              </LocalizedClientLink>
+            </div>
             
             {/* No Suspense boundary needed */}
             <CartButton />

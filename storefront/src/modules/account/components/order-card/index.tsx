@@ -1,5 +1,8 @@
+"use client" // Added this based on common practice for components using hooks like useTranslations
+
 import { Button } from "@medusajs/ui"
 import { useMemo } from "react"
+import { useTranslations } from "next-intl" // <--- DIESEN IMPORT HINZUFÜGEN
 
 import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -11,6 +14,8 @@ type OrderCardProps = {
 }
 
 const OrderCard = ({ order }: OrderCardProps) => {
+  const t = useTranslations('orders') // <--- DIESE ZEILE HINZUFÜGEN
+
   const numberOfLines = useMemo(() => {
     return (
       order.items?.reduce((acc, item) => {
@@ -30,7 +35,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
       </div>
       <div className="flex items-center divide-x divide-gray-200 text-small-regular text-ui-fg-base">
         <span className="pr-2" data-testid="order-created-at">
-          {new Date(order.created_at).toDateString()}
+           {new Date(order.created_at).toLocaleDateString('de-DE')}
         </span>
         <span className="px-2" data-testid="order-amount">
           {convertToLocale({
@@ -38,9 +43,12 @@ const OrderCard = ({ order }: OrderCardProps) => {
             currency_code: order.currency_code,
           })}
         </span>
-        <span className="pl-2">{`${numberOfLines} ${
-          numberOfLines > 1 ? "items" : "item"
-        }`}</span>
+        <span className="pl-2">
+          {/* <--- ÜBERSETZT MIT KONDITIONALEM TEXT FÜR SINGULAR/PLURAL */}
+          {`${numberOfLines} ${
+            numberOfLines > 1 ? t("item_plural") : t("item_singular")
+          }`}
+        </span>
       </div>
       <div className="grid grid-cols-2 small:grid-cols-4 gap-4 my-4">
         {order.items?.slice(0, 3).map((i) => {
@@ -69,14 +77,16 @@ const OrderCard = ({ order }: OrderCardProps) => {
             <span className="text-small-regular text-ui-fg-base">
               + {numberOfLines - 4}
             </span>
-            <span className="text-small-regular text-ui-fg-base">more</span>
+            <span className="text-small-regular text-ui-fg-base">
+              {t("more")} {/* <--- ÜBERSETZT */}
+            </span>
           </div>
         )}
       </div>
       <div className="flex justify-end">
         <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
           <Button data-testid="order-details-link" variant="secondary">
-            See details
+            {t("see_details_button")} {/* <--- ÜBERSETZT */}
           </Button>
         </LocalizedClientLink>
       </div>

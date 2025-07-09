@@ -1,0 +1,139 @@
+{
+  "Homepage": {
+    "title": "Hello World!"
+  },
+  "account": {
+    "edit": "Bearbeiten",
+    "cancel": "Abbrechen",
+    "saveChanges": "Änderungen speichern",
+    "updateSuccess": "{label} erfolgreich aktualisiert",
+    "title": "Konto",
+    "hello": "Hallo",
+    "profile": "Profil",
+    "addresses": "Adressen",
+    "orders": "Bestellungen",
+    "overview": "Übersicht",
+    "logout": "Abmelden",
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "password": "Passwort",
+    "billing_address": "Rechnungsadresse",
+    "no_billing_address": "Keine Rechnungsadresse",
+    "first_name": "Vorname",
+    "last_name": "Nachname",
+    "company": "Firma",
+    "address": "Adresse",
+    "apartment_suite_etc": "Wohnung, Suite, etc.",
+    "postal_code": "Postleitzahl",
+    "city": "Stadt",
+    "province": "Bundesland",
+    "select_country_placeholder": "-",
+    "password_not_shown_security_reasons": "Das Passwort wird aus Sicherheitsgründen nicht angezeigt",
+    "old_password": "Altes Passwort",
+    "new_password": "Neues Passwort",
+    "confirm_password": "Passwort bestätigen",
+    "agreement_part1": "Mit dem Erstellen eines Kontos stimmen Sie der ",
+    "agreement_privacy_policy": "Datenschutzerklärung",
+    "agreement_and": " und den ",
+    "agreement_terms_of_use": "Nutzungsbedingungen",
+    "join_button": "Beitreten",
+    "already_member_question": "Bereits Mitglied?",
+    "sign_in_button": "Anmelden",
+    "new_address": "Neue Adresse",
+    "add_address": "Adresse hinzufügen",
+    "province_state": "Bundesland / Staat",
+    "save": "Speichern",
+    "edit_button": "Bearbeiten",
+    "remove_button": "Entfernen",
+    "edit_address": "Adresse bearbeiten",
+    "welcome_back": "Willkommen zurück",
+    "login_description": "Melden Sie sich an, um ein verbessertes Einkaufserlebnis zu genießen.",
+    "email_input_title": "Geben Sie eine gültige E-Mail-Adresse ein.",
+    "not_member_question": "Noch kein Mitglied?",
+    "hello_name": "Hallo {firstName}",
+    "signed_in_as": "Angemeldet mit:",
+    "completed": "Abgeschlossen",
+    "saved": "Gespeichert",
+    "view_your_addresses": "Adressen anzeigen",
+    "addresses_page_hint": "Ihre Adressen werden bei dem Checkout verwendet, um Ihre Bestellung zu liefern.",
+     "orders_page_summary": "Übersicht Ihrer bisherigen Bestellungen.",
+    "orders_page_description": "Sehen Sie Ihre bisherigen Bestellungen und deren Status ein. Sie können bei Bedarf auch Rücksendungen oder einen Umtausch für Ihre Bestellungen erstellen.",
+    "edit_profile": "Profil bearbeiten",
+     "update_profile_information": "Sie können Ihre Profilinformationen einsehen und aktualisieren, einschließlich Ihres Namens, Ihrer E-Mail-Adresse und Ihrer Telefonnummer. Sie können auch Ihre Rechnungsadresse aktualisieren oder Ihr Passwort ändern."
+    
+  },
+  "side-menu": {
+    "account": "Konto",
+    "cart": "Warenkorb",
+    "home": "Home",
+    "menu": "Menü",
+    "store": "Shop",
+    "search": "Suche",
+    "copyright": "Jutta Strickerei. Alle Rechte vorbehalten."
+  },
+  
+  "cart": {
+    "quantity": "Menge",
+    "remove": "Entfernen",
+    "subtotal": "Zwischensumme",
+    "exclTaxes": "Exkl. MwSt.",
+    "goToCart": "Zum Warenkorb",
+    "empty": "Leer",
+    "goToProducts": "Zu den Produkten",
+    "exploreProducts": "Produkte entdecken"
+  },
+  "countryselect": {
+    "shippingto": "Versand nach"
+  },
+  "nav": {
+    "account": "Konto",
+    "search": "Suche",
+    "cart": "Warenkorb"
+  },
+  "product": {
+    "productinformation": "Produktinformationen",
+    "origincountry": "Herkunftsland",
+    "weight": "Gewicht",
+    "dimensions": "Abmessungen",
+    "material": "Material",
+    "shipping_return": "Versand & Rücksendungen",
+    "shipping_returninfo": "Ihr Paket kommt innerhalb von 3-5 Werktagen an Ihrer Abholstelle oder bequem bei Ihnen zu Hause an.",
+    "fastdelivery": "schnelle Lieferung",
+    "exchange": "einfacher Umtausch",
+    "exchangeinfo": "Passt es nicht ganz? Keine Sorge – wir tauschen Ihr Produkt gegen ein neues um.",
+    "addToCart": "In den Warenkorb",
+    "outOfStock": "Nicht auf Lager"
+  },
+  "productbutton": {
+    "addToCart": "In den Warenkorb",
+    "outOfStock": "Nicht auf Lager",
+    "selectvariant": "Variante auswählen"
+  },
+    "store" : {
+    "sortBy": "Sortieren nach",
+    "latestarrivals": "Neueste Produkte",
+    "lowtohigh": "Preis: Niedrig -> Hoch",
+    "hightolow": "Preis: Hoch -> Niedrig"
+  },
+   "orders": {
+    "item_plural": "Artikel",
+    "item_singular": "Artikel",
+    "more": "mehr",
+    "see_details_button": "Details ansehen",
+     "recent_orders": "Letzte Bestellungen",
+    "no_recent_orders": "Keine aktuellen Bestellungen",
+    "date_placed": "Bestelldatum",
+    "order_number": "Bestellnummer",
+    "total_amount": "Gesamtbetrag",
+    "go_to_order": "Gehe zu Bestellung Nr.",
+    "no_orders_title": "Hier gibt es nichts zu sehen",
+    "no_orders_description": "Sie haben noch keine Bestellungen, lassen Sie uns das ändern :)",
+    "continue_shopping_button": "Weiter einkaufen",
+    "order_details_title": "Bestelldetails",
+    "order_details_description": "Sehen Sie die Details Ihrer Bestellung ein."
+  }
+  
+}
+
+

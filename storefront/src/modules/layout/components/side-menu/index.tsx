@@ -8,36 +8,40 @@ import { Fragment } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
-import { useLanguage } from "../../../../i18n/LanguageContext" // Import the language hook
-import LanguageSwitcher from "../../../../i18n/components/LanguageSwitcher" // Import the language switcher component
+
+//import { useLanguage } from "../../../../i18n/LanguageContext" // Import the language hook
+//import LanguageSwitcher from "../../../../i18n/components/LanguageSwitcher" // Import the language switcher component
+
+import { useTranslations } from "next-intl"
+
 
 // Define menu items with translation keys
 const SideMenuItems = {
   Home: {
     path: "/",
-    translationKey: "common.home", // Add translation key for Home
+    translationKey: "home", // Add translation key for Home
   },
   Store: {
     path: "/store",
-    translationKey: "common.store", // Add translation key for Store
+    translationKey: "store", // Add translation key for Store
   },
   Search: {
     path: "/search",
-    translationKey: "common.search", // Use existing translation key for Search
+    translationKey: "search", // Use existing translation key for Search
   },
   Account: {
     path: "/account",
-    translationKey: "common.account", // Add translation key for Account
+    translationKey: "account", // Add translation key for Account
   },
   Cart: {
     path: "/cart",
-    translationKey: "common.cart", // Use existing translation key for Cart
+    translationKey: "cart", // Use existing translation key for Cart
   },
 }
 
 const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
   const toggleState = useToggleState()
-  const { t } = useLanguage() // Use the language hook to get translations
+  const t = useTranslations("side-menu")
 
   return (
     <div className="h-full">
@@ -50,7 +54,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                   data-testid="nav-menu-button"
                   className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
                 >
-                  {t("common.menu")} {/* Translate the Menu text */}
+                  {t("menu")} {/* Translate the Menu text */}
                 </Popover.Button>
               </div>
 
@@ -92,9 +96,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                     </ul>
                     <div className="flex flex-col gap-y-6">
                       {/* Add Language Switcher */}
-                      <div className="flex justify-between mb-4">
-                        <LanguageSwitcher />
-                      </div>
+                    
 
                       <div
                         className="flex justify-between"
@@ -115,7 +117,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                         />
                       </div>
                       <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} {t("common.copyright")} {/* Translate copyright */}
+                        © {new Date().getFullYear()} {t("copyright")} {/* Translate copyright */}
                       </Text>
                     </div>
                   </div>

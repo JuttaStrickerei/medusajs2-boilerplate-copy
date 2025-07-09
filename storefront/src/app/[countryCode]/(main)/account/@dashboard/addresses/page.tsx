@@ -7,9 +7,17 @@ import { headers } from "next/headers"
 import { getRegion } from "@lib/data/regions"
 import { getCustomer } from "@lib/data/customer"
 
-export const metadata: Metadata = {
-  title: "Addresses",
-  description: "View your addresses",
+import { useTranslations } from "next-intl"
+import { title } from "process"
+import { Description } from "@headlessui/react/dist/components/description/description"
+import { getTranslations } from "next-intl/server"
+
+export async function genereateMetadata() {
+  const t = await getTranslations("account")
+  return {
+    title: t("addresses"), 
+    description: t("view_your_addresses"),
+  }
 }
 
 export default async function Addresses({
@@ -17,9 +25,11 @@ export default async function Addresses({
 }: {
   params: { countryCode: string }
 }) {
-  const { countryCode } = params
-  const customer = await getCustomer()
-  const region = await getRegion(countryCode)
+  // 2. Get translation function for the component
+  const t = await getTranslations("account");
+  const { countryCode } = params;
+  const customer = await getCustomer();
+  const region = await getRegion(countryCode);
 
   if (!customer || !region) {
     notFound()
@@ -28,10 +38,10 @@ export default async function Addresses({
   return (
     <div className="w-full" data-testid="addresses-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">Shipping Addresses</h1>
+        {/* 3. Use translations for page content */}
+        <h1 className="text-2xl-semi">{t("addresses")}</h1>
         <p className="text-base-regular">
-          View and update your shipping addresses, you can add as many as you
-          like. Saving your addresses will make them available during checkout.
+          {t("addresses_page_hint")}
         </p>
       </div>
       <AddressBook customer={customer} region={region} />

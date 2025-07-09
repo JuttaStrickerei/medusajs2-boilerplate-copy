@@ -7,6 +7,7 @@ import Input from "@modules/common/components/input"
 import AccountInfo from "../account-info"
 import { useFormState } from "react-dom"
 import { HttpTypes } from "@medusajs/types"
+import { useTranslations } from "next-intl"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
@@ -14,6 +15,7 @@ type MyInformationProps = {
 
 const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false)
+  const t = useTranslations("account")
 
   // TODO: Add support for password updates
   const [state, formAction] = useFormState((() => {}) as any, {
@@ -33,9 +35,9 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
   return (
     <form action={formAction} onReset={() => clearState()} className="w-full">
       <AccountInfo
-        label="Password"
+        label="password"
         currentInfo={
-          <span>The password is not shown for security reasons</span>
+          <span>{t("password_not_shown_security_reasons")}</span>
         }
         isSuccess={successState}
         isError={!!state.error}
@@ -45,21 +47,21 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
       >
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="Old password"
+            label={t("old_password")}
             name="old_password"
             required
             type="password"
             data-testid="old-password-input"
           />
           <Input
-            label="New password"
+            label={t("new_password")}
             type="password"
             name="new_password"
             required
             data-testid="new-password-input"
           />
           <Input
-            label="Confirm password"
+            label={t("confirm_password")}
             type="password"
             name="confirm_password"
             required

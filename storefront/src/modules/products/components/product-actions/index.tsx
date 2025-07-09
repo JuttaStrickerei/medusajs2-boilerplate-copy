@@ -14,7 +14,7 @@ import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 
-import { useLanguage } from "../../../../i18n/LanguageContext"
+import { useTranslations } from "next-intl"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -110,7 +110,7 @@ export default function ProductActions({
     setIsAdding(false)
   }
 
-  const { t } = useLanguage()
+  const t = useTranslations("productbutton")
 
   return (
     <>
@@ -148,10 +148,10 @@ export default function ProductActions({
           data-testid="add-product-button"
         >
           {!selectedVariant
-            ? t("productbutton.selectvariant")
+            ? t("selectvariant")
             : !inStock
-            ? t("productbutton.outOfStock")
-            : t("productbutton.addToCart")}
+            ? t("outOfStock")
+            : t("addToCart")}
         </Button>
         <MobileActions
           product={product}

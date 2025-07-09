@@ -1,7 +1,8 @@
 "use client"
 
 import FilterRadioGroup from "@modules/common/components/filter-radio-group"
-import { useLanguage } from "../../../../../i18n/LanguageContext"
+import { useTranslations } from "next-intl"
+import { use } from "react"
 
 export type SortOptions = "price_asc" | "price_desc" | "created_at"
 
@@ -17,21 +18,21 @@ const SortProducts = ({
   setQueryParams,
 }: SortProductsProps) => {
   // Move the useLanguage hook inside the component
-  const { t } = useLanguage()
+  const t = useTranslations('store')
   
   // Define sortOptions inside the component with proper t function calls
   const sortOptions = [
     {
       value: "created_at",
-      label: t('store.latestarrivals'),
+      label: t('latestarrivals'),
     },
     {
       value: "price_asc",
-      label: t('store.lowtohigh'),
+      label: t('lowtohigh'),
     },
     {
       value: "price_desc",
-      label: t('store.hightolow'),
+      label: t('hightolow'),
     },
   ]
 
@@ -41,7 +42,7 @@ const SortProducts = ({
   
   return (
     <FilterRadioGroup
-      title={t('store.sortBy')}
+      title={t('sortBy')}
       items={sortOptions}
       value={sortBy}
       handleChange={handleChange}

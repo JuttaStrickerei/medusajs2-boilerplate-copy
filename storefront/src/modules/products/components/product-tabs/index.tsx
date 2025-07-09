@@ -7,7 +7,8 @@ import Refresh from "@modules/common/icons/refresh"
 import Accordion from "./accordion"
 import { HttpTypes } from "@medusajs/types"
 
-import { useLanguage } from "../../../../i18n/LanguageContext"
+import { useTranslations} from "next-intl"
+import { useTransition } from "react"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
@@ -16,15 +17,15 @@ type ProductTabsProps = {
 
 const ProductTabs = ({ product }: ProductTabsProps) => {
 
-  const {t} = useLanguage()
+  const t = useTranslations("product")
 
   const tabs = [
     {
-      label: t('product.productinformation'),
+      label: t('productinformation'),
       component: <ProductInfoTab product={product} />,
     },
     {
-      label: t('product.shipping_return'),
+      label: t('shipping_return'),
       component: <ShippingInfoTab />,
     },
   ]
@@ -48,27 +49,27 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
 }
 
 const ProductInfoTab = ({ product }: ProductTabsProps) => {
-  const {t} = useLanguage()
+  const t = useTranslations("product")
   return (
     <div className="text-small-regular py-8">
       <div className="grid grid-cols-2 gap-x-8">
         <div className="flex flex-col gap-y-4">
           <div>
-            <span className="font-semibold">{t('productinformation.material')}</span>
+            <span className="font-semibold">{t('material')}</span>
             <p>{product.material ? product.material : "-"}</p>
           </div>
           <div>
-            <span className="font-semibold">{t('productinformation.origincountry')}</span>
+            <span className="font-semibold">{t('origincountry')}</span>
             <p>{product.origin_country ? product.origin_country : "-"}</p>
           </div>
         </div>
         <div className="flex flex-col gap-y-4">
           <div>
-            <span className="font-semibold">{t('productinformation.weight')}</span>
+            <span className="font-semibold">{t('weight')}</span>
             <p>{product.weight ? `${product.weight} g` : "-"}</p>
           </div>
           <div>
-            <span className="font-semibold">{t('productinformation.dimensions')}</span>
+            <span className="font-semibold">{t('dimensions')}</span>
             <p>
               {product.length && product.width && product.height
                 ? `${product.length}L x ${product.width}W x ${product.height}H`
@@ -82,7 +83,7 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
 }
 
 const ShippingInfoTab = () => {
-  const {t} = useLanguage()
+  const t = useTranslations("product")
   return (
     
     <div className="text-small-regular py-8">
@@ -90,18 +91,18 @@ const ShippingInfoTab = () => {
         <div className="flex items-start gap-x-2">
           <FastDelivery />
           <div>
-            <span className="font-semibold">{t('product.fastdelivery')}</span>
+            <span className="font-semibold">{t('fastdelivery')}</span>
             <p className="max-w-sm">
-              {t('product.shipping_returninfo')}
+              {t('shipping_returninfo')}
             </p>
           </div>
         </div>
         <div className="flex items-start gap-x-2">
           <Refresh />
           <div>
-            <span className="font-semibold">{t('product.exchange')}</span>
+            <span className="font-semibold">{t('exchange')}</span>
             <p className="max-w-sm">
-              {t('product.exchangeinfo')}
+              {t('exchangeinfo')}
             </p>
           </div>
         </div>

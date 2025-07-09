@@ -6,6 +6,8 @@ import { retrieveOrder } from "@lib/data/orders"
 import { enrichLineItems } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 
+import { getTranslations } from "next-intl/server"
+
 type Props = {
   params: { id: string }
 }
@@ -26,6 +28,7 @@ async function getOrder(id: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const t = await getTranslations("orders");
   const order = await getOrder(params.id).catch(() => null)
 
   if (!order) {
@@ -33,8 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `Order #${order.display_id}`,
-    description: `View your order`,
+    title: t("order_details_title ") + `Order #${order.display_id}`,
+    description: t("order_details_description"),
   }
 }
 

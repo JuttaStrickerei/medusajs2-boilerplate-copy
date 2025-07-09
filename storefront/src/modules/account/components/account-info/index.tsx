@@ -4,7 +4,7 @@ import { useEffect } from "react"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
 import { useFormStatus } from "react-dom"
-import { useLanguage } from "../../../../i18n/LanguageContext" 
+import { useTranslations } from "next-intl"
 
 type AccountInfoProps = {
   label: string
@@ -37,14 +37,14 @@ const AccountInfo = ({
 }: AccountInfoProps) => {
   const { state, close, toggle } = useToggleState()
   const { pending } = useFormStatus()
-  const { t } = useLanguage() // Get translation function
+  const t = useTranslations('account') // Get translation function
 
   // Default translation keys
   const defaultTranslationKeys = {
-    editButton: "account.edit",
-    cancelButton: "account.cancel",
-    saveButton: "account.saveChanges",
-    successMessage: "account.updateSuccess"
+    editButton: "edit",
+    cancelButton: "cancel",
+    saveButton: "saveChanges",
+    successMessage: "updateSuccess"
   }
 
   // Merge default translation keys with any overrides provided
