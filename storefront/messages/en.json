@@ -61,6 +61,7 @@
     "orders_page_description": "View your previous orders and their status. You can also create returns or exchanges for your orders if needed.",
     "edit_profile": "View and edit your Medusa Store profile.",
     "update_profile_information": "View and update your profile information, including your name, email, and phone number. You can also update your billing address, or change your password."
+  
   },
   "side-menu": {
     "account": "Account",

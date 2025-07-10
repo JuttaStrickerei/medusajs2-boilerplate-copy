@@ -16,7 +16,7 @@ type Props = {
 
 const Register = ({ setCurrentView }: Props) => {
   const [message, formAction] = useFormState(signup, null)
-  const t = useTranslations('register') // <--- DIESE ZEILE HINZUFÜGEN (oder 'account', je nach Ihrer Wahl)
+  const t = useTranslations('account') // <--- DIESE ZEILE HINZUFÜGEN (oder 'account', je nach Ihrer Wahl)
 
   return (
     <div
