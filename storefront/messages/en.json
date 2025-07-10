@@ -81,7 +81,27 @@
     "goToCart": "Go to cart",
     "empty": "Empty",
     "goToProducts": "Go to products",
-    "exploreProducts": "Explore products"
+    "exploreProducts": "Explore products",
+    "emptyCartMessage": "You don't have anything in your cart. Let's change that, use the link below to start browsing our products.",
+    "cartTitle": "Cart",
+    "item": "Item",
+    "price": "Price",
+    "total": "Total",
+    "select": "Select...",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInForBetterExperience": "Sign in for a better experience.",
+    "signIn": "Sign in",
+    "summary": "Summary",
+    "goToCheckout": "Go to checkout",
+    "subtotalExcl": "Subtotal (excl. shipping and taxes)",
+    "discount": "Discount",
+    "shipping": "Shipping",
+    "taxes": "Taxes",
+    "giftCard": "Gift card",
+    "checkout": "Checkout",
+    "backToCart": "Back to shopping cart",
+    "back": "Back",
+    "store": "Jutta Strickerei"
   },
   "countryselect": {
     "shippingto": "Shipping to"

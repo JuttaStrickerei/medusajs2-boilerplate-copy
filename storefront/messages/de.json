@@ -82,7 +82,27 @@
     "goToCart": "Zum Warenkorb",
     "empty": "Leer",
     "goToProducts": "Zu den Produkten",
-    "exploreProducts": "Produkte entdecken"
+    "exploreProducts": "Produkte entdecken",
+    "emptyCartMessage": "Sie haben nichts in Ihrem Warenkorb. Lassen Sie uns das ändern, verwenden Sie den unten stehenden Link, um unsere Produkte zu durchsuchen.",
+    "cartTitle": "Warenkorb",
+    "item": "Artikel",
+    "price": "Preis",
+    "total": "Gesamt",
+    "select": "Auswählen...",
+    "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+    "signInForBetterExperience": "Melden Sie sich für ein besseres Erlebnis an.",
+    "signIn": "Anmelden",
+    "summary": "Zusammenfassung",
+    "goToCheckout": "Zur Kasse gehen",
+    "subtotalExcl": "Zwischensumme (exkl. Versand und Steuern)",
+    "discount": "Rabatt",
+    "shipping": "Versand",
+    "taxes": "Steuern",
+    "giftCard": "Geschenkkarte",
+    "checkout": "Kasse",
+    "backToCart": "Zurück zum Warenkorb",
+    "back": "Zurück",
+    "store": "Jutta Strickerei"
   },
   "countryselect": {
     "shippingto": "Versand nach"

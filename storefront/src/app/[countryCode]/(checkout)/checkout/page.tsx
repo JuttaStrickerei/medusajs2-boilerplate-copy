@@ -7,6 +7,7 @@ import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { enrichLineItems, retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getCustomer } from "@lib/data/customer"
+import { useTranslations } from "next-intl"
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -29,6 +30,7 @@ const fetchCart = async () => {
 export default async function Checkout() {
   const cart = await fetchCart()
   const customer = await getCustomer()
+  const t = useTranslations("cart")
 
   return (
     <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-x-40 py-12">
