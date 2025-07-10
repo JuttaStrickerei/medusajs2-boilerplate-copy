@@ -35,7 +35,7 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
   return (
     <form action={formAction} onReset={() => clearState()} className="w-full">
       <AccountInfo
-        label="password"
+        label={t("password")}
         currentInfo={
           <span>{t("password_not_shown_security_reasons")}</span>
         }

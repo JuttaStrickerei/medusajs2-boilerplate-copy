@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
@@ -43,6 +44,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const t = await getTranslations("app")
+
   try {
     const { product_categories } = await getCategoryByHandle(
       params.category
@@ -54,10 +57,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const description =
       product_categories[product_categories.length - 1].description ??
-      `${title} category.`
+      `${title}${t("category")}`
 
     return {
-      title: `${title} | Medusa Store`,
+      title: `${title}${t("medusa_store")}`,
       description,
       alternates: {
         canonical: `${params.category.join("/")}`,

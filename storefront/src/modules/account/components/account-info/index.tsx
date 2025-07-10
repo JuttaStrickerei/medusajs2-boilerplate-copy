@@ -30,7 +30,7 @@ const AccountInfo = ({
   isSuccess,
   isError,
   clearState,
-  errorMessage = "An error occurred, please try again",
+  errorMessage = t("an_error_occurred"),
   children,
   'data-testid': dataTestid,
   translationKeys

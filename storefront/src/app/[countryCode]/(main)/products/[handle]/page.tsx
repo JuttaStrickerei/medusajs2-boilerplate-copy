@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import ProductTemplate from "@modules/products/templates"
 import { getRegion, listRegions } from "@lib/data/regions"
@@ -45,6 +46,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { handle } = params
   const region = await getRegion(params.countryCode)
+  const t = await getTranslations("app")
 
   if (!region) {
     notFound()
@@ -57,10 +59,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${product.title} | Jutta Strickerei`,
+    title: `${product.title}${t("store_name")}`,
     description: `${product.title}`,
     openGraph: {
-      title: `${product.title} | Jutta Strickerei`,
+      title: `${product.title}${t("store_name")}`,
       description: `${product.title}`,
       images: product.thumbnail ? [product.thumbnail] : [],
     },

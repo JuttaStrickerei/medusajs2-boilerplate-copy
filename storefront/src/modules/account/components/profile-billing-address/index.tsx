@@ -85,12 +85,12 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
   return (
     <form action={formAction} onReset={() => clearState()} className="w-full">
       <AccountInfo
-        label="billing_address" // <--- TRANSLATE THIS KEY
+        label={t("billing_address")} // <--- TRANSLATE THIS KEY
         currentInfo={currentInfo}
         isSuccess={successState}
         isError={!!state.error}
         // If state.error is a generic string, translate it, otherwise handle it as dynamic message
-        errorMessage={state.error ? t("error_occurred_please_try_again") : undefined} // <--- TRANSLATE OR HANDLE THIS
+        errorMessage={state.error ? t("an_error_occurred") : undefined} // <--- TRANSLATE OR HANDLE THIS
         clearState={clearState}
         data-testid="account-billing-address-editor"
       >

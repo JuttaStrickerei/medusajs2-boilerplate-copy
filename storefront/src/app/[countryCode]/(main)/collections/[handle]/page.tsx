@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import {
   getCollectionByHandle,
@@ -52,6 +53,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const t = await getTranslations("app")
   const collection = await getCollectionByHandle(params.handle)
 
   if (!collection) {
@@ -59,8 +61,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const metadata = {
-    title: `${collection.title} | Medusa Store`,
-    description: `${collection.title} collection`,
+    title: `${collection.title}${t("medusa_store")}`,
+    description: `${collection.title}${t("collection")}`,
   } as Metadata
 
   return metadata

@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import Wrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
@@ -7,10 +8,13 @@ import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { enrichLineItems, retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getCustomer } from "@lib/data/customer"
-import { useTranslations } from "next-intl"
 
-export const metadata: Metadata = {
-  title: "Checkout",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("cart")
+
+  return {
+    title: t("checkout"),
+  }
 }
 
 const fetchCart = async () => {
@@ -30,7 +34,6 @@ const fetchCart = async () => {
 export default async function Checkout() {
   const cart = await fetchCart()
   const customer = await getCustomer()
-  const t = useTranslations("cart")
 
   return (
     <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-x-40 py-12">

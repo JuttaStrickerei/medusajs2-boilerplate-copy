@@ -1,13 +1,18 @@
 import { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 
 import SearchResultsTemplate from "@modules/search/templates/search-results-template"
 
 import { search } from "@modules/search/actions"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
-export const metadata: Metadata = {
-  title: "Search",
-  description: "Explore all of our products.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("search")
+
+  return {
+    title: t("meta_title"),
+    description: t("meta_description"),
+  }
 }
 
 type Params = {

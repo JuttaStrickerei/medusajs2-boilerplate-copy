@@ -60,7 +60,13 @@
     "orders_page_summary": "Overview of your previous orders.",
     "orders_page_description": "View your previous orders and their status. You can also create returns or exchanges for your orders if needed.",
     "edit_profile": "View and edit your Medusa Store profile.",
-    "update_profile_information": "View and update your profile information, including your name, email, and phone number. You can also update your billing address, or change your password."
+    "update_profile_information": "View and update your profile information, including your name, email, and phone number. You can also update your billing address, or change your password.",
+    "an_error_occurred": "An error occurred, please try again",
+    "got_questions": "Got questions?",
+    "faq_message": "You can find frequently asked questions and answers on our customer service page.",
+    "customer_service": "Customer Service",
+    "sign_in_title": "Sign in",
+    "sign_in_description": "Sign in to your Medusa Store account."
   
   },
   "side-menu": {
@@ -101,7 +107,9 @@
     "checkout": "Checkout",
     "backToCart": "Back to shopping cart",
     "back": "Back",
-    "store": "Jutta Strickerei"
+    "store": "Jutta Strickerei",
+    "meta_title": "Cart",
+    "meta_description": "View your cart"
   },
   "countryselect": {
     "shippingto": "Shipping to"
@@ -134,7 +142,9 @@
     "sortBy": "Sort by",
     "latestarrivals": "Latest Arrivals",
     "lowtohigh": "Price: Low -> High",
-    "hightolow": "Price: High -> Low"
+    "hightolow": "Price: High -> Low",
+    "meta_title": "Store",
+    "meta_description": "Explore all of our products."
   },
   "orders": {
     "item_plural": "items",
@@ -151,7 +161,34 @@
     "no_orders_description": "You don't have any orders yet, let us change that :)",
     "continue_shopping_button": "Continue shopping",
     "order_details_title": "Order Details",
-    "order_details_description": "View the details of your order."
+    "order_details_description": "View the details of your order.",
+    "order_number_label": "Order #"
+  },
+  "app": {
+    "store_name": " | Jutta Strickerei",
+    "medusa_store": " | Medusa Store",
+    "category": " category.",
+    "collection": " collection"
+  },
+  "not_found": {
+    "title": "404",
+    "description": "Something went wrong",
+    "page_not_found": "Page not found",
+    "page_does_not_exist": "The page you tried to access does not exist.",
+    "go_to_frontpage": "Go to frontpage",
+    "cart_not_found": "The cart you tried to access does not exist. Clear your cookies and try again."
+  },
+  "order": {
+    "confirmed_title": "Order Confirmed",
+    "confirmed_description": "You purchase was successful"
+  },
+  "home": {
+    "meta_title": "Medusa Next.js Starter Template",
+    "meta_description": "A performant frontend ecommerce starter template with Next.js 14 and Medusa."
+  },
+  "search": {
+    "meta_title": "Search",
+    "meta_description": "Explore all of our products."
   }
   
 }

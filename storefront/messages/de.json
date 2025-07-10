@@ -61,7 +61,13 @@
      "orders_page_summary": "Übersicht Ihrer bisherigen Bestellungen.",
     "orders_page_description": "Sehen Sie Ihre bisherigen Bestellungen und deren Status ein. Sie können bei Bedarf auch Rücksendungen oder einen Umtausch für Ihre Bestellungen erstellen.",
     "edit_profile": "Profil bearbeiten",
-     "update_profile_information": "Sie können Ihre Profilinformationen einsehen und aktualisieren, einschließlich Ihres Namens, Ihrer E-Mail-Adresse und Ihrer Telefonnummer. Sie können auch Ihre Rechnungsadresse aktualisieren oder Ihr Passwort ändern."
+     "update_profile_information": "Sie können Ihre Profilinformationen einsehen und aktualisieren, einschließlich Ihres Namens, Ihrer E-Mail-Adresse und Ihrer Telefonnummer. Sie können auch Ihre Rechnungsadresse aktualisieren oder Ihr Passwort ändern.",
+    "an_error_occurred": "Ein Fehler ist aufgetreten, bitte versuchen Sie es erneut",
+    "got_questions": "Haben Sie Fragen?",
+    "faq_message": "Auf unserer Kundenservice-Seite finden Sie häufig gestellte Fragen und Antworten.",
+    "customer_service": "Kundenservice",
+    "sign_in_title": "Anmelden",
+    "sign_in_description": "Melden Sie sich bei Ihrem Medusa Store-Konto an."
     
   },
   "side-menu": {
@@ -102,7 +108,9 @@
     "checkout": "Kasse",
     "backToCart": "Zurück zum Warenkorb",
     "back": "Zurück",
-    "store": "Jutta Strickerei"
+    "store": "Jutta Strickerei",
+    "meta_title": "Warenkorb",
+    "meta_description": "Sehen Sie sich Ihren Warenkorb an"
   },
   "countryselect": {
     "shippingto": "Versand nach"
@@ -152,7 +160,34 @@
     "no_orders_description": "Sie haben noch keine Bestellungen, lassen Sie uns das ändern :)",
     "continue_shopping_button": "Weiter einkaufen",
     "order_details_title": "Bestelldetails",
-    "order_details_description": "Sehen Sie die Details Ihrer Bestellung ein."
+    "order_details_description": "Sehen Sie die Details Ihrer Bestellung ein.",
+    "order_number_label": "Bestellung #"
+  },
+  "app": {
+    "store_name": " | Jutta Strickerei",
+    "medusa_store": " | Medusa Store",
+    "category": " Kategorie.",
+    "collection": " Kollektion"
+  },
+  "not_found": {
+    "title": "404",
+    "description": "Etwas ist schief gelaufen",
+    "page_not_found": "Seite nicht gefunden",
+    "page_does_not_exist": "Die Seite, auf die Sie zugreifen wollten, existiert nicht.",
+    "go_to_frontpage": "Zur Startseite",
+    "cart_not_found": "Der Warenkorb, auf den Sie zugreifen wollten, existiert nicht. Löschen Sie Ihre Cookies und versuchen Sie es erneut."
+  },
+  "order": {
+    "confirmed_title": "Bestellung bestätigt",
+    "confirmed_description": "Ihr Kauf war erfolgreich"
+  },
+  "home": {
+    "meta_title": "Medusa Next.js Starter Template",
+    "meta_description": "Eine leistungsstarke Frontend-E-Commerce-Startervorlage mit Next.js 14 und Medusa."
+  },
+  "search": {
+    "meta_title": "Suche",
+    "meta_description": "Entdecken Sie alle unsere Produkte."
   }
   
 }

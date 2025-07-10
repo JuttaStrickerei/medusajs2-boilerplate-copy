@@ -1,13 +1,18 @@
 import { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import CartTemplate from "@modules/cart/templates"
 
 import { enrichLineItems, retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getCustomer } from "@lib/data/customer"
 
-export const metadata: Metadata = {
-  title: "Cart",
-  description: "View your cart",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("cart")
+
+  return {
+    title: t("meta_title"),
+    description: t("meta_description"),
+  }
 }
 
 const fetchCart = async () => {
