@@ -1,6 +1,7 @@
 {
   "Homepage": {
-    "title": "Hello Welt!"
+    "title": "Hello Welt!",
+    "viewall": "View all"
   },
   "checkout": {
     "addressSelect": {
