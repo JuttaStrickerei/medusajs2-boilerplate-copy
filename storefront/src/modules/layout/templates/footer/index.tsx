@@ -119,6 +119,15 @@ export default async function Footer() {
                     {t("terms_services")} {/* CHANGED */}
                   </LocalizedClientLink>
                 </li>
+
+                <li>
+                  <LocalizedClientLink
+                    href="/privacy_policy/"
+                    className="hover:text-ui-fg-base"
+                  >
+                    {t("privacy_policy")} {/* CHANGED */}
+                  </LocalizedClientLink>
+                </li>
               </ul>
             </div>
           </div>
