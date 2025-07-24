@@ -21,6 +21,17 @@ export default async function Footer() {
             >
               Jutta Strickerei
             </LocalizedClientLink>
+
+            <div className="mt-2">
+              <a
+                href="https://strickerei-jutta.at/"
+                target="_blank"
+                rel="noopener noreferrer "
+                className="text-ui-fg-subtle hover:text-ui-fg-base txt-small"
+                >
+                  {t("back_to_homepage")}
+                </a>
+            </div>
           </div>
           <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
             {product_categories && product_categories?.length > 0 && (
