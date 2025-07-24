@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import {
   ChangeEvent,
@@ -31,12 +32,13 @@ type SearchBoxProps = {
 
 const SearchBoxWrapper = ({
   children,
-  placeholder = "Search products...",
+  placeholder,
   ...rest
 }: SearchBoxProps) => {
   const { query, refine } = useSearchBox(rest)
   const [value, setValue] = useState(query)
   const inputRef = useRef<HTMLInputElement>(null)
+  const t = useTranslations("common")
 
   const router = useRouter()
 
@@ -84,7 +86,7 @@ const SearchBoxWrapper = ({
     onChange,
     onSubmit,
     onReset,
-    placeholder,
+    placeholder: placeholder ?? t("search-products"),
   }
 
   return children(state) as React.ReactElement

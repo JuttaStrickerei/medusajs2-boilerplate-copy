@@ -2,7 +2,92 @@
   "Homepage": {
     "title": "Hello Welt!"
   },
-"account": {
+  "checkout": {
+    "addressSelect": {
+      "chooseAddress": "Choose an address"
+    },
+    "addresses": {
+      "shippingAddress": "Shipping Address",
+      "edit": "Edit",
+      "billingAddress": "Billing address",
+      "continueToDelivery": "Continue to delivery",
+      "contact": "Contact",
+      "sameAsDelivery": "Billing- and delivery address are the same."
+    },
+    "billingAddress": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "address": "Address",
+      "company": "Company",
+      "postalCode": "Postal code",
+      "city": "City",
+      "stateOrProvince": "State / Province",
+      "phone": "Phone"
+    },
+    "countrySelect": {
+      "country": "Country"
+    },
+    "discountCode": {
+      "addPromotion": "Add Promotion Code(s)",
+      "apply": "Apply",
+      "promotionsApplied": "Promotion(s) applied:",
+      "removeDiscount": "Remove discount code from order"
+    },
+    "paymentButton": {
+      "selectPaymentMethod": "Select a payment method",
+      "unknownError": "An unknown error occurred",
+      "placeOrder": "Place order"
+    },
+    "paymentTest": {
+      "attention": "Attention",
+      "forTestingPurposesOnly": "For testing purposes only."
+    },
+    "stripeWrapper": {
+      "stripeKeyMissing": "Stripe key is missing. Set NEXT_PUBLIC_STRIPE_KEY environment variable.",
+      "stripePromiseMissing": "Stripe promise is missing. Make sure you have provided a valid Stripe key.",
+      "stripeClientSecretMissing": "Stripe client secret is missing. Cannot initialize Stripe."
+    },
+    "payment": {
+      "payment": "Payment",
+      "edit": "Edit",
+      "paymentNotReady": "Payment processing not ready. Please try again.",
+      "paymentError": "An error occurred with the payment",
+      "initPaymentError": "Failed to initialize payment. Please try again.",
+      "paymentMethod": "Payment method",
+      "giftCard": "Gift card",
+      "continueToReview": "Continue to review",
+      "paymentDetails": "Payment details",
+      "anotherStep": "Another step will appear"
+    },
+    "review": {
+      "review": "Review",
+      "termsMessage": "By clicking the Place Order button, you confirm that you have read, understand and accept our Terms of Use, Terms of Sale and Returns Policy and acknowledge that you have read Medusa Store's Privacy Policy."
+    },
+    "shippingAddress": {
+      "savedAddressesMessage": "Hi {name}, do you want to use one of your saved addresses?",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "address": "Address",
+      "company": "Company",
+      "postalCode": "Postal code",
+      "city": "City",
+      "stateOrProvince": "State / Province",
+      "billingAddressSameAsShipping": "Billing address same as shipping address",
+      "email": "Email",
+      "emailTitle": "Enter a valid email address.",
+      "phone": "Phone"
+    },
+    "shipping": {
+      "delivery": "Delivery",
+      "edit": "Edit",
+      "continueToPayment": "Continue to payment",
+      "method": "Method"
+    },
+    "checkoutSummary": {
+      "inYourCart": "In your Cart"
+    }
+  },
+  "account": {
     "edit": "Edit",
     "cancel": "Cancel",
     "saveChanges": "Save changes",
@@ -14,10 +99,10 @@
     "orders": "Orders",
     "overview": "Overview",
     "logout": "Log out",
-    "name": "Name",             
-    "email": "Email",           
-    "phone": "Phone",           
-    "password": "Password",     
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
     "billing_address": "Billing address",
     "no_billing_address": "No billing address",
     "first_name": "First name",
@@ -48,7 +133,7 @@
     "edit_button": "Edit",
     "remove_button": "Remove",
     "edit_address": "Edit address",
-     "welcome_back": "Welcome back",
+    "welcome_back": "Welcome back",
     "login_description": "Sign in to access an enhanced shopping experience.",
     "email_input_title": "Enter a valid email address.",
     "not_member_question": "Not a member?",
@@ -67,7 +152,6 @@
     "customer_service": "Customer Service",
     "sign_in_title": "Sign in",
     "sign_in_description": "Sign in to your Medusa Store account."
-  
   },
   "side-menu": {
     "account": "Account",
@@ -78,7 +162,6 @@
     "search": "Search",
     "copyright": "Jutta Strickerei. All rights reserved."
   },
-  
   "cart": {
     "quantity": "Quantity",
     "remove": "Remove",
@@ -128,8 +211,8 @@
     "shipping_return": "Shipping & Returns",
     "shipping_returninfo": "Your package will arrive in 3-5 business days at your pick up location or in the comfort of your home.",
     "fastdelivery": "fast delivery",
-    "exchange":"simple exchanges",    
-    "exchangeinfo":"Is the fit not quite right? No worries - we'll exchange your product for a new one.",    
+    "exchange": "simple exchanges",
+    "exchangeinfo": "Is the fit not quite right? No worries - we'll exchange your product for a new one.",
     "addToCart": "Add to Cart",
     "outOfStock": "Out of Stock"
   },
@@ -138,7 +221,7 @@
     "outOfStock": "Out of Stock",
     "selectvariant": "Select variant"
   },
-  "store" : {
+  "store": {
     "sortBy": "Sort by",
     "latestarrivals": "Latest Arrivals",
     "lowtohigh": "Price: Low -> High",
@@ -151,7 +234,7 @@
     "item_singular": "item",
     "more": "more",
     "see_details_button": "See details",
-     "recent_orders": "Recent orders",
+    "recent_orders": "Recent orders",
     "no_recent_orders": "No recent orders",
     "date_placed": "Date placed",
     "order_number": "Order number",
@@ -179,8 +262,35 @@
     "cart_not_found": "The cart you tried to access does not exist. Clear your cookies and try again."
   },
   "order": {
-    "confirmed_title": "Order Confirmed",
-    "confirmed_description": "You purchase was successful"
+    "thankYou": "Thank you!",
+    "orderPlaced": "Your order was placed successfully.",
+    "summary": "Summary",
+    "orderDetails": "Order details",
+    "backToOverview": "Back to overview",
+    "needHelp": "Need help?",
+    "contact": "Contact",
+    "returnsExchanges": "Returns & Exchanges",
+    "testOrderCreated": "Your test order was successfully created! 🎉",
+    "completeSetup": "You can now complete setting up your store in the admin.",
+    "completeSetupAdmin": "Complete setup in admin",
+    "confirmationSentTo": "We have sent the order confirmation details to",
+    "orderDate": "Order date:",
+    "orderNumber": "Order number:",
+    "orderStatus": "Order status:",
+    "paymentStatus": "Payment status:",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "shipping": "Shipping",
+    "taxes": "Taxes",
+    "total": "Total",
+    "payment": "Payment",
+    "paymentMethod": "Payment method",
+    "paymentDetails": "Payment details",
+    "paidAt": "paid at",
+    "delivery": "Delivery",
+    "shippingAddress": "Shipping Address",
+    "method": "Method"
   },
   "home": {
     "meta_title": "Medusa Next.js Starter Template",
@@ -189,9 +299,22 @@
   "search": {
     "meta_title": "Search",
     "meta_description": "Explore all of our products."
+  },
+  "common": {
+    "search-products": "Search products...",
+    "cancel": "Cancel",
+    "no-results-found": "No results found.",
+    "showing-the-first": "Showing the first",
+    "results": "results.",
+    "view-all": "View all",
+    "search-results-for": "Search Results for:",
+    "clear": "Clear",
+    "no-results": "No results."
+  },
+   "Footer": {
+    "categories": "Categories",
+    "collections": "Collections",
+    "informations": "Informations",
+    "terms_services": "Terms & Services"
   }
-  
 }
-
- 
-

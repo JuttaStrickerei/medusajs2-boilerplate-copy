@@ -1,4 +1,5 @@
 import { Heading, Text } from "@medusajs/ui"
+import { getTranslations } from "next-intl/server"
 import Link from "next/link"
 
 import RefinementList from "@modules/store/components/refinement-list"
@@ -14,7 +15,7 @@ type SearchResultsTemplateProps = {
   countryCode: string
 }
 
-const SearchResultsTemplate = ({
+const SearchResultsTemplate = async ({
   query,
   ids,
   sortBy,
@@ -22,12 +23,13 @@ const SearchResultsTemplate = ({
   countryCode,
 }: SearchResultsTemplateProps) => {
   const pageNumber = page ? parseInt(page) : 1
+  const t = await getTranslations("common")
 
   return (
     <>
       <div className="flex justify-between border-b w-full py-6 px-8 small:px-14 items-center">
         <div className="flex flex-col items-start">
-          <Text className="text-ui-fg-muted">Search Results for:</Text>
+          <Text className="text-ui-fg-muted">{t("search-results-for")}</Text>
           <Heading>
             {decodeURI(query)} ({ids.length})
           </Heading>
@@ -36,7 +38,7 @@ const SearchResultsTemplate = ({
           href="/store"
           className="txt-medium text-ui-fg-subtle hover:text-ui-fg-base"
         >
-          Clear
+          {t("clear")}
         </LocalizedClientLink>
       </div>
       <div className="flex flex-col small:flex-row small:items-start p-6">
@@ -53,7 +55,7 @@ const SearchResultsTemplate = ({
             </div>
           </>
         ) : (
-          <Text className="ml-8 small:ml-14 mt-3">No results.</Text>
+          <Text className="ml-8 small:ml-14 mt-3">{t("no-results")}</Text>
         )}
       </div>
     </>

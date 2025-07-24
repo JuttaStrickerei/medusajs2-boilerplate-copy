@@ -1,5 +1,6 @@
 import { XMarkMini } from "@medusajs/icons"
 import { FormEvent } from "react"
+import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 
 import SearchBoxWrapper, {
@@ -15,6 +16,7 @@ const ControlledSearchBox = ({
   value,
   ...props
 }: ControlledSearchBoxProps) => {
+  const t = useTranslations("common")
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
     event.stopPropagation()
@@ -63,7 +65,7 @@ const ControlledSearchBox = ({
               className="items-center justify-center text-ui-fg-on-color focus:outline-none gap-x-2 px-2 txt-compact-large flex"
             >
               <XMarkMini />
-              Cancel
+              {t("cancel")}
             </button>
           )}
         </div>

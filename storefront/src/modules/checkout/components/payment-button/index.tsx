@@ -8,6 +8,7 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import { useParams } from "next/navigation"
 import React, { useEffect, useState, useCallback } from "react"
 import ErrorMessage from "../error-message"
+import { useTranslations } from "next-intl"
 
 /**
  * @name PaymentButton
@@ -19,6 +20,7 @@ const PaymentButton: React.FC<{
   cart: HttpTypes.StoreCart
   "data-testid": string
 }> = ({ cart, "data-testid": dataTestId }) => {
+  const t = useTranslations("checkout.paymentButton")
   // Determine if the checkout is ready for payment submission.
   const notReady =
     !cart ||
@@ -43,7 +45,7 @@ const PaymentButton: React.FC<{
   // Fallback for when no supported payment method is available.
   return (
     <Button disabled data-testid="submit-order-button">
-      Select a payment method
+      {t("selectPaymentMethod")}
     </Button>
   )
 }
@@ -53,6 +55,7 @@ const PaymentButton: React.FC<{
  * @description A component that handles the entire payment flow for Stripe,
  * including credit cards, PayPal, Klarna, and other methods configured in Stripe.
  * It uses the `redirect: 'if_required'` strategy to seamlessly handle both
+
  * on-site and off-site payment authentications.
  */
 const StripePaymentButton = ({
@@ -64,6 +67,7 @@ const StripePaymentButton = ({
   notReady: boolean
   "data-testid"?: string
 }) => {
+  const t = useTranslations("checkout.paymentButton")
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { countryCode } = useParams()
@@ -118,7 +122,7 @@ const StripePaymentButton = ({
 
     if (error) {
       // Display any errors that occurred during the payment confirmation process.
-      setErrorMessage(error.message ?? "An unknown error occurred")
+      setErrorMessage(error.message ?? t("unknownError"))
       return
     }
 
@@ -145,7 +149,7 @@ const StripePaymentButton = ({
         isLoading={submitting}
         data-testid={dataTestId}
       >
-        Place order
+        {t("placeOrder")}
       </Button>
       <ErrorMessage
         error={errorMessage}

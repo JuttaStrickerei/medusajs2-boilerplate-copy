@@ -7,10 +7,15 @@ import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import Divider from "@modules/common/components/divider"
-import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
+import {
+  PaymentElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js"
 import { StripePaymentElementChangeEvent } from "@stripe/stripe-js"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext, useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 
 const Payment = ({
   cart,
@@ -19,6 +24,7 @@ const Payment = ({
   cart: any
   availablePaymentMethods: any[]
 }) => {
+  const t = useTranslations("checkout.payment")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [stripeComplete, setStripeComplete] = useState(false)
@@ -79,13 +85,13 @@ const Payment = ({
 
     try {
       if (!stripe || !elements) {
-        setError("Payment processing not ready. Please try again.")
+        setError(t("paymentNotReady"))
         return
       }
 
       await elements.submit().catch((err) => {
         console.error(err)
-        setError(err.message || "An error occurred with the payment")
+        setError(err.message || t("paymentError"))
         return
       })
 
@@ -106,7 +112,7 @@ const Payment = ({
       })
     } catch (err) {
       console.error("Failed to initialize Stripe session:", err)
-      setError("Failed to initialize payment. Please try again.")
+      setError(t("initPaymentError"))
     }
   }
 
@@ -133,7 +139,7 @@ const Payment = ({
             }
           )}
         >
-          Payment
+          {t("payment")}
           {!isOpen && paymentReady && <CheckCircleSolid />}
         </Heading>
         {!isOpen && paymentReady && (
@@ -143,7 +149,7 @@ const Payment = ({
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               data-testid="edit-payment-button"
             >
-              Edit
+              {t("edit")}
             </button>
           </Text>
         )}
@@ -165,13 +171,13 @@ const Payment = ({
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
+                {t("paymentMethod")}
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                Gift card
+                {t("giftCard")}
               </Text>
             </div>
           )}
@@ -194,7 +200,7 @@ const Payment = ({
             }
             data-testid="submit-payment-button"
           >
-            Continue to review
+            {t("continueToReview")}
           </Button>
         </div>
 
@@ -203,7 +209,7 @@ const Payment = ({
             <div className="flex items-start gap-x-1 w-full">
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  Payment method
+                  {t("paymentMethod")}
                 </Text>
                 <Text
                   className="txt-medium text-ui-fg-subtle"
@@ -215,7 +221,7 @@ const Payment = ({
               </div>
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  Payment details
+                  {t("paymentDetails")}
                 </Text>
                 <div
                   className="flex gap-2 txt-medium text-ui-fg-subtle items-center"
@@ -226,20 +232,20 @@ const Payment = ({
                       <CreditCard />
                     )}
                   </Container>
-                  <Text>Another step will appear</Text>
+                  <Text>{t("anotherStep")}</Text>
                 </div>
               </div>
             </div>
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
+                {t("paymentMethod")}
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                Gift card
+                {t("giftCard")}
               </Text>
             </div>
           ) : null}
