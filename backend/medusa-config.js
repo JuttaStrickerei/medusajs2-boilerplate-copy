@@ -183,7 +183,10 @@ const medusaConfig = {
           }
         }
       }
-    }] : [])
+    }] : []),
+    {
+      resolve: "./src/modules/product-review",
+    },
   ],
   plugins: []
 };
