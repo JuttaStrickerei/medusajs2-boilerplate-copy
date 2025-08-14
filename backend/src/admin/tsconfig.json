@@ -5,6 +5,6 @@
     "moduleResolution": "bundler",
     "types": ["vite/client"]
   },
-  "include": ["."],
+  "include": [".", "../api/admin/orders"],
   "exclude": ["**/*.spec.js"]
 }
