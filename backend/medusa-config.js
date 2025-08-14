@@ -71,6 +71,8 @@ const medusaConfig = {
         ],
       },
     },
+    {resolve: './src/modules/invoice-generator',
+    },
     {
       key: Modules.FILE,
       resolve: '@medusajs/file',
@@ -183,7 +185,7 @@ const medusaConfig = {
           }
         }
       }
-    }] : [])
+    }] : []),
   ],
   plugins: []
 };
