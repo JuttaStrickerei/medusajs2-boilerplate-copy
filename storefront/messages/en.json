@@ -275,6 +275,8 @@
     "completeSetup": "You can now complete setting up your store in the admin.",
     "completeSetupAdmin": "Complete setup in admin",
     "confirmationSentTo": "We have sent the order confirmation details to",
+     "confirmed_title": "Order confirmed",
+    "confirmed_description": "Thank you! Your order has been confirmed.",
     "orderDate": "Order date:",
     "orderNumber": "Order number:",
     "orderStatus": "Order status:",

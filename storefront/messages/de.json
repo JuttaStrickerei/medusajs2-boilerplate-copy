@@ -274,6 +274,8 @@
     "completeSetup": "Sie können jetzt die Einrichtung Ihres Shops im Admin-Bereich abschließen.",
     "completeSetupAdmin": "Einrichtung im Admin-bereich abschließen",
     "confirmationSentTo": "Wir haben die Bestellbestätigungsdetails an",
+    "confirmed_title": "Bestellung bestätigt",
+    "confirmed_description": "Vielen Dank! Ihre Bestellung wurde erfolgreich aufgegeben.",
     "orderDate": "Bestelldatum:",
     "orderNumber": "Bestellnummer:",
     "orderStatus": "Bestellstatus:",
