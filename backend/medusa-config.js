@@ -32,6 +32,7 @@ import {
 
 loadEnv(process.env.NODE_ENV, process.cwd());
 
+/** @type {import('@medusajs/types').MedusaConfig} */
 const medusaConfig = {
   projectConfig: {
     databaseUrl: DATABASE_URL,
@@ -153,18 +154,6 @@ const medusaConfig = {
               webhookSecret: STRIPE_WEBHOOK_SECRET,
             },
           },
-          // paypal Plugin-veraltet
-          /*
-          {
-            resolve: `@medusajs/medusa-payment-paypal`,
-            options: {
-              sandbox: PAYPAL_SANDBOX,
-              clientId: PAYPAL_CLIENT_ID,
-              clientSecret: PAYPAL_CLIENT_SECRET,
-              authWebhookId: PAYPAL_AUTH_WEBHOOK_ID,
-            },
-          },
-          */
         ],
       },
     }] : []),
@@ -185,10 +174,11 @@ const medusaConfig = {
           }
         }
       }
-    }] : []),
+    }] : [])
   ],
   plugins: []
 };
 
 console.log(JSON.stringify(medusaConfig, null, 2));
-export default defineConfig(medusaConfig);
+
+export default /** @type {import('@medusajs/types').MedusaConfig} */ (defineConfig(medusaConfig))
