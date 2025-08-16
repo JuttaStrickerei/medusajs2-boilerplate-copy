@@ -24,6 +24,7 @@
     "@medusajs/admin-sdk": "latest",
     "@medusajs/cli": "latest",
     "@medusajs/core-flows": "latest",
+    "@medusajs/dashboard": "^2.9.0",
     "@medusajs/framework": "latest",
     "@medusajs/js-sdk": "^2.9.0",
     "@medusajs/medusa": "latest",

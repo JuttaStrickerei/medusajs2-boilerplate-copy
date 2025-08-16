@@ -72,7 +72,7 @@ const medusaConfig = {
         ],
       },
     },
-    {resolve: './src/modules/invoice-generator',
+    {resolve: './src/modules/invoice_generator',
     },
     {
       key: Modules.FILE,

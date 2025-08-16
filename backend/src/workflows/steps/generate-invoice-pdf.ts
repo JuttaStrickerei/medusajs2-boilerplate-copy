@@ -1,7 +1,7 @@
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
-import { INVOICE_MODULE } from "../../modules/invoice-generator"
+import { INVOICE_MODULE } from "../../modules/invoice_generator"
 import { OrderDTO, OrderLineItemDTO } from "@medusajs/framework/types"
-import  InvoiceGeneratorService  from "modules/invoice-generator/service"
+import  InvoiceGeneratorService  from "modules/invoice_generator/service"
 
 export type GenerateInvoicePdfStepInput = {
   order: OrderDTO

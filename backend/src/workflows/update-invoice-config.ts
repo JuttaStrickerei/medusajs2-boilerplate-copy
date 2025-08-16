@@ -1,7 +1,7 @@
 import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
 import { updateInvoiceConfigStep } from "./steps/update-invoice-config"
 // Add this import for your entity type
-import { InvoiceConfig } from "../modules/invoice-generator/models/invoice-config"
+import { InvoiceConfig } from "../modules/invoice_generator/models/invoice_config"
 
 type WorkflowInput = {
   id?: string

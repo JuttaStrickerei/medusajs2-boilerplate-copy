@@ -1,7 +1,7 @@
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
-import { INVOICE_MODULE } from "../../modules/invoice-generator"
-import { InvoiceStatus } from "../../modules/invoice-generator/models/invoice"
-import InvoiceGeneratorService from "../../modules/invoice-generator/service"
+import { INVOICE_MODULE } from "../../modules/invoice_generator"
+import { InvoiceStatus } from "../../modules/invoice_generator/models/invoice"
+import InvoiceGeneratorService from "../../modules/invoice_generator/service"
 
 type StepInput = {
   order_id: string

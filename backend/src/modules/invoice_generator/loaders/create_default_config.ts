@@ -2,7 +2,7 @@ import {
   LoaderOptions,
   IMedusaInternalService,
 } from "@medusajs/framework/types"
-import { InvoiceConfig } from "../models/invoice-config"
+import { InvoiceConfig } from "../models/invoice_config"
 
 export default async function createDefaultConfigLoader({
   container,

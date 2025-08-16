@@ -1,5 +1,5 @@
 import { MedusaService } from "@medusajs/framework/utils"
-import { InvoiceConfig } from "./models/invoice-config"
+import { InvoiceConfig } from "./models/invoice_config"
 import { Invoice, InvoiceStatus } from "./models/invoice"
 import PdfPrinter from "pdfmake"
 import { 
