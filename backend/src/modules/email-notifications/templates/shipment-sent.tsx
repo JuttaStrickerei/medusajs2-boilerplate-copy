@@ -196,20 +196,6 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                     Menge
                   </Text>
                 </td>
-                <td align="right" style={{ 
-                  padding: '12px', 
-                  borderBottom: '1px solid #e2e8f0'
-                }}>
-                  <Text style={{ 
-                    fontSize: '12px', 
-                    fontWeight: 'bold', 
-                    color: '#4a5568', 
-                    margin: '0',
-                    textTransform: 'uppercase'
-                  }}>
-                    Preis
-                  </Text>
-                </td>
               </tr>
 
               {/* Artikel-Zeilen */}
@@ -249,19 +235,6 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                       margin: '0' 
                     }}>
                       {item.quantity}
-                    </Text>
-                  </td>
-                  <td align="right" style={{ 
-                    padding: '14px 12px',
-                    borderBottom: index < order.items.length - 1 ? '1px solid #f1f5f9' : 'none'
-                  }}>
-                    <Text style={{ 
-                      fontSize: '14px', 
-                      fontWeight: '500', 
-                      color: '#1a1a1a', 
-                      margin: '0' 
-                    }}>
-                      {item.unit_price} {order.currency_code}
                     </Text>
                   </td>
                 </tr>

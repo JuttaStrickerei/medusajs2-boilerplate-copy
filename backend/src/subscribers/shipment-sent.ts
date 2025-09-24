@@ -4,7 +4,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 
-export default async function fulfillmentCreatedHandler({
+export default async function shipmentCreatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
