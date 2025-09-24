@@ -1,4 +1,4 @@
-import { Text, Section, Hr } from '@react-email/components'
+import { Text, Section, Hr, Container } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
@@ -23,216 +23,346 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   PreviewProps: OrderPlacedPreviewProps
 } = ({ order, shippingAddress, preview = 'Your order has been placed!' }) => {
   return (
-    <Base preview={preview}>
-  <Section style={{ maxWidth: '600px', margin: '0 auto', padding: '40px 20px' }}>
-    {/* Header mit Logo-Platzhalter */}
-    <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-      <Text style={{ 
-        fontSize: '28px', 
-        fontWeight: '600', 
-        color: '#1a1a1a',
-        margin: '0 0 8px',
-        letterSpacing: '-0.5px'
-      }}>
-        Bestellbestätigung
-      </Text>
-      <Text style={{ 
-        fontSize: '14px', 
-        color: '#666',
-        margin: 0
-      }}>
-        Vielen Dank für Ihre Bestellung!
-      </Text>
-    </div>
-
-    {/* Persönliche Ansprache */}
-    <div style={{ 
-      backgroundColor: '#f8f9fa', 
-      borderRadius: '12px', 
-      padding: '24px',
-      marginBottom: '32px'
-    }}>
-      <Text style={{ 
-        fontSize: '16px',
-        color: '#1a1a1a',
-        margin: '0 0 16px',
-        lineHeight: '1.5'
-      }}>
-        Hallo {shippingAddress.first_name} {shippingAddress.last_name},
-      </Text>
-      <Text style={{ 
-        fontSize: '15px',
-        color: '#4a5568',
-        margin: 0,
-        lineHeight: '1.6'
-      }}>
-        wir haben Ihre Bestellung erhalten und werden diese schnellstmöglich bearbeiten. 
-        Unten finden Sie alle wichtigen Details zu Ihrer Bestellung.
-      </Text>
-    </div>
-
-    {/* Bestellübersicht */}
-    <div style={{ marginBottom: '32px' }}>
-      <Text style={{ 
-        fontSize: '18px', 
-        fontWeight: '600', 
-        color: '#1a1a1a',
-        margin: '0 0 16px',
-        borderBottom: '2px solid #e2e8f0',
-        paddingBottom: '8px'
-      }}>
-        Bestellübersicht
-      </Text>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontSize: '14px', color: '#718096', margin: 0 }}>
-            Bestellnummer:
-          </Text>
-          <Text style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a', margin: 0 }}>
-            #{order.display_id}
-          </Text>
-        </div>
-        
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontSize: '14px', color: '#718096', margin: 0 }}>
-            Bestelldatum:
-          </Text>
-          <Text style={{ fontSize: '14px', color: '#1a1a1a', margin: 0 }}>
-            {new Date(order.created_at).toLocaleDateString('de-DE', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </Text>
-        </div>
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginTop: '8px',
-          paddingTop: '12px',
-          borderTop: '1px solid #e2e8f0'
-        }}>
-          <Text style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a', margin: 0 }}>
-            Gesamtbetrag:
-          </Text>
-          <Text style={{ fontSize: '20px', fontWeight: '700', color: '#059669', margin: 0 }}>
-            {order.summary.raw_current_order_total.value} {order.currency_code}
-          </Text>
-        </div>
-      </div>
-    </div>
-
-    {/* Artikel */}
-    <div style={{ marginBottom: '32px' }}>
-      <Text style={{ 
-        fontSize: '18px', 
-        fontWeight: '600', 
-        color: '#1a1a1a',
-        margin: '0 0 16px',
-        borderBottom: '2px solid #e2e8f0',
-        paddingBottom: '8px'
-      }}>
-        Bestellte Artikel
-      </Text>
-
-      <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-        {/* Tabellenkopf */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr 1fr',
-          backgroundColor: '#f8f9fa',
-          padding: '12px 16px',
-          borderBottom: '1px solid #e2e8f0'
-        }}>
-          <Text style={{ fontSize: '13px', fontWeight: '600', color: '#4a5568', margin: 0 }}>
-            ARTIKEL
-          </Text>
-          <Text style={{ fontSize: '13px', fontWeight: '600', color: '#4a5568', margin: 0, textAlign: 'center' }}>
-            MENGE
-          </Text>
-          <Text style={{ fontSize: '13px', fontWeight: '600', color: '#4a5568', margin: 0, textAlign: 'right' }}>
-            PREIS
-          </Text>
-        </div>
-
-        {/* Artikel-Zeilen */}
-        {order.items.map((item, index) => (
-          <div key={item.id} style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr 1fr',
-            padding: '16px',
-            borderBottom: index < order.items.length - 1 ? '1px solid #f1f5f9' : 'none',
-            backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafbfc'
-          }}>
-            <div>
-              <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1a1a1a', margin: '0 0 4px' }}>
-                {item.product_title}
-              </Text>
-              {item.title !== item.product_title && (
-                <Text style={{ fontSize: '13px', color: '#718096', margin: 0 }}>
-                  {item.title}
-                </Text>
-              )}
-            </div>
-            <Text style={{ fontSize: '14px', color: '#4a5568', margin: 0, textAlign: 'center' }}>
-              {item.quantity}
+  <Base preview={preview}>
+  <Section>
+    <Container style={{ maxWidth: '600px' }}>
+      {/* Header */}
+      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+        <tr>
+          <td align="center">
+            <Text style={{ 
+              fontSize: '26px', 
+              fontWeight: 'bold', 
+              color: '#1a1a1a',
+              margin: '0 0 8px 0'
+            }}>
+              Bestellbestätigung
             </Text>
-            <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1a1a1a', margin: 0, textAlign: 'right' }}>
-              {item.unit_price} {order.currency_code}
+            <Text style={{ 
+              fontSize: '14px', 
+              color: '#666666',
+              margin: '0'
+            }}>
+              Vielen Dank für Ihre Bestellung!
             </Text>
-          </div>
-        ))}
-      </div>
-    </div>
+          </td>
+        </tr>
+      </table>
 
-    {/* Lieferadresse */}
-    <div style={{ marginBottom: '32px' }}>
-      <Text style={{ 
-        fontSize: '18px', 
-        fontWeight: '600', 
-        color: '#1a1a1a',
-        margin: '0 0 16px',
-        borderBottom: '2px solid #e2e8f0',
-        paddingBottom: '8px'
+      {/* Persönliche Ansprache */}
+      <table width="100%" cellPadding="20" cellSpacing="0" style={{ 
+        backgroundColor: '#f8f9fa', 
+        marginBottom: '25px'
       }}>
-        Lieferadresse
-      </Text>
+        <tr>
+          <td>
+            <Text style={{ 
+              fontSize: '16px',
+              color: '#1a1a1a',
+              margin: '0 0 12px 0'
+            }}>
+              Hallo {shippingAddress.first_name} {shippingAddress.last_name},
+            </Text>
+            <Text style={{ 
+              fontSize: '14px',
+              color: '#4a5568',
+              margin: '0',
+              lineHeight: '22px'
+            }}>
+              wir haben Ihre Bestellung erhalten und werden diese schnellstmöglich bearbeiten. 
+              Unten finden Sie alle wichtigen Details zu Ihrer Bestellung.
+            </Text>
+          </td>
+        </tr>
+      </table>
+
+      {/* Bestellübersicht */}
+      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+        <tr>
+          <td>
+            <Text style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              color: '#1a1a1a',
+              margin: '0 0 15px 0',
+              paddingBottom: '8px',
+              borderBottom: '2px solid #e2e8f0'
+            }}>
+              Bestellübersicht
+            </Text>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table width="100%" cellPadding="0" cellSpacing="0">
+              <tr>
+                <td style={{ paddingBottom: '8px' }}>
+                  <Text style={{ fontSize: '14px', color: '#718096', margin: '0' }}>
+                    Bestellnummer:
+                  </Text>
+                </td>
+                <td align="right" style={{ paddingBottom: '8px' }}>
+                  <Text style={{ fontSize: '14px', fontWeight: 'bold', color: '#1a1a1a', margin: '0' }}>
+                    #{order.display_id}
+                  </Text>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <Text style={{ fontSize: '14px', color: '#718096', margin: '0' }}>
+                    Bestelldatum:
+                  </Text>
+                </td>
+                <td align="right" style={{ paddingBottom: '12px' }}>
+                  <Text style={{ fontSize: '14px', color: '#1a1a1a', margin: '0' }}>
+                    {new Date(order.created_at).toLocaleDateString('de-DE', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </Text>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={2} style={{ 
+                  paddingTop: '12px', 
+                  borderTop: '1px solid #e2e8f0' 
+                }}>
+                  <table width="100%" cellPadding="0" cellSpacing="0">
+                    <tr>
+                      <td>
+                        <Text style={{ fontSize: '16px', fontWeight: 'bold', color: '#1a1a1a', margin: '0' }}>
+                          Gesamtbetrag:
+                        </Text>
+                      </td>
+                      <td align="right">
+                        <Text style={{ fontSize: '18px', fontWeight: 'bold', color: '#059669', margin: '0' }}>
+                          {order.summary.raw_current_order_total.value} {order.currency_code}
+                        </Text>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      {/* Bestellte Artikel */}
+      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+        <tr>
+          <td>
+            <Text style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              color: '#1a1a1a',
+              margin: '0 0 15px 0',
+              paddingBottom: '8px',
+              borderBottom: '2px solid #e2e8f0'
+            }}>
+              Bestellte Artikel
+            </Text>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table width="100%" cellPadding="0" cellSpacing="0" style={{ 
+              border: '1px solid #e2e8f0'
+            }}>
+              {/* Tabellenkopf */}
+              <tr style={{ backgroundColor: '#f8f9fa' }}>
+                <td style={{ 
+                  padding: '12px', 
+                  borderBottom: '1px solid #e2e8f0'
+                }}>
+                  <Text style={{ 
+                    fontSize: '12px', 
+                    fontWeight: 'bold', 
+                    color: '#4a5568', 
+                    margin: '0',
+                    textTransform: 'uppercase'
+                  }}>
+                    Artikel
+                  </Text>
+                </td>
+                <td align="center" style={{ 
+                  padding: '12px', 
+                  borderBottom: '1px solid #e2e8f0'
+                }}>
+                  <Text style={{ 
+                    fontSize: '12px', 
+                    fontWeight: 'bold', 
+                    color: '#4a5568', 
+                    margin: '0',
+                    textTransform: 'uppercase'
+                  }}>
+                    Menge
+                  </Text>
+                </td>
+                <td align="right" style={{ 
+                  padding: '12px', 
+                  borderBottom: '1px solid #e2e8f0'
+                }}>
+                  <Text style={{ 
+                    fontSize: '12px', 
+                    fontWeight: 'bold', 
+                    color: '#4a5568', 
+                    margin: '0',
+                    textTransform: 'uppercase'
+                  }}>
+                    Preis
+                  </Text>
+                </td>
+              </tr>
+
+              {/* Artikel-Zeilen */}
+              {order.items.map((item, index) => (
+                <tr key={item.id} style={{ 
+                  backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafbfc' 
+                }}>
+                  <td style={{ 
+                    padding: '14px 12px',
+                    borderBottom: index < order.items.length - 1 ? '1px solid #f1f5f9' : 'none'
+                  }}>
+                    <Text style={{ 
+                      fontSize: '14px', 
+                      fontWeight: '500', 
+                      color: '#1a1a1a', 
+                      margin: '0 0 4px 0' 
+                    }}>
+                      {item.product_title}
+                    </Text>
+                    {item.title !== item.product_title && (
+                      <Text style={{ 
+                        fontSize: '13px', 
+                        color: '#718096', 
+                        margin: '0' 
+                      }}>
+                        {item.title}
+                      </Text>
+                    )}
+                  </td>
+                  <td align="center" style={{ 
+                    padding: '14px 12px',
+                    borderBottom: index < order.items.length - 1 ? '1px solid #f1f5f9' : 'none'
+                  }}>
+                    <Text style={{ 
+                      fontSize: '14px', 
+                      color: '#4a5568', 
+                      margin: '0' 
+                    }}>
+                      {item.quantity}
+                    </Text>
+                  </td>
+                  <td align="right" style={{ 
+                    padding: '14px 12px',
+                    borderBottom: index < order.items.length - 1 ? '1px solid #f1f5f9' : 'none'
+                  }}>
+                    <Text style={{ 
+                      fontSize: '14px', 
+                      fontWeight: '500', 
+                      color: '#1a1a1a', 
+                      margin: '0' 
+                    }}>
+                      {item.unit_price} {order.currency_code}
+                    </Text>
+                  </td>
+                </tr>
+              ))}
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      {/* Lieferadresse */}
+      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+        <tr>
+          <td>
+            <Text style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              color: '#1a1a1a',
+              margin: '0 0 15px 0',
+              paddingBottom: '8px',
+              borderBottom: '2px solid #e2e8f0'
+            }}>
+              Lieferadresse
+            </Text>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table width="100%" cellPadding="16" cellSpacing="0" style={{ 
+              border: '1px solid #e2e8f0',
+              backgroundColor: '#ffffff'
+            }}>
+              <tr>
+                <td>
+                  <Text style={{ 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#1a1a1a', 
+                    margin: '0 0 8px 0' 
+                  }}>
+                    {shippingAddress.first_name} {shippingAddress.last_name}
+                  </Text>
+                  <Text style={{ 
+                    fontSize: '14px', 
+                    color: '#4a5568', 
+                    margin: '0 0 4px 0' 
+                  }}>
+                    {shippingAddress.address_1}
+                  </Text>
+                  <Text style={{ 
+                    fontSize: '14px', 
+                    color: '#4a5568', 
+                    margin: '0 0 4px 0' 
+                  }}>
+                    {shippingAddress.postal_code} {shippingAddress.city}
+                  </Text>
+                  <Text style={{ 
+                    fontSize: '14px', 
+                    color: '#4a5568', 
+                    margin: '0' 
+                  }}>
+                    {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{shippingAddress.country_code}
+                  </Text>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      {/* Footer */}
+      <Hr style={{ 
+        borderTop: '1px solid #e2e8f0', 
+        margin: '35px 0 20px 0' 
+      }} />
       
-      <div style={{ 
-        backgroundColor: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '8px',
-        padding: '16px'
-      }}>
-        <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1a1a1a', margin: '0 0 8px' }}>
-          {shippingAddress.first_name} {shippingAddress.last_name}
-        </Text>
-        <Text style={{ fontSize: '14px', color: '#4a5568', margin: '0 0 4px' }}>
-          {shippingAddress.address_1}
-        </Text>
-        <Text style={{ fontSize: '14px', color: '#4a5568', margin: '0 0 4px' }}>
-          {shippingAddress.postal_code} {shippingAddress.city}
-        </Text>
-        <Text style={{ fontSize: '14px', color: '#4a5568', margin: 0 }}>
-          {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{shippingAddress.country_code}
-        </Text>
-      </div>
-    </div>
-
-    {/* Footer */}
-    <Hr style={{ borderColor: '#e2e8f0', margin: '40px 0 24px' }} />
-    
-    <div style={{ textAlign: 'center' }}>
-      <Text style={{ fontSize: '13px', color: '#718096', margin: '0 0 8px', lineHeight: '1.6' }}>
-        Bei Fragen zu Ihrer Bestellung kontaktieren Sie uns gerne unter support@example.com
-      </Text>
-      <Text style={{ fontSize: '12px', color: '#a0aec0', margin: 0 }}>
-        Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht auf diese Nachricht.
-      </Text>
-    </div>
+      <table width="100%" cellPadding="0" cellSpacing="0">
+        <tr>
+          <td align="center">
+            <Text style={{ 
+              fontSize: '13px', 
+              color: '#718096', 
+              margin: '0 0 8px 0',
+              lineHeight: '20px'
+            }}>
+              Bei Fragen zu Ihrer Bestellung kontaktieren Sie uns gerne unter support@example.com
+            </Text>
+            <Text style={{ 
+              fontSize: '12px', 
+              color: '#a0aec0', 
+              margin: '0' 
+            }}>
+              Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht auf diese Nachricht.
+            </Text>
+          </td>
+        </tr>
+      </table>
+    </Container>
   </Section>
 </Base>
   )
