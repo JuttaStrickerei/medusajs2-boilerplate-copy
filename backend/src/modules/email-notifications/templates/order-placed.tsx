@@ -21,7 +21,7 @@ export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplat
 
 export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   PreviewProps: OrderPlacedPreviewProps
-} = ({ order, shippingAddress, preview = 'Your order has been placed!' }) => {
+} = ({ order, shippingAddress, preview = 'Ihre Bestellung wurde aufgenommen!' }) => {
   return (
   <Base preview={preview}>
   <Section>
@@ -132,7 +132,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                     <tr>
                       <td>
                         <Text style={{ fontSize: '16px', fontWeight: 'bold', color: '#1a1a1a', margin: '0' }}>
-                          Gesamtbetrag:
+                          Gesamtbetrag (inkl. MwSt. + Versandkosten):
                         </Text>
                       </td>
                       <td align="right">
@@ -350,7 +350,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               margin: '0 0 8px 0',
               lineHeight: '20px'
             }}>
-              Bei Fragen zu Ihrer Bestellung kontaktieren Sie uns gerne unter support@example.com
+              Bei Fragen zu Ihrer Bestellung kontaktieren Sie uns gerne unter office@strickere-jutta.at
             </Text>
             <Text style={{ 
               fontSize: '12px', 
