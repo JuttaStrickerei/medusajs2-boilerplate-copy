@@ -3,6 +3,7 @@ import { INotificationModuleService, IOrderModuleService, IFulfillmentModuleServ
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { generateInvoicePdfWorkflow } from "../workflows/generate-invoice-pdf"
 
 export default async function shipmentCreatedHandler({
   event: { data },
@@ -51,6 +52,18 @@ export default async function shipmentCreatedHandler({
   console.log('fulfillment data:', fulfillment)
 
   try {
+    // PDF-Rechnung generieren
+    const { result: { pdf_buffer } } = await generateInvoicePdfWorkflow(container)
+      .run({
+        input: {
+          order_id: orderId,  // Verwende die orderId, die wir bereits haben
+        },
+      })
+    
+    const buffer = Buffer.from(pdf_buffer)
+    const base64Content = buffer.toString("base64")
+
+    // E-Mail mit PDF-Anhang senden
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
@@ -64,11 +77,19 @@ export default async function shipmentCreatedHandler({
         fulfillment,  // ← Jetzt wird es übergeben!
         shippingAddress,
         preview: 'Vielen Dank für die Bestellung!'
-      }
+      },
+      attachments: [
+        {
+          content: base64Content,
+          filename: `invoice-${order.display_id}.pdf`, // Nutze die display_id für den Dateinamen
+          content_type: "application/pdf",
+          disposition: "attachment",
+        },
+      ],
     })
-    console.log('Shipment notification sent successfully')
+    console.log('Shipment notification with invoice PDF sent successfully')
   } catch (error) {
-    console.error('Error sending fulfillment notification:', error)
+    console.error('Error sending fulfillment notification with PDF:', error)
   }
 }
 
