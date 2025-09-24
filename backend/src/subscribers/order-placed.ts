@@ -54,11 +54,11 @@ export default async function orderPlacedHandler({
       data: {
         emailOptions: {
           replyTo: 'office@strickerei-jutta.at',
-          subject: 'Your order has been placed'
+          subject: 'Ihre Bestellung wurde aufgegeben.'
         },
         order,
         shippingAddress,
-        preview: 'Thank you for your order!'
+        preview: 'Vielen Dank für die Bestellung!'
       },
         attachments: [
         {

@@ -10,12 +10,13 @@ export default async function shipmentCreatedHandler({
 }: SubscriberArgs<any>) {
   const notificationModuleService = container.resolve(Modules.NOTIFICATION)
   const orderModuleService = container.resolve(Modules.ORDER)
+  const fulfillmentModuleService = container.resolve(Modules.FULFILLMENT)
   
   console.log('the data.id is', data.id)
 
   // Resolve the query directly from the container parameter
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
-    
+  
   const { data: order_fulfillment } = await query.graph({
     entity: "order_fulfillment",
     fields: [
@@ -31,11 +32,23 @@ export default async function shipmentCreatedHandler({
   const orderId = order_fulfillment[0].order_id
   console.log(`Fulfillment ${data.id} is for order ${orderId}`)
 
-  const order = await orderModuleService.retrieveOrder(orderId, { relations: ['items', 'summary', 'shipping_address'] })
+  // Retrieve order with relations
+  const order = await orderModuleService.retrieveOrder(orderId, { 
+    relations: ['items', 'summary', 'shipping_address'] 
+  })
   console.log('order data:', order)
 
-  const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
+  // Retrieve shipping address
+  const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
+    order.shipping_address.id
+  )
   console.log('shippingAddress data:', shippingAddress)
+
+  // ⚠️ WICHTIG: Fulfillment-Daten abrufen!
+  const fulfillment = await fulfillmentModuleService.retrieveFulfillment(data.id, {
+    relations: ['items', 'delivery_address', 'labels']
+  })
+  console.log('fulfillment data:', fulfillment)
 
   try {
     await notificationModuleService.createNotifications({
@@ -44,18 +57,19 @@ export default async function shipmentCreatedHandler({
       template: EmailTemplates.SHIPMENT_SENT,
       data: {
         emailOptions: {
-          replyTo: 'info@example.com',
-          subject: 'Your order has been shipped'
+          replyTo: 'office@strickerei-jutta.at',
+          subject: 'Ihre Bestellung wurde versandt.'
         },
-        order, 
+        order,
+        fulfillment,  // ← Jetzt wird es übergeben!
         shippingAddress,
-        preview: 'Thank you for your order!'
+        preview: 'Vielen Dank für die Bestellung!'
       }
     })
+    console.log('Shipment notification sent successfully')
   } catch (error) {
     console.error('Error sending fulfillment notification:', error)
   }
-
 }
 
 export const config: SubscriberConfig = {

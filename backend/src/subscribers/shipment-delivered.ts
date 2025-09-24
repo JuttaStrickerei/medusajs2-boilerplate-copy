@@ -44,12 +44,12 @@ export default async function fulfillmentCreatedHandler({
       template: EmailTemplates.SHIPMENT_DELIVERED,
       data: {
         emailOptions: {
-          replyTo: 'info@example.com',
-          subject: 'Your order has been delivered'
+          replyTo: 'office@strickerei-jutta.at',
+          subject: 'Zustellung'
         },
         order,
         shippingAddress,
-        preview: 'Your order has been delivered!'
+        preview: 'Ihre Bestellung wurde zugestellt.'
       }
     })
   } catch (error) {
