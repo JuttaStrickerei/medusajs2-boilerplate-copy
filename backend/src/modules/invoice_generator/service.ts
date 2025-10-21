@@ -336,8 +336,9 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                       alignment: "right",
                     },
                   ],
-                    [
-                    { text: "", style: "totalLabel", margin: [0, 5, 0, 5] },
+                  [
+                    { text: "", style: "totalLabel", margin: [0, 5, 0, 5], colSpan: 2 },
+                    {},  
                   ],
                   [
                     { text: "GESAMTBETRAG:", style: "grandTotalLabel" },
