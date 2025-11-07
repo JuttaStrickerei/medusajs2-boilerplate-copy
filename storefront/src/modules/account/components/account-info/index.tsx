@@ -30,7 +30,7 @@ const AccountInfo = ({
   isSuccess,
   isError,
   clearState,
-  errorMessage = t("an_error_occurred"),
+  errorMessage,
   children,
   'data-testid': dataTestid,
   translationKeys
@@ -50,6 +50,9 @@ const AccountInfo = ({
   // Merge default translation keys with any overrides provided
   const translations = { ...defaultTranslationKeys, ...translationKeys }
 
+  // Set default error message after t is available
+  const finalErrorMessage = errorMessage || t("an_error_occurred")
+
   const handleToggle = () => {
     clearState()
     setTimeout(() => toggle(), 100)
@@ -65,7 +68,7 @@ const AccountInfo = ({
     <div className="text-small-regular" data-testid={dataTestid}>
       <div className="flex items-end justify-between">
         <div className="flex flex-col">
-          <span className="uppercase text-ui-fg-base">{t(label)}</span>
+          <span className="uppercase text-ui-fg-base">{label}</span>
           <div className="flex items-center flex-1 basis-0 justify-end gap-x-4">
             {typeof currentInfo === "string" ? (
               <span className="font-semibold" data-testid="current-info">{currentInfo}</span>
@@ -102,7 +105,7 @@ const AccountInfo = ({
           data-testid="success-message"
         >
           <Badge className="p-2 my-4" color="green">
-            <span>{t(translations.successMessage).replace("{label}", t(label))}</span>
+            <span>{t(translations.successMessage, { label: label })}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -121,7 +124,7 @@ const AccountInfo = ({
           data-testid="error-message"
         >
           <Badge className="p-2 my-4" color="red">
-            <span>{typeof errorMessage === "string" ? t(errorMessage) : errorMessage}</span>
+            <span>{finalErrorMessage}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>

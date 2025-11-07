@@ -12,15 +12,13 @@ import { getCustomer } from "@lib/data/customer"
 
 import { getTranslations } from "next-intl/server"
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("account");
   return {
     title: t("profile"),
     description: t("edit_profile"),
   }
-  
 }
-
 
 export default async function Profile() {
   const t = await getTranslations("account");
