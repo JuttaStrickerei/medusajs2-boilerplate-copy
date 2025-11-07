@@ -152,7 +152,8 @@
     "faq_message": "You can find frequently asked questions and answers on our customer service page.",
     "customer_service": "Customer Service",
     "sign_in_title": "Sign in",
-    "sign_in_description": "Sign in to your Medusa Store account."
+    "sign_in_description": "Sign in to your Medusa Store account.",
+    "no_recent_orders": "No recent orders"
   },
   "side-menu": {
     "account": "Account",

@@ -153,7 +153,8 @@
     "faq_message": "Auf unserer Kundenservice-Seite finden Sie häufig gestellte Fragen und Antworten.",
     "customer_service": "Kundenservice",
     "sign_in_title": "Anmelden",
-    "sign_in_description": "Melden Sie sich bei Ihrem Medusa Store-Konto an."
+    "sign_in_description": "Melden Sie sich bei Ihrem Medusa Store-Konto an.",
+    "no_recent_orders": "Keine aktuellen Bestellungen"
   },
   "side-menu": {
     "account": "Konto",
