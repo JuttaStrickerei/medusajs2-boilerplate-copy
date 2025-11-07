@@ -11,8 +11,9 @@ export default async function Nav() {
 
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
-      <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
-        <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
+      <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base"> 
+        {/* Textfarbe der Navigation auf dunklen Stein gesetzt */}
+        <nav className="content-container text-sm text-stone-900 flex items-center justify-between w-full h-full"> 
           <div className="flex-1 basis-0 h-full flex items-center">
             <div className="h-full">
               <SideMenu regions={regions} />
@@ -22,7 +23,8 @@ export default async function Nav() {
           <div className="flex items-center h-full">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
+              // Serifen-Display-Schriftart für das Logo
+              className="font-serif-display text-xl font-medium text-stone-900 hover:text-stone-700 uppercase tracking-wider transition-colors" 
               data-testid="nav-store-link"
             >
               Jutta Strickerei
@@ -31,11 +33,12 @@ export default async function Nav() {
 
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
             <div className="hidden small:flex items-center gap-x-6 h-full">
+              {/* Nav-Links verwenden dunklen Text und Hover-Effekte */}
               <LocalizedClientLink
-              href="/search"
-              scroll={false}
-              data-testid="nav-search-link"
-              className="hover:text-ui-fg-base"
+                href="/search"
+                scroll={false}
+                data-testid="nav-search-link"
+                className="hover:text-stone-700 text-sm transition-colors" 
               >
                 {t("search")}
               </LocalizedClientLink>
@@ -43,13 +46,12 @@ export default async function Nav() {
               <LocalizedClientLink
                 href="/account"
                 data-testid="nav-account-link"
-                className="hover:text-ui-fg-base"
+                className="hover:text-stone-700 text-sm transition-colors" 
               >
                 {t("account")}
               </LocalizedClientLink>
             </div>
             
-            {/* No Suspense boundary needed */}
             <CartButton />
           </div>
         </nav>

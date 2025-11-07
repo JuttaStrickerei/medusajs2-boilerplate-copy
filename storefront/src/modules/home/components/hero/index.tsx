@@ -1,39 +1,43 @@
-import { Heading } from "@medusajs/ui";
 import { useTranslations } from "next-intl";
 
 const Hero = () => {
   const t = useTranslations('Homepage');
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 border-b border-ui-border-base">
-      <div className="text-center mb-16"> {/* Increased bottom margin */}
-        <Heading level="h1">{t('title')}</Heading>
-      </div>
-      
-      <div className="relative inline-block w-full max-w-5xl">
-        <img 
-          src="https://bucket-production-af40.up.railway.app/medusa-media/store-jutta-min.jpg" 
-          alt="Exterior of a modern store" 
-          className="
-            block w-full h-auto
-            [mask-image:linear-gradient(to_right,transparent,black_20%,black_80%,transparent),linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]
-            [mask-composite:intersect]
-          "
-        />
+    <section
+      className="relative h-screen flex items-center justify-center bg-cover bg-center"
+      style={{
+        // Combines the gradient from the HTML's .hero-image style with your image
+        backgroundImage:
+          'linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.2)), url("https://bucket-production-af40.up.railway.app/medusa-media/store-jutta-min.jpg")',
+      }}
+    >
+      {/* This is the secondary gradient overlay from the HTML */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20"></div>
+
+      {/* Content Wrapper */}
+      <div className="relative z-10 text-center text-white max-w-2xl mx-auto px-6">
         
-        <a 
-          href="/store"
-          aria-label="Enter the store"
-          className="
-            absolute 
-            top-[38%] left-[47%] w-[11%] h-[29%]
-            hover:bg-black/10
-            transition-colors
-          "
-        >
-        </a>
+        {/* Text content with fade-in animation class */}
+        <div className="fade-in stagger-1">
+          <h1 className="font-serif text-5xl md:text-7xl font-medium mb-6 text-shadow">
+            {t('title')} 
+            {/* Example: "Handwerkskunst" */}
+          </h1>
+        </div>
+
+        {/* Button with fade-in animation class */}
+        <div className="fade-in stagger-2">
+          <a
+            href="/store" // Standard <a> tag
+            className="inline-block bg-white text-stone-800 px-8 py-3 text-sm font-medium tracking-wide hover:bg-stone-100 transition-colors hover-lift"
+          >
+            {t('discoverCollection')}
+            {/* Example: "KOLLEKTION ENTDECKEN" */}
+          </a>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -11,13 +11,17 @@ export default async function Footer() {
   const t = await getTranslations("Footer") 
 
   return (
-    <footer className="border-t border-ui-border-base w-full">
+    // Hintergrundfarbe auf dunklen Stein, Textfarbe hell und Border angepasst
+    <footer className="bg-stone-800 border-t border-stone-700 w-full text-stone-300">
       <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
+        <div className="flex flex-col gap-y-12 xsmall:flex-row items-start justify-between py-16 md:py-24">
+          
+          {/* Brand Name Section */}
           <div>
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
+              // Serifen-Display-Schriftart, größer und weiß
+              className="font-serif-display text-2xl font-medium text-white hover:text-white uppercase tracking-wider" 
             >
               Jutta Strickerei
             </LocalizedClientLink>
@@ -26,21 +30,25 @@ export default async function Footer() {
               <a
                 href="https://strickerei-jutta.at/"
                 target="_blank"
-                rel="noopener noreferrer "
-                className="text-ui-fg-subtle hover:text-ui-fg-base txt-small"
-                >
-                  {t("back_to_homepage")}
-                </a>
+                rel="noopener noreferrer"
+                // Textfarbe angepasst
+                className="text-stone-400 hover:text-white text-sm transition-colors" 
+              >
+                {t("back_to_homepage")}
+              </a>
             </div>
           </div>
-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
+          
+          {/* Navigation Links Section */}
+          <div className="text-sm gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
             {product_categories && product_categories?.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  {t("categories")} {/* CHANGED */}
+              <div className="flex flex-col gap-y-3">
+                {/* Überschriften in Weiß, fett und uppercase */}
+                <span className="text-white font-medium mb-1 uppercase tracking-wider text-xs">
+                  {t("categories")}
                 </span>
                 <ul
-                  className="grid grid-cols-1 gap-2"
+                  className="grid grid-cols-1 gap-2 text-stone-400"
                   data-testid="footer-categories"
                 >
                   {product_categories?.slice(0, 6).map((c) => {
@@ -57,18 +65,18 @@ export default async function Footer() {
 
                     return (
                       <li
-                        className="flex flex-col gap-2 text-ui-fg-subtle txt-small"
+                        className="flex flex-col gap-2 text-stone-400 text-sm"
                         key={c.id}
                       >
                         <LocalizedClientLink
                           className={clx(
-                            "hover:text-ui-fg-base",
-                            children && "txt-small-plus"
+                            "hover:text-white transition-colors", // Hover-Effekt auf Weiß
+                            children && "font-medium"
                           )}
                           href={`/categories/${c.handle}`}
                           data-testid="category-link"
                         >
-                          {c.name} {/* REVERTED to original */}
+                          {c.name}
                         </LocalizedClientLink>
                         {children && (
                           <ul className="grid grid-cols-1 ml-3 gap-2">
@@ -76,11 +84,11 @@ export default async function Footer() {
                               children.map((child) => (
                                 <li key={child.id}>
                                   <LocalizedClientLink
-                                    className="hover:text-ui-fg-base"
+                                    className="hover:text-white transition-colors"
                                     href={`/categories/${child.handle}`}
                                     data-testid="category-link"
                                   >
-                                    {child.name} {/* REVERTED to original */}
+                                    {child.name}
                                   </LocalizedClientLink>
                                 </li>
                               ))}
@@ -92,14 +100,15 @@ export default async function Footer() {
                 </ul>
               </div>
             )}
+            
             {collections && collections.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  {t("collections")} {/* CHANGED */}
+              <div className="flex flex-col gap-y-3">
+                <span className="text-white font-medium mb-1 uppercase tracking-wider text-xs">
+                  {t("collections")}
                 </span>
                 <ul
                   className={clx(
-                    "grid grid-cols-1 gap-2 text-ui-fg-subtle txt-small",
+                    "grid grid-cols-1 gap-2 text-stone-400 text-sm",
                     {
                       "grid-cols-2": (collections?.length || 0) > 3,
                     }
@@ -108,43 +117,46 @@ export default async function Footer() {
                   {collections?.slice(0, 6).map((c) => (
                     <li key={c.id}>
                       <LocalizedClientLink
-                        className="hover:text-ui-fg-base"
+                        className="hover:text-white transition-colors"
                         href={`/collections/${c.handle}`}
                       >
-                        {c.title} {/* REVERTED to original */}
+                        {c.title}
                       </LocalizedClientLink>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
-            {/* ... The rest of your component ... */}
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">{t("informations")}</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
+            
+            {/* Informations Links */}
+            <div className="flex flex-col gap-y-3">
+              <span className="text-white font-medium mb-1 uppercase tracking-wider text-xs">{t("informations")}</span>
+              <ul className="grid grid-cols-1 gap-y-2 text-stone-400 text-sm">
                 <li>
                   <LocalizedClientLink
                     href="/terms_services/"
-                    className="hover:text-ui-fg-base"
+                    className="hover:text-white transition-colors"
                   >
-                    {t("terms_services")} {/* CHANGED */}
+                    {t("terms_services")}
                   </LocalizedClientLink>
                 </li>
 
                 <li>
                   <LocalizedClientLink
                     href="/privacy_policy/"
-                    className="hover:text-ui-fg-base"
+                    className="hover:text-white transition-colors"
                   >
-                    {t("privacy_policy")} {/* CHANGED */}
+                    {t("privacy_policy")}
                   </LocalizedClientLink>
                 </li>
               </ul>
             </div>
           </div>
         </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
+        
+        {/* Copyright Section */}
+        <div className="flex w-full mb-8 pt-8 border-t border-stone-700 justify-between text-stone-400">
+          <Text className="text-xs">
             © {new Date().getFullYear()} Jutta Strickerei
           </Text>
           <MedusaCTA />
