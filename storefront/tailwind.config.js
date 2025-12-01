@@ -34,6 +34,19 @@ module.exports = {
           80: "#1F2937",
           90: "#111827",
         },
+        // Strickerei Jutta Brand - Stone palette (warm grays)
+        stone: {
+          50: "#fafaf9",   // Page background
+          100: "#f5f5f4",  // Card hover, alternate backgrounds
+          200: "#e7e5e4",  // Borders, dividers
+          300: "#d6d3d1",  // Muted borders
+          400: "#a8a29e",  // Placeholder text
+          500: "#78716c",  // Secondary text
+          600: "#57534e",  // Body text, nav links
+          700: "#44403c",  // Dark accents
+          800: "#292524",  // Primary (buttons, headings)
+          900: "#1c1917",  // Extra dark
+        },
       },
       borderRadius: {
         none: "0px",
@@ -68,6 +81,12 @@ module.exports = {
           "Helvetica Neue",
           "Ubuntu",
           "sans-serif",
+        ],
+        // Strickerei Jutta Brand - Serif for headings & brand name
+        serif: [
+          "Playfair Display",
+          "Georgia",
+          "serif",
         ],
       },
       keyframes: {

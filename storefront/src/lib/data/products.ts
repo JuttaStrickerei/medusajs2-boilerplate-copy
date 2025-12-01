@@ -98,11 +98,13 @@ export const getProductsListWithSort = cache(async function ({
   queryParams,
   sortBy = "created_at",
   countryCode,
+  filters,
 }: {
   page?: number
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
   sortBy?: SortOptions
   countryCode: string
+  filters?: { [key: string]: string | undefined }
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number }
   nextPage: number | null
@@ -123,16 +125,74 @@ export const getProductsListWithSort = cache(async function ({
 
   const sortedProducts = sortProducts(products, sortBy)
 
+  // Apply filters if provided
+  let filteredProducts = sortedProducts
+  if (filters) {
+    filteredProducts = sortedProducts.filter((product) => {
+      // Check each filter
+      for (const [filterKey, filterValue] of Object.entries(filters)) {
+        if (!filterValue) continue
+
+        const filterValues = filterValue.split(",")
+
+        // Handle different filter types
+        switch (filterKey) {
+          case "color":
+          case "size":
+            // Check if any variant has the matching option value
+            const hasMatchingVariant = product.variants?.some((variant) =>
+              variant.options?.some((option) =>
+                filterValues.some((val) =>
+                  option.value?.toLowerCase() === val.toLowerCase()
+                )
+              )
+            )
+            if (!hasMatchingVariant) return false
+            break
+
+          case "material":
+            // Check product metadata
+            const productMaterial = product.metadata?.material as string
+            if (!productMaterial || !filterValues.includes(productMaterial.toLowerCase())) {
+              return false
+            }
+            break
+
+          case "price":
+            // Handle price range filter (format: "min-max")
+            const [minStr, maxStr] = filterValue.split("-")
+            const min = parseInt(minStr) * 100 // Convert to cents
+            const max = parseInt(maxStr) * 100
+
+            // Check if any variant price falls within range
+            const hasPriceInRange = product.variants?.some((variant) => {
+              const price = variant.calculated_price?.calculated_amount
+              return price && price >= min && price <= max
+            })
+            if (!hasPriceInRange) return false
+            break
+
+          default:
+            // Generic metadata filter
+            const metadataValue = product.metadata?.[filterKey] as string
+            if (!metadataValue || !filterValues.includes(metadataValue.toLowerCase())) {
+              return false
+            }
+        }
+      }
+      return true
+    })
+  }
+
+  const filteredCount = filteredProducts.length
   const pageParam = (page - 1) * limit
-
-  const nextPage = count > pageParam + limit ? pageParam + limit : null
-
-  const paginatedProducts = sortedProducts.slice(pageParam, pageParam + limit)
+  const nextPage = filteredCount > pageParam + limit ? pageParam + limit : null
+  const paginatedProducts = filteredProducts.slice(pageParam, pageParam + limit)
 
   return {
     response: {
       products: paginatedProducts,
-      count,
+      count: filteredCount,
     },
     nextPage,
     queryParams,

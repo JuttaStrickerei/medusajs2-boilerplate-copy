@@ -14,6 +14,10 @@ type PaginatedProductsParams = {
   order?: string
 }
 
+type ProductFilters = {
+  [key: string]: string | undefined
+}
+
 export default async function PaginatedProducts({
   sortBy,
   page,
@@ -21,6 +25,7 @@ export default async function PaginatedProducts({
   categoryId,
   productsIds,
   countryCode,
+  filters,
 }: {
   sortBy?: SortOptions
   page: number
@@ -28,6 +33,7 @@ export default async function PaginatedProducts({
   categoryId?: string
   productsIds?: string[]
   countryCode: string
+  filters?: ProductFilters
 }) {
   const queryParams: PaginatedProductsParams = {
     limit: 12,
@@ -62,6 +68,7 @@ export default async function PaginatedProducts({
     queryParams,
     sortBy,
     countryCode,
+    filters,
   })
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)

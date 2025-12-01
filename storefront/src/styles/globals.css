@@ -1,13 +1,18 @@
+/* ============================================
+   GOOGLE FONTS - Strickerei Jutta Brand
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* Added base body font from the HTML template */
+/* Base body font */
 body {
   font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* Added animation keyframes from the HTML template */
+/* Animation keyframes */
 @keyframes fadeInUp {
   to {
     opacity: 1;
@@ -16,7 +21,9 @@ body {
 }
 
 @layer utilities {
-  /* Chrome, Safari and Opera */
+  /* ============================================
+     SCROLLBAR UTILITIES
+     ============================================ */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -29,6 +36,10 @@ body {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+
+  /* ============================================
+     FORM INPUT UTILITIES
+     ============================================ */
 
   input:focus ~ label,
   input:not(:placeholder-shown) ~ label {
@@ -61,34 +72,61 @@ body {
     -webkit-appearance: none;
   }
 
-  /* --- STYLES ADDED FOR HERO COMPONENT --- */
-  
+  /* ============================================
+     STRICKEREI JUTTA BRAND UTILITIES
+     ============================================ */
+
+  /* Text shadow for hero headings */
   .text-shadow {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
+  /* Navigation link with animated underline (from mockup) */
+  .nav-link {
+    @apply relative transition-all duration-300;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute -bottom-0.5 left-0 w-0 h-px bg-stone-600 transition-all duration-300;
+  }
+
+  .nav-link:hover {
+    @apply text-stone-600;
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  /* Card hover lift effect with shadow (from mockup) */
   .hover-lift {
-    transition: transform 0.3s ease;
+    @apply transition-all duration-300;
   }
 
   .hover-lift:hover {
-    transform: translateY(-2px);
+    @apply -translate-y-0.5;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   }
 
+  /* Fade in animation for scroll reveals */
   .fade-in {
     opacity: 0;
     transform: translateY(20px);
     animation: fadeInUp 0.8s ease forwards;
   }
 
+  /* Stagger delays for sequential animations */
   .stagger-1 { animation-delay: 0.1s; }
   .stagger-2 { animation-delay: 0.2s; }
   .stagger-3 { animation-delay: 0.3s; }
-
-  /* --- END OF ADDED STYLES --- */
+  .stagger-4 { animation-delay: 0.4s; }
 }
 
 @layer components {
+  /* ============================================
+     LAYOUT COMPONENTS
+     ============================================ */
   .content-container {
     @apply max-w-[1440px] w-full mx-auto px-6;
   }
@@ -97,6 +135,9 @@ body {
     @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
   }
 
+  /* ============================================
+     TYPOGRAPHY COMPONENTS
+     ============================================ */
   .text-xsmall-regular {
     @apply text-[10px] leading-4 font-normal;
   }
