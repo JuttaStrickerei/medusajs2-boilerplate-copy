@@ -134,6 +134,24 @@ export default async function Footer() {
               <ul className="grid grid-cols-1 gap-y-2 text-stone-400 text-sm">
                 <li>
                   <LocalizedClientLink
+                    href="/ueber-uns/"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("about_us")}
+                  </LocalizedClientLink>
+                </li>
+
+                <li>
+                  <LocalizedClientLink
+                    href="/impressum/"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("impressum")}
+                  </LocalizedClientLink>
+                </li>
+
+                <li>
+                  <LocalizedClientLink
                     href="/terms_services/"
                     className="hover:text-white transition-colors"
                   >
