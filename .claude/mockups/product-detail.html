@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashmere Pullover Classic - Strickerei Jutta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            400: '#a8a29e',
+                            500: '#78716c',
+                            600: '#57534e',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #fafaf9;
+        }
+        
+        .product-image {
+            background: linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.1)), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750"><rect fill="%23f5f5f4" width="600" height="750"/><text x="300" y="375" text-anchor="middle" font-family="serif" font-size="20" fill="%23a8a29e">Cashmere Pullover</text></svg>');
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .thumbnail-image {
+            background: linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.1)), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 200"><rect fill="%23f5f5f4" width="150" height="200"/><text x="75" y="100" text-anchor="middle" font-family="serif" font-size="12" fill="%23a8a29e">Bild</text></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: #57534e;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: #57534e;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .size-option {
+            transition: all 0.3s ease;
+        }
+        
+        .size-option:hover {
+            border-color: #292524;
+            background-color: #f5f5f4;
+        }
+        
+        .size-option.selected {
+            border-color: #292524;
+            background-color: #292524;
+            color: white;
+        }
+        
+        .color-option {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .color-option::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            transition: border-color 0.3s ease;
+        }
+        
+        .color-option.selected::after {
+            border-color: #292524;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-button.active {
+            border-bottom-color: #292524;
+            color: #292524;
+        }
+        
+        .zoom-container {
+            position: relative;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        
+        .zoom-container:hover .product-image {
+            transform: scale(1.2);
+        }
+        
+        .star-rating {
+            color: #fbbf24;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(to right, #fbbf24 var(--width), #e5e7eb var(--width));
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+    <!-- Navigation -->
+    <nav class="bg-white/95 backdrop-blur-sm border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-between h-16">
+                <!-- Left Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="nav-link text-sm font-medium text-stone-600">Kollektionen</a>
+                    <a href="#" class="nav-link text-sm font-medium text-stone-600">Damen</a>
+                    <a href="#" class="nav-link text-sm font-medium text-stone-600">Über uns</a>
+                </div>
+                
+                <!-- Center Logo -->
+                <div class="flex items-center">
+                    <a href="#" class="text-center">
+                        <div class="font-serif text-xl font-medium text-stone-800">Strickerei Jutta</div>
+                        <div class="text-xs text-stone-500 tracking-wider">SEIT 1965</div>
+                    </a>
+                </div>
+                
+                <!-- Right Navigation -->
+                <div class="flex items-center space-x-6">
+                    <button class="text-stone-600 hover:text-stone-800 transition-colors">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                    <button class="text-stone-600 hover:text-stone-800 transition-colors relative">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        <span class="absolute -top-2 -right-2 bg-stone-800 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                    </button>
+                    <a href="#" class="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors">Konto</a>
+                    <button class="text-stone-600 hover:text-stone-800 transition-colors relative">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"/>
+                        </svg>
+                        <span class="absolute -top-2 -right-2 bg-stone-800 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-6 py-3">
+            <nav class="flex text-sm text-stone-500">
+                <a href="#" class="hover:text-stone-800 transition-colors">Home</a>
+                <span class="mx-2">/</span>
+                <a href="#" class="hover:text-stone-800 transition-colors">Kollektionen</a>
+                <span class="mx-2">/</span>
+                <a href="#" class="hover:text-stone-800 transition-colors">Pullover</a>
+                <span class="mx-2">/</span>
+                <span class="text-stone-800">Cashmere Pullover Classic</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Product Detail -->
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Product Images -->
+            <div class="space-y-4">
+                <!-- Main Image -->
+                <div class="zoom-container aspect-[4/5] bg-white rounded-lg overflow-hidden shadow-sm border border-stone-200">
+                    <div id="mainImage" class="w-full h-full product-image"></div>
+                </div>
+                
+                <!-- Thumbnail Images -->
+                <div class="grid grid-cols-4 gap-4">
+                    <button class="aspect-[4/5] thumbnail-image bg-white rounded-lg border-2 border-stone-800 overflow-hidden" onclick="changeMainImage(1)"></button>
+                    <button class="aspect-[4/5] thumbnail-image bg-white rounded-lg border-2 border-stone-200 hover:border-stone-400 transition-colors overflow-hidden" onclick="changeMainImage(2)"></button>
+                    <button class="aspect-[4/5] thumbnail-image bg-white rounded-lg border-2 border-stone-200 hover:border-stone-400 transition-colors overflow-hidden" onclick="changeMainImage(3)"></button>
+                    <button class="aspect-[4/5] thumbnail-image bg-white rounded-lg border-2 border-stone-200 hover:border-stone-400 transition-colors overflow-hidden" onclick="changeMainImage(4)"></button>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="space-y-8">
+                <!-- Product Header -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-stone-800 text-white text-xs px-2 py-1 rounded">NEU</span>
+                        <span class="text-sm text-stone-600">Artikel-Nr: SJ-CP-001</span>
+                    </div>
+                    
+                    <h1 class="font-serif text-3xl md:text-4xl font-medium text-stone-800">
+                        Cashmere Pullover Classic
+                    </h1>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-1">
+                            <div class="flex star-rating">
+                                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm text-stone-600">(4.8)</span>
+                        </div>
+                        <a href="#reviews" class="text-sm text-stone-600 hover:text-stone-800 underline">24 Bewertungen</a>
+                    </div>
+                    
+                    <div class="text-3xl font-medium text-stone-800">€ 295</div>
+                    
+                    <p class="text-stone-600 leading-relaxed">
+                        Unser klassischer Cashmere-Pullover aus 100% mongolischem Kaschmir. 
+                        Zeitlos elegant und unglaublich weich, perfekt für jede Gelegenheit. 
+                        Handgefertigt in unserer Manufaktur in Draßburg.
+                    </p>
+                </div>
+
+                <!-- Color Selection -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-medium text-stone-800">Farbe: <span id="selectedColor">Schwarz</span></h3>
+                    <div class="flex space-x-3">
+                        <button class="color-option w-10 h-10 rounded-full bg-stone-800 selected" onclick="selectColor('Schwarz', this)"></button>
+                        <button class="color-option w-10 h-10 rounded-full bg-stone-600" onclick="selectColor('Grau', this)"></button>
+                        <button class="color-option w-10 h-10 rounded-full bg-white border-2 border-stone-300" onclick="selectColor('Weiß', this)"></button>
+                        <button class="color-option w-10 h-10 rounded-full bg-red-800" onclick="selectColor('Bordeaux', this)"></button>
+                        <button class="color-option w-10 h-10 rounded-full bg-blue-900" onclick="selectColor('Navy', this)"></button>
+                    </div>
+                </div>
+
+                <!-- Size Selection -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-medium text-stone-800">Größe: <span id="selectedSize">Bitte wählen</span></h3>
+                        <button class="text-sm text-stone-600 hover:text-stone-800 underline">Größentabelle</button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-3">
+                        <button class="size-option py-3 px-4 text-sm border border-stone-300 rounded text-center hover:border-stone-800 transition-colors" onclick="selectSize('36', this)">36</button>
+                        <button class="size-option py-3 px-4 text-sm border border-stone-300 rounded text-center hover:border-stone-800 transition-colors" onclick="selectSize('38', this)">38</button>
+                        <button class="size-option py-3 px-4 text-sm border border-stone-300 rounded text-center hover:border-stone-800 transition-colors" onclick="selectSize('40', this)">40</button>
+                        <button class="size-option py-3 px-4 text-sm border border-stone-300 rounded text-center hover:border-stone-800 transition-colors" onclick="selectSize('42', this)">42</button>
+                        <button class="size-option py-3 px-4 text-sm border border-stone-300 rounded text-center hover:border-stone-800 transition-colors" onclick="selectSize('44', this)">44</button>
+                        <button class="size-option py-3 px-4 text-sm border border-stone-300 rounded text-center hover:border-stone-800 transition-colors" onclick="selectSize('46', this)">46</button>
+                        <button class="size-option py-3 px-4 text-sm border border-stone-300 rounded text-center hover:border-stone-800 transition-colors" onclick="selectSize('48', this)">48</button>
+                        <button class="size-option py-3 px-4 text-sm border border-stone-300 rounded text-center hover:border-stone-800 transition-colors" onclick="selectSize('50', this)">50</button>
+                    </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-medium text-stone-800">Anzahl</h3>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center border border-stone-300 rounded">
+                            <button class="px-3 py-2 text-stone-600 hover:text-stone-800" onclick="changeQuantity(-1)">-</button>
+                            <span id="quantity" class="px-4 py-2 border-l border-r border-stone-300">1</span>
+                            <button class="px-3 py-2 text-stone-600 hover:text-stone-800" onclick="changeQuantity(1)">+</button>
+                        </div>
+                        <span class="text-sm text-green-600">✓ Auf Lager</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-4">
+                    <button class="w-full bg-stone-800 text-white py-4 text-sm font-medium tracking-wide hover:bg-stone-700 transition-colors hover-lift">
+                        IN DEN WARENKORB
+                    </button>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="flex items-center justify-center space-x-2 py-3 border border-stone-300 rounded hover:bg-stone-50 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            </svg>
+                            <span class="text-sm">Merkliste</span>
+                        </button>
+                        <button class="flex items-center justify-center space-x-2 py-3 border border-stone-300 rounded hover:bg-stone-50 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+                            </svg>
+                            <span class="text-sm">Teilen</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product Features -->
+                <div class="space-y-4 pt-8 border-t border-stone-200">
+                    <div class="flex items-center space-x-3">
+                        <svg class="h-5 w-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                        <span class="text-sm text-stone-600">Handgefertigt in Österreich</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <svg class="h-5 w-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="text-sm text-stone-600">30 Tage Rückgaberecht</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <svg class="h-5 w-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span class="text-sm text-stone-600">Kostenloser Versand ab € 150</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details Tabs -->
+        <div class="mt-16">
+            <div class="border-b border-stone-200">
+                <nav class="flex space-x-8">
+                    <button class="tab-button py-4 text-sm font-medium border-b-2 border-transparent hover:text-stone-800 transition-colors active" onclick="showTab('description')">
+                        Beschreibung
+                    </button>
+                    <button class="tab-button py-4 text-sm font-medium border-b-2 border-transparent hover:text-stone-800 transition-colors" onclick="showTab('materials')">
+                        Material & Pflege
+                    </button>
+                    <button class="tab-button py-4 text-sm font-medium border-b-2 border-transparent hover:text-stone-800 transition-colors" onclick="showTab('sizing')">
+                        Größen & Passform
+                    </button>
+                    <button class="tab-button py-4 text-sm font-medium border-b-2 border-transparent hover:text-stone-800 transition-colors" onclick="showTab('reviews')">
+                        Bewertungen (24)
+                    </button>
+                </nav>
+            </div>
+
+            <div class="py-8">
+                <!-- Description Tab -->
+                <div id="description" class="tab-content active">
+                    <div class="max-w-4xl space-y-6">
+                        <h3 class="text-xl font-medium text-stone-800">Produktbeschreibung</h3>
+                        <div class="prose prose-stone max-w-none">
+                            <p>
+                                Unser klassischer Cashmere-Pullover verkörpert zeitlose Eleganz und unvergleichlichen Komfort. 
+                                Gefertigt aus 100% mongolischem Kaschmir der höchsten Qualität, bietet er eine luxuriöse Haptik 
+                                und außergewöhnliche Wärme bei minimalem Gewicht.
+                            </p>
+                            <p>
+                                Das zeitlose Design mit seinem klassischen Rundhalsausschnitt macht ihn zum perfekten Begleiter 
+                                für jede Gelegenheit - vom Business-Meeting bis zum entspannten Wochenende. Die sorgfältige 
+                                Handarbeit unserer erfahrenen Stricker garantiert eine perfekte Passform und Langlebigkeit.
+                            </p>
+                            <h4>Besondere Eigenschaften:</h4>
+                            <ul>
+                                <li>100% mongolisches Kaschmir (Grad A)</li>
+                                <li>Handgestrickt in unserer Manufaktur</li>
+                                <li>Klassischer Rundhalsausschnitt</li>
+                                <li>Zeitloses, vielseitiges Design</li>
+                                <li>Verfügbar in 5 eleganten Farben</li>
+                                <li>Größen 36-50 verfügbar</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materials Tab -->
+                <div id="materials" class="tab-content">
+                    <div class="max-w-4xl space-y-6">
+                        <h3 class="text-xl font-medium text-stone-800">Material & Pflege</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="font-medium text-stone-800 mb-4">Materialzusammensetzung</h4>
+                                <ul class="space-y-2 text-stone-600">
+                                    <li>• 100% Kaschmir (mongolisch, Grad A)</li>
+                                    <li>• Garnstärke: 2/28 Nm</li>
+                                    <li>• Gewicht: ca. 280g (Größe 40)</li>
+                                    <li>• Maschenart: Rechts-Links gestrickt</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-stone-800 mb-4">Pflegehinweise</h4>
+                                <ul class="space-y-2 text-stone-600">
+                                    <li>• Handwäsche bei 30°C empfohlen</li>
+                                    <li>• Spezialwaschmittel für Kaschmir verwenden</li>
+                                    <li>• Liegend trocknen, nicht aufhängen</li>
+                                    <li>• Bei Bedarf professionelle Reinigung</li>
+                                    <li>• Nicht im Trockner trocknen</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sizing Tab -->
+                <div id="sizing" class="tab-content">
+                    <div class="max-w-4xl space-y-6">
+                        <h3 class="text-xl font-medium text-stone-800">Größen & Passform</h3>
+                        <div class="space-y-6">
+                            <p class="text-stone-600">
+                                Unser Cashmere-Pullover hat eine normale, entspannte Passform. 
+                                Für eine figurbetonte Silhouette empfehlen wir eine Nummer kleiner zu wählen.
+                            </p>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse border border-stone-300">
+                                    <thead>
+                                        <tr class="bg-stone-100">
+                                            <th class="border border-stone-300 px-4 py-2 text-left">Größe</th>
+                                            <th class="border border-stone-300 px-4 py-2 text-left">Brustumfang (cm)</th>
+                                            <th class="border border-stone-300 px-4 py-2 text-left">Länge (cm)</th>
+                                            <th class="border border-stone-300 px-4 py-2 text-left">Ärmel (cm)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-stone-300 px-4 py-2">36</td>
+                                            <td class="border border-stone-300 px-4 py-2">88</td>
+                                            <td class="border border-stone-300 px-4 py-2">58</td>
+                                            <td class="border border-stone-300 px-4 py-2">58</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-stone-300 px-4 py-2">38</td>
+                                            <td class="border border-stone-300 px-4 py-2">92</td>
+                                            <td class="border border-stone-300 px-4 py-2">59</td>
+                                            <td class="border border-stone-300 px-4 py-2">59</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-stone-300 px-4 py-2">40</td>
+                                            <td class="border border-stone-300 px-4 py-2">96</td>
+                                            <td class="border border-stone-300 px-4 py-2">60</td>
+                                            <td class="border border-stone-300 px-4 py-2">60</td>
+                                        </tr>
+                                        <!-- More sizes... -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Tab -->
+                <div id="reviews" class="tab-content">
+                    <div class="max-w-4xl space-y-8">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-medium text-stone-800">Kundenbewertungen</h3>
+                            <button class="bg-stone-800 text-white px-4 py-2 text-sm rounded hover:bg-stone-700 transition-colors">
+                                Bewertung schreiben
+                            </button>
+                        </div>
+                        
+                        <!-- Rating Summary -->
+                        <div class="bg-stone-50 p-6 rounded-lg">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="text-center">
+                                    <div class="text-4xl font-bold text-stone-800 mb-2">4.8</div>
+                                    <div class="flex justify-center star-rating mb-2">
+                                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="text-sm text-stone-600">Basierend auf 24 Bewertungen</div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm w-8">5★</span>
+                                        <div class="flex-1 h-2 bg-stone-200 rounded-full">
+                                            <div class="h-2 bg-yellow-400 rounded-full progress-bar" style="--width: 75%"></div>
+                                        </div>
+                                        <span class="text-sm text-stone-600 w-8">18</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm w-8">4★</span>
+                                        <div class="flex-1 h-2 bg-stone-200 rounded-full">
+                                            <div class="h-2 bg-yellow-400 rounded-full progress-bar" style="--width: 20%"></div>
+                                        </div>
+                                        <span class="text-sm text-stone-600 w-8">5</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm w-8">3★</span>
+                                        <div class="flex-1 h-2 bg-stone-200 rounded-full">
+                                            <div class="h-2 bg-yellow-400 rounded-full progress-bar" style="--width: 4%"></div>
+                                        </div>
+                                        <span class="text-sm text-stone-600 w-8">1</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm w-8">2★</span>
+                                        <div class="flex-1 h-2 bg-stone-200 rounded-full">
+                                            <div class="h-2 bg-yellow-400 rounded-full progress-bar" style="--width: 0%"></div>
+                                        </div>
+                                        <span class="text-sm text-stone-600 w-8">0</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm w-8">1★</span>
+                                        <div class="flex-1 h-2 bg-stone-200 rounded-full">
+                                            <div class="h-2 bg-yellow-400 rounded-full progress-bar" style="--width: 0%"></div>
+                                        </div>
+                                        <span class="text-sm text-stone-600 w-8">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Individual Reviews -->
+                        <div class="space-y-6">
+                            <div class="border-b border-stone-200 pb-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <div class="font-medium text-stone-800">Maria K.</div>
+                                        <div class="flex star-rating text-sm">
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-stone-500">vor 2 Wochen</div>
+                                </div>
+                                <p class="text-stone-600">
+                                    Absolut fantastische Qualität! Der Pullover ist unglaublich weich und warm. 
+                                    Die Verarbeitung ist tadellos und man merkt die Handarbeit. Definitiv jeden Euro wert.
+                                </p>
+                            </div>
+                            
+                            <div class="border-b border-stone-200 pb-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <div class="font-medium text-stone-800">Thomas S.</div>
+                                        <div class="flex star-rating text-sm">
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-stone-500">vor 1 Monat</div>
+                                </div>
+                                <p class="text-stone-600">
+                                    Perfekte Passform und sehr angenehm zu tragen. Als Geschenk für meine Frau gekauft - 
+                                    sie ist begeistert! Schnelle Lieferung und schöne Verpackung.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <div class="mt-16">
+            <h2 class="font-serif text-2xl md:text-3xl font-medium text-stone-800 mb-8 text-center">
+                Das könnte Ihnen auch gefallen
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Related Product 1 -->
+                <div class="group cursor-pointer hover-lift bg-white rounded-lg overflow-hidden shadow-sm border border-stone-200">
+                    <div class="relative">
+                        <div class="aspect-[3/4] product-image"></div>
+                        <div class="absolute top-4 right-4">
+                            <button class="bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors">
+                                <svg class="h-4 w-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-medium text-stone-800 mb-2">Merino Cardigan Elegant</h3>
+                        <p class="text-sm text-stone-600 mb-2">Feinste Merinowolle</p>
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-stone-800">€ 245</span>
+                            <div class="flex space-x-1">
+                                <div class="w-3 h-3 rounded-full bg-stone-600 border border-stone-300"></div>
+                                <div class="w-3 h-3 rounded-full bg-red-800 border border-stone-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- More related products... -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let quantity = 1;
+        let selectedSize = '';
+        let selectedColor = 'Schwarz';
+
+        function selectColor(color, element) {
+            // Remove selected class from all color options
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Update selected color text
+            document.getElementById('selectedColor').textContent = color;
+            selectedColor = color;
+        }
+
+        function selectSize(size, element) {
+            // Remove selected class from all size options
+            document.querySelectorAll('.size-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Update selected size text
+            document.getElementById('selectedSize').textContent = size;
+            selectedSize = size;
+        }
+
+        function changeQuantity(delta) {
+            quantity = Math.max(1, quantity + delta);
+            document.getElementById('quantity').textContent = quantity;
+        }
+
+        function changeMainImage(imageNumber) {
+            // Update main image (placeholder functionality)
+            console.log('Changing to image', imageNumber);
+            
+            // Update thumbnail borders
+            document.querySelectorAll('.thumbnail-image').forEach((thumb, index) => {
+                if (index === imageNumber - 1) {
+                    thumb.classList.remove('border-stone-200');
+                    thumb.classList.add('border-stone-800');
+                } else {
+                    thumb.classList.remove('border-stone-800');
+                    thumb.classList.add('border-stone-200');
+                }
+            });
+        }
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab button
+            event.target.classList.add('active');
+        }
+
+        // Add scroll-triggered animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.hover-lift').forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
+

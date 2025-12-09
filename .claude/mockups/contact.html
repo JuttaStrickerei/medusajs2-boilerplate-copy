@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontakt - Strickerei Jutta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            400: '#a8a29e',
+                            500: '#78716c',
+                            600: '#57534e',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #fafaf9;
+        }
+        
+        .map-placeholder {
+            background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.2)), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400"><rect fill="%23f5f5f4" width="600" height="400"/><text x="300" y="200" text-anchor="middle" font-family="serif" font-size="18" fill="%23a8a29e">Karte - Draßburg, Österreich</text></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .store-image {
+            background: linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.1)), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="%23f5f5f4" width="400" height="300"/><text x="200" y="150" text-anchor="middle" font-family="serif" font-size="16" fill="%23a8a29e">Strickerei Jutta</text></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: #57534e;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: #57534e;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .contact-card {
+            transition: all 0.3s ease;
+        }
+        
+        .contact-card:hover {
+            border-color: #292524;
+            background-color: #f5f5f4;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #292524;
+            box-shadow: 0 0 0 3px rgba(41, 37, 36, 0.1);
+        }
+        
+        .opening-hours {
+            background: linear-gradient(135deg, #f5f5f4, #e7e5e4);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+    <!-- Navigation -->
+    <nav class="bg-white/95 backdrop-blur-sm border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-between h-16">
+                <!-- Left Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="nav-link text-sm font-medium text-stone-600">Kollektionen</a>
+                    <a href="#" class="nav-link text-sm font-medium text-stone-600">Damen</a>
+                    <a href="#" class="nav-link text-sm font-medium text-stone-600">Über uns</a>
+                </div>
+                
+                <!-- Center Logo -->
+                <div class="flex items-center">
+                    <a href="#" class="text-center">
+                        <div class="font-serif text-xl font-medium text-stone-800">Strickerei Jutta</div>
+                        <div class="text-xs text-stone-500 tracking-wider">SEIT 1965</div>
+                    </a>
+                </div>
+                
+                <!-- Right Navigation -->
+                <div class="flex items-center space-x-6">
+                    <button class="text-stone-600 hover:text-stone-800 transition-colors">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                    <button class="text-stone-600 hover:text-stone-800 transition-colors relative">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        <span class="absolute -top-2 -right-2 bg-stone-800 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                    </button>
+                    <a href="#" class="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors">Konto</a>
+                    <button class="text-stone-600 hover:text-stone-800 transition-colors relative">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"/>
+                        </svg>
+                        <span class="absolute -top-2 -right-2 bg-stone-800 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-6 py-3">
+            <nav class="flex text-sm text-stone-500">
+                <a href="#" class="hover:text-stone-800 transition-colors">Home</a>
+                <span class="mx-2">/</span>
+                <span class="text-stone-800">Kontakt</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <h1 class="font-serif text-4xl md:text-5xl font-medium text-stone-800 mb-6 fade-in">
+                Kontaktieren Sie uns
+            </h1>
+            <p class="text-xl text-stone-600 max-w-2xl mx-auto fade-in stagger-1">
+                Wir freuen uns auf Ihre Nachricht und stehen Ihnen gerne für alle Fragen 
+                rund um unsere Produkte und Services zur Verfügung.
+            </p>
+        </div>
+    </section>
+
+    <!-- Contact Methods -->
+    <section class="py-16 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Phone -->
+                <div class="contact-card bg-white rounded-lg p-8 text-center border border-stone-200 hover-lift fade-in stagger-1">
+                    <div class="w-16 h-16 bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif text-xl font-medium text-stone-800 mb-4">Telefon</h3>
+                    <p class="text-stone-600 mb-4">
+                        Rufen Sie uns an für eine persönliche Beratung
+                    </p>
+                    <div class="space-y-2">
+                        <div class="font-medium text-stone-800">+43 2687 12345</div>
+                        <div class="text-sm text-stone-600">Mo-Fr: 9:00-17:00 Uhr</div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="contact-card bg-white rounded-lg p-8 text-center border border-stone-200 hover-lift fade-in stagger-2">
+                    <div class="w-16 h-16 bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif text-xl font-medium text-stone-800 mb-4">E-Mail</h3>
+                    <p class="text-stone-600 mb-4">
+                        Schreiben Sie uns eine Nachricht
+                    </p>
+                    <div class="space-y-2">
+                        <div class="font-medium text-stone-800"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1e777078715e6d6a6c777d757b6c7b7733746b6a6a7f307f6a">[email&#160;protected]</a></div>
+                        <div class="text-sm text-stone-600">Antwort innerhalb von 24h</div>
+                    </div>
+                </div>
+
+                <!-- Visit -->
+                <div class="contact-card bg-white rounded-lg p-8 text-center border border-stone-200 hover-lift fade-in stagger-3">
+                    <div class="w-16 h-16 bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif text-xl font-medium text-stone-800 mb-4">Besuchen Sie uns</h3>
+                    <p class="text-stone-600 mb-4">
+                        Erleben Sie unsere Produkte vor Ort
+                    </p>
+                    <div class="space-y-2">
+                        <div class="font-medium text-stone-800">Hauptstraße 42</div>
+                        <div class="font-medium text-stone-800">7021 Draßburg</div>
+                        <div class="text-sm text-stone-600">Nach Terminvereinbarung</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form & Info -->
+    <section class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Contact Form -->
+                <div class="fade-in">
+                    <h2 class="font-serif text-3xl font-medium text-stone-800 mb-6">
+                        Nachricht senden
+                    </h2>
+                    <form class="space-y-6" onsubmit="handleSubmit(event)">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-stone-800 mb-2">Vorname *</label>
+                                <input type="text" required class="form-input w-full px-4 py-3 border border-stone-300 rounded-lg transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-stone-800 mb-2">Nachname *</label>
+                                <input type="text" required class="form-input w-full px-4 py-3 border border-stone-300 rounded-lg transition-all">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-stone-800 mb-2">E-Mail-Adresse *</label>
+                            <input type="email" required class="form-input w-full px-4 py-3 border border-stone-300 rounded-lg transition-all">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-stone-800 mb-2">Telefonnummer</label>
+                            <input type="tel" class="form-input w-full px-4 py-3 border border-stone-300 rounded-lg transition-all">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-stone-800 mb-2">Betreff *</label>
+                            <select required class="form-input w-full px-4 py-3 border border-stone-300 rounded-lg transition-all">
+                                <option value="">Bitte wählen...</option>
+                                <option value="product">Produktanfrage</option>
+                                <option value="custom">Maßanfertigung</option>
+                                <option value="care">Pflegehinweise</option>
+                                <option value="return">Rückgabe/Umtausch</option>
+                                <option value="other">Sonstiges</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-stone-800 mb-2">Nachricht *</label>
+                            <textarea required rows="6" class="form-input w-full px-4 py-3 border border-stone-300 rounded-lg transition-all" placeholder="Teilen Sie uns Ihr Anliegen mit..."></textarea>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <input type="checkbox" id="privacy" required class="mt-1">
+                            <label for="privacy" class="text-sm text-stone-600">
+                                Ich stimme der Verarbeitung meiner Daten gemäß der 
+                                <a href="#" class="text-stone-800 underline hover:no-underline">Datenschutzerklärung</a> zu. *
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-stone-800 text-white py-4 rounded-lg font-medium hover:bg-stone-700 transition-colors hover-lift">
+                            Nachricht senden
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Store Information -->
+                <div class="space-y-8 fade-in stagger-1">
+                    <!-- Store Image -->
+                    <div class="store-image aspect-[4/3] rounded-lg"></div>
+                    
+                    <!-- Opening Hours -->
+                    <div class="opening-hours rounded-lg p-6">
+                        <h3 class="font-serif text-xl font-medium text-stone-800 mb-4">Öffnungszeiten</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-stone-600">Montag - Freitag</span>
+                                <span class="font-medium text-stone-800">9:00 - 17:00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-stone-600">Samstag</span>
+                                <span class="font-medium text-stone-800">9:00 - 13:00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-stone-600">Sonntag</span>
+                                <span class="font-medium text-stone-800">Geschlossen</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-stone-300">
+                            <p class="text-sm text-stone-600">
+                                <strong>Hinweis:</strong> Besuche nach Terminvereinbarung möglich. 
+                                Rufen Sie uns gerne an!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Details -->
+                    <div class="bg-white rounded-lg p-6 border border-stone-200">
+                        <h3 class="font-serif text-xl font-medium text-stone-800 mb-4">Kontaktdaten</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <svg class="h-5 w-5 text-stone-600 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <div>
+                                    <div class="font-medium text-stone-800">Strickerei Jutta</div>
+                                    <div class="text-stone-600">Hauptstraße 42</div>
+                                    <div class="text-stone-600">7021 Draßburg, Österreich</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <svg class="h-5 w-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                                <div>
+                                    <div class="font-medium text-stone-800">+43 2687 12345</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <svg class="h-5 w-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <div>
+                                    <div class="font-medium text-stone-800"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1f767179705f6c6b6d767c747a6d7a7632756a6b6b7e317e6b">[email&#160;protected]</a></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <svg class="h-5 w-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"/>
+                                </svg>
+                                <div>
+                                    <div class="font-medium text-stone-800">www.strickerei-jutta.at</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="py-16 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="font-serif text-3xl font-medium text-stone-800 mb-4 fade-in">
+                    So finden Sie uns
+                </h2>
+                <p class="text-lg text-stone-600 fade-in stagger-1">
+                    Besuchen Sie uns in unserer Manufaktur in Draßburg
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Map -->
+                <div class="lg:col-span-2">
+                    <div class="map-placeholder aspect-[16/10] rounded-lg fade-in"></div>
+                </div>
+                
+                <!-- Directions -->
+                <div class="space-y-6 fade-in stagger-1">
+                    <div class="bg-white rounded-lg p-6 border border-stone-200">
+                        <h3 class="font-medium text-stone-800 mb-4">Anfahrt mit dem Auto</h3>
+                        <div class="text-sm text-stone-600 space-y-2">
+                            <p>• A4 Richtung Neusiedl am See</p>
+                            <p>• Ausfahrt Draßburg</p>
+                            <p>• 2 km Richtung Ortszentrum</p>
+                            <p>• Kostenlose Parkplätze vorhanden</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 border border-stone-200">
+                        <h3 class="font-medium text-stone-800 mb-4">Öffentliche Verkehrsmittel</h3>
+                        <div class="text-sm text-stone-600 space-y-2">
+                            <p>• S-Bahn S30 bis Draßburg</p>
+                            <p>• 5 Minuten Fußweg vom Bahnhof</p>
+                            <p>• Bus 263 Haltestelle "Hauptstraße"</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-stone-800 text-white rounded-lg p-6">
+                        <h3 class="font-medium mb-4">Terminvereinbarung empfohlen</h3>
+                        <p class="text-sm opacity-90 mb-4">
+                            Für eine persönliche Beratung vereinbaren Sie gerne einen Termin mit uns.
+                        </p>
+                        <button class="bg-white text-stone-800 px-4 py-2 rounded text-sm font-medium hover:bg-stone-100 transition-colors">
+                            Termin vereinbaren
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="font-serif text-3xl font-medium text-stone-800 mb-4 fade-in">
+                    Häufige Fragen
+                </h2>
+                <p class="text-lg text-stone-600 fade-in stagger-1">
+                    Antworten auf die wichtigsten Fragen rund um unsere Produkte und Services
+                </p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-stone-50 rounded-lg p-6 fade-in stagger-1">
+                    <h3 class="font-medium text-stone-800 mb-3">Bieten Sie Maßanfertigungen an?</h3>
+                    <p class="text-stone-600">
+                        Ja, wir fertigen gerne individuelle Stücke nach Ihren Wünschen. 
+                        Kontaktieren Sie uns für ein persönliches Beratungsgespräch.
+                    </p>
+                </div>
+                
+                <div class="bg-stone-50 rounded-lg p-6 fade-in stagger-2">
+                    <h3 class="font-medium text-stone-800 mb-3">Wie lange dauert eine Maßanfertigung?</h3>
+                    <p class="text-stone-600">
+                        Je nach Komplexität des Stücks benötigen wir 4-8 Wochen für eine Maßanfertigung. 
+                        Genaue Termine besprechen wir gerne persönlich.
+                    </p>
+                </div>
+                
+                <div class="bg-stone-50 rounded-lg p-6 fade-in stagger-3">
+                    <h3 class="font-medium text-stone-800 mb-3">Welche Zahlungsmöglichkeiten gibt es?</h3>
+                    <p class="text-stone-600">
+                        Wir akzeptieren alle gängigen Kreditkarten, PayPal, Klarna und Banküberweisung. 
+                        Bei Maßanfertigungen ist eine Anzahlung von 50% erforderlich.
+                    </p>
+                </div>
+                
+                <div class="bg-stone-50 rounded-lg p-6 fade-in stagger-4">
+                    <h3 class="font-medium text-stone-800 mb-3">Versenden Sie auch international?</h3>
+                    <p class="text-stone-600">
+                        Ja, wir versenden in alle EU-Länder sowie in die Schweiz und nach Liechtenstein. 
+                        Für andere Länder kontaktieren Sie uns bitte direkt.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            // Show success message (in a real implementation, this would send the form data)
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            // Simple validation
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.style.borderColor = '#dc2626';
+                } else {
+                    field.style.borderColor = '#d6d3d1';
+                }
+            });
+            
+            if (isValid) {
+                alert('Vielen Dank für Ihre Nachricht! Wir werden uns schnellstmöglich bei Ihnen melden.');
+                form.reset();
+            } else {
+                alert('Bitte füllen Sie alle Pflichtfelder aus.');
+            }
+        }
+
+        // Add scroll-triggered animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry 
