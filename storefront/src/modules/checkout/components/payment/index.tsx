@@ -15,7 +15,6 @@ import {
 import { StripePaymentElementChangeEvent } from "@stripe/stripe-js"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext, useEffect, useState } from "react"
-import { useTranslations } from "next-intl"
 
 const Payment = ({
   cart,
@@ -24,7 +23,6 @@ const Payment = ({
   cart: any
   availablePaymentMethods: any[]
 }) => {
-  const t = useTranslations("checkout.payment")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [stripeComplete, setStripeComplete] = useState(false)
@@ -85,13 +83,13 @@ const Payment = ({
 
     try {
       if (!stripe || !elements) {
-        setError(t("paymentNotReady"))
+        setError("Payment is not ready")
         return
       }
 
       await elements.submit().catch((err) => {
         console.error(err)
-        setError(err.message || t("paymentError"))
+        setError(err.message || "Payment error")
         return
       })
 
@@ -112,7 +110,7 @@ const Payment = ({
       })
     } catch (err) {
       console.error("Failed to initialize Stripe session:", err)
-      setError(t("initPaymentError"))
+      setError("Failed to initialize payment")
     }
   }
 
@@ -139,7 +137,7 @@ const Payment = ({
             }
           )}
         >
-          {t("payment")}
+          Payment
           {!isOpen && paymentReady && <CheckCircleSolid />}
         </Heading>
         {!isOpen && paymentReady && (
@@ -149,7 +147,7 @@ const Payment = ({
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               data-testid="edit-payment-button"
             >
-              {t("edit")}
+              Edit
             </button>
           </Text>
         )}
@@ -171,13 +169,13 @@ const Payment = ({
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                {t("paymentMethod")}
+                Payment method
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                {t("giftCard")}
+                Gift card
               </Text>
             </div>
           )}
@@ -200,7 +198,7 @@ const Payment = ({
             }
             data-testid="submit-payment-button"
           >
-            {t("continueToReview")}
+            Continue to review
           </Button>
         </div>
 
@@ -209,7 +207,7 @@ const Payment = ({
             <div className="flex items-start gap-x-1 w-full">
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  {t("paymentMethod")}
+                  Payment method
                 </Text>
                 <Text
                   className="txt-medium text-ui-fg-subtle"
@@ -221,7 +219,7 @@ const Payment = ({
               </div>
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  {t("paymentDetails")}
+                  Payment details
                 </Text>
                 <div
                   className="flex gap-2 txt-medium text-ui-fg-subtle items-center"
@@ -232,20 +230,20 @@ const Payment = ({
                       <CreditCard />
                     )}
                   </Container>
-                  <Text>{t("anotherStep")}</Text>
+                  <Text>Another step will appear</Text>
                 </div>
               </div>
             </div>
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                {t("paymentMethod")}
+                Payment method
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                {t("giftCard")}
+                Gift card
               </Text>
             </div>
           ) : null}

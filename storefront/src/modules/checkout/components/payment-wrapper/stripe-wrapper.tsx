@@ -3,7 +3,6 @@
 import { Stripe, StripeElementsOptions } from "@stripe/stripe-js"
 import { Elements } from "@stripe/react-stripe-js"
 import { HttpTypes } from "@medusajs/types"
-import { useTranslations } from "next-intl"
 
 type StripeWrapperProps = {
   paymentSession: HttpTypes.StorePaymentSession
@@ -18,28 +17,24 @@ const StripeWrapper: React.FC<StripeWrapperProps> = ({
   stripePromise,
   children,
 }) => {
-  const t = useTranslations("checkout.stripeWrapper")
-  // Update the options to include payment_method_types
   const options: StripeElementsOptions = {
     clientSecret: paymentSession!.data?.client_secret as string | undefined,
     appearance: {
-      // Customize as needed
       theme: "stripe",
     },
-    // This allows the widget to show multiple payment methods
     loader: "auto",
   }
 
   if (!stripeKey) {
-    throw new Error(t("stripeKeyMissing"))
+    throw new Error("Stripe key is missing")
   }
 
   if (!stripePromise) {
-    throw new Error(t("stripePromiseMissing"))
+    throw new Error("Stripe promise is missing")
   }
 
   if (!paymentSession?.data?.client_secret) {
-    throw new Error(t("stripeClientSecretMissing"))
+    throw new Error("Stripe client secret is missing")
   }
 
   return (
