@@ -30,6 +30,7 @@
     "@medusajs/medusa": "latest",
     "@medusajs/notification-sendgrid": "latest",
     "@medusajs/payment-stripe": "latest",
+    "@medusajs/icons": "latest",
     "@medusajs/ui": "^4.0.19",
     "@medusajs/utils": "^2.9.0",
     "@medusajs/workflow-engine-redis": "latest",
