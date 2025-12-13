@@ -21,7 +21,7 @@ export const GET = async (
     // Get all providers
     const providers = await fulfillmentService.listFulfillmentProviders()
 
-    console.log("[ProviderAPI] All providers:", providers.map(p => ({ id: p.id, is_enabled: p.is_enabled })))
+    console.log("[ProviderAPI] All providers:", providers.map(p => ({ id: p.id })))
 
     // Use Query to get location with providers
     const query = req.scope.resolve("query")
@@ -43,7 +43,6 @@ export const GET = async (
       },
       all_providers: providers.map(p => ({
         id: p.id,
-        is_enabled: p.is_enabled,
       })),
     })
   } catch (error) {

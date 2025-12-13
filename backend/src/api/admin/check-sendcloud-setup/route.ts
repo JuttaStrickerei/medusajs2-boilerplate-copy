@@ -22,7 +22,7 @@ export const GET = async (
     const sendcloudProvider = providers.find(p => p.id.includes("sendcloud"))
 
     // 2. Check all stock locations
-    const locations = await stockLocationService.listStockLocations()
+    const locations = await stockLocationService.listStockLocations({})
 
     // 3. Check which locations have sendcloud linked
     const locationsWithProviders = await Promise.all(
@@ -42,7 +42,7 @@ export const GET = async (
 
     return res.json({
       sendcloud_provider: sendcloudProvider || null,
-      all_providers: providers.map(p => ({ id: p.id, is_enabled: p.is_enabled })),
+      all_providers: providers.map(p => ({ id: p.id })),
       stock_locations: locationsWithProviders,
       summary: {
         sendcloud_exists: !!sendcloudProvider,
