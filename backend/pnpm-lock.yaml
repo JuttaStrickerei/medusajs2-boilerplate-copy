@@ -26,6 +26,9 @@ importers:
       '@medusajs/framework':
         specifier: latest
         version: 2.9.0(@medusajs/cli@2.9.0(@mikro-orm/core@6.4.3)(@mikro-orm/knex@6.4.3(@mikro-orm/core@6.4.3)(pg@8.16.3))(@mikro-orm/migrations@6.4.3(@mikro-orm/core@6.4.3)(@types/node@20.19.11)(pg@8.16.3))(@mikro-orm/postgresql@6.4.3(@mikro-orm/core@6.4.3))(@types/node@20.19.11)(awilix@8.0.1)(ioredis@5.7.0)(pg@8.16.3)(vite@5.4.19(@types/node@20.19.11)))(@mikro-orm/cli@6.4.3(pg@8.16.3))(@mikro-orm/core@6.4.3)(@mikro-orm/knex@6.4.3(@mikro-orm/core@6.4.3)(pg@8.16.3))(@mikro-orm/migrations@6.4.3(@mikro-orm/core@6.4.3)(@types/node@20.19.11)(pg@8.16.3))(@mikro-orm/postgresql@6.4.3(@mikro-orm/core@6.4.3))(awilix@8.0.1)(ioredis@5.7.0)(pg@8.16.3)(vite@5.4.19(@types/node@20.19.11))
+      '@medusajs/icons':
+        specifier: latest
+        version: 2.12.2(react@18.3.1)
       '@medusajs/js-sdk':
         specifier: ^2.9.0
         version: 2.9.0(awilix@8.0.1)(ioredis@5.7.0)(vite@5.4.19(@types/node@20.19.11))
@@ -1464,6 +1467,11 @@ packages:
       '@mikro-orm/migrations': 6.4.3
       '@mikro-orm/postgresql': 6.4.3
       awilix: ^8.0.1
+
+  '@medusajs/icons@2.12.2':
+    resolution: {integrity: sha512-xFy/nIyYG8WmwJteUp+tE9cuB/qTBs4Vv5TIba7PqoJYD5EsoEHTmv4pfkz5TJO5OezAjxElwvifZB9bNvUsDw==}
+    peerDependencies:
+      react: ^18.3.1
 
   '@medusajs/icons@2.9.0':
     resolution: {integrity: sha512-qzFyX8f87WjLBFr23aly5F8hmN/camZ2oVcqmP1XBK4HqOWWxrPPjABePomQixwm7XGkfQHZf+B2rnyIyjwfKA==}
@@ -9423,6 +9431,10 @@ snapshots:
       '@mikro-orm/migrations': 6.4.3(@mikro-orm/core@6.4.3)(@types/node@20.19.11)(pg@8.16.3)
       '@mikro-orm/postgresql': 6.4.3(@mikro-orm/core@6.4.3)
       awilix: 8.0.1
+
+  '@medusajs/icons@2.12.2(react@18.3.1)':
+    dependencies:
+      react: 18.3.1
 
   '@medusajs/icons@2.9.0(react@18.3.1)':
     dependencies:
