@@ -1,4 +1,20 @@
 // src/modules/sendcloud/types.ts
+export type SendcloudOptions = {
+  public_key: string
+  secret_key: string
+  brand_domain?: string;
+  return_address?: {
+    name: string;
+    company_name?: string;
+    address: string;
+    house_number: string;
+    city: string;
+    postal_code: string;
+    country: string;
+    email?: string;
+    telephone?: string;
+  };
+}
 
 // Price and Currency Types
 export type SendcloudPriceBreakdown = {
@@ -59,6 +75,7 @@ export type SendcloudParcelResponse = {
   email?: string
   status: SendcloudParcelStatus
   tracking_number?: string
+  tracking_url?: string
   label?: SendcloudLabel
   weight: string
   carrier: {
@@ -75,6 +92,24 @@ export type SendcloudParcelResponse = {
   }
   order_number?: string
   colli_uuid?: string
+}
+
+/**
+ * Parcel item structure for Sendcloud
+ * See: https://api.sendcloud.dev/docs/sendcloud-public-api/parcels/operations/create-a-parcel
+ */
+export interface SendcloudParcelItem {
+  description: string;
+  quantity: number;
+  weight: string;           // Weight in KG (e.g., "0.500")
+  sku?: string;             // Stock Keeping Unit
+  value: string;            // Price per item (e.g., "10.00")
+  hs_code?: string;         // Harmonized System code for customs
+  origin_country?: string;  // Country of origin (ISO 2)
+  product_id?: string;      // External product ID
+  product_url?: string;     // URL to product page or image
+  mid_code?: string;        // Manufacturer ID code
+  properties?: Record<string, string>; // Custom properties
 }
 
 export type SendcloudCreateParcelRequest = {
@@ -94,6 +129,20 @@ export type SendcloudCreateParcelRequest = {
     weight: string
     order_number?: string
     request_label: boolean
+    is_return?: boolean
+    parcel_items?: SendcloudParcelItem[]
+    
+    // Return-spezifische Felder (from_* = Absender bei Retouren)
+    from_name?: string
+    from_company_name?: string
+    from_address_1?: string
+    from_address_2?: string
+    from_house_number?: string
+    from_city?: string
+    from_postal_code?: string
+    from_country?: string
+    from_email?: string
+    from_telephone?: string
   }
 }
 
