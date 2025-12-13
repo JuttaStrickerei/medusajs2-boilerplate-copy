@@ -1,30 +1,69 @@
-import { Heading } from "@medusajs/ui"
-
 import ItemsPreviewTemplate from "@modules/cart/templates/preview"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import CartTotals from "@modules/common/components/cart-totals"
-import Divider from "@modules/common/components/divider"
-import { getTranslations } from "next-intl/server"
+import { Shield, Truck, RefreshCw } from "@components/icons"
 
-const CheckoutSummary = async ({ cart }: { cart: any }) => {
-  const t = await getTranslations("checkout.checkoutSummary")
+const CheckoutSummary = ({ cart }: { cart: any }) => {
   return (
-    <div className="sticky top-0 flex flex-col-reverse small:flex-col gap-y-8 py-8 small:py-0 ">
-      <div className="w-full bg-white flex flex-col">
-        <Divider className="my-6 small:hidden" />
-        <Heading
-          level="h2"
-          className="flex flex-row text-3xl-regular items-baseline"
-        >
-          {t("inYourCart")}
-        </Heading>
-        <Divider className="my-6" />
-        <CartTotals totals={cart} />
-        <ItemsPreviewTemplate items={cart?.items} />
-        <div className="my-6">
+    <div className="space-y-6">
+      {/* Order Summary Card */}
+      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-stone-200 bg-stone-50">
+          <h2 className="font-serif text-lg font-medium text-stone-800">
+            Ihre Bestellung
+          </h2>
+          <p className="text-sm text-stone-500 mt-0.5">
+            {cart?.items?.length || 0} {cart?.items?.length === 1 ? "Artikel" : "Artikel"}
+          </p>
+        </div>
+
+        {/* Cart Items Preview */}
+        <div className="px-6 py-4 border-b border-stone-200">
+          <ItemsPreviewTemplate cart={cart} />
+        </div>
+
+        {/* Discount Code */}
+        <div className="px-6 py-4 border-b border-stone-200">
           <DiscountCode cart={cart} />
         </div>
+
+        {/* Totals */}
+        <div className="px-6 py-4">
+          <CartTotals 
+            totals={cart} 
+            taxIncluded={cart?.region?.automatic_taxes !== false}
+          />
+        </div>
       </div>
+
+      {/* Trust Badges */}
+      <div className="bg-white rounded-2xl border border-stone-200 p-4">
+        <div className="flex items-center justify-around text-center">
+          <TrustBadgeSmall icon={<Shield size={18} />} text="Sicher" />
+          <div className="w-px h-8 bg-stone-200" />
+          <TrustBadgeSmall icon={<Truck size={18} />} text="Schnell" />
+          <div className="w-px h-8 bg-stone-200" />
+          <TrustBadgeSmall icon={<RefreshCw size={18} />} text="30 Tage" />
+        </div>
+      </div>
+
+      {/* Help Text */}
+      <div className="text-center text-sm text-stone-500">
+        <p>Fragen zu Ihrer Bestellung?</p>
+        <a href="mailto:info@strickerei-jutta.at" className="text-stone-800 hover:underline">
+          info@strickerei-jutta.at
+        </a>
+      </div>
+    </div>
+  )
+}
+
+function TrustBadgeSmall({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-stone-400">{icon}</span>
+      <span className="text-xs text-stone-600">{text}</span>
     </div>
   )
 }

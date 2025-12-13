@@ -1,13 +1,11 @@
 "use client"
 
-import { Button, Heading } from "@medusajs/ui"
-
 import CartTotals from "@modules/common/components/cart-totals"
-import Divider from "@modules/common/components/divider"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
-import { useTranslations } from "next-intl"
+import { Button } from "@components/ui"
+import { ArrowRight, Shield, Lock } from "@components/icons"
 
 type SummaryProps = {
   cart: HttpTypes.StoreCart & {
@@ -27,22 +25,53 @@ function getCheckoutStep(cart: HttpTypes.StoreCart) {
 
 const Summary = ({ cart }: SummaryProps) => {
   const step = getCheckoutStep(cart)
-  const t = useTranslations("cart")
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <Heading level="h2" className="text-[2rem] leading-[2.75rem]">
-        {t("summary")}
-      </Heading>
-      <DiscountCode cart={cart} />
-      <Divider />
-      <CartTotals totals={cart} />
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="font-serif text-xl font-medium text-stone-800">
+          Zusammenfassung
+        </h2>
+      </div>
+
+      {/* Discount Code */}
+      <div>
+        <DiscountCode cart={cart} />
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-stone-200" />
+
+      {/* Totals */}
+      <CartTotals 
+        totals={cart} 
+        taxIncluded={cart.region?.automatic_taxes !== false}
+      />
+
+      {/* Checkout Button */}
       <LocalizedClientLink
         href={"/checkout?step=" + step}
         data-testid="checkout-button"
+        className="block"
       >
-        <Button className="w-full h-10">{t("goToCheckout")}</Button>
+        <Button className="w-full h-12 text-base">
+          Zur Kasse
+          <ArrowRight size={18} className="ml-2" />
+        </Button>
       </LocalizedClientLink>
+
+      {/* Security Note */}
+      <div className="flex items-center justify-center gap-4 pt-2">
+        <div className="flex items-center gap-1.5 text-xs text-stone-500">
+          <Lock size={14} />
+          <span>SSL-verschlüsselt</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-stone-500">
+          <Shield size={14} />
+          <span>Sicherer Checkout</span>
+        </div>
+      </div>
     </div>
   )
 }

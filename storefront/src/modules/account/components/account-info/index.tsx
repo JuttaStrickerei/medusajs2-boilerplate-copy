@@ -1,10 +1,11 @@
 import { Disclosure } from "@headlessui/react"
-import { Badge, Button, clx } from "@medusajs/ui"
+import { clx } from "@medusajs/ui"
 import { useEffect } from "react"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
 import { useFormStatus } from "react-dom"
-import { useTranslations } from "next-intl"
+import { Button, Badge } from "@components/ui"
+import { CheckCircle, XCircle } from "@components/icons"
 
 type AccountInfoProps = {
   label: string
@@ -15,13 +16,6 @@ type AccountInfoProps = {
   clearState: () => void
   children?: React.ReactNode
   'data-testid'?: string
-  // Optional translation keys to override defaults
-  translationKeys?: {
-    editButton?: string
-    cancelButton?: string
-    saveButton?: string
-    successMessage?: string
-  }
 }
 
 const AccountInfo = ({
@@ -30,28 +24,13 @@ const AccountInfo = ({
   isSuccess,
   isError,
   clearState,
-  errorMessage,
+  errorMessage = "Ein Fehler ist aufgetreten, bitte versuchen Sie es erneut",
   children,
-  'data-testid': dataTestid,
-  translationKeys
+  'data-testid': dataTestid
 }: AccountInfoProps) => {
   const { state, close, toggle } = useToggleState()
+
   const { pending } = useFormStatus()
-  const t = useTranslations('account') // Get translation function
-
-  // Default translation keys
-  const defaultTranslationKeys = {
-    editButton: "edit",
-    cancelButton: "cancel",
-    saveButton: "saveChanges",
-    successMessage: "updateSuccess"
-  }
-
-  // Merge default translation keys with any overrides provided
-  const translations = { ...defaultTranslationKeys, ...translationKeys }
-
-  // Set default error message after t is available
-  const finalErrorMessage = errorMessage || t("an_error_occurred")
 
   const handleToggle = () => {
     clearState()
@@ -65,30 +44,28 @@ const AccountInfo = ({
   }, [isSuccess, close])
 
   return (
-    <div className="text-small-regular" data-testid={dataTestid}>
-      <div className="flex items-end justify-between">
-        <div className="flex flex-col">
-          <span className="uppercase text-ui-fg-base">{label}</span>
-          <div className="flex items-center flex-1 basis-0 justify-end gap-x-4">
+    <div className="text-sm" data-testid={dataTestid}>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <span className="text-xs text-stone-500 uppercase tracking-wider">{label}</span>
+          <div className="mt-1">
             {typeof currentInfo === "string" ? (
-              <span className="font-semibold" data-testid="current-info">{currentInfo}</span>
+              <span className="font-medium text-stone-800" data-testid="current-info">{currentInfo}</span>
             ) : (
               currentInfo
             )}
           </div>
         </div>
-        <div>
-          <Button
-            variant="secondary"
-            className="w-[100px] min-h-[25px] py-1"
-            onClick={handleToggle}
-            type={state ? "reset" : "button"}
-            data-testid="edit-button"
-            data-active={state}
-          >
-            {state ? t(translations.cancelButton) : t(translations.editButton)}
-          </Button>
-        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleToggle}
+          type={state ? "reset" : "button"}
+          data-testid="edit-button"
+          data-active={state}
+        >
+          {state ? "Abbrechen" : "Bearbeiten"}
+        </Button>
       </div>
 
       {/* Success state */}
@@ -104,9 +81,10 @@ const AccountInfo = ({
           )}
           data-testid="success-message"
         >
-          <Badge className="p-2 my-4" color="green">
-            <span>{t(translations.successMessage, { label: label })}</span>
-          </Badge>
+          <div className="flex items-center gap-2 p-3 my-3 bg-green-50 border border-green-200 rounded-lg text-green-800">
+            <CheckCircle size={18} />
+            <span className="text-sm">{label} erfolgreich aktualisiert</span>
+          </div>
         </Disclosure.Panel>
       </Disclosure>
 
@@ -123,9 +101,10 @@ const AccountInfo = ({
           )}
           data-testid="error-message"
         >
-          <Badge className="p-2 my-4" color="red">
-            <span>{finalErrorMessage}</span>
-          </Badge>
+          <div className="flex items-center gap-2 p-3 my-3 bg-red-50 border border-red-200 rounded-lg text-red-800">
+            <XCircle size={18} />
+            <span className="text-sm">{errorMessage}</span>
+          </div>
         </Disclosure.Panel>
       </Disclosure>
 
@@ -140,16 +119,15 @@ const AccountInfo = ({
             }
           )}
         >
-          <div className="flex flex-col gap-y-2 py-4">
-            <div>{children}</div>
-            <div className="flex items-center justify-end mt-2">
+          <div className="pt-4 mt-4 border-t border-stone-200">
+            <div className="space-y-4">{children}</div>
+            <div className="flex items-center justify-end mt-4">
               <Button
                 isLoading={pending}
-                className="w-full small:max-w-[140px]"
                 type="submit"
                 data-testid="save-button"
               >
-                {t(translations.saveButton)}
+                Änderungen speichern
               </Button>
             </div>
           </div>

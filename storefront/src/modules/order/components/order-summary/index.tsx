@@ -1,17 +1,14 @@
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
-import { useTranslations } from "next-intl"
 
 type OrderSummaryProps = {
   order: HttpTypes.StoreOrder
 }
 
 const OrderSummary = ({ order }: OrderSummaryProps) => {
-  const t = useTranslations("order")
-
   const getAmount = (amount?: number | null) => {
-    if (!amount) {
-      return
+    if (!amount && amount !== 0) {
+      return "–"
     }
 
     return convertToLocale({
@@ -20,41 +17,69 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
     })
   }
 
+  // Calculate item total from individual items (more accurate with tax)
+  const itemsTotal = order.items?.reduce((acc, item) => acc + (item.total || 0), 0) || 0
+
   return (
-    <div>
-      <h2 className="text-base-semi">{t("orderSummary")}</h2>
-      <div className="text-small-regular text-ui-fg-base my-2">
-        <div className="flex items-center justify-between text-base-regular text-ui-fg-base mb-2">
-          <span>{t("subtotal")}</span>
-          <span>{getAmount(order.subtotal)}</span>
+    <div className="pt-6 border-t border-stone-200">
+      <h2 className="font-serif text-xl font-medium text-stone-800 mb-4">
+        Bestellübersicht
+      </h2>
+      
+      <div className="space-y-3 text-sm">
+        {/* Item Subtotal - use calculated items total for clarity */}
+        <div className="flex items-center justify-between text-stone-600">
+          <span>Artikel</span>
+          <span>{getAmount(itemsTotal)}</span>
         </div>
-        <div className="flex flex-col gap-y-1">
-          {order.discount_total > 0 && (
-            <div className="flex items-center justify-between">
-              <span>{t("discount")}</span>
-              <span>- {getAmount(order.discount_total)}</span>
-            </div>
-          )}
-          {order.gift_card_total > 0 && (
-            <div className="flex items-center justify-between">
-              <span>{t("discount")}</span>
-              <span>- {getAmount(order.gift_card_total)}</span>
-            </div>
-          )}
+        
+        {/* Discounts */}
+        {order.discount_total > 0 && (
           <div className="flex items-center justify-between">
-            <span>{t("shipping")}</span>
-            <span>{getAmount(order.shipping_total)}</span>
+            <span className="text-stone-600">Rabatt</span>
+            <span className="text-green-600 font-medium">
+              −{getAmount(order.discount_total)}
+            </span>
           </div>
+        )}
+        
+        {/* Gift Cards */}
+        {order.gift_card_total > 0 && (
           <div className="flex items-center justify-between">
-            <span>{t("taxes")}</span>
-            <span>{getAmount(order.tax_total)}</span>
+            <span className="text-stone-600">Geschenkkarte</span>
+            <span className="text-green-600 font-medium">
+              −{getAmount(order.gift_card_total)}
+            </span>
           </div>
+        )}
+        
+        {/* Shipping */}
+        <div className="flex items-center justify-between text-stone-600">
+          <span>Versand</span>
+          <span>{getAmount(order.shipping_total)}</span>
         </div>
-        <div className="h-px w-full border-b border-gray-200 border-dashed my-4" />
-        <div className="flex items-center justify-between text-base-regular text-ui-fg-base mb-2">
-          <span>{t("total")}</span>
-          <span>{getAmount(order.total)}</span>
+        
+        {/* Tax breakdown - show as "davon MwSt." */}
+        <div className="flex items-center justify-between text-stone-500 text-xs pt-1">
+          <span>davon MwSt. (20%)</span>
+          <span>{getAmount(order.tax_total)}</span>
         </div>
+        
+        {/* Divider */}
+        <div className="border-t border-stone-200 pt-3 mt-3" />
+        
+        {/* Total */}
+        <div className="flex items-center justify-between">
+          <span className="font-medium text-stone-800">Gesamt</span>
+          <span className="text-lg font-semibold text-stone-800">
+            {getAmount(order.total)}
+          </span>
+        </div>
+        
+        {/* Tax note */}
+        <p className="text-xs text-stone-500">
+          inkl. MwSt.
+        </p>
       </div>
     </div>
   )

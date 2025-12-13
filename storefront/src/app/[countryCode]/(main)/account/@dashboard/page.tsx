@@ -2,23 +2,16 @@ import { Metadata } from "next"
 
 import Overview from "@modules/account/components/overview"
 import { notFound } from "next/navigation"
-import { getCustomer } from "@lib/data/customer"
+import { retrieveCustomer } from "@lib/data/customer"
 import { listOrders } from "@lib/data/orders"
 
-import { getTranslations } from "next-intl/server"
-
-export async function generateMetadata() {
-  const t = await getTranslations("account");
-  
-  return {
-    title: t("title"),
-    description: t("overview"),
-  }
-  
+export const metadata: Metadata = {
+  title: "Account",
+  description: "Overview of your account activity.",
 }
 
 export default async function OverviewTemplate() {
-  const customer = await getCustomer().catch(() => null)
+  const customer = await retrieveCustomer().catch(() => null)
   const orders = (await listOrders().catch(() => null)) || null
 
   if (!customer) {

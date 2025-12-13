@@ -11,7 +11,6 @@ import {
 } from "react"
 
 import ChevronDown from "@modules/common/icons/chevron-down"
-import { useTranslations } from "next-intl"
 
 type NativeSelectProps = {
   placeholder?: string
@@ -20,11 +19,9 @@ type NativeSelectProps = {
 } & Omit<SelectHTMLAttributes<HTMLSelectElement>, "size">
 
 const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
-  ({ placeholder, className, children, ...props }, ref) => {
+  ({ placeholder = "Select...", className, children, ...props }, ref) => {
     const innerRef = useRef<HTMLSelectElement>(null)
     const [isPlaceholder, setIsPlaceholder] = useState(false)
-    const t = useTranslations("cart")
-    const customPlaceholder = placeholder || t("select")
 
     useImperativeHandle<HTMLSelectElement | null, HTMLSelectElement | null>(
       ref,
@@ -58,7 +55,7 @@ const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
             className="appearance-none bg-transparent border-none px-4 transition-colors duration-150 focus:border-gray-700 outline-none w-16 h-16 items-center justify-center"
           >
             <option disabled value="">
-              {customPlaceholder}
+              {placeholder}
             </option>
             {children}
           </select>

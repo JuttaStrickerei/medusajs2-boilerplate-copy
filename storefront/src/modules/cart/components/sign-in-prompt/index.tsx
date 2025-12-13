@@ -1,28 +1,25 @@
-import { Button, Heading, Text } from "@medusajs/ui"
-import { useTranslations } from "next-intl"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { Button } from "@components/ui"
+import { User } from "@components/icons"
 
 const SignInPrompt = () => {
-  const t = useTranslations("cart")
-
   return (
-    <div className="bg-white flex items-center justify-between">
-      <div>
-        <Heading level="h2" className="txt-xlarge">
-          {t("alreadyHaveAccount")}
-        </Heading>
-        <Text className="txt-medium text-ui-fg-subtle mt-2">
-          {t("signInForBetterExperience")}
-        </Text>
-      </div>
-      <div>
+    <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center flex-shrink-0">
+          <User size={24} className="text-stone-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-stone-800">
+            Sie haben bereits ein Konto?
+          </h3>
+          <p className="text-sm text-stone-500 mt-0.5">
+            Melden Sie sich an für ein besseres Einkaufserlebnis
+          </p>
+        </div>
         <LocalizedClientLink href="/account">
-          <Button
-            variant="secondary"
-            className="h-10"
-            data-testid="sign-in-button"
-          >
-            {t("signIn")}
+          <Button variant="secondary" data-testid="sign-in-button">
+            Anmelden
           </Button>
         </LocalizedClientLink>
       </div>

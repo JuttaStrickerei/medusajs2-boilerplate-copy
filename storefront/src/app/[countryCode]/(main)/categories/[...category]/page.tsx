@@ -1,25 +1,18 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
-import { StoreProductCategory, StoreRegion } from "@medusajs/types"
+import { StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 type Props = {
-  params: { category: string[]; countryCode: string }
-  searchParams: {
+  params: Promise<{ category: string[]; countryCode: string }>
+  searchParams: Promise<{
     sortBy?: SortOptions
     page?: string
-    // Filter params
-    color?: string
-    size?: string
-    material?: string
-    price?: string
-    [key: string]: string | undefined
-  }
+  }>
 }
 
 export async function generateStaticParams() {
@@ -49,24 +42,17 @@ export async function generateStaticParams() {
   return staticParams
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const t = await getTranslations("app")
-
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
   try {
-    const { product_categories } = await getCategoryByHandle(
-      params.category
-    )
+    const productCategory = await getCategoryByHandle(params.category)
 
-    const title = product_categories
-      .map((category: StoreProductCategory) => category.name)
-      .join(" | ")
+    const title = productCategory.name + " | Medusa Store"
 
-    const description =
-      product_categories[product_categories.length - 1].description ??
-      `${title}${t("category")}`
+    const description = productCategory.description ?? `${title} category.`
 
     return {
-      title: `${title}${t("medusa_store")}`,
+      title: `${title} | Medusa Store`,
       description,
       alternates: {
         canonical: `${params.category.join("/")}`,
@@ -77,24 +63,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function CategoryPage({ params, searchParams }: Props) {
-  const { sortBy, page, ...filters } = searchParams
+export default async function CategoryPage(props: Props) {
+  const searchParams = await props.searchParams
+  const params = await props.params
+  const { sortBy, page } = searchParams
 
-  const { product_categories } = await getCategoryByHandle(
-    params.category
-  )
+  const productCategory = await getCategoryByHandle(params.category)
 
-  if (!product_categories) {
+  if (!productCategory) {
     notFound()
   }
 
   return (
     <CategoryTemplate
-      categories={product_categories}
+      category={productCategory}
       sortBy={sortBy}
       page={page}
       countryCode={params.countryCode}
-      filters={filters}
     />
   )
 }

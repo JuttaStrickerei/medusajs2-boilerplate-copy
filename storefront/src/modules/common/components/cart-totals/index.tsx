@@ -1,9 +1,6 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
-import { InformationCircleSolid } from "@medusajs/icons"
-import { Tooltip } from "@medusajs/ui"
-import { useTranslations } from "next-intl"
 import React from "react"
 
 type CartTotalsProps = {
@@ -11,83 +8,128 @@ type CartTotalsProps = {
     total?: number | null
     subtotal?: number | null
     tax_total?: number | null
-    shipping_total?: number | null
-    discount_total?: number | null
-    gift_card_total?: number | null
     currency_code: string
+    item_subtotal?: number | null
+    item_total?: number | null
+    shipping_subtotal?: number | null
+    shipping_total?: number | null
+    discount_subtotal?: number | null
+    discount_total?: number | null
+    items?: Array<{ total?: number | null }>
   }
+  taxIncluded?: boolean
 }
 
-const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
+const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) => {
   const {
     currency_code,
     total,
-    subtotal,
     tax_total,
+    item_subtotal,
+    item_total,
+    shipping_subtotal,
     shipping_total,
+    discount_subtotal,
     discount_total,
-    gift_card_total,
+    items,
   } = totals
 
-  const t = useTranslations("cart")
+  // Helper function for consistent formatting
+  const formatAmount = (amount: number) => {
+    return convertToLocale({
+      amount,
+      currency_code,
+    })
+  }
+
+  // Calculate items total from individual items if available (most accurate with tax)
+  const calculatedItemsTotal = items?.reduce((acc, item) => acc + (item.total || 0), 0) || 0
   
+  // Use the calculated items total, or fall back to item_total/item_subtotal
+  const displayItemsSubtotal = calculatedItemsTotal || item_total || item_subtotal || 0
+  
+  // Use shipping_total if available (includes tax), otherwise shipping_subtotal
+  const displayShipping = shipping_total || shipping_subtotal || 0
+  
+  // Use discount_total if available, otherwise discount_subtotal
+  const displayDiscount = discount_total || discount_subtotal || 0
+
   return (
-    <div>
-      <div className="flex flex-col gap-y-2 txt-medium text-ui-fg-subtle ">
-        {!!discount_total && (
-          <div className="flex items-center justify-between">
-            <span>{t("discount")}</span>
-            <span
-              className="text-ui-fg-interactive"
-              data-testid="cart-discount"
-              data-value={discount_total || 0}
-            >
-              -{" "}
-              {convertToLocale({
-                amount: discount_total ?? 0,
-                currency_code,
-              })}
-            </span>
-          </div>
-        )}
-        <div className="flex items-center justify-between">
-         <span>{t("shipping")}</span>
-          <span
-            data-testid="cart-shipping"
-            data-value={shipping_total ?? "-"}
-          >
-            {/* Prüfe ob shipping_total vorhanden und nicht 0 ist */}
-            {shipping_total && shipping_total !== 0
-              ? convertToLocale({ amount: shipping_total, currency_code })
-              : "-"}
+    <div className="space-y-3">
+      {/* Line Items */}
+      <div className="space-y-2.5 text-sm">
+        {/* Subtotal - Items */}
+        <div className="flex items-center justify-between text-stone-600">
+          <span>Artikel</span>
+          <span data-testid="cart-subtotal" data-value={displayItemsSubtotal}>
+            {formatAmount(displayItemsSubtotal)}
           </span>
-        </div>  
-        {!!gift_card_total && (
+        </div>
+        
+        {/* Discount */}
+        {displayDiscount > 0 && (
           <div className="flex items-center justify-between">
-            <span>{t("giftCard")}</span>
+            <span className="text-stone-600">Rabatt</span>
             <span
-              className="text-ui-fg-interactive"
-              data-testid="cart-gift-card-amount"
-              data-value={gift_card_total || 0}
+              className="text-green-600 font-medium"
+              data-testid="cart-discount"
+              data-value={displayDiscount}
             >
-              -{" "}
-              {convertToLocale({ amount: gift_card_total ?? 0, currency_code })}
+              −{formatAmount(displayDiscount)}
+            </span>
+          </div>
+        )}
+        
+        {/* Shipping */}
+        <div className="flex items-center justify-between text-stone-600">
+          <span>Versand</span>
+          <span data-testid="cart-shipping" data-value={displayShipping}>
+            {displayShipping > 0
+              ? formatAmount(displayShipping)
+              : <span className="text-stone-400 italic">Wird berechnet</span>
+            }
+          </span>
+        </div>
+        
+        {/* Tax breakdown - only show if tax exists */}
+        {(tax_total ?? 0) > 0 && (
+          <div className="flex items-center justify-between text-stone-500 text-xs pt-1">
+            <span>davon MwSt. (20%)</span>
+            <span data-testid="cart-taxes" data-value={tax_total || 0}>
+              {formatAmount(tax_total ?? 0)}
             </span>
           </div>
         )}
       </div>
-      <div className="h-px w-full border-b border-gray-200 my-4" />
-      <div className="flex items-center justify-between text-ui-fg-base mb-2 txt-medium ">
-        <span>{t("total")}</span>
-        <span
-          className="txt-xlarge-plus"
-          data-testid="cart-total"
-          data-value={total || 0}
-        >
-          {convertToLocale({ amount: total ?? 0, currency_code })}
-        </span>
+
+      {/* Divider */}
+      <div className="border-t border-stone-200 pt-3" />
+
+      {/* Total */}
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-base font-semibold text-stone-800">Gesamt</span>
+        </div>
+        <div className="text-right">
+          <span
+            className="text-xl font-bold text-stone-800"
+            data-testid="cart-total"
+            data-value={total || 0}
+          >
+            {formatAmount(total ?? 0)}
+          </span>
+          <span className="text-xs text-stone-500 block">
+            inkl. MwSt.
+          </span>
+        </div>
       </div>
-      <div className="h-px w-full border-b border-gray-200 mt-4" />
+      
+      {/* Additional info */}
+      {!displayShipping && (
+        <p className="text-xs text-stone-400 italic">
+          Versandkosten werden im nächsten Schritt berechnet
+        </p>
+      )}
     </div>
   )
 }

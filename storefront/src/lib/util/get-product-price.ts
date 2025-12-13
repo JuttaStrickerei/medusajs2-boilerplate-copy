@@ -1,5 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
-import { getPercentageDiff } from "./get-precentage-diff"
+import { getPercentageDiff } from "./get-percentage-diff"
 import { convertToLocale } from "./money"
 
 export const getPricesForVariant = (variant: any) => {
@@ -7,23 +7,35 @@ export const getPricesForVariant = (variant: any) => {
     return null
   }
 
+  const calculatedPrice = variant.calculated_price
+  
+  // Use tax-inclusive price if available, otherwise fall back to base amount
+  // For B2C (Austrian shop), always display prices including VAT
+  const priceWithTax = calculatedPrice.calculated_amount_with_tax ?? calculatedPrice.calculated_amount
+  const originalPriceWithTax = calculatedPrice.original_amount_with_tax ?? calculatedPrice.original_amount
+
   return {
-    calculated_price_number: variant.calculated_price.calculated_amount,
+    // Use tax-inclusive prices for display
+    calculated_price_number: priceWithTax,
     calculated_price: convertToLocale({
-      amount: variant.calculated_price.calculated_amount,
-      currency_code: variant.calculated_price.currency_code,
+      amount: priceWithTax,
+      currency_code: calculatedPrice.currency_code,
     }),
-    original_price_number: variant.calculated_price.original_amount,
+    original_price_number: originalPriceWithTax,
     original_price: convertToLocale({
-      amount: variant.calculated_price.original_amount,
-      currency_code: variant.calculated_price.currency_code,
+      amount: originalPriceWithTax,
+      currency_code: calculatedPrice.currency_code,
     }),
-    currency_code: variant.calculated_price.currency_code,
-    price_type: variant.calculated_price.calculated_price.price_list_type,
+    currency_code: calculatedPrice.currency_code,
+    price_type: calculatedPrice.calculated_price?.price_list_type,
     percentage_diff: getPercentageDiff(
-      variant.calculated_price.original_amount,
-      variant.calculated_price.calculated_amount
+      originalPriceWithTax,
+      priceWithTax
     ),
+    // Keep raw values for calculations if needed
+    price_without_tax: calculatedPrice.calculated_amount,
+    original_price_without_tax: calculatedPrice.original_amount,
+    is_tax_inclusive: calculatedPrice.is_calculated_price_tax_inclusive ?? false,
   }
 }
 
@@ -46,10 +58,10 @@ export function getProductPrice({
     const cheapestVariant: any = product.variants
       .filter((v: any) => !!v.calculated_price)
       .sort((a: any, b: any) => {
-        return (
-          a.calculated_price.calculated_amount -
-          b.calculated_price.calculated_amount
-        )
+        // Sort by tax-inclusive price if available, otherwise use base amount
+        const priceA = a.calculated_price.calculated_amount_with_tax ?? a.calculated_price.calculated_amount
+        const priceB = b.calculated_price.calculated_amount_with_tax ?? b.calculated_price.calculated_amount
+        return priceA - priceB
       })[0]
 
     return getPricesForVariant(cheapestVariant)

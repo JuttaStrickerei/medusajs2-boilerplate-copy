@@ -1,42 +1,50 @@
-import { useFormState } from "react-dom"
-
+import { login } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
-import Input from "@modules/common/components/input"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
-import { login } from "@lib/data/customer"
-import { useTranslations } from "next-intl" // Already imported, good!
+import Input from "@modules/common/components/input"
+import { useActionState } from "react"
+import { User } from "@components/icons"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
 }
 
 const Login = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useFormState(login, null)
-  const t = useTranslations("account") // Already initialized, good!
+  const [message, formAction] = useActionState(login, null)
 
   return (
     <div
-      className="max-w-sm w-full flex flex-col items-center"
+      className="bg-white rounded-2xl border border-stone-200 shadow-sm p-8"
       data-testid="login-page"
     >
-      <h1 className="text-large-semi uppercase mb-6">{t("welcome_back")}</h1> {/* <--- ÜBERSETZT */}
-      <p className="text-center text-base-regular text-ui-fg-base mb-8">
-        {t("login_description")} {/* <--- ÜBERSETZT */}
-      </p>
-      <form className="w-full" action={formAction}>
-        <div className="flex flex-col w-full gap-y-2">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-4">
+          <User size={28} className="text-stone-600" />
+        </div>
+        <h1 className="font-serif text-2xl font-medium text-stone-800 mb-2">
+          Willkommen zurück
+        </h1>
+        <p className="text-stone-600">
+          Melden Sie sich an, um fortzufahren
+        </p>
+      </div>
+
+      {/* Form */}
+      <form className="space-y-4" action={formAction}>
+        <div className="space-y-4">
           <Input
-            label={t("email")} // <--- ÜBERSETZT (key reused from previous steps)
+            label="E-Mail Adresse"
             name="email"
             type="email"
-            title={t("email_input_title")} // <--- ÜBERSETZT
+            title="Geben Sie eine gültige E-Mail Adresse ein"
             autoComplete="email"
             required
             data-testid="email-input"
           />
           <Input
-            label={t("password")} // <--- ÜBERSETZT (key reused from previous steps)
+            label="Passwort"
             name="password"
             type="password"
             autoComplete="current-password"
@@ -44,22 +52,30 @@ const Login = ({ setCurrentView }: Props) => {
             data-testid="password-input"
           />
         </div>
+
         <ErrorMessage error={message} data-testid="login-error-message" />
-        <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
-          {t("sign_in_button")} {/* <--- ÜBERSETZT (key reused from Register component) */}
+
+        <SubmitButton 
+          data-testid="sign-in-button" 
+          className="w-full h-12 text-base"
+        >
+          Anmelden
         </SubmitButton>
       </form>
-      <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        {t("not_member_question")}{" "} {/* <--- ÜBERSETZT */}
-        <button
-          onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
-          className="underline"
-          data-testid="register-button"
-        >
-          {t("join_button")} {/* <--- ÜBERSETZT (key reused from Register component) */}
-        </button>
-        .
-      </span>
+
+      {/* Footer */}
+      <div className="mt-6 pt-6 border-t border-stone-200 text-center">
+        <p className="text-sm text-stone-600">
+          Noch kein Konto?{" "}
+          <button
+            onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
+            className="font-medium text-stone-800 hover:underline"
+            data-testid="register-button"
+          >
+            Jetzt registrieren
+          </button>
+        </p>
+      </div>
     </div>
   )
 }

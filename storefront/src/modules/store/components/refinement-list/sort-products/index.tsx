@@ -1,8 +1,7 @@
 "use client"
 
-import FilterRadioGroup from "@modules/common/components/filter-radio-group"
-import { useTranslations } from "next-intl"
-import { use } from "react"
+import { cn } from "@lib/utils"
+import { ChevronDown } from "@components/icons"
 
 export type SortOptions = "price_asc" | "price_desc" | "created_at"
 
@@ -12,42 +11,57 @@ type SortProductsProps = {
   "data-testid"?: string
 }
 
+const sortOptions = [
+  {
+    value: "created_at",
+    label: "Neueste",
+  },
+  {
+    value: "price_asc",
+    label: "Preis: Aufsteigend",
+  },
+  {
+    value: "price_desc",
+    label: "Preis: Absteigend",
+  },
+] as const
+
 const SortProducts = ({
   "data-testid": dataTestId,
   sortBy,
   setQueryParams,
 }: SortProductsProps) => {
-  // Move the useLanguage hook inside the component
-  const t = useTranslations('store')
-  
-  // Define sortOptions inside the component with proper t function calls
-  const sortOptions = [
-    {
-      value: "created_at",
-      label: t('latestarrivals'),
-    },
-    {
-      value: "price_asc",
-      label: t('lowtohigh'),
-    },
-    {
-      value: "price_desc",
-      label: t('hightolow'),
-    },
-  ]
-
-  const handleChange = (value: SortOptions) => {
-    setQueryParams("sortBy", value)
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setQueryParams("sortBy", e.target.value as SortOptions)
   }
-  
+
+  const currentLabel = sortOptions.find((o) => o.value === sortBy)?.label || "Sortieren"
+
   return (
-    <FilterRadioGroup
-      title={t('sortBy')}
-      items={sortOptions}
-      value={sortBy}
-      handleChange={handleChange}
-      data-testid={dataTestId}
-    />
+    <div className="relative" data-testid={dataTestId}>
+      <select
+        value={sortBy}
+        onChange={handleChange}
+        className={cn(
+          "appearance-none w-full",
+          "px-4 py-2.5 pr-10",
+          "bg-white border border-stone-300 rounded-lg",
+          "text-sm text-stone-700",
+          "focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-500/20",
+          "cursor-pointer transition-colors"
+        )}
+      >
+        {sortOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        size={16}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none"
+      />
+    </div>
   )
 }
 

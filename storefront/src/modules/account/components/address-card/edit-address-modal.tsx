@@ -1,16 +1,14 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useActionState } from "react"
 import { PencilSquare as Edit, Trash } from "@medusajs/icons"
 import { Button, Heading, Text, clx } from "@medusajs/ui"
-import { useTranslations } from "next-intl" // <--- DIESEN IMPORT HINZUFÜGEN
 
 import useToggleState from "@lib/hooks/use-toggle-state"
 import CountrySelect from "@modules/checkout/components/country-select"
 import Input from "@modules/common/components/input"
 import Modal from "@modules/common/components/modal"
 import Spinner from "@modules/common/icons/spinner"
-import { useFormState } from "react-dom"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import { HttpTypes } from "@medusajs/types"
 import {
@@ -32,9 +30,8 @@ const EditAddress: React.FC<EditAddressProps> = ({
   const [removing, setRemoving] = useState(false)
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
-  const t = useTranslations('account') // <--- DIESE ZEILE HINZUFÜGEN
 
-  const [formState, formAction] = useFormState(updateCustomerAddress, {
+  const [formState, formAction] = useActionState(updateCustomerAddress, {
     success: false,
     error: null,
     addressId: address.id,
@@ -100,10 +97,6 @@ const EditAddress: React.FC<EditAddressProps> = ({
             </span>
             <span data-testid="address-province-country">
               {address.province && `${address.province}, `}
-              {/* country_code.toUpperCase() is often used for display,
-                  but for full localization, you might want to translate it via a utility
-                  function or by looking it up in `regionOptions`'s `label`.
-                  For now, leaving as-is as per original code's display logic. */}
               {address.country_code?.toUpperCase()}
             </span>
           </Text>
@@ -115,7 +108,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
             data-testid="address-edit-button"
           >
             <Edit />
-            {t("edit_button")} {/* <--- ÜBERSETZT */}
+            Bearbeiten
           </button>
           <button
             className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
@@ -123,21 +116,22 @@ const EditAddress: React.FC<EditAddressProps> = ({
             data-testid="address-delete-button"
           >
             {removing ? <Spinner /> : <Trash />}
-            {t("remove_button")} {/* <--- ÜBERSETZT */}
+            Löschen
           </button>
         </div>
       </div>
 
       <Modal isOpen={state} close={close} data-testid="edit-address-modal">
         <Modal.Title>
-          <Heading className="mb-2">{t("edit_address")}</Heading> {/* <--- ÜBERSETZT */}
+          <Heading className="mb-2">Adresse bearbeiten</Heading>
         </Modal.Title>
         <form action={formAction}>
+          <input type="hidden" name="addressId" value={address.id} />
           <Modal.Body>
             <div className="grid grid-cols-1 gap-y-2">
               <div className="grid grid-cols-2 gap-x-2">
                 <Input
-                  label={t("first_name")} // <--- ÜBERSETZT (bereits erwähnt)
+                  label="Vorname"
                   name="first_name"
                   required
                   autoComplete="given-name"
@@ -145,7 +139,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                   data-testid="first-name-input"
                 />
                 <Input
-                  label={t("last_name")} // <--- ÜBERSETZT (bereits erwähnt)
+                  label="Nachname"
                   name="last_name"
                   required
                   autoComplete="family-name"
@@ -154,14 +148,14 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 />
               </div>
               <Input
-                label={t("company")} // <--- ÜBERSETZT (bereits erwähnt)
+                label="Firma (optional)"
                 name="company"
                 autoComplete="organization"
                 defaultValue={address.company || undefined}
                 data-testid="company-input"
               />
               <Input
-                label={t("address")} // <--- ÜBERSETZT (bereits erwähnt)
+                label="Adresse"
                 name="address_1"
                 required
                 autoComplete="address-line1"
@@ -169,7 +163,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 data-testid="address-1-input"
               />
               <Input
-                label={t("apartment_suite_etc")} // <--- ÜBERSETZT (bereits erwähnt)
+                label="Adresszusatz (optional)"
                 name="address_2"
                 autoComplete="address-line2"
                 defaultValue={address.address_2 || undefined}
@@ -177,7 +171,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
               />
               <div className="grid grid-cols-[144px_1fr] gap-x-2">
                 <Input
-                  label={t("postal_code")} // <--- ÜBERSETZT (bereits erwähnt)
+                  label="PLZ"
                   name="postal_code"
                   required
                   autoComplete="postal-code"
@@ -185,7 +179,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                   data-testid="postal-code-input"
                 />
                 <Input
-                  label={t("city")} // <--- ÜBERSETZT (bereits erwähnt)
+                  label="Ort"
                   name="city"
                   required
                   autoComplete="locality"
@@ -194,7 +188,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 />
               </div>
               <Input
-                label={t("province_state")} // <--- ÜBERSETZT (bereits erwähnt)
+                label="Bundesland"
                 name="province"
                 autoComplete="address-level1"
                 defaultValue={address.province || undefined}
@@ -209,19 +203,16 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 data-testid="country-select"
               />
               <Input
-                label={t("phone")} // <--- ÜBERSETZT (bereits erwähnt)
+                label="Telefon"
                 name="phone"
-                autoComplete="tel" // Korrigiert zu "tel"
+                autoComplete="phone"
                 defaultValue={address.phone || undefined}
                 data-testid="phone-input"
               />
             </div>
             {formState.error && (
               <div className="text-rose-500 text-small-regular py-2">
-                {/* <--- ÜBERSETZEN ODER HANDHABEN VON FEHLERN HIER */}
-                {/* Wenn formState.error ein generischer String ist, wie "An error occurred",
-                    dann t("an_error_occurred"), oder einen spezifischeren Schlüssel verwenden. */}
-                {t(formState.error, { defaultValue: t("an_error_occurred") })}
+                {formState.error}
               </div>
             )}
           </Modal.Body>
@@ -234,11 +225,9 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 className="h-10"
                 data-testid="cancel-button"
               >
-                {t("cancel")} {/* <--- ÜBERSETZT (bereits erwähnt) */}
+                Abbrechen
               </Button>
-              <SubmitButton data-testid="save-button">
-                {t("save")} {/* <--- ÜBERSETZT (bereits erwähnt) */}
-              </SubmitButton>
+              <SubmitButton data-testid="save-button">Speichern</SubmitButton>
             </div>
           </Modal.Footer>
         </form>

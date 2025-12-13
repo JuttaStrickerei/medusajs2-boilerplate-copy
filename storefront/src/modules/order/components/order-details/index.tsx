@@ -1,70 +1,102 @@
-"use client"
 import { HttpTypes } from "@medusajs/types"
-import { Text } from "@medusajs/ui"
-import { useTranslations } from "next-intl"
 
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
   showStatus?: boolean
 }
 
+// Status translations
+const fulfillmentStatusMap: Record<string, string> = {
+  not_fulfilled: "In Bearbeitung",
+  partially_fulfilled: "Teilweise versendet",
+  fulfilled: "Versendet",
+  partially_shipped: "Teilweise versendet",
+  shipped: "Versendet",
+  partially_delivered: "Teilweise geliefert",
+  delivered: "Geliefert",
+  canceled: "Storniert",
+}
+
+const paymentStatusMap: Record<string, string> = {
+  not_paid: "Nicht bezahlt",
+  awaiting: "Ausstehend",
+  captured: "Bezahlt",
+  partially_refunded: "Teilweise erstattet",
+  refunded: "Erstattet",
+  canceled: "Storniert",
+}
+
 const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
-  const t = useTranslations("order")
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("de-AT", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+  }
 
+  const getFulfillmentStatus = (status: string) => {
+    return fulfillmentStatusMap[status] || status.split("_").join(" ")
+  }
 
-  const formatStatus = (str: string) => {
-    const formatted = str.split("_").join(" ")
-
-    return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
+  const getPaymentStatus = (status: string) => {
+    return paymentStatusMap[status] || status.split("_").join(" ")
   }
 
   return (
-    <div>
-      <Text>
-        {t("confirmationSentTo")}{" "}
+    <div className="space-y-3">
+      <p className="text-sm text-stone-600">
+        Bestellbestätigung gesendet an{" "}
         <span
-          className="text-ui-fg-medium-plus font-semibold"
+          className="font-semibold text-stone-800"
           data-testid="order-email"
         >
           {order.email}
         </span>
+      </p>
+      
+      <div className="space-y-1.5 text-sm">
+        <p className="text-stone-600">
+          Bestelldatum:{" "}
+          <span data-testid="order-date" className="text-stone-800">
+            {formatDate(order.created_at)}
+          </span>
+        </p>
         
-      </Text>
-      <Text className="mt-2">
-        {t("orderDate")}{" "}
-        <span data-testid="order-date">
-          {new Date(order.created_at).toDateString()}
-        </span>
-      </Text>
-      <div className="flex gap-2 items-center mt-2">
-      <Text className="text-ui-fg-interactive">
-        Order number: <span data-testid="order-id">{order.display_id}</span>
-      </Text>
-    </div>
-
-
-      <div className="flex items-center text-compact-small gap-x-4 mt-4">
-        {showStatus && (
-          <>
-            <Text>
-              {t("orderStatus")}{" "}
-              <span className="text-ui-fg-subtle " data-testid="order-status">
-                {/* TODO: Check where the statuses should come from */}
-                 {formatStatus(order.status)}
-              </span>
-            </Text>
-            <Text>
-              {t("paymentStatus")}{" "}
-              <span
-                className="text-ui-fg-subtle "
-                sata-testid="order-payment-status"
-              >
-                {formatStatus(order.payment_status)}
-              </span>
-            </Text>
-          </>
-        )}
+        <p className="text-stone-600">
+          Bestellnummer:{" "}
+          <span 
+            data-testid="order-id" 
+            className="font-medium text-stone-800"
+          >
+            #{order.display_id}
+          </span>
+        </p>
       </div>
+
+      {showStatus && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2 text-sm">
+          <p className="text-stone-600">
+            Bestellstatus:{" "}
+            <span 
+              className="text-stone-800" 
+              data-testid="order-status"
+            >
+              {getFulfillmentStatus(order.fulfillment_status)}
+            </span>
+          </p>
+          <p className="text-stone-600">
+            Zahlungsstatus:{" "}
+            <span
+              className="text-stone-800"
+              data-testid="order-payment-status"
+            >
+              {getPaymentStatus(order.payment_status)}
+            </span>
+          </p>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,53 +1,53 @@
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
-import { Heading, Table } from "@medusajs/ui"
-import { useTranslations } from "next-intl"
-
 import Item from "@modules/cart/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
 
 type ItemsTemplateProps = {
-  items?: HttpTypes.StoreCartLineItem[]
+  cart?: HttpTypes.StoreCart
 }
 
-const ItemsTemplate = ({ items }: ItemsTemplateProps) => {
-  const t = useTranslations("cart")
-
+const ItemsTemplate = ({ cart }: ItemsTemplateProps) => {
+  const items = cart?.items
+  
   return (
     <div>
-      <div className="pb-3 flex items-center">
-        <Heading className="text-[2rem] leading-[2.75rem]">
-          {t("cartTitle")}
-        </Heading>
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-stone-200">
+        <div className="flex items-center justify-between">
+          <h2 className="font-serif text-xl font-medium text-stone-800">
+            Ihre Artikel
+          </h2>
+          <span className="text-sm text-stone-500">
+            {items?.length || 0} {items?.length === 1 ? "Artikel" : "Artikel"}
+          </span>
+        </div>
       </div>
-      <Table>
-        <Table.Header className="border-t-0">
-          <Table.Row className="text-ui-fg-subtle txt-medium-plus">
-            <Table.HeaderCell className="!pl-0">{t("item")}</Table.HeaderCell>
-            <Table.HeaderCell></Table.HeaderCell>
-            <Table.HeaderCell>{t("quantity")}</Table.HeaderCell>
-            <Table.HeaderCell className="hidden small:table-cell">
-              {t("price")}
-            </Table.HeaderCell>
-            <Table.HeaderCell className="!pr-0 text-right">
-              {t("total")}
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {items
-            ? items
-                .sort((a, b) => {
-                  return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-                })
-                .map((item) => {
-                  return <Item key={item.id} item={item} />
-                })
-            : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
-              })}
-        </Table.Body>
-      </Table>
+
+      {/* Table Header - Desktop */}
+      <div className="hidden small:grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 px-6 py-3 bg-stone-50 border-b border-stone-200 text-sm font-medium text-stone-600">
+        <span>Produkt</span>
+        <span className="text-center">Menge</span>
+        <span className="text-right">Einzelpreis</span>
+        <span className="text-right">Gesamt</span>
+      </div>
+
+      {/* Items */}
+      <div className="divide-y divide-stone-200">
+        {items
+          ? items
+              .sort((a, b) => {
+                return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+              })
+              .map((item) => (
+                <Item
+                  key={item.id}
+                  item={item}
+                  currencyCode={cart?.currency_code}
+                />
+              ))
+          : repeat(3).map((i) => <SkeletonLineItem key={i} />)}
+      </div>
     </div>
   )
 }

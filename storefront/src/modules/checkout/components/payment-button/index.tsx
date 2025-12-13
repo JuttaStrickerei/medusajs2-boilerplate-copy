@@ -1,6 +1,6 @@
 "use client"
 
-import { isStripe } from "@lib/constants"
+import { isStripe, isManual } from "@lib/constants"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
@@ -8,7 +8,6 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import { useParams } from "next/navigation"
 import React, { useEffect, useState, useCallback } from "react"
 import ErrorMessage from "../error-message"
-import { useTranslations } from "next-intl"
 
 /**
  * @name PaymentButton
@@ -20,7 +19,6 @@ const PaymentButton: React.FC<{
   cart: HttpTypes.StoreCart
   "data-testid": string
 }> = ({ cart, "data-testid": dataTestId }) => {
-  const t = useTranslations("checkout.paymentButton")
   // Determine if the checkout is ready for payment submission.
   const notReady =
     !cart ||
@@ -42,10 +40,17 @@ const PaymentButton: React.FC<{
     )
   }
 
+  // Render the Manual Test Payment button
+  if (isManual(paymentSession?.provider_id)) {
+    return (
+      <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
+    )
+  }
+
   // Fallback for when no supported payment method is available.
   return (
     <Button disabled data-testid="submit-order-button">
-      {t("selectPaymentMethod")}
+      Select a payment method
     </Button>
   )
 }
@@ -55,7 +60,6 @@ const PaymentButton: React.FC<{
  * @description A component that handles the entire payment flow for Stripe,
  * including credit cards, PayPal, Klarna, and other methods configured in Stripe.
  * It uses the `redirect: 'if_required'` strategy to seamlessly handle both
-
  * on-site and off-site payment authentications.
  */
 const StripePaymentButton = ({
@@ -67,7 +71,6 @@ const StripePaymentButton = ({
   notReady: boolean
   "data-testid"?: string
 }) => {
-  const t = useTranslations("checkout.paymentButton")
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { countryCode } = useParams()
@@ -122,7 +125,7 @@ const StripePaymentButton = ({
 
     if (error) {
       // Display any errors that occurred during the payment confirmation process.
-      setErrorMessage(error.message ?? t("unknownError"))
+      setErrorMessage(error.message ?? "An unknown error occurred")
       return
     }
 
@@ -149,11 +152,59 @@ const StripePaymentButton = ({
         isLoading={submitting}
         data-testid={dataTestId}
       >
-        {t("placeOrder")}
+        Place order
       </Button>
       <ErrorMessage
         error={errorMessage}
         data-testid="stripe-payment-error-message"
+      />
+    </>
+  )
+}
+
+/**
+ * @name ManualTestPaymentButton
+ * @description A simple button for manual/test payments
+ */
+const ManualTestPaymentButton = ({
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const onPaymentCompleted = async () => {
+    await placeOrder()
+      .catch((err) => {
+        setErrorMessage(err.message)
+      })
+      .finally(() => {
+        setSubmitting(false)
+      })
+  }
+
+  const handlePayment = () => {
+    setSubmitting(true)
+    onPaymentCompleted()
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        isLoading={submitting}
+        onClick={handlePayment}
+        size="large"
+        data-testid={dataTestId}
+      >
+        Place order
+      </Button>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="manual-payment-error-message"
       />
     </>
   )

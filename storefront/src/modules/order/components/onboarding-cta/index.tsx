@@ -1,30 +1,28 @@
 "use client"
 
 import { resetOnboardingState } from "@lib/data/onboarding"
-import { Button, Container, Text } from "@medusajs/ui"
-import { useTranslations } from "next-intl"
+import { Button } from "@components/ui"
+import { CheckCircle } from "@components/icons"
 
 const OnboardingCta = ({ orderId }: { orderId: string }) => {
-  const t = useTranslations("order")
-
   return (
-    <Container className="max-w-4xl h-full bg-ui-bg-subtle w-full">
-      <div className="flex flex-col gap-y-4 center p-4 md:items-center">
-        <Text className="text-ui-fg-base text-xl">
-          {t("testOrderCreated")}
-        </Text>
-        <Text className="text-ui-fg-subtle text-small-regular">
-          {t("completeSetup")}
-        </Text>
+    <div className="max-w-4xl w-full bg-green-50 border border-green-200 rounded-xl p-6">
+      <div className="flex flex-col gap-y-4 items-center text-center">
+        <CheckCircle size={32} className="text-green-600" />
+        <h2 className="text-lg font-medium text-stone-800">
+          Ihre Testbestellung wurde erfolgreich erstellt! 🎉
+        </h2>
+        <p className="text-sm text-stone-600">
+          Sie können jetzt die Einrichtung Ihres Shops im Admin-Bereich abschließen.
+        </p>
         <Button
           className="w-fit"
-          size="xlarge"
           onClick={() => resetOnboardingState(orderId)}
         >
-          {t("completeSetupAdmin")}
+          Einrichtung im Admin abschließen
         </Button>
       </div>
-    </Container>
+    </div>
   )
 }
 

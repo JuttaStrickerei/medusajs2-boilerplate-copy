@@ -1,46 +1,80 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import ChevronDown from "@modules/common/icons/chevron-down"
-import MedusaCTA from "@modules/layout/components/medusa-cta"
-import { useTranslations } from "next-intl"
+import { ArrowLeft, Shield, Lock } from "@components/icons"
 
 export default function CheckoutLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const t = useTranslations("cart")
-
   return (
-    <div className="w-full bg-white relative small:min-h-screen">
-      <div className="h-16 bg-white border-b ">
-        <nav className="flex h-full items-center content-container justify-between">
+    <div className="w-full bg-stone-50 relative min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-stone-200">
+        <nav className="flex h-16 items-center content-container justify-between">
+          {/* Back Link */}
           <LocalizedClientLink
             href="/cart"
-            className="text-small-semi text-ui-fg-base flex items-center gap-x-2 uppercase flex-1 basis-0"
+            className="flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors flex-1 basis-0"
             data-testid="back-to-cart-link"
           >
-            <ChevronDown className="rotate-90" size={16} />
-            <span className="mt-px hidden small:block txt-compact-plus text-ui-fg-subtle hover:text-ui-fg-base ">
-              {t("backToCart")}
+            <ArrowLeft size={18} />
+            <span className="text-sm font-medium hidden small:block">
+              Zurück zum Warenkorb
             </span>
-            <span className="mt-px block small:hidden txt-compact-plus text-ui-fg-subtle hover:text-ui-fg-base">
-              {t("back")}
+            <span className="text-sm font-medium small:hidden">
+              Zurück
             </span>
           </LocalizedClientLink>
+          
+          {/* Logo */}
           <LocalizedClientLink
             href="/"
-            className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
+            className="text-center group"
             data-testid="store-link"
           >
-            {t("store")}
+            <span className="font-serif text-xl font-medium text-stone-800 group-hover:text-stone-600 transition-colors">
+              Strickerei Jutta
+            </span>
           </LocalizedClientLink>
-          <div className="flex-1 basis-0" />
+          
+          {/* Security Badges */}
+          <div className="flex items-center justify-end gap-3 flex-1 basis-0">
+            <div className="hidden small:flex items-center gap-1.5 text-xs text-stone-500">
+              <Lock size={14} />
+              <span>SSL</span>
+            </div>
+            <div className="hidden small:flex items-center gap-1.5 text-xs text-stone-500">
+              <Shield size={14} />
+              <span>Sicher</span>
+            </div>
+          </div>
         </nav>
-      </div>
-      <div className="relative" data-testid="checkout-container">{children}</div>
-      <div className="py-4 w-full flex items-center justify-center">
-        <MedusaCTA />
-      </div>
+      </header>
+      
+      {/* Main Content */}
+      <main className="relative" data-testid="checkout-container">
+        {children}
+      </main>
+      
+      {/* Footer */}
+      <footer className="py-6 border-t border-stone-200 bg-white">
+        <div className="content-container">
+          <div className="flex flex-col small:flex-row items-center justify-between gap-4 text-sm text-stone-500">
+            <p>© {new Date().getFullYear()} Strickerei Jutta. Alle Rechte vorbehalten.</p>
+            <div className="flex items-center gap-6">
+              <LocalizedClientLink href="/datenschutz" className="hover:text-stone-800 transition-colors">
+                Datenschutz
+              </LocalizedClientLink>
+              <LocalizedClientLink href="/agb" className="hover:text-stone-800 transition-colors">
+                AGB
+              </LocalizedClientLink>
+              <LocalizedClientLink href="/impressum" className="hover:text-stone-800 transition-colors">
+                Impressum
+              </LocalizedClientLink>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

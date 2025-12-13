@@ -3,45 +3,33 @@ import { notFound } from "next/navigation"
 
 import AddressBook from "@modules/account/components/address-book"
 
-import { headers } from "next/headers"
 import { getRegion } from "@lib/data/regions"
-import { getCustomer } from "@lib/data/customer"
+import { retrieveCustomer } from "@lib/data/customer"
 
-import { useTranslations } from "next-intl"
-import { title } from "process"
-import { Description } from "@headlessui/react/dist/components/description/description"
-import { getTranslations } from "next-intl/server"
-
-export async function genereateMetadata() {
-  const t = await getTranslations("account")
-  return {
-    title: t("addresses"), 
-    description: t("view_your_addresses"),
-  }
+export const metadata: Metadata = {
+  title: "Adressen",
+  description: "Ihre gespeicherten Adressen",
 }
 
-export default async function Addresses({
-  params,
-}: {
-  params: { countryCode: string }
+export default async function Addresses(props: {
+  params: Promise<{ countryCode: string }>
 }) {
-  // 2. Get translation function for the component
-  const t = await getTranslations("account");
-  const { countryCode } = params;
-  const customer = await getCustomer();
-  const region = await getRegion(countryCode);
+  const params = await props.params
+  const { countryCode } = params
+  const customer = await retrieveCustomer()
+  const region = await getRegion(countryCode)
 
   if (!customer || !region) {
     notFound()
   }
 
   return (
-    <div className="w-full" data-testid="addresses-page-wrapper">
-      <div className="mb-8 flex flex-col gap-y-4">
-        {/* 3. Use translations for page content */}
-        <h1 className="text-2xl-semi">{t("addresses")}</h1>
-        <p className="text-base-regular">
-          {t("addresses_page_hint")}
+    <div className="p-6 small:p-8" data-testid="addresses-page-wrapper">
+      <div className="mb-8">
+        <h1 className="font-serif text-2xl font-medium text-stone-800 mb-2">Lieferadressen</h1>
+        <p className="text-stone-600">
+          Verwalten Sie Ihre Lieferadressen. Gespeicherte Adressen stehen Ihnen 
+          beim Checkout zur Verfügung.
         </p>
       </div>
       <AddressBook customer={customer} region={region} />

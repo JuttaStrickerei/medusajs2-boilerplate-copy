@@ -2,6 +2,7 @@ import { deleteLineItem } from "@lib/data/cart"
 import { Spinner, Trash } from "@medusajs/icons"
 import { clx } from "@medusajs/ui"
 import { useState } from "react"
+import { triggerCartRefresh } from "@lib/context/cart-context"
 
 const DeleteButton = ({
   id,
@@ -16,9 +17,17 @@ const DeleteButton = ({
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
-    await deleteLineItem(id).catch((err) => {
-      setIsDeleting(false)
-    })
+    await deleteLineItem(id)
+      .then(() => {
+        // Trigger instant cart update
+        triggerCartRefresh()
+      })
+      .catch((err) => {
+        console.error("Error deleting item:", err)
+      })
+      .finally(() => {
+        setIsDeleting(false)
+      })
   }
 
   return (

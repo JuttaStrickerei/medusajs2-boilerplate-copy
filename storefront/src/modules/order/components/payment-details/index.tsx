@@ -1,63 +1,78 @@
-import { Container, Heading, Text } from "@medusajs/ui"
-import { useTranslations } from "next-intl"
-
 import { isStripe, paymentInfoMap } from "@lib/constants"
-import Divider from "@modules/common/components/divider"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import { CreditCard } from "@components/icons"
 
 type PaymentDetailsProps = {
   order: HttpTypes.StoreOrder
 }
 
 const PaymentDetails = ({ order }: PaymentDetailsProps) => {
-  const t = useTranslations("order")
   const payment = order.payment_collections?.[0].payments?.[0]
 
+  const formatPaymentDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("de-AT", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
   return (
-    <div>
-      <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
-        {t("payment")}
-      </Heading>
-      <div>
-        {payment && (
-          <div className="flex items-start gap-x-1 w-full">
-            <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                {t("paymentMethod")}
-              </Text>
-              <Text
-                className="txt-medium text-ui-fg-subtle"
+    <div className="pt-6 border-t border-stone-200">
+      <h2 className="font-serif text-xl font-medium text-stone-800 mb-6">
+        Zahlung
+      </h2>
+      
+      {payment && (
+        <div className="grid grid-cols-1 small:grid-cols-2 gap-6">
+          {/* Payment Method */}
+          <div>
+            <h3 className="text-sm font-medium text-stone-800 mb-2">
+              Zahlungsart
+            </h3>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded bg-stone-100 flex items-center justify-center">
+                {paymentInfoMap[payment.provider_id]?.icon || (
+                  <CreditCard size={16} className="text-stone-500" />
+                )}
+              </div>
+              <span
+                className="text-sm text-stone-600"
                 data-testid="payment-method"
               >
-                {paymentInfoMap[payment.provider_id].title}
-              </Text>
-            </div>
-            <div className="flex flex-col w-2/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                {t("paymentDetails")}
-              </Text>
-              <div className="flex gap-2 txt-medium text-ui-fg-subtle items-center">
-                <Container className="flex items-center h-7 w-fit p-2 bg-ui-button-neutral-hover">
-                  {paymentInfoMap[payment.provider_id].icon}
-                </Container>
-                <Text data-testid="payment-amount">
-                  {isStripe(payment.provider_id) && payment.data?.card_last4
-                    ? `**** **** **** ${payment.data.card_last4}`
-                    : `${convertToLocale({
-                        amount: payment.amount,
-                        currency_code: order.currency_code,
-                      })} ${t("paidAt")} ${new Date(
-                        payment.created_at ?? ""
-                      ).toLocaleString()}`}
-                </Text>
-              </div>
+                {paymentInfoMap[payment.provider_id]?.title || payment.provider_id}
+              </span>
             </div>
           </div>
-        )}
-      </div>
 
-      <Divider className="mt-8" />
+          {/* Payment Details */}
+          <div>
+            <h3 className="text-sm font-medium text-stone-800 mb-2">
+              Zahlungsdetails
+            </h3>
+            <div className="text-sm text-stone-600 space-y-0.5" data-testid="payment-amount">
+              {isStripe(payment.provider_id) && payment.data?.card_last4 ? (
+                <p>Karte: **** **** **** {payment.data.card_last4}</p>
+              ) : (
+                <p>
+                  {convertToLocale({
+                    amount: payment.amount,
+                    currency_code: order.currency_code,
+                  })}
+                </p>
+              )}
+              {payment.created_at && (
+                <p className="text-stone-400 text-xs">
+                  Bezahlt am {formatPaymentDate(payment.created_at)}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
