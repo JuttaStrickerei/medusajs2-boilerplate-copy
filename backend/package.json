@@ -25,6 +25,7 @@
     "@medusajs/cli": "latest",
     "@medusajs/core-flows": "latest",
     "@medusajs/dashboard": "^2.12.3",
+    "@medusajs/draft-order": "^2.12.3",
     "@medusajs/framework": "latest",
     "@medusajs/icons": "latest",
     "@medusajs/js-sdk": "^2.12.3",
@@ -77,10 +78,10 @@
     "zod": "3.22.4"
   },
   "pnpm": {
-  "overrides": {
-    "zod": "3.22.4",
-    "next": "^15.1.11"
-  }
+    "overrides": {
+      "zod": "3.22.4",
+      "next": "^15.1.11"
+    }
   },
   "packageManager": "pnpm@9.10.0",
   "engines": {
