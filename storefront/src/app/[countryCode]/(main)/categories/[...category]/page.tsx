@@ -51,6 +51,8 @@ export async function generateStaticParams() {
   }
 }
 
+export const dynamicParams = true
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
   try {

@@ -67,7 +67,7 @@ export default function ContactPage() {
                 Schreiben Sie uns eine Nachricht
               </p>
               <div className="space-y-1">
-                <div className="font-medium text-stone-800">info@strickerei-jutta.at</div>
+                <div className="font-medium text-stone-800">office@strickerei-jutta.at</div>
                 <div className="text-sm text-stone-600">Antwort innerhalb von 24h</div>
               </div>
             </div>
@@ -239,8 +239,8 @@ export default function ContactPage() {
                   
                   <div className="flex items-center space-x-3">
                     <Mail size={20} className="text-stone-600 flex-shrink-0" />
-                    <a href="mailto:info@strickerei-jutta.at" className="font-medium text-stone-800 hover:underline">
-                      info@strickerei-jutta.at
+                    <a href="mailto:office@strickerei-jutta.at" className="font-medium text-stone-800 hover:underline">
+                      office@strickerei-jutta.at
                     </a>
                   </div>
                 </div>

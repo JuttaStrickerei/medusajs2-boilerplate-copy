@@ -51,6 +51,7 @@ export const listProducts = async ({
 
   const next = {
     ...(await getCacheOptions("products")),
+    revalidate: 60,
   }
 
   // Get country code for tax calculation - use region's first country if countryCode not provided
@@ -73,7 +74,6 @@ export const listProducts = async ({
         },
         headers,
         next,
-        cache: "force-cache",
       }
     )
     .then(({ products, count }) => {

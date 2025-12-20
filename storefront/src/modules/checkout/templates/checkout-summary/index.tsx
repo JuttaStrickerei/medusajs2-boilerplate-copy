@@ -51,8 +51,8 @@ const CheckoutSummary = ({ cart }: { cart: any }) => {
       {/* Help Text */}
       <div className="text-center text-sm text-stone-500">
         <p>Fragen zu Ihrer Bestellung?</p>
-        <a href="mailto:info@strickerei-jutta.at" className="text-stone-800 hover:underline">
-          info@strickerei-jutta.at
+        <a href="mailto:office@strickerei-jutta.at" className="text-stone-800 hover:underline">
+          office@strickerei-jutta.at
         </a>
       </div>
     </div>

@@ -43,7 +43,7 @@ export default function PrivacyPage() {
                 Strickerei Jutta<br />
                 Hauptstraße 1<br />
                 7021 Draßburg, Österreich<br />
-                E-Mail: info@strickerei-jutta.at
+                E-Mail: office@strickerei-jutta.at
               </p>
 
               <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
@@ -97,7 +97,7 @@ export default function PrivacyPage() {
               </h2>
               <p className="text-stone-600 mb-4">
                 Bei Fragen zum Datenschutz kontaktieren Sie uns unter:<br />
-                E-Mail: info@strickerei-jutta.at<br />
+                E-Mail: office@strickerei-jutta.at<br />
                 Telefon: +43 2686 2259
               </p>
             </div>

@@ -142,8 +142,8 @@ export default function FAQPage() {
               <h3 className="font-medium text-stone-800 mb-2">Ihre Frage nicht dabei?</h3>
               <p className="text-stone-600 text-sm mb-4">
                 Kontaktieren Sie uns unter{" "}
-                <a href="mailto:info@strickerei-jutta.at" className="text-stone-800 hover:underline">
-                  info@strickerei-jutta.at
+                <a href="mailto:office@strickerei-jutta.at" className="text-stone-800 hover:underline">
+                  office@strickerei-jutta.at
                 </a>
                 {" "}oder{" "}
                 <a href="tel:+4326862259" className="text-stone-800 hover:underline">

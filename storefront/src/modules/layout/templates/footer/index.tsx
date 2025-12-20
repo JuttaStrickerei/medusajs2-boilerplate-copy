@@ -43,11 +43,11 @@ export default async function Footer() {
                 +43 2686 2259
               </a>
               <a 
-                href="mailto:info@strickerei-jutta.at" 
+                href="mailto:office@strickerei-jutta.at" 
                 className="flex items-center gap-3 text-sm text-stone-400 hover:text-white transition-colors"
               >
                 <Mail size={16} />
-                info@strickerei-jutta.at
+                office@strickerei-jutta.at
               </a>
               <div className="flex items-start gap-3 text-sm text-stone-400">
                 <MapPin size={16} className="flex-shrink-0 mt-0.5" />

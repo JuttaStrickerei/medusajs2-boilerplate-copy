@@ -47,7 +47,7 @@ export default function ImprintPage() {
               </h2>
               <div className="text-stone-600 mb-6">
                 <p>Telefon: +43 2686 2259</p>
-                <p>E-Mail: info@strickerei-jutta.at</p>
+                <p>E-Mail: office@strickerei-jutta.at</p>
               </div>
 
               <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
