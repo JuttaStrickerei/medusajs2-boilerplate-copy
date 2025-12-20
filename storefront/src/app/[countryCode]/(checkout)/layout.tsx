@@ -32,9 +32,12 @@ export default function CheckoutLayout({
             className="text-center group"
             data-testid="store-link"
           >
-            <span className="font-serif text-xl font-medium text-stone-800 group-hover:text-stone-600 transition-colors">
+            <div className="font-serif text-xl small:text-2xl font-medium text-stone-800 tracking-tight group-hover:text-stone-600 transition-colors">
               Strickerei Jutta
-            </span>
+            </div>
+            <div className="text-[10px] small:text-xs text-stone-500 tracking-[0.2em] uppercase">
+              seit 1965
+            </div>
           </LocalizedClientLink>
           
           {/* Security Badges */}
