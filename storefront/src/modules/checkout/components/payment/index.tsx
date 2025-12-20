@@ -164,20 +164,35 @@ const Payment = ({
         )}
       </div>
 
+      {/* PaymentElement muss immer gemountet bleiben, auch wenn nicht sichtbar */}
+      {!paidByGiftcard &&
+        availablePaymentMethods?.length &&
+        stripeReady && (
+          <div
+            style={
+              isOpen
+                ? {}
+                : {
+                    position: "absolute",
+                    left: "-9999px",
+                    width: "1px",
+                    height: "1px",
+                    overflow: "hidden",
+                    pointerEvents: "none",
+                  }
+            }
+          >
+            <PaymentElement
+              onChange={handlePaymentElementChange}
+              options={{
+                layout: "accordion",
+              }}
+            />
+          </div>
+        )}
+
       {isOpen ? (
         <div className="space-y-6">
-          {!paidByGiftcard &&
-            availablePaymentMethods?.length &&
-            stripeReady && (
-              <div className="transition-all duration-150 ease-in-out">
-                <PaymentElement
-                  onChange={handlePaymentElementChange}
-                  options={{
-                    layout: "accordion",
-                  }}
-                />
-              </div>
-            )}
           {paidByGiftcard && (
             <div className="text-sm text-stone-600">
               <p className="font-medium text-stone-800 mb-1">

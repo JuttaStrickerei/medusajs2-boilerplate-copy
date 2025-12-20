@@ -108,6 +108,22 @@ const StripePaymentButton = ({
     // It points to a dedicated API route that will complete the order on the server.
     const returnUrl = `${window.location.origin}/api/capture-payment/${cart.id}?country_code=${countryCode}`
 
+    // Validierung: Prüfe ob PaymentElement gemountet ist
+    if (!elements) {
+      console.error("Stripe Elements not initialized")
+      setErrorMessage("Zahlungselemente sind nicht initialisiert. Bitte Seite neu laden.")
+      setSubmitting(false)
+      return
+    }
+
+    const paymentElement = elements.getElement("payment")
+    if (!paymentElement) {
+      console.error("PaymentElement not mounted")
+      setErrorMessage("Zahlungselement ist nicht verfügbar. Bitte zurück zur Zahlungsseite.")
+      setSubmitting(false)
+      return
+    }
+
     const { error } = await stripe.confirmPayment({
       elements,
       clientSecret,
