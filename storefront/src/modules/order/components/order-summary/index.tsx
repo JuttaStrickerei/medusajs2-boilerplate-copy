@@ -7,12 +7,11 @@ type OrderSummaryProps = {
 
 const OrderSummary = ({ order }: OrderSummaryProps) => {
   const getAmount = (amount?: number | null) => {
-    if (!amount && amount !== 0) {
-      return "–"
-    }
+    // Handle null/undefined as 0, but preserve actual 0 values
+    const displayAmount = amount ?? 0
 
     return convertToLocale({
-      amount,
+      amount: displayAmount,
       currency_code: order.currency_code,
     })
   }

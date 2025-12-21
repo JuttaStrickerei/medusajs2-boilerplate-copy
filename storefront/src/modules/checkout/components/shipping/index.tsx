@@ -355,7 +355,7 @@ const Shipping: React.FC<ShippingProps> = ({
                     </div>
                     <span className="font-medium text-stone-800">
                       {convertToLocale({
-                        amount: option.amount!,
+                        amount: option.amount ?? 0,
                         currency_code: cart?.currency_code,
                       })}
                     </span>
@@ -389,7 +389,7 @@ const Shipping: React.FC<ShippingProps> = ({
                 </p>
                 <p className="text-sm text-stone-600">
                   {convertToLocale({
-                    amount: cart.shipping_methods!.at(-1)!.amount!,
+                    amount: cart.shipping_methods!.at(-1)!.amount ?? 0,
                     currency_code: cart?.currency_code,
                   })}
                 </p>

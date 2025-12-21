@@ -49,7 +49,8 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
   const displayItemsSubtotal = calculatedItemsTotal || item_total || item_subtotal || 0
   
   // Use shipping_total if available (includes tax), otherwise shipping_subtotal
-  const displayShipping = shipping_total || shipping_subtotal || 0
+  // Use ?? null to preserve null state (means "not yet calculated")
+  const displayShipping = shipping_total ?? shipping_subtotal ?? null
   
   // Use discount_total if available, otherwise discount_subtotal
   const displayDiscount = discount_total || discount_subtotal || 0
@@ -83,8 +84,8 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
         {/* Shipping */}
         <div className="flex items-center justify-between text-stone-600">
           <span>Versand</span>
-          <span data-testid="cart-shipping" data-value={displayShipping}>
-            {displayShipping > 0
+          <span data-testid="cart-shipping" data-value={displayShipping ?? 0}>
+            {displayShipping !== null
               ? formatAmount(displayShipping)
               : <span className="text-stone-400 italic">Wird berechnet</span>
             }
@@ -125,7 +126,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
       </div>
       
       {/* Additional info */}
-      {!displayShipping && (
+      {displayShipping === null && (
         <p className="text-xs text-stone-400 italic">
           Versandkosten werden im nächsten Schritt berechnet
         </p>
