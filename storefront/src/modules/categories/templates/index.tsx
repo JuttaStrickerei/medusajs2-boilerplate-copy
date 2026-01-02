@@ -8,89 +8,152 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
+import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
+import MobileSortSelect from "@modules/store/components/mobile-sort-select"
+import { ProductFilters } from "@modules/store/templates"
 
 export default function CategoryTemplate({
   category,
   sortBy,
   page,
   countryCode,
+  filters,
 }: {
   category: HttpTypes.StoreProductCategory
   sortBy?: SortOptions
   page?: string
   countryCode: string
+  filters?: ProductFilters
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
 
   if (!category || !countryCode) notFound()
 
+  // Build parent categories array (from root to direct parent)
   const parents = [] as HttpTypes.StoreProductCategory[]
 
-  const getParents = (category: HttpTypes.StoreProductCategory) => {
-    if (category.parent_category) {
-      parents.push(category.parent_category)
-      getParents(category.parent_category)
+  const getParents = (cat: HttpTypes.StoreProductCategory) => {
+    if (cat.parent_category) {
+      getParents(cat.parent_category)
+      parents.push(cat.parent_category)
     }
   }
 
   getParents(category)
 
+  // Build breadcrumb path
+  const buildCategoryPath = (cat: HttpTypes.StoreProductCategory): string => {
+    const path = [cat.handle]
+    let current = cat.parent_category
+    while (current) {
+      path.unshift(current.handle)
+      current = current.parent_category
+    }
+    return path.join("/")
+  }
+
   return (
-    <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
-      data-testid="category-container"
-    >
-      <RefinementList sortBy={sort} data-testid="sort-by-container" />
-      <div className="w-full">
-        <div className="flex flex-row mb-8 text-2xl-semi gap-4">
-          {parents &&
-            parents.map((parent) => (
-              <span key={parent.id} className="text-ui-fg-subtle">
+    <div className="bg-stone-50 min-h-screen" data-testid="category-container">
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-stone-200">
+        <div className="content-container py-3 small:py-4">
+          <nav className="flex items-center gap-2 text-xs small:text-sm text-stone-500">
+            <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
+              Home
+            </LocalizedClientLink>
+            <span>/</span>
+            <LocalizedClientLink href="/store" className="hover:text-stone-800 transition-colors">
+              Kategorien
+            </LocalizedClientLink>
+            {parents.map((parent) => (
+              <span key={parent.id}>
+                <span>/</span>
                 <LocalizedClientLink
-                  className="mr-4 hover:text-black"
-                  href={`/categories/${parent.handle}`}
-                  data-testid="sort-by-link"
+                  href={`/categories/${buildCategoryPath(parent)}`}
+                  className="hover:text-stone-800 transition-colors"
                 >
                   {parent.name}
                 </LocalizedClientLink>
-                /
               </span>
             ))}
-          <h1 data-testid="category-page-title">{category.name}</h1>
+            <span>/</span>
+            <span className="text-stone-800">{category.name}</span>
+          </nav>
         </div>
-        {category.description && (
-          <div className="mb-8 text-base-regular">
-            <p>{category.description}</p>
-          </div>
-        )}
-        {category.category_children && (
-          <div className="mb-8 text-base-large">
-            <ul className="grid grid-cols-1 gap-2">
-              {category.category_children?.map((c) => (
-                <li key={c.id}>
-                  <InteractiveLink href={`/categories/${c.handle}`}>
-                    {c.name}
-                  </InteractiveLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <Suspense
-          fallback={
-            <SkeletonProductGrid
-              numberOfProducts={category.products?.length ?? 8}
-            />
-          }
-        >
-          <PaginatedProducts
-            sortBy={sort}
-            page={pageNumber}
-            categoryId={category.id}
-            countryCode={countryCode}
-          />
-        </Suspense>
+      </div>
+
+      {/* Main Content */}
+      <div className="content-container pt-6 small:pt-8 pb-12 small:pb-16">
+        <div className="flex flex-col small:flex-row gap-6 small:gap-8">
+          {/* Filters Sidebar - Desktop/Tablet */}
+          <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
+            <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5">
+              <RefinementList sortBy={sort} filters={filters} data-testid="sort-by-container" />
+            </div>
+          </aside>
+
+          {/* Products Grid */}
+          <main className="flex-1">
+            {/* Page Header */}
+            <div className="mb-6 small:mb-8">
+              <h1 className="font-serif text-2xl small:text-3xl medium:text-4xl font-medium text-stone-800" data-testid="category-page-title">
+                {category.name}
+              </h1>
+              {category.description && (
+                <p className="mt-2 text-sm small:text-base text-stone-600">
+                  {category.description}
+                </p>
+              )}
+            </div>
+
+            {/* Subcategories */}
+            {category.category_children && category.category_children.length > 0 && (
+              <div className="mb-6 small:mb-8">
+                <h2 className="text-sm font-medium text-stone-800 mb-3">Unterkategorien</h2>
+                <ul className="flex flex-wrap gap-2">
+                  {category.category_children.map((c) => (
+                    <li key={c.id}>
+                      <LocalizedClientLink
+                        href={`/categories/${buildCategoryPath(c)}`}
+                        className="inline-block px-4 py-2 text-sm text-stone-600 bg-stone-100 rounded-full hover:bg-stone-800 hover:text-white transition-colors"
+                      >
+                        {c.name}
+                      </LocalizedClientLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Mobile/Tablet Filter & Sort Bar */}
+            <div className="small:hidden mb-4">
+              <div className="flex items-center gap-3">
+                <MobileFilterDrawer sortBy={sort} filters={filters} />
+                <div className="flex-1">
+                  <MobileSortSelect sortBy={sort} />
+                </div>
+              </div>
+            </div>
+
+            {/* Products */}
+            <Suspense
+              fallback={
+                <SkeletonProductGrid
+                  numberOfProducts={category.products?.length ?? 8}
+                />
+              }
+            >
+              <PaginatedProducts
+                sortBy={sort}
+                page={pageNumber}
+                categoryId={category.id}
+                countryCode={countryCode}
+                filters={filters}
+              />
+            </Suspense>
+          </main>
+        </div>
       </div>
     </div>
   )

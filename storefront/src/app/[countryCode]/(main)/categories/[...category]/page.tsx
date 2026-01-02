@@ -12,6 +12,10 @@ type Props = {
   searchParams: Promise<{
     sortBy?: SortOptions
     page?: string
+    colors?: string
+    sizes?: string
+    materials?: string
+    priceRange?: string
   }>
 }
 
@@ -77,12 +81,20 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function CategoryPage(props: Props) {
   const searchParams = await props.searchParams
   const params = await props.params
-  const { sortBy, page } = searchParams
+  const { sortBy, page, colors, sizes, materials, priceRange } = searchParams
 
   const productCategory = await getCategoryByHandle(params.category)
 
   if (!productCategory) {
     notFound()
+  }
+
+  // Parse filter strings into arrays
+  const filters = {
+    colors: colors ? colors.split(",") : undefined,
+    sizes: sizes ? sizes.split(",") : undefined,
+    materials: materials ? materials.split(",") : undefined,
+    priceRange: priceRange || undefined,
   }
 
   return (
@@ -91,6 +103,7 @@ export default async function CategoryPage(props: Props) {
       sortBy={sortBy}
       page={page}
       countryCode={params.countryCode}
+      filters={filters}
     />
   )
 }

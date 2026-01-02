@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { listRegions } from "@lib/data/regions"
 import { listCategories } from "@lib/data/categories"
+import { listCollections } from "@lib/data/collections"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
@@ -12,6 +13,7 @@ import { Search, User, Heart, ShoppingBag } from "@components/icons"
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
   const categories = await listCategories()
+  const { collections } = await listCollections()
 
   return (
     <div className="sticky top-0 inset-x-0 z-50">
@@ -21,13 +23,40 @@ export default async function Nav() {
           <div className="flex items-center justify-between h-16 small:h-20">
             {/* Left Navigation - Desktop */}
             <div className="hidden small:flex items-center space-x-8 flex-1">
-              <LocalizedClientLink
-                href="/store"
-                className="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors relative group"
-              >
-                Kollektionen
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-stone-800 transition-all duration-300 group-hover:w-full" />
-              </LocalizedClientLink>
+              {collections && collections.length > 0 && (
+                <div className="relative group">
+                  <LocalizedClientLink
+                    href="/store"
+                    className="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors flex items-center gap-1 relative group"
+                  >
+                    Kollektionen
+                    <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 9l-7 7-7-7" />
+                    </svg>
+                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-stone-800 transition-all duration-300 group-hover:w-full" />
+                  </LocalizedClientLink>
+                  {/* Dropdown */}
+                  <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div className="bg-white rounded-xl shadow-lg border border-stone-200 py-2 min-w-[200px]">
+                      <LocalizedClientLink
+                        href="/store"
+                        className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-800 transition-colors font-medium border-b border-stone-100"
+                      >
+                        Alle Kollektionen
+                      </LocalizedClientLink>
+                      {collections.map((collection) => (
+                        <LocalizedClientLink
+                          key={collection.id}
+                          href={`/collections/${collection.handle}`}
+                          className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-800 transition-colors"
+                        >
+                          {collection.title}
+                        </LocalizedClientLink>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {categories && categories.length > 0 && (
                 <div className="relative group">
@@ -65,7 +94,7 @@ export default async function Nav() {
 
             {/* Mobile Menu */}
             <div className="flex small:hidden">
-              <SideMenu regions={regions} />
+              <SideMenu regions={regions} collections={collections} />
             </div>
 
             {/* Center Logo */}

@@ -10,9 +10,10 @@ import { Menu, Close, ChevronRight, Search, User, Heart } from "@components/icon
 
 interface SideMenuProps {
   regions: HttpTypes.StoreRegion[] | null
+  collections?: HttpTypes.StoreCollection[]
 }
 
-export default function SideMenu({ regions }: SideMenuProps) {
+export default function SideMenu({ regions, collections }: SideMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
@@ -32,7 +33,6 @@ export default function SideMenu({ regions }: SideMenuProps) {
 
   const navigationLinks = [
     { href: "/store", label: "Alle Produkte" },
-    { href: "/collections", label: "Kollektionen" },
     { href: "/categories", label: "Kategorien" },
     { href: "/about", label: "Über uns" },
     { href: "/contact", label: "Kontakt" },
@@ -146,6 +146,44 @@ export default function SideMenu({ regions }: SideMenuProps) {
                                 </LocalizedClientLink>
                               </li>
                             ))}
+                            
+                            {/* Collections Section */}
+                            {collections && collections.length > 0 && (
+                              <>
+                                <li>
+                                  <LocalizedClientLink
+                                    href="/collections"
+                                    onClick={closeMenu}
+                                    className="flex items-center justify-between py-3 text-stone-700 hover:text-stone-900 transition-colors group"
+                                  >
+                                    <span className="font-medium">Kollektionen</span>
+                                    <ChevronRight 
+                                      size={18} 
+                                      className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all" 
+                                    />
+                                  </LocalizedClientLink>
+                                </li>
+                                <li className="pl-4">
+                                  <ul className="space-y-1 border-l border-stone-200 pl-4">
+                                    {collections.map((collection) => (
+                                      <li key={collection.id}>
+                                        <LocalizedClientLink
+                                          href={`/collections/${collection.handle}`}
+                                          onClick={closeMenu}
+                                          className="flex items-center justify-between py-2 text-sm text-stone-600 hover:text-stone-900 transition-colors group"
+                                        >
+                                          <span>{collection.title}</span>
+                                          <ChevronRight 
+                                            size={16} 
+                                            className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all" 
+                                          />
+                                        </LocalizedClientLink>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </li>
+                              </>
+                            )}
                           </ul>
                         </nav>
 

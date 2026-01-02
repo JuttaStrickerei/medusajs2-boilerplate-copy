@@ -12,6 +12,10 @@ type Props = {
   searchParams: Promise<{
     page?: string
     sortBy?: SortOptions
+    colors?: string
+    sizes?: string
+    materials?: string
+    priceRange?: string
   }>
 }
 
@@ -78,7 +82,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function CollectionPage(props: Props) {
   const searchParams = await props.searchParams
   const params = await props.params
-  const { sortBy, page } = searchParams
+  const { sortBy, page, colors, sizes, materials, priceRange } = searchParams
 
   const collection = await getCollectionByHandle(params.handle).then(
     (collection: StoreCollection) => collection
@@ -88,12 +92,21 @@ export default async function CollectionPage(props: Props) {
     notFound()
   }
 
+  // Parse filter strings into arrays
+  const filters = {
+    colors: colors ? colors.split(",") : undefined,
+    sizes: sizes ? sizes.split(",") : undefined,
+    materials: materials ? materials.split(",") : undefined,
+    priceRange: priceRange || undefined,
+  }
+
   return (
     <CollectionTemplate
       collection={collection}
       page={page}
       sortBy={sortBy}
       countryCode={params.countryCode}
+      filters={filters}
     />
   )
 }
