@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import Image from "next/image"
 import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
 import { listCollections } from "@lib/data/collections"
@@ -6,6 +7,7 @@ import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
 import { Sparkles, Truck, RefreshCw, Shield } from "@components/icons"
+import { IMAGES } from "@lib/constants/images"
 
 export const metadata: Metadata = {
   title: "Strickerei Jutta | Österreichische Handwerkskunst seit 1965",
@@ -70,15 +72,16 @@ export default async function Home(props: {
           <div className="grid medium:grid-cols-2 gap-12 medium:gap-16 items-center">
             {/* Image */}
             <div className="relative aspect-[4/5] bg-stone-200 rounded-2xl overflow-hidden">
-              {/* Placeholder - replace with actual image */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-stone-400">
-                  <p className="font-serif text-lg">Manufaktur</p>
-                  <p className="text-sm">Bild Platzhalter</p>
-                </div>
-              </div>
+              <Image
+                src={IMAGES.home.manufaktur}
+                alt="Strickerei Jutta Manufaktur - Traditionelle Handwerkskunst seit 1965"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
               {/* Floating Badge */}
-              <div className="absolute bottom-6 left-6 bg-white p-4 rounded-xl shadow-lg">
+              <div className="absolute bottom-6 left-6 bg-white p-4 rounded-xl shadow-lg z-10">
                 <p className="font-serif text-2xl font-medium text-stone-800">1965</p>
                 <p className="text-sm text-stone-600">Gegründet in Draßburg</p>
               </div>

@@ -1,7 +1,9 @@
 import { Metadata } from "next"
+import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
 import { ArrowRight } from "@components/icons"
+import { IMAGES } from "@lib/constants/images"
 
 export const metadata: Metadata = {
   title: "Über uns",
@@ -66,8 +68,14 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-            <div className="bg-stone-100 rounded-2xl aspect-[4/3] flex items-center justify-center">
-              <span className="text-stone-400 font-serif text-lg">Historie</span>
+            <div className="relative bg-stone-100 rounded-2xl aspect-[4/3] overflow-hidden">
+              <Image
+                src={IMAGES.about.historie}
+                alt="Strickerei Jutta Historie - Drei Generationen österreichische Handwerkskunst seit 1965"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
