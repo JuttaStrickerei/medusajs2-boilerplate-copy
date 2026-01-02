@@ -6,6 +6,7 @@ import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
+import { searchProductsInMeiliSearch, isMeiliSearchConfigured } from "@lib/search/meilisearch-client"
 
 export const listProducts = async ({
   pageParam = 1,
@@ -142,17 +143,17 @@ export const listProductsWithSort = async ({
 
 /**
  * Search products by query string
+ * Uses MeiliSearch if configured, falls back to Backend API
  */
 export const searchProducts = async (
   query: string,
   countryCode: string
 ): Promise<HttpTypes.StoreProduct[]> => {
-  if (!query.trim()) {
+  if (!query || query.trim().length < 2) {
     return []
   }
 
   const region = await getRegion(countryCode)
-
   if (!region) {
     return []
   }
@@ -163,6 +164,49 @@ export const searchProducts = async (
 
   const taxCountryCode = countryCode || region?.countries?.[0]?.iso_2
 
+  // Prüfe ob MeiliSearch verfügbar ist
+  if (isMeiliSearchConfigured()) {
+    try {
+      // 1. MeiliSearch für schnelle Suche (findet Material, Tags, etc.)
+      const meiliResults = await searchProductsInMeiliSearch(query, 20)
+
+      if (meiliResults.length === 0) {
+        return []
+      }
+
+      // 2. Produkt-IDs extrahieren
+      const productIds = meiliResults.map((hit) => hit.id)
+
+      // 3. Vollständige Produktdaten vom Backend laden
+      const { products } = await sdk.client.fetch<{
+        products: HttpTypes.StoreProduct[]
+        count: number
+      }>(`/store/products`, {
+        method: "GET",
+        query: {
+          id: productIds,
+          limit: 20,
+          region_id: region.id,
+          ...(taxCountryCode && { country_code: taxCountryCode }),
+          fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+        },
+        headers,
+        cache: "no-store",
+      })
+
+      // 4. Reihenfolge von MeiliSearch beibehalten (Relevanz-Sortierung)
+      const productMap = new Map(products.map((p) => [p.id, p]))
+      return productIds
+        .map((id) => productMap.get(id))
+        .filter((p): p is HttpTypes.StoreProduct => p !== undefined)
+
+    } catch (error) {
+      console.error('MeiliSearch search failed, falling back to API:', error)
+      // Fallback zur Backend-API bei Fehler
+    }
+  }
+
+  // Fallback: Backend-API (alte Methode)
   try {
     const { products } = await sdk.client.fetch<{
       products: HttpTypes.StoreProduct[]
@@ -174,8 +218,7 @@ export const searchProducts = async (
         limit: 20,
         region_id: region.id,
         ...(taxCountryCode && { country_code: taxCountryCode }),
-        fields:
-          "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+        fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
       },
       headers,
       cache: "no-store",

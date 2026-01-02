@@ -157,6 +157,9 @@ const medusaConfig = {
         ],
       },
     }] : []),
+    // ========================================
+    // MEILISEARCH - Erweiterte Konfiguration
+    // ========================================
     ...(MEILISEARCH_HOST && MEILISEARCH_API_KEY ? [{
       resolve: '@rokmohar/medusa-plugin-meilisearch',
       options: {
@@ -167,8 +170,46 @@ const medusaConfig = {
         settings: {
           products: {
             indexSettings: {
-              searchableAttributes: ['title', 'description', 'variant_sku'],
-              displayedAttributes: ['id', 'title', 'description', 'variant_sku', 'thumbnail', 'handle'],
+              // Erweiterte durchsuchbare Felder (Reihenfolge = Priorität)
+              searchableAttributes: [
+                'title',        // Priorität 1: Produkttitel
+                'description',  // Priorität 2: Beschreibung
+                'material',     // Priorität 3: Material (z.B. "Kaschmir", "Merinowolle")
+                'subtitle',     // Priorität 4: Untertitel
+                'tags',         // Priorität 5: Tags (Array)
+                'variant_sku',  // Priorität 6: SKU
+                'collection',   // Priorität 7: Kollektion
+                'metadata',     // Priorität 8: Metadata (Key-Value)
+                'type',         // Priorität 9: Produkttyp
+              ],
+              // Angezeigte Felder in Suchergebnissen
+              displayedAttributes: [
+                'id',
+                'title',
+                'description',
+                'material',
+                'subtitle',
+                'tags',
+                'variant_sku',
+                'thumbnail',
+                'handle',
+                'collection',
+                'metadata',
+                'type',
+              ],
+              // Ranking-Regeln für bessere Relevanz
+              rankingRules: [
+                'words',      // Anzahl übereinstimmender Wörter
+                'typo',       // Tippfehler-Toleranz
+                'proximity',  // Nähe der Suchbegriffe zueinander
+                'attribute',  // Gewichtung nach searchableAttributes-Reihenfolge
+                'sort',       // Benutzerdefinierte Sortierung
+                'exactness',  // Exakte Übereinstimmungen bevorzugen
+              ],
+              // Sortierbare Attribute (für Filterung)
+              sortableAttributes: ['title', 'created_at'],
+              // Filterbare Attribute (für Facetten)
+              filterableAttributes: ['material', 'tags', 'collection', 'type'],
             },
             primaryKey: 'id',
           }

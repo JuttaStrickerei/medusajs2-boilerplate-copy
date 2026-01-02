@@ -17,8 +17,29 @@ export default async function productUpsertHandler({ event: { data }, container 
     return;
   }
 
-  const product = await productModuleService.retrieveProduct(productId);
-  await meiliSearchService.addDocuments('products', [product], SearchUtils.indexTypes.PRODUCTS);
+  // Produkt mit ALLEN relevanten Feldern und Relations laden
+  const product = await productModuleService.retrieveProduct(productId, {
+    relations: ['tags', 'collection', 'type', 'variants'],
+  });
+
+  // Dokument für MeiliSearch vorbereiten mit allen durchsuchbaren Feldern
+  const searchDocument = {
+    id: product.id,
+    title: product.title,
+    description: product.description,
+    material: product.material,
+    subtitle: product.subtitle,
+    handle: product.handle,
+    thumbnail: product.thumbnail,
+    metadata: product.metadata,
+    // Relations flach machen für bessere Suche
+    tags: product.tags?.map(tag => tag.value) || [],
+    collection: product.collection?.title || null,
+    type: product.type?.value || null,
+    variant_sku: product.variants?.map(v => v.sku).filter(Boolean) || [],
+  };
+
+  await meiliSearchService.addDocuments('products', [searchDocument], SearchUtils.indexTypes.PRODUCTS);
 }
 
 export const config: SubscriberConfig = {
