@@ -41,7 +41,7 @@ export default function ContactPage() {
       {/* Contact Methods */}
       <section className="py-16 bg-stone-50">
         <div className="content-container">
-          <div className="grid grid-cols-1 small:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 small:grid-cols-2 medium:grid-cols-4 gap-8 max-w-5xl mx-auto">
             {/* Phone */}
             <div className="bg-white rounded-2xl p-8 text-center border border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all">
               <div className="w-16 h-16 bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -53,7 +53,6 @@ export default function ContactPage() {
               </p>
               <div className="space-y-1">
                 <div className="font-medium text-stone-800">+43 2686 2259</div>
-                <div className="text-sm text-stone-600">Mo-Fr: 9:00-17:00 Uhr</div>
               </div>
             </div>
 
@@ -68,7 +67,6 @@ export default function ContactPage() {
               </p>
               <div className="space-y-1">
                 <div className="font-medium text-stone-800">office@strickerei-jutta.at</div>
-                <div className="text-sm text-stone-600">Antwort innerhalb von 24h</div>
               </div>
             </div>
 
@@ -82,19 +80,101 @@ export default function ContactPage() {
                 Erleben Sie unsere Produkte vor Ort
               </p>
               <div className="space-y-1">
-                <div className="font-medium text-stone-800">Hauptstraße 42</div>
+                <div className="font-medium text-stone-800">Wiener Neustädterstraße 47</div>
                 <div className="font-medium text-stone-800">7021 Draßburg</div>
-                <div className="text-sm text-stone-600">Nach Terminvereinbarung</div>
+              </div>
+            </div>
+
+            {/* Opening Hours */}
+            <div className="bg-white rounded-2xl p-8 text-center border border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all">
+              <div className="w-16 h-16 bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Clock size={28} className="text-white" />
+              </div>
+              <h3 className="font-serif text-xl font-medium text-stone-800 mb-4">Öffnungszeiten</h3>
+              <p className="text-stone-600 mb-4">
+                Unsere Geschäftszeiten
+              </p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-stone-600">Mo-Do</span>
+                  <span className="font-medium text-stone-800">8:00 - 16:00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-600">Fr - Sa</span>
+                  <span className="font-medium text-stone-800">8:00 - 12:00</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Contact Form & Info */}
+      {/* Map & Directions */}
+      <section className="py-16 bg-stone-50">
+        <div className="content-container">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl font-medium text-stone-800 mb-4">
+              So finden Sie uns
+            </h2>
+            <p className="text-lg text-stone-600">
+              Besuchen Sie uns in unserer Manufaktur in Draßburg
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 medium:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Google Maps */}
+            <div className="medium:col-span-2">
+              <div className="rounded-2xl overflow-hidden aspect-[16/10]">
+                <iframe
+                  src="https://www.google.com/maps?q=47.7497514,16.482084&hl=de&z=15&output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Standort Strickerei Strobl - Draßburg"
+                  className="w-full h-full"
+                />
+              </div>
+              <div className="mt-4 text-center">
+                <a 
+                  href="https://www.google.com/maps/place/Strickerei+Strobl/@47.7496977,16.4805415,304m/data=!3m1!1e3!4m6!3m5!1s0x476c30bf053f4555:0x5d518431581fd28c!8m2!3d47.7497514!4d16.482084!16s%2Fg%2F1tfcxltv?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoASAFQAw%3D%3D"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-stone-600 hover:text-stone-800 underline text-sm transition-colors"
+                >
+                  Route in Google Maps öffnen
+                </a>
+              </div>
+            </div>
+            
+            {/* Directions */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl p-6 border border-stone-200">
+                <h3 className="font-medium text-stone-800 mb-4">Anfahrt mit dem Auto</h3>
+                <ul className="text-sm text-stone-600 space-y-2">
+                  <li>• von Wien: A3 Richtung Eisenstadt</li>
+                  <li>• Kostenlose Parkplätze vorhanden</li>
+                </ul>
+              </div>
+              
+              <div className="bg-white rounded-2xl p-6 border border-stone-200">
+                <h3 className="font-medium text-stone-800 mb-4">Öffentliche Verkehrsmittel</h3>
+                <ul className="text-sm text-stone-600 space-y-2">
+                  <li>• von Wien: REX 6 bis Draßburg</li>
+                  <li>• 15 Minuten Fußweg vom Bahnhof</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Form */}
       <section className="py-16 bg-white">
         <div className="content-container">
-          <div className="grid grid-cols-1 medium:grid-cols-2 gap-12 max-w-6xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             {/* Contact Form */}
             <div>
               <h2 className="font-serif text-3xl font-medium text-stone-800 mb-6">
@@ -181,129 +261,6 @@ export default function ContactPage() {
                 </button>
               </form>
             </div>
-
-            {/* Store Information */}
-            <div className="space-y-8">
-              {/* Store Image */}
-              <div className="bg-stone-100 rounded-2xl aspect-[4/3] flex items-center justify-center">
-                <span className="text-stone-400 font-serif">Strickerei Jutta</span>
-              </div>
-              
-              {/* Opening Hours */}
-              <div className="bg-gradient-to-br from-stone-100 to-stone-200 rounded-2xl p-6">
-                <h3 className="font-serif text-xl font-medium text-stone-800 mb-4 flex items-center gap-2">
-                  <Clock size={20} />
-                  Öffnungszeiten
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-stone-600">Montag - Freitag</span>
-                    <span className="font-medium text-stone-800">9:00 - 17:00</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-stone-600">Samstag</span>
-                    <span className="font-medium text-stone-800">9:00 - 13:00</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-stone-600">Sonntag</span>
-                    <span className="font-medium text-stone-800">Geschlossen</span>
-                  </div>
-                </div>
-                <div className="mt-4 pt-4 border-t border-stone-300">
-                  <p className="text-sm text-stone-600">
-                    <strong>Hinweis:</strong> Besuche nach Terminvereinbarung möglich. 
-                    Rufen Sie uns gerne an!
-                  </p>
-                </div>
-              </div>
-
-              {/* Contact Details */}
-              <div className="bg-white rounded-2xl p-6 border border-stone-200">
-                <h3 className="font-serif text-xl font-medium text-stone-800 mb-4">Kontaktdaten</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <MapPin size={20} className="text-stone-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-medium text-stone-800">Strickerei Jutta</div>
-                      <div className="text-stone-600">Hauptstraße 42</div>
-                      <div className="text-stone-600">7021 Draßburg, Österreich</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Phone size={20} className="text-stone-600 flex-shrink-0" />
-                    <a href="tel:+4326862259" className="font-medium text-stone-800 hover:underline">
-                      +43 2686 2259
-                    </a>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Mail size={20} className="text-stone-600 flex-shrink-0" />
-                    <a href="mailto:office@strickerei-jutta.at" className="font-medium text-stone-800 hover:underline">
-                      office@strickerei-jutta.at
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Map & Directions */}
-      <section className="py-16 bg-stone-50">
-        <div className="content-container">
-          <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl font-medium text-stone-800 mb-4">
-              So finden Sie uns
-            </h2>
-            <p className="text-lg text-stone-600">
-              Besuchen Sie uns in unserer Manufaktur in Draßburg
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 medium:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Map Placeholder */}
-            <div className="medium:col-span-2">
-              <div className="bg-stone-200 rounded-2xl aspect-[16/10] flex items-center justify-center">
-                <span className="text-stone-400">Karte - Draßburg, Österreich</span>
-              </div>
-            </div>
-            
-            {/* Directions */}
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl p-6 border border-stone-200">
-                <h3 className="font-medium text-stone-800 mb-4">Anfahrt mit dem Auto</h3>
-                <ul className="text-sm text-stone-600 space-y-2">
-                  <li>• A4 Richtung Neusiedl am See</li>
-                  <li>• Ausfahrt Draßburg</li>
-                  <li>• 2 km Richtung Ortszentrum</li>
-                  <li>• Kostenlose Parkplätze vorhanden</li>
-                </ul>
-              </div>
-              
-              <div className="bg-white rounded-2xl p-6 border border-stone-200">
-                <h3 className="font-medium text-stone-800 mb-4">Öffentliche Verkehrsmittel</h3>
-                <ul className="text-sm text-stone-600 space-y-2">
-                  <li>• S-Bahn S30 bis Draßburg</li>
-                  <li>• 5 Minuten Fußweg vom Bahnhof</li>
-                  <li>• Bus 263 Haltestelle "Hauptstraße"</li>
-                </ul>
-              </div>
-              
-              <div className="bg-stone-800 text-white rounded-2xl p-6">
-                <h3 className="font-medium mb-3">Terminvereinbarung empfohlen</h3>
-                <p className="text-sm text-stone-300 mb-4">
-                  Für eine persönliche Beratung vereinbaren Sie gerne einen Termin mit uns.
-                </p>
-                <a 
-                  href="tel:+4326862259"
-                  className="inline-block bg-white text-stone-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-stone-100 transition-colors"
-                >
-                  Termin vereinbaren
-                </a>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -332,7 +289,7 @@ export default function ContactPage() {
             <div className="bg-stone-50 rounded-2xl p-6">
               <h3 className="font-medium text-stone-800 mb-3">Wie lange dauert eine Maßanfertigung?</h3>
               <p className="text-stone-600">
-                Je nach Komplexität des Stücks benötigen wir 4-8 Wochen für eine Maßanfertigung. 
+                Maßanfertigung dauert bis zu 4 Wochen. 
                 Genaue Termine besprechen wir gerne persönlich.
               </p>
             </div>
@@ -340,16 +297,7 @@ export default function ContactPage() {
             <div className="bg-stone-50 rounded-2xl p-6">
               <h3 className="font-medium text-stone-800 mb-3">Welche Zahlungsmöglichkeiten gibt es?</h3>
               <p className="text-stone-600">
-                Wir akzeptieren alle gängigen Kreditkarten, PayPal, Klarna und Banküberweisung. 
-                Bei Maßanfertigungen ist eine Anzahlung von 50% erforderlich.
-              </p>
-            </div>
-            
-            <div className="bg-stone-50 rounded-2xl p-6">
-              <h3 className="font-medium text-stone-800 mb-3">Versenden Sie auch international?</h3>
-              <p className="text-stone-600">
-                Ja, wir versenden in alle EU-Länder sowie in die Schweiz und nach Liechtenstein. 
-                Für andere Länder kontaktieren Sie uns bitte direkt.
+                Wir akzeptieren alle gängigen Kreditkarten, PayPal und Klarna.
               </p>
             </div>
           </div>
