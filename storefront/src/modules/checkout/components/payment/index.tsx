@@ -234,9 +234,6 @@ const Payment = ({
                   {paymentInfoMap[selectedPaymentMethod]?.title ||
                     selectedPaymentMethod}
                 </p>
-                <p className="text-sm text-stone-600">
-                  Zahlungsdetails werden angezeigt
-                </p>
               </div>
             </div>
           ) : paidByGiftcard ? (

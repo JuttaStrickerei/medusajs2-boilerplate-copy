@@ -168,7 +168,7 @@ const StripePaymentButton = ({
         isLoading={submitting}
         data-testid={dataTestId}
       >
-        Place order
+        Bestellung abgeben
       </Button>
       <ErrorMessage
         error={errorMessage}
@@ -216,7 +216,7 @@ const ManualTestPaymentButton = ({
         size="large"
         data-testid={dataTestId}
       >
-        Place order
+        Bestellung abgeben
       </Button>
       <ErrorMessage
         error={errorMessage}
