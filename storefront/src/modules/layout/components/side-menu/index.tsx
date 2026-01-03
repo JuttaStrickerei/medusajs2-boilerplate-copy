@@ -97,7 +97,7 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                             Strickerei Jutta
                           </div>
                           <div className="text-[10px] text-stone-500 tracking-[0.2em] uppercase">
-                            seit 1965
+                            in 3. Generation
                           </div>
                         </LocalizedClientLink>
                         <button

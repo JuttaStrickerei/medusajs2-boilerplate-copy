@@ -23,7 +23,7 @@ export default async function Footer() {
                 Strickerei Jutta
               </div>
               <div className="text-xs text-stone-500 tracking-[0.2em] uppercase mt-1">
-                seit 1965
+                in 3. Generation
               </div>
             </LocalizedClientLink>
             

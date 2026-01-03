@@ -15,7 +15,7 @@ module.exports = {
     extend: {
       // ============================================
       // STRICKEREI JUTTA - DESIGN SYSTEM
-      // Luxury Austrian Knitwear Brand (seit 1965)
+      // Luxury Austrian Knitwear Brand (in 3. Generation)
       // ============================================
       
       colors: {

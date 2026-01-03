@@ -23,7 +23,7 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
   title: {
-    default: "Strickerei Jutta | Österreichische Handwerkskunst seit 1965",
+    default: "Strickerei Jutta | Österreichische Handwerkskunst in 3. Generation",
     template: "%s | Strickerei Jutta",
   },
   description:

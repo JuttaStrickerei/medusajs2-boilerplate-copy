@@ -36,7 +36,7 @@ export default function CheckoutLayout({
               Strickerei Jutta
             </div>
             <div className="text-[10px] small:text-xs text-stone-500 tracking-[0.2em] uppercase">
-              seit 1965
+              in 3. Generation
             </div>
           </LocalizedClientLink>
           

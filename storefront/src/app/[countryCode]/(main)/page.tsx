@@ -6,11 +6,11 @@ import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
-import { Sparkles, Truck, RefreshCw, Shield } from "@components/icons"
+import { Sparkles, RefreshCw, Shield } from "@components/icons"
 import { IMAGES } from "@lib/constants/images"
 
 export const metadata: Metadata = {
-  title: "Strickerei Jutta | Österreichische Handwerkskunst seit 1965",
+  title: "Strickerei Jutta | Österreichische Handwerkskunst in 3. Generation",
   description:
     "Entdecken Sie handgefertigte Strickwaren aus feinsten Naturfasern. Kaschmir, Merinowolle und Alpaka - 60 Jahre Tradition und Qualität aus Österreich.",
 }
@@ -38,7 +38,7 @@ export default async function Home(props: {
       {/* Trust Badges Section */}
       <section className="py-12 small:py-16 bg-stone-50 border-y border-stone-200">
         <div className="content-container">
-          <div className="grid grid-cols-2 medium:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 medium:grid-cols-3 gap-8">
             <TrustBadge
               icon={<Sparkles size={24} />}
               title="Handarbeit"
@@ -50,14 +50,9 @@ export default async function Home(props: {
               description="100% Naturfasern"
             />
             <TrustBadge
-              icon={<Truck size={24} />}
-              title="Kostenloser Versand"
-              description="Ab €150 Bestellwert"
-            />
-            <TrustBadge
               icon={<RefreshCw size={24} />}
               title="30 Tage Rückgabe"
-              description="Einfach & kostenlos"
+              description="Einfach"
             />
           </div>
         </div>
@@ -74,7 +69,7 @@ export default async function Home(props: {
             <div className="relative aspect-[4/5] bg-stone-200 rounded-2xl overflow-hidden">
               <Image
                 src={IMAGES.home.manufaktur}
-                alt="Strickerei Jutta Manufaktur - Traditionelle Handwerkskunst seit 1965"
+                alt="Strickerei Jutta Manufaktur - Traditionelle Handwerkskunst in 3. Generation"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover"

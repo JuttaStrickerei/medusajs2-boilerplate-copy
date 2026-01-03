@@ -7,7 +7,7 @@ import { IMAGES } from "@lib/constants/images"
 
 export const metadata: Metadata = {
   title: "Über uns",
-  description: "Erfahren Sie mehr über Strickerei Jutta - Drei Generationen österreichische Handwerkskunst seit 1965.",
+  description: "Erfahren Sie mehr über Strickerei Jutta - Drei Generationen österreichische Handwerkskunst in 3. Generation.",
 }
 
 export default function AboutPage() {
@@ -34,7 +34,7 @@ export default function AboutPage() {
               Drei Generationen<br />österreichische Handwerkskunst
             </h1>
             <p className="text-xl small:text-2xl text-stone-300">
-              Seit 1965 steht Strickerei Jutta für kompromisslose Qualität und traditionelle Werte
+              In 3. Generation steht Strickerei Jutta für kompromisslose Qualität und traditionelle Werte
             </p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default function AboutPage() {
             <div className="relative bg-stone-100 rounded-2xl aspect-[4/3] overflow-hidden">
               <Image
                 src={IMAGES.about.historie}
-                alt="Strickerei Jutta Historie - Drei Generationen österreichische Handwerkskunst seit 1965"
+                alt="Strickerei Jutta Historie - Drei Generationen österreichische Handwerkskunst in 3. Generation"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover"

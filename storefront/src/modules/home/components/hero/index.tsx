@@ -38,14 +38,6 @@ const Hero = () => {
             </span>
           </h1>
           
-          {/* Subheadline */}
-          <p className="text-lg small:text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            Seit 1965 fertigen wir in Draßburg handgestrickte Unikate aus{' '}
-            <span className="text-stone-800 font-medium">Kaschmir</span>,{' '}
-            <span className="text-stone-800 font-medium">Merinowolle</span> und{' '}
-            <span className="text-stone-800 font-medium">Alpaka</span>.
-          </p>
-          
           {/* CTA Buttons */}
           <div className="flex flex-col small:flex-row items-center justify-center gap-4 pt-4 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
             <LocalizedClientLink href="/store">
