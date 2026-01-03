@@ -77,7 +77,7 @@ export default async function Home(props: {
               />
               {/* Floating Badge */}
               <div className="absolute bottom-6 left-6 bg-white p-4 rounded-xl shadow-lg z-10">
-                <p className="font-serif text-2xl font-medium text-stone-800">1965</p>
+                <p className="font-serif text-2xl font-medium text-stone-800">in 3. Generation</p>
                 <p className="text-sm text-stone-600">Gegründet in Draßburg</p>
               </div>
             </div>
@@ -88,15 +88,9 @@ export default async function Home(props: {
                 Unsere Geschichte
               </p>
               <h2 className="font-serif text-3xl small:text-4xl font-medium text-stone-800 leading-tight">
-                60 Jahre österreichische Tradition
+                Über 60 Jahre österreichische Tradition
               </h2>
               <div className="space-y-4 text-stone-600 leading-relaxed">
-                <p>
-                  Was 1965 als kleine Familienstrickerei in Draßburg begann, ist heute ein 
-                  renommiertes Unternehmen in der dritten Generation. Jutta Müller gründete 
-                  das Unternehmen mit der Vision, hochwertige Strickwaren in traditioneller 
-                  Handarbeit zu fertigen.
-                </p>
                 <p>
                   Unsere Philosophie ist einfach: Qualität ohne Kompromisse. Wir verwenden 
                   ausschließlich feinste Naturfasern und fertigen jedes Stück mit der Präzision 

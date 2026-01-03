@@ -50,7 +50,7 @@ class InvoiceGeneratorService extends MedusaService({
     const invoiceConfigs = await this.listInvoiceConfigs()
     const config = invoiceConfigs[0] || {
       company_name: "Jutta Strickerei",
-      company_address: "Wiener Neustädterstraße 47, 7021 Drassburg",
+      company_address: "Wiener Neustädterstraße 47, 7021, Draßburg",
       company_phone: "+43 22686 2259",
       company_email: "office@strickerei-jutta.at",
       company_logo: null,

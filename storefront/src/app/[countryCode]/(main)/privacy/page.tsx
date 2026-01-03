@@ -41,7 +41,7 @@ export default function PrivacyPage() {
               <p className="text-stone-600 mb-4">
                 Verantwortlich für die Datenverarbeitung auf dieser Website ist:<br />
                 Strickerei Jutta<br />
-                Hauptstraße 1<br />
+                Wiener Neustädterstraße 47<br />
                 7021 Draßburg, Österreich<br />
                 E-Mail: office@strickerei-jutta.at
               </p>

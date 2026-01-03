@@ -4,7 +4,7 @@ import EmptyCartMessage from "../components/empty-cart-message"
 import SignInPrompt from "../components/sign-in-prompt"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { ShoppingBag, Shield, Truck, RefreshCw } from "@components/icons"
+import { ShoppingBag } from "@components/icons"
 
 const CartTemplate = ({
   cart,
@@ -60,25 +60,6 @@ const CartTemplate = ({
               <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
                 <ItemsTemplate cart={cart} />
               </div>
-
-              {/* Trust Badges */}
-              <div className="grid grid-cols-1 small:grid-cols-3 gap-4">
-                <TrustBadge
-                  icon={<Truck size={20} />}
-                  title="Kostenloser Versand"
-                  description="Ab €150 Bestellwert"
-                />
-                <TrustBadge
-                  icon={<RefreshCw size={20} />}
-                  title="30 Tage Rückgabe"
-                  description="Kostenlose Rücksendung"
-                />
-                <TrustBadge
-                  icon={<Shield size={20} />}
-                  title="Sicherer Checkout"
-                  description="SSL-verschlüsselt"
-                />
-              </div>
             </div>
 
             {/* Right Column - Summary */}
@@ -91,18 +72,6 @@ const CartTemplate = ({
         ) : (
           <EmptyCartMessage />
         )}
-      </div>
-    </div>
-  )
-}
-
-function TrustBadge({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
-  return (
-    <div className="flex items-center gap-3 p-4 bg-white rounded-xl border border-stone-200">
-      <span className="text-stone-400">{icon}</span>
-      <div>
-        <p className="text-sm font-medium text-stone-800">{title}</p>
-        <p className="text-xs text-stone-500">{description}</p>
       </div>
     </div>
   )

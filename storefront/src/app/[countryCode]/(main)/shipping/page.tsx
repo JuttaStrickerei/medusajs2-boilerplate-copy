@@ -50,13 +50,11 @@ export default function ShippingPage() {
               <div className="grid grid-cols-1 small:grid-cols-2 gap-6">
                 <div className="p-4 bg-stone-50 rounded-xl">
                   <h3 className="font-medium text-stone-800 mb-2">Österreich</h3>
-                  <p className="text-stone-600 text-sm mb-2">Versandkosten: € 4,90</p>
-                  <p className="text-stone-600 text-sm">Ab € 75,00 versandkostenfrei</p>
+                  <p className="text-stone-600 text-sm">Versand per Post</p>
                 </div>
                 <div className="p-4 bg-stone-50 rounded-xl">
                   <h3 className="font-medium text-stone-800 mb-2">EU & Schweiz</h3>
-                  <p className="text-stone-600 text-sm mb-2">Versandkosten: € 9,90</p>
-                  <p className="text-stone-600 text-sm">Ab € 150,00 versandkostenfrei</p>
+                  <p className="text-stone-600 text-sm">in Zukunft möglich</p>
                 </div>
               </div>
 
@@ -66,9 +64,7 @@ export default function ShippingPage() {
                   <div>
                     <h3 className="font-medium text-stone-800 mb-1">Lieferzeit</h3>
                     <p className="text-stone-600 text-sm">
-                      Innerhalb Österreichs: 2-4 Werktage<br />
-                      EU: 4-7 Werktage<br />
-                      Schweiz: 5-8 Werktage
+                      Innerhalb Österreichs: 2-4 Werktage
                     </p>
                   </div>
                 </div>

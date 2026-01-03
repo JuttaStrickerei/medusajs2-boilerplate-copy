@@ -19,7 +19,7 @@ export default async function createDefaultConfigLoader({
 
   await service.create({
     company_name: "Jutta Strickerei",
-    company_address: "Wiener Neustädterstraße 47, 7021, Drassburg",
+    company_address: "Wiener Neustädterstraße 47, 7021, Draßburg",
     company_phone: "+43 2686 2259",
     company_email: "office@strickerei-jutta.at",
   })

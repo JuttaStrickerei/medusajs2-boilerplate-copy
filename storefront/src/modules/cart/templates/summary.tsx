@@ -5,7 +5,7 @@ import DiscountCode from "@modules/checkout/components/discount-code"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@components/ui"
-import { ArrowRight, Shield, Lock } from "@components/icons"
+import { ArrowRight } from "@components/icons"
 
 type SummaryProps = {
   cart: HttpTypes.StoreCart & {
@@ -60,18 +60,6 @@ const Summary = ({ cart }: SummaryProps) => {
           <ArrowRight size={18} className="ml-2" />
         </Button>
       </LocalizedClientLink>
-
-      {/* Security Note */}
-      <div className="flex items-center justify-center gap-4 pt-2">
-        <div className="flex items-center gap-1.5 text-xs text-stone-500">
-          <Lock size={14} />
-          <span>SSL-verschlüsselt</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-stone-500">
-          <Shield size={14} />
-          <span>Sicherer Checkout</span>
-        </div>
-      </div>
     </div>
   )
 }

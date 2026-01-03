@@ -37,7 +37,7 @@ export default function ImprintPage() {
               
               <div className="text-stone-600 mb-6">
                 <p className="mb-2"><strong>Strickerei Jutta</strong></p>
-                <p>Hauptstraße 1</p>
+                <p>Wiener Neustädterstraße 47</p>
                 <p>7021 Draßburg</p>
                 <p>Österreich</p>
               </div>

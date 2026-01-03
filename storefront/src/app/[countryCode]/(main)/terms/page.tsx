@@ -41,7 +41,7 @@ export default function TermsPage() {
               <p className="text-stone-600 mb-4">
                 Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge, die über 
                 unseren Online-Shop geschlossen werden. Vertragspartner ist die Strickerei 
-                Jutta, Hauptstraße 1, 7021 Draßburg, Österreich.
+                Jutta, Wiener Neustädterstraße 47, 7021 Draßburg, Österreich.
               </p>
 
               <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
