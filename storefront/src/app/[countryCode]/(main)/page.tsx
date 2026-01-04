@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import Image from "next/image"
 import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
+import NewsletterForm from "@modules/home/components/newsletter-form"
 import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -112,32 +113,7 @@ export default async function Home(props: {
       {/* Newsletter Section */}
       <section className="section-container bg-stone-800 text-white">
         <div className="content-container text-center">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="font-serif text-3xl small:text-4xl font-medium">
-              Bleiben Sie informiert
-            </h2>
-            <p className="text-stone-300 leading-relaxed">
-              Erhalten Sie exklusive Einblicke in neue Kollektionen, 
-              Pflegetipps für Ihre Strickwaren und besondere Angebote.
-            </p>
-            <form className="flex flex-col small:flex-row gap-3 max-w-md mx-auto pt-4">
-              <input
-                type="email"
-                placeholder="Ihre E-Mail-Adresse"
-                className="flex-1 px-4 py-3 rounded-lg bg-stone-700 border border-stone-600 text-white placeholder:text-stone-400 focus:outline-none focus:border-stone-400 transition-colors"
-              />
-              <Button type="submit" className="bg-white text-stone-800 hover:bg-stone-100">
-                Anmelden
-              </Button>
-            </form>
-            <p className="text-xs text-stone-500">
-              Mit der Anmeldung stimmen Sie unseren{" "}
-              <LocalizedClientLink href="/privacy" className="underline hover:text-white">
-                Datenschutzrichtlinien
-              </LocalizedClientLink>{" "}
-              zu.
-            </p>
-          </div>
+          <NewsletterForm />
         </div>
       </section>
     </>
