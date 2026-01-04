@@ -1,40 +1,20 @@
-import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework" 
+// DEAKTIVIERT - Logik wurde in API Route verschoben
+// Der Event-Bus ist asynchron und wartet nicht auf den Subscriber,
+// daher wurde die Logik direkt in src/api/store/newsletter/route.ts implementiert
 
-export default async function orderPlacedHandler({
+import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
+
+// Leerer Handler um Fehler zu vermeiden
+export default async function newsletterSignupHandler({
   event: { data },
   container,
-}: SubscriberArgs<{ email: string, first_name: string, last_name: string }>) {
+}: SubscriberArgs<{ email: string; first_name?: string; last_name?: string }>) {
   const logger = container.resolve("logger")
-  const notificationModuleService = container.resolve("notification")
-
-  // Debug: Log subscriber execution
-  logger.info(`[Newsletter Subscriber] Processing newsletter signup event - email: ${data.email}, first_name: ${data.first_name || 'none'}, last_name: ${data.last_name || 'none'}`)
-
-  try {
-    logger.info(`[Newsletter Subscriber] Creating notification with channel 'newsletter'`)
-    
-    const result = await notificationModuleService.createNotifications({
-      channel: "newsletter",
-      to: data.email,
-      template: "newsletter-signup",
-      data: {
-        first_name: data.first_name,
-        last_name: data.last_name,
-      },
-    })
-
-    logger.info(`[Newsletter Subscriber] Notification created successfully`)
-    logger.info(`[Newsletter Subscriber] Result: ${JSON.stringify(result, null, 2)}`)
-  } catch (error: any) {
-    logger.error(`[Newsletter Subscriber] Failed to create notification`)
-    logger.error(`[Newsletter Subscriber] Error: ${error.message}`)
-    logger.error(`[Newsletter Subscriber] Error type: ${error.constructor.name}`)
-    logger.error(`[Newsletter Subscriber] Full error: ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}`)
-    throw error
-  }
+  logger.info(`[Newsletter Subscriber] DEAKTIVIERT - Logik in API Route verschoben. Email: ${data.email}`)
+  // Keine Aktion - Logik ist jetzt in der API Route
 }
 
 export const config: SubscriberConfig = {
-  event: `newsletter.signup`,
+  event: "newsletter.signup",
 }
 

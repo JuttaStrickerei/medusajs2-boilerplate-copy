@@ -91,32 +91,46 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
       // Debug: Log successful response
       const mailchimpId = "id" in response ? response.id : "unknown"
       const status = response.status || "unknown"
-      this.logger_.info(`[Mailchimp] Successfully added subscriber to Mailchimp - email: ${to}, mailchimpId: ${mailchimpId}, status: ${status}`)
-      this.logger_.info(`[Mailchimp] Full response: ${JSON.stringify(response, null, 2)}`)
+      this.logger_.info(`[Mailchimp] Successfully added NEW subscriber: ${to}, id: ${mailchimpId}, status: ${status}`)
   
       return {
         id: "id" in response ? response.id : "",
       }
     } catch (error: any) {
-      // Debug: Log error details
-      const errorResponse = error.response ? {
-        status: error.response.status,
-        statusText: error.response.statusText,
-        body: error.response.body,
-        text: error.response.text,
-      } : 'no response object'
-      this.logger_.error(`[Mailchimp] Failed to add subscriber to Mailchimp - email: ${to}, error: ${error.message}, errorType: ${error.constructor.name}`)
-      this.logger_.error(`[Mailchimp] Error response: ${JSON.stringify(errorResponse, null, 2)}`)
-      this.logger_.error(`[Mailchimp] Full error: ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}`)
+      const errorBody = error.response?.body || {}
+      const errorTitle = errorBody.title || ""
+      const errorDetail = errorBody.detail || error.message || ""
+      const errorStatus = error.response?.status
 
-      const errorMessage = error.response?.body?.detail || 
-                          error.response?.text || 
-                          error.message || 
-                          'Unknown error'
-      
+      this.logger_.info(`[Mailchimp] Error for ${to}: title=${errorTitle}, status=${errorStatus}, detail=${errorDetail}`)
+
+      // "Member Exists" Fehler - E-Mail ist bereits in der Liste
+      if (
+        errorTitle === "Member Exists" ||
+        (errorStatus === 400 && errorDetail.includes("already a list member"))
+      ) {
+        this.logger_.info(`[Mailchimp] Email ALREADY SUBSCRIBED: ${to} - returning special status`)
+        
+        // WICHTIG: Speziellen Identifier zurückgeben (großgeschrieben für Konsistenz)
+        return {
+          id: "ALREADY_SUBSCRIBED",
+        }
+      }
+
+      // "Invalid Resource" Fehler - Ungültige E-Mail-Adresse
+      if (errorTitle === "Invalid Resource" || errorDetail.includes("valid email")) {
+        this.logger_.error(`[Mailchimp] Invalid email address: ${to}`)
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+        )
+      }
+
+      // Andere Fehler
+      this.logger_.error(`[Mailchimp] Unexpected error for ${to}: ${errorDetail}`)
       throw new MedusaError(
-        MedusaError.Types.UNEXPECTED_STATE, 
-        `Failed to send newsletter signup: ${errorMessage}`
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Newsletter-Anmeldung fehlgeschlagen: ${errorDetail}`
       )
     }
   }
