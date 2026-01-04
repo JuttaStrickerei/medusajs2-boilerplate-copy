@@ -11,6 +11,11 @@ import {
   RESEND_FROM_EMAIL,
   SENDGRID_API_KEY,
   SENDGRID_FROM_EMAIL,
+  MAILCHIMP_API_KEY,
+  MAILCHIMP_SERVER,
+  MAILCHIMP_LIST_ID,
+  MAILCHIMP_NEW_PRODUCTS_SUBJECT_LINE,
+  MAILCHIMP_NEW_PRODUCTS_STOREFRONT_URL,
   SHOULD_DISABLE_ADMIN,
   STORE_CORS,
   STRIPE_API_KEY,
@@ -115,7 +120,7 @@ const medusaConfig = {
         }
       }
     }] : []),
-    ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL || RESEND_API_KEY && RESEND_FROM_EMAIL ? [{
+    ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL || RESEND_API_KEY && RESEND_FROM_EMAIL || MAILCHIMP_API_KEY && MAILCHIMP_SERVER && MAILCHIMP_LIST_ID ? [{
       key: Modules.NOTIFICATION,
       resolve: '@medusajs/notification',
       options: {
@@ -136,6 +141,22 @@ const medusaConfig = {
               channels: ['email'],
               api_key: RESEND_API_KEY,
               from: RESEND_FROM_EMAIL,
+            },
+          }] : []),
+          ...(MAILCHIMP_API_KEY && MAILCHIMP_SERVER && MAILCHIMP_LIST_ID ? [{
+            resolve: './src/modules/mailchimp',
+            id: 'mailchimp',
+            options: {
+              channels: ['newsletter'],
+              apiKey: MAILCHIMP_API_KEY,
+              server: MAILCHIMP_SERVER,
+              listId: MAILCHIMP_LIST_ID,
+              templates: {
+                new_products: {
+                  subject_line: MAILCHIMP_NEW_PRODUCTS_SUBJECT_LINE,
+                  storefront_url: MAILCHIMP_NEW_PRODUCTS_STOREFRONT_URL,
+                },
+              },
             },
           }] : []),
         ]
