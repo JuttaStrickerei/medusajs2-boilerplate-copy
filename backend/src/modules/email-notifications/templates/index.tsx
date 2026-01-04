@@ -4,12 +4,16 @@ import { InviteUserEmail, INVITE_USER, isInviteUserData } from './invite-user'
 import { OrderPlacedTemplate, ORDER_PLACED, isOrderPlacedTemplateData } from './order-placed'
 import { ShipmentSentTemplate, SHIPMENT_SENT, isShipmentSentTemplateData } from './shipment-sent'
 import { ShipmentDeliveredTemplate, SHIPMENT_DELIVERED, isShipmentDeliveredTemplateData } from './shipment-delivered'
+import { ContactFormTemplate, CONTACT_FORM, isContactFormTemplateData } from './contact-form'
+import { ContactFormConfirmationTemplate, CONTACT_FORM_CONFIRMATION, isContactFormConfirmationTemplateData } from './contact-form-confirmation'
 
 export const EmailTemplates = {
   INVITE_USER,
   ORDER_PLACED,
   SHIPMENT_SENT,
-  SHIPMENT_DELIVERED
+  SHIPMENT_DELIVERED,
+  CONTACT_FORM,
+  CONTACT_FORM_CONFIRMATION
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -52,6 +56,24 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <ShipmentDeliveredTemplate {...data} />
 
+    case EmailTemplates.CONTACT_FORM:
+      if (!isContactFormTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.CONTACT_FORM}"`
+        )
+      }
+      return <ContactFormTemplate {...data} />
+
+    case EmailTemplates.CONTACT_FORM_CONFIRMATION:
+      if (!isContactFormConfirmationTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.CONTACT_FORM_CONFIRMATION}"`
+        )
+      }
+      return <ContactFormConfirmationTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -64,5 +86,7 @@ export {
   InviteUserEmail, 
   OrderPlacedTemplate, 
   ShipmentSentTemplate, 
-  ShipmentDeliveredTemplate 
+  ShipmentDeliveredTemplate,
+  ContactFormTemplate,
+  ContactFormConfirmationTemplate
 }
