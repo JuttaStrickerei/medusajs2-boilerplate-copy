@@ -1,7 +1,14 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { INotificationModuleService } from "@medusajs/framework/types"
+import { z } from "zod"
 import { EmailTemplates } from "../../../modules/email-notifications/templates"
+
+export const newsletterSignupSchema = z.object({
+  email: z.string().email(),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+})
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const logger = req.scope.resolve("logger")
