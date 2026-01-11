@@ -13,10 +13,10 @@ import {
   CreateShippingOptionDTO
 } from "@medusajs/framework/types"
 import { SendcloudClient } from "./client"
-import { SendcloudOptions, SendcloudCreateParcelRequest, SendcloudParcelItem } from "./types"
+import { SendcloudOptions, SendcloudCreateParcelRequest } from "./types"
 
 
-// MODIFIED MappedOrderItem interface with extended product info
+// MODIFIED MappedOrderItem interface
 interface MappedOrderItem {
   id: string;
   title: string;
@@ -26,12 +26,18 @@ interface MappedOrderItem {
   unitPrice: number;
   hs_code?: string | null;
   origin_country?: string | null;
-  product_id?: string;      // Medusa product ID
-  product_handle?: string;  // Product handle for URL generation
-  thumbnail?: string;       // Product image URL
 }
 
-// NOTE: SendcloudParcelItem interface is now imported from types.ts
+// NEW Interface for Sendcloud's expected parcel_item structure
+interface SendcloudParcelItem {
+  description: string;
+  quantity: number;
+  weight: string;
+  sku?: string;
+  value: string;
+  hs_code?: string;
+  origin_country?: string;
+}
 
 
 class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderService {
@@ -224,9 +230,6 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
       let itemUnitPrice: number = loggableOrderLineItem.unit_price || 0; 
       let hsCode: string | null | undefined = null;
       let originCountry: string | null | undefined = null;
-      let productId: string | undefined = undefined;
-      let productHandle: string | undefined = undefined;
-      let thumbnail: string | undefined = undefined;
   
       if (loggableOrderLineItem.variant) {
         hsCode = loggableOrderLineItem.variant.hs_code; 
@@ -237,18 +240,6 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
         } else if (loggableOrderLineItem.variant.product && typeof loggableOrderLineItem.variant.product.weight === 'number') {
           weightInGrams = loggableOrderLineItem.variant.product.weight;
         }
-
-        // Extract product info for Sendcloud
-        if (loggableOrderLineItem.variant.product) {
-          productId = loggableOrderLineItem.variant.product.id;
-          productHandle = loggableOrderLineItem.variant.product.handle;
-          thumbnail = loggableOrderLineItem.variant.product.thumbnail || loggableOrderLineItem.thumbnail;
-        }
-      }
-
-      // Fallback to line item thumbnail
-      if (!thumbnail && loggableOrderLineItem.thumbnail) {
-        thumbnail = loggableOrderLineItem.thumbnail;
       }
   
       mappedItems.push({
@@ -260,9 +251,6 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
         unitPrice: itemUnitPrice,
         hs_code: hsCode,
         origin_country: originCountry,
-        product_id: productId,
-        product_handle: productHandle,
-        thumbnail: thumbnail,
       });
     });
   
@@ -333,20 +321,9 @@ async createReturnFulfillment(
   }
 
   // Extract Sendcloud Method ID from shipping option data
-  // The sendcloud_id can be in various locations depending on how the shipping option was configured
-  console.log("[SendcloudProvider] Return - shipping_option:", JSON.stringify(shipping_option, null, 2));
-  
-  const sendcloudMethodId = 
-    (shipping_option.data?.data as any)?.sendcloud_id ||  // Nested in data.data
-    (shipping_option.data as any)?.sendcloud_id ||         // Direct in data
-    (shipping_option as any)?.sendcloud_id ||              // Direct on shipping_option
-    (shipping_option.service_zone?.fulfillment_set?.service_zones?.[0]?.shipping_options?.[0]?.data as any)?.sendcloud_id; // Deeply nested
-    
-  console.log("[SendcloudProvider] Return - extracted sendcloud_id:", sendcloudMethodId);
-  
+  const sendcloudMethodId = (shipping_option.data?.data as any)?.sendcloud_id || shipping_option.data?.sendcloud_id;
   if (!sendcloudMethodId) {
     console.error("[SendcloudProvider] Missing sendcloud_id in shipping_option.data");
-    console.error("[SendcloudProvider] shipping_option structure:", JSON.stringify(shipping_option, null, 2));
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
       "Sendcloud shipping method ID (data.sendcloud_id) is required in shipping option data."
@@ -369,30 +346,22 @@ async createReturnFulfillment(
     customerAddress = order.shipping_address;
     orderNumber = String(order.display_id || order.id);
   } 
-  // Strategy 2: Fetch order data using container_ with "query" service (Medusa v2 style)
+  // Strategy 2: Fetch order data using container_
   else if (items && items.length > 0 && this.container_) {
     try {
-      // Use "query" service for Medusa v2 (more reliable than Modules.ORDER)
-      const query = this.container_.resolve("query");
+      const orderModuleService = this.container_.resolve(Modules.ORDER);
       const firstLineItemId = items[0].line_item_id;
       
-      console.log("[SendcloudProvider] Fetching order data for line_item_id:", firstLineItemId);
+      const orders = await orderModuleService.listOrders(
+        {},
+        {
+          relations: ["shipping_address", "items", "items.variant"],
+          take: 50,
+          order: { created_at: "DESC" }
+        }
+      );
       
-      // Query orders with the line item
-      const { data: orders } = await query.graph({
-        entity: "order",
-        fields: [
-          "id",
-          "display_id",
-          "email",
-          "shipping_address.*",
-          "items.id",
-        ],
-        filters: {},
-      });
-      
-      // Find order containing this line item
-      const matchingOrder = orders?.find((o: any) =>
+      const matchingOrder = orders.find((o: any) =>
         o.items?.some((item: any) => item.id === firstLineItemId)
       );
       
@@ -401,30 +370,24 @@ async createReturnFulfillment(
         orderFound = true;
         customerAddress = matchingOrder.shipping_address;
         orderNumber = String(matchingOrder.display_id || matchingOrder.id);
-        console.log("[SendcloudProvider] Found order:", orderNumber, "with shipping address");
       }
     } catch (error) {
       console.error("[SendcloudProvider] Failed to fetch order data:", error instanceof Error ? error.message : error);
     }
   }
 
-  // Strategy 3: Last resort - use placeholder data with Austria as default
-  // (since most return methods are Austria-specific)
+  // Strategy 3: Last resort - use placeholder data
   if (!orderFound) {
     console.warn("[SendcloudProvider] No order data found, using placeholder (may result in invalid labels)");
-    
-    // Try to get country from delivery_address (which is the merchant address)
-    const fallbackCountry = delivery_address?.country_code?.toLowerCase() || "at";
-    
     customerAddress = {
       first_name: "Customer",
       last_name: "Return",
       address_1: "Return Address",
       address_2: "1",
-      city: "Wien",
-      postal_code: "1070",
-      country_code: fallbackCountry, // Use delivery country as fallback
-      phone: "+436641234567",
+      city: "City",
+      postal_code: "12345",
+      country_code: "de",
+      phone: "+49000000000",
       email: "returns@placeholder.com"
     };
   }
@@ -442,9 +405,6 @@ async createReturnFulfillment(
 
     totalWeightKg = this.calculateTotalWeight(mappedItems);
 
-    // Get storefront URL for product links
-    const storefrontUrl = process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://strickerei-jutta.at"
-    
     sendcloudParcelItems = mappedItems.map(item => ({
       description: item.title,
       quantity: item.quantity,
@@ -452,10 +412,7 @@ async createReturnFulfillment(
       sku: item.sku || undefined,
       value: item.unitPrice.toFixed(2),
       hs_code: item.hs_code || undefined,
-      origin_country: item.origin_country?.toUpperCase() || undefined, // Must be uppercase (e.g., "AT")
-      product_id: item.product_id || undefined,
-      // Use thumbnail URL or construct product page URL
-      product_url: item.thumbnail || (item.product_handle ? `${storefrontUrl}/products/${item.product_handle}` : undefined),
+      origin_country: item.origin_country || undefined
     }));
   }
   // Fallback: Use basic item data (will have placeholder weights/prices)
@@ -529,19 +486,18 @@ async createReturnFulfillment(
     const response = await this.client_.createParcel(parcelData);
     const createdParcel = response.parcel;
 
-    // Use FULL URL for label download
-    // Use /labels/ endpoint (public, no auth required)
+    // Use our proxy URL for label download (requires authentication)
     // Note: For returns, the label is requested later by the subscriber
-    const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
-    const proxyLabelUrl = `${backendUrl}/labels/${createdParcel.id}`
+    // This is just a placeholder that will be updated
+    const proxyLabelUrl = `/admin/sendcloud/labels/${createdParcel.id}`
     
     return {
       data: {
         parcel_id: createdParcel.id,
         tracking_number: createdParcel.tracking_number,
         tracking_url: createdParcel.tracking_url,
-        label_url: proxyLabelUrl, // Full URL for admin panel
-        sendcloud_label_url: createdParcel.label?.normal_printer?.[0], // Direct Sendcloud URL as backup
+        label_url: proxyLabelUrl,
+        sendcloud_label_url: createdParcel.label?.normal_printer?.[0], // Keep original for reference
         is_return: true,
       },
       labels: [{
@@ -592,9 +548,6 @@ async createReturnFulfillment(
     }
     const countryCode = order.shipping_address.country_code.toUpperCase();
 
-    // Get storefront URL for product links
-    const storefrontUrl = process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://strickerei-jutta.at"
-    
     const sendcloudParcelItems: SendcloudParcelItem[] = itemsForSendcloudParcel.map(item => ({
       description: item.title,
       quantity: item.quantity,
@@ -602,10 +555,7 @@ async createReturnFulfillment(
       sku: item.sku || undefined, 
       value: item.unitPrice.toFixed(2), 
       hs_code: item.hs_code || undefined,
-      origin_country: item.origin_country?.toUpperCase() || undefined, // Must be uppercase (e.g., "AT")
-      product_id: item.product_id || undefined,
-      // Use thumbnail URL or construct product page URL
-      product_url: item.thumbnail || (item.product_handle ? `${storefrontUrl}/products/${item.product_handle}` : undefined),
+      origin_country: item.origin_country || undefined,
     }));
 
     const orderNumberString = String(order.display_id || order.id!);
@@ -633,18 +583,17 @@ async createReturnFulfillment(
     try {
       const response = await this.client_.createParcel(parcelData);
 
-      // Use FULL URL for label download
-      // Use /labels/ endpoint (public, no auth required)
-      const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
-      const proxyLabelUrl = `${backendUrl}/labels/${response.parcel.id}`
+      // Use our proxy URL for label download (requires authentication)
+      // Format: /admin/sendcloud/labels/:parcel_id
+      const proxyLabelUrl = `/admin/sendcloud/labels/${response.parcel.id}`
       
       return {
         data: {
           parcel_id: response.parcel.id,
           tracking_number: response.parcel.tracking_number,
           tracking_url: response.parcel.tracking_url,
-          label_url: proxyLabelUrl, // Full URL for admin panel
-          sendcloud_label_url: response.parcel.label?.normal_printer?.[0], // Direct Sendcloud URL as backup
+          label_url: proxyLabelUrl,
+          sendcloud_label_url: response.parcel.label?.normal_printer?.[0], // Keep original for reference
           carrier: response.parcel.carrier?.code,
           status: response.parcel.status?.message
         },
@@ -671,74 +620,35 @@ async createReturnFulfillment(
   ): Promise<Record<string, unknown>> {
     const parcelId = (data as any)?.parcel_id; 
     
-    console.log("[SendcloudProvider] cancelFulfillment called with parcel_id:", parcelId);
-    
-    // If no parcel ID, we can still "cancel" in Medusa - just return success
     if (!parcelId) {
-      console.warn("[SendcloudProvider] No parcel ID found - cancelling only in Medusa");
-      return { 
-        ...data, 
-        cancelled_at: new Date().toISOString(),
-        cancel_note: "No Sendcloud parcel ID - cancelled in Medusa only" 
-      };
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "No parcel ID found in fulfillment data - cannot cancel in Sendcloud" 
+      );
     }
   
     try {
-      const result = await this.client_.cancelOrDeleteParcel(Number(parcelId));
-      console.log("[SendcloudProvider] Parcel cancelled in Sendcloud:", parcelId, result);
-      return { 
-        ...data, 
-        cancelled_at: new Date().toISOString(),
-        sendcloud_cancel_status: result.status,
-        sendcloud_cancel_message: result.message
-      }; 
+      await this.client_.cancelOrDeleteParcel(Number(parcelId));
+      return data; 
     } catch (error) {
-      const errorMessage = (error instanceof Error ? error.message : String(error)).toLowerCase();
+      const errorMessage = error instanceof Error ? error.message : String(error);
       
-      console.log("[SendcloudProvider] Cancel error:", errorMessage);
-      
-      // Handle cases where parcel is already deleted/cancelled or doesn't exist
-      // These should all be treated as "success" for the cancel operation
-      const successPatterns = [
-        "parcel has been deleted",
-        "parcel is deleted",
-        "no parcel matches",
-        "parcel not found",
-        "not found",
-        "gone",
-        "404",
-        "does not exist",
-        "already being cancelled",
-        "shipment is already being cancelled",
-        "this shipment is already being cancelled",
-        "already cancelled",
-        "already canceled",
-        "cannot be cancelled",
-        "status does not allow",
-        "cancellation not possible",
-        "parcel was cancelled",
-        "is being cancelled",
-        "shipment is being cancelled",
-        "bad request",  // Often means already cancelled
-      ];
-      
-      for (const pattern of successPatterns) {
-        if (errorMessage.includes(pattern)) {
-          console.log("[SendcloudProvider] Parcel", parcelId, "already cancelled/deleted - treating as success");
-          return { 
-            ...data, 
-            cancelled_at: new Date().toISOString(),
-            cancel_note: "Parcel was already cancelled or deleted in Sendcloud" 
-          };
-        }
+      // Handle cases where parcel is already deleted or doesn't exist
+      if (
+        errorMessage.includes("Parcel has been deleted") || 
+        errorMessage.includes("No Parcel matches the given query") ||
+        errorMessage.includes("Gone") ||
+        errorMessage.includes("404") ||
+        errorMessage.includes("not found") ||
+        errorMessage.includes("does not exist") ||
+        errorMessage.includes("already being cancelled") ||
+        errorMessage.includes("already cancelled")
+      ) {
+        return data; 
       }
       
-      // Only throw for genuine unexpected errors
-      console.error("[SendcloudProvider] Unexpected error cancelling Sendcloud parcel:", errorMessage);
-      throw new MedusaError(
-        MedusaError.Types.UNEXPECTED_STATE,
-        `Failed to cancel parcel in Sendcloud: ${errorMessage}`
-      );
+      console.error("[SendcloudProvider] Error cancelling Sendcloud parcel:", errorMessage);
+      throw error; 
     }
   }
 
