@@ -11,7 +11,13 @@ export const metadata: Metadata = {
   description: "Sicher und einfach bestellen",
 }
 
-export default async function Checkout() {
+export default async function Checkout({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ countryCode: string }>
+  searchParams: Promise<{ step?: string }>
+}) {
   const cart = await retrieveCart()
 
   if (!cart) {
@@ -19,6 +25,7 @@ export default async function Checkout() {
   }
 
   const customer = await retrieveCustomer()
+  // Allow guest checkout - no redirect needed
 
   return (
     <div className="content-container py-8 small:py-12">

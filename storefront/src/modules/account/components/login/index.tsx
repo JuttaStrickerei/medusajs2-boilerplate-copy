@@ -8,9 +8,10 @@ import { User } from "@components/icons"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
+  redirectUrl?: string
 }
 
-const Login = ({ setCurrentView }: Props) => {
+const Login = ({ setCurrentView, redirectUrl }: Props) => {
   const [message, formAction] = useActionState(login, null)
 
   return (
@@ -33,6 +34,9 @@ const Login = ({ setCurrentView }: Props) => {
 
       {/* Form */}
       <form className="space-y-4" action={formAction}>
+        {redirectUrl && (
+          <input type="hidden" name="redirect_url" value={redirectUrl} />
+        )}
         <div className="space-y-4">
           <Input
             label="E-Mail Adresse"

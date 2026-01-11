@@ -1,16 +1,13 @@
-"use client"
-
 import CartTotals from "@modules/common/components/cart-totals"
 import DiscountCode from "@modules/checkout/components/discount-code"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import CheckoutButton from "@modules/checkout/components/checkout-button"
 import { HttpTypes } from "@medusajs/types"
-import { Button } from "@components/ui"
-import { ArrowRight } from "@components/icons"
 
 type SummaryProps = {
   cart: HttpTypes.StoreCart & {
     promotions: HttpTypes.StorePromotion[]
   }
+  isAuthenticated?: boolean
 }
 
 function getCheckoutStep(cart: HttpTypes.StoreCart) {
@@ -23,7 +20,7 @@ function getCheckoutStep(cart: HttpTypes.StoreCart) {
   }
 }
 
-const Summary = ({ cart }: SummaryProps) => {
+const Summary = ({ cart, isAuthenticated = false }: SummaryProps) => {
   const step = getCheckoutStep(cart)
 
   return (
@@ -50,16 +47,11 @@ const Summary = ({ cart }: SummaryProps) => {
       />
 
       {/* Checkout Button */}
-      <LocalizedClientLink
-        href={"/checkout?step=" + step}
-        data-testid="checkout-button"
-        className="block"
-      >
-        <Button className="w-full h-12 text-base">
-          Zur Kasse
-          <ArrowRight size={18} className="ml-2" />
-        </Button>
-      </LocalizedClientLink>
+      <CheckoutButton 
+        cart={cart}
+        step={step}
+        isAuthenticated={isAuthenticated}
+      />
     </div>
   )
 }

@@ -65,7 +65,12 @@ const CartTemplate = ({
             {/* Right Column - Summary */}
             <div className="large:sticky large:top-24 large:self-start">
               <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6">
-                {cart && cart.region && <Summary cart={cart as any} />}
+                {cart && cart.region && (
+                  <Summary 
+                    cart={cart as any} 
+                    isAuthenticated={!!customer}
+                  />
+                )}
               </div>
             </div>
           </div>
