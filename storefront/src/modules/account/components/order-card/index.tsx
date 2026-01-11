@@ -46,9 +46,14 @@ const OrderCard = ({ order }: OrderCardProps) => {
     })
   }
 
-  // Get fulfillment info
+  // Get fulfillment info - WICHTIG: Gecancelte Fulfillments ausfiltern!
   const fulfillments = (order.fulfillments || []) as FulfillmentWithData[]
-  const latestFulfillment = fulfillments[0]
+  const activeFulfillments = fulfillments.filter(f => !f.canceled_at)
+  
+  // Nehme das neueste aktive Fulfillment (letztes im Array, da sortiert nach created_at)
+  const latestFulfillment = activeFulfillments.length > 0 
+    ? activeFulfillments[activeFulfillments.length - 1] 
+    : null
   const fulfillmentStatus = latestFulfillment ? getFulfillmentStatus(latestFulfillment) : "pending"
   
   // Get tracking URL from labels or data
