@@ -417,7 +417,8 @@ export async function placeOrder(cartId?: string) {
     const orderCacheTag = await getCacheTag("orders")
     revalidateTag(orderCacheTag)
 
-    removeCartId()
+    // WICHTIG: await hinzugefügt - Cart-Cookie muss gelöscht sein bevor Redirect
+    await removeCartId()
     redirect(`/${countryCode}/order/${cartRes?.order.id}/confirmed`)
   }
 
