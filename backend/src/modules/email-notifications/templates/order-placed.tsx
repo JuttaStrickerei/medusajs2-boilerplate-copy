@@ -38,7 +38,8 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   }
 
   // Calculate items total
-  const itemsTotal = order.items?.reduce((acc, item) => acc + (item.total || 0), 0) || 0
+  // Note: item.total is BigNumberValue in Medusa 2.0, convert to number
+  const itemsTotal = order.items?.reduce((acc, item) => acc + Number(item.total || 0), 0) || 0
   const shippingTotal = (order as any).shipping_total || 0
 
   return (
@@ -309,7 +310,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                       color: '#1c1917', 
                       margin: '0' 
                     }}>
-                      {formatCurrency((item.total || 0) / (item.quantity || 1), order.currency_code)}
+                      {formatCurrency(Number(item.total || 0) / (item.quantity || 1), order.currency_code)}
                     </Text>
                   </td>
                 </tr>

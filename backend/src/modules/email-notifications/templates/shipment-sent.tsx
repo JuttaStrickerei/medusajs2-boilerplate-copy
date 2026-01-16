@@ -141,7 +141,7 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                   </Text>
                 </td>
               </tr>
-              {fulfillment.tracking_number && (
+              {((fulfillment as any).labels?.[0]?.tracking_number || (fulfillment as any).data?.tracking_number) && (
                 <tr>
                   <td style={{ paddingTop: '8px', paddingBottom: '4px' }}>
                     <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
@@ -150,7 +150,7 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                   </td>
                   <td align="right" style={{ paddingTop: '8px', paddingBottom: '4px' }}>
                     <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1c1917', margin: '0' }}>
-                      {fulfillment.tracking_number}
+                      {(fulfillment as any).labels?.[0]?.tracking_number || (fulfillment as any).data?.tracking_number}
                     </Text>
                   </td>
                 </tr>
