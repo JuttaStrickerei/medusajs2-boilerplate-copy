@@ -59,7 +59,10 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
 
   // Check if order is fully delivered (nur aktive Fulfillments berücksichtigen)
   const isOrderDelivered = order.fulfillment_status === "delivered" || 
-    (regularFulfillments.length > 0 && regularFulfillments.every(f => getFulfillmentStatus(f) === "delivered"))
+    (regularFulfillments.length > 0 && regularFulfillments.every(f => {
+      const status = getFulfillmentStatus(f)
+      return status === "delivered"
+    }))
   
   // Check if there's an active return
   const hasActiveReturn = returnFulfillments.length > 0
@@ -265,7 +268,7 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
           const trackingNumber = fulfillment.labels?.[0]?.tracking_number || getTrackingNumber(fulfillmentData)
           const carrier = getCarrierName(fulfillmentData)
 
-          // Skip pending fulfillments
+          // Pending status - no fulfillment data yet
           if (status === "pending") {
             return (
               <div key={fulfillment.id} className="bg-stone-50 rounded-xl p-5 flex items-center gap-4">
@@ -273,9 +276,46 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                   <Clock size={20} className="text-stone-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-stone-700">Wird vorbereitet</p>
+                  <p className="font-medium text-stone-700">In Bearbeitung</p>
                   <p className="text-sm text-stone-500">
-                    Sendung {index + 1} wird für den Versand vorbereitet
+                    Ihre Bestellung wird bearbeitet
+                  </p>
+                </div>
+              </div>
+            )
+          }
+
+          // Preparing status - Label created, announced to carrier, but NOT yet shipped
+          // NO tracking link shown in this state!
+          if (status === "preparing") {
+            return (
+              <div key={fulfillment.id} className="bg-white rounded-xl border border-amber-200 overflow-hidden">
+                {/* Status Header - Preparing */}
+                <div className="px-5 py-4 flex items-center justify-between bg-amber-50 border-b border-amber-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                      <Package size={20} className="text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-amber-800">Wird für den Versand vorbereitet</p>
+                      {carrier && (
+                        <p className="text-sm text-amber-600">via {carrier}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {regularFulfillments.length > 1 && (
+                    <span className="text-sm text-amber-600">
+                      Sendung {index + 1} von {regularFulfillments.length}
+                    </span>
+                  )}
+                </div>
+
+                {/* Info - NO tracking link yet */}
+                <div className="p-5">
+                  <p className="text-sm text-stone-600">
+                    Ihr Paket wurde für den Versand vorbereitet und wird in Kürze vom Paketdienst abgeholt. 
+                    Sobald es unterwegs ist, erhalten Sie hier Ihren Tracking-Link.
                   </p>
                 </div>
               </div>

@@ -78,6 +78,12 @@ const OrderCard = ({ order }: OrderCardProps) => {
           label: "Versendet",
           className: "bg-blue-100 text-blue-700"
         }
+      case "preparing":
+        return {
+          icon: <Package size={14} />,
+          label: "Wird vorbereitet",
+          className: "bg-amber-100 text-amber-700"
+        }
       case "canceled":
         return {
           icon: <Package size={14} />,
