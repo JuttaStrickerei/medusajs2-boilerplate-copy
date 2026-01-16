@@ -9,7 +9,6 @@ import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
-import MobileSortSelect from "@modules/store/components/mobile-sort-select"
 import { ProductFilters } from "@modules/store/templates"
 
 export default function CategoryTemplate({
@@ -126,13 +125,10 @@ export default function CategoryTemplate({
               </div>
             )}
 
-            {/* Mobile/Tablet Filter & Sort Bar */}
+            {/* Mobile/Tablet Filter Bar */}
             <div className="small:hidden mb-4">
               <div className="flex items-center gap-3">
                 <MobileFilterDrawer sortBy={sort} filters={filters} />
-                <div className="flex-1">
-                  <MobileSortSelect sortBy={sort} />
-                </div>
               </div>
             </div>
 
