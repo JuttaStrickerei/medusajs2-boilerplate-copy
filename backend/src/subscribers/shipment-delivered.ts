@@ -3,6 +3,8 @@ import { INotificationModuleService, IOrderModuleService, IFulfillmentModuleServ
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { INVOICE_MODULE } from "../modules/invoice_generator"
+import InvoiceGeneratorService from "../modules/invoice_generator/service"
 
 export default async function fulfillmentCreatedHandler({
   event: { data },
@@ -37,6 +39,11 @@ export default async function fulfillmentCreatedHandler({
   const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
   console.log('shippingAddress data:', shippingAddress)
 
+  // Get company logo from invoice config
+  const invoiceGeneratorService = container.resolve(INVOICE_MODULE) as InvoiceGeneratorService
+  const invoiceConfigs = await invoiceGeneratorService.listInvoiceConfigs()
+  const companyLogo = invoiceConfigs[0]?.company_logo || null
+
   try {
     await notificationModuleService.createNotifications({
       to: order.email,
@@ -49,6 +56,7 @@ export default async function fulfillmentCreatedHandler({
         },
         order,
         shippingAddress,
+        companyLogo,
         preview: 'Ihre Bestellung wurde zugestellt.'
       }
     })

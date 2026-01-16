@@ -4,6 +4,8 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { generateInvoicePdfWorkflow } from "../workflows/generate-invoice-pdf"
+import { INVOICE_MODULE } from "../modules/invoice_generator"
+import InvoiceGeneratorService from "../modules/invoice_generator/service"
 
 export default async function shipmentCreatedHandler({
   event: { data },
@@ -51,6 +53,11 @@ export default async function shipmentCreatedHandler({
   })
   console.log('fulfillment data:', fulfillment)
 
+  // Get company logo from invoice config
+  const invoiceGeneratorService = container.resolve(INVOICE_MODULE) as InvoiceGeneratorService
+  const invoiceConfigs = await invoiceGeneratorService.listInvoiceConfigs()
+  const companyLogo = invoiceConfigs[0]?.company_logo || null
+
   try {
     // PDF-Rechnung generieren
     const { result: { pdf_buffer } } = await generateInvoicePdfWorkflow(container)
@@ -76,6 +83,7 @@ export default async function shipmentCreatedHandler({
         order,
         fulfillment,  // ← Jetzt wird es übergeben!
         shippingAddress,
+        companyLogo,
         preview: 'Vielen Dank für die Bestellung!'
       },
       attachments: [

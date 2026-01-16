@@ -1,4 +1,4 @@
-import { Text, Section, Hr, Container } from '@react-email/components'
+import { Text, Section, Hr, Container, Img } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 import { OrderDTO, OrderAddressDTO, FulfillmentDTO } from '@medusajs/framework/types'
@@ -9,6 +9,7 @@ interface ShipmentSentPreviewProps {
   order: OrderDTO & { display_id: string; summary: { raw_current_order_total: { value: number } } }
   fulfillment: FulfillmentDTO
   shippingAddress: OrderAddressDTO
+  companyLogo?: string
 }
 
 export interface ShipmentSentTemplateProps {
@@ -16,13 +17,14 @@ export interface ShipmentSentTemplateProps {
   fulfillment: FulfillmentDTO
   shippingAddress: OrderAddressDTO
   preview?: string
+  companyLogo?: string
 }
 
 export const isShipmentSentTemplateData = (data: any): data is ShipmentSentTemplateProps =>
  typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
   PreviewProps: ShipmentSentPreviewProps
-} = ({ order, fulfillment, shippingAddress, preview = 'Your order has been shipped!' }) => {
+} = ({ order, fulfillment, shippingAddress, preview = 'Your order has been shipped!', companyLogo }) => {
   return (
  <Base preview={preview}>
   <Section>
@@ -30,44 +32,57 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
       {/* Header */}
       <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
         <tr>
-          <td align="center">
+          <td align="center" style={{ paddingBottom: '24px', borderBottom: '1px solid #e7e5e4' }}>
+            {companyLogo && (
+              <Img
+                src={companyLogo}
+                alt="Logo"
+                width="120"
+                height="60"
+                style={{ 
+                  margin: '0 auto 16px auto',
+                  display: 'block'
+                }}
+              />
+            )}
             <Text style={{ 
-              fontSize: '26px', 
-              fontWeight: 'bold', 
-              color: '#1a1a1a',
-              margin: '0 0 8px 0'
+              fontSize: '30px', 
+              fontWeight: '500', 
+              color: '#1c1917',
+              margin: '0 0 8px 0',
+              fontFamily: 'Georgia, serif'
             }}>
-              Versandbestätigung
+              Ihre Bestellung ist unterwegs!
             </Text>
             <Text style={{ 
               fontSize: '14px', 
-              color: '#666666',
+              color: '#57534e',
               margin: '0'
             }}>
-              Ihre Bestellung ist unterwegs!
+              Versandbestätigung
             </Text>
           </td>
         </tr>
       </table>
 
       {/* Persönliche Ansprache */}
-      <table width="100%" cellPadding="20" cellSpacing="0" style={{ 
-        backgroundColor: '#f8f9fa', 
-        marginBottom: '25px'
+      <table width="100%" cellPadding="0" cellSpacing="0" style={{ 
+        marginBottom: '24px'
       }}>
         <tr>
           <td>
             <Text style={{ 
-              fontSize: '16px',
-              color: '#1a1a1a',
-              margin: '0 0 12px 0'
+              fontSize: '14px',
+              color: '#57534e',
+              margin: '0',
+              lineHeight: '22px'
             }}>
               Hallo {shippingAddress.first_name} {shippingAddress.last_name},
             </Text>
             <Text style={{ 
               fontSize: '14px',
-              color: '#4a5568',
-              margin: '0',
+              color: '#57534e',
+              margin: '8px 0 0 0',
               lineHeight: '22px'
             }}>
               großartige Neuigkeiten! Ihre Bestellung wurde versandt und ist bereits auf dem Weg zu Ihnen. 
@@ -78,44 +93,18 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
       </table>
 
       {/* Versandübersicht */}
-      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px' }}>
         <tr>
           <td>
-            <Text style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold', 
-              color: '#1a1a1a',
-              margin: '0 0 15px 0',
-              paddingBottom: '8px',
-              borderBottom: '2px solid #e2e8f0'
-            }}>
-              Versandübersicht
-            </Text>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <table width="100%" cellPadding="0" cellSpacing="0">
+            <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '12px' }}>
               <tr>
-                <td style={{ paddingBottom: '8px' }}>
-                  <Text style={{ fontSize: '14px', color: '#718096', margin: '0' }}>
-                    Bestellnummer:
-                  </Text>
-                </td>
-                <td align="right" style={{ paddingBottom: '8px' }}>
-                  <Text style={{ fontSize: '14px', fontWeight: 'bold', color: '#1a1a1a', margin: '0' }}>
-                    #{order.display_id}
-                  </Text>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '8px' }}>
-                  <Text style={{ fontSize: '14px', color: '#718096', margin: '0' }}>
+                <td style={{ paddingBottom: '4px' }}>
+                  <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
                     Bestelldatum:
                   </Text>
                 </td>
-                <td align="right" style={{ paddingBottom: '8px' }}>
-                  <Text style={{ fontSize: '14px', color: '#1a1a1a', margin: '0' }}>
+                <td align="right" style={{ paddingBottom: '4px' }}>
+                  <Text style={{ fontSize: '14px', color: '#1c1917', margin: '0' }}>
                     {new Date(order.created_at).toLocaleDateString('de-DE', { 
                       year: 'numeric', 
                       month: 'long', 
@@ -125,13 +114,25 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                 </td>
               </tr>
               <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <Text style={{ fontSize: '14px', color: '#718096', margin: '0' }}>
+                <td style={{ paddingBottom: '4px' }}>
+                  <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
+                    Bestellnummer:
+                  </Text>
+                </td>
+                <td align="right" style={{ paddingBottom: '4px' }}>
+                  <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1c1917', margin: '0' }}>
+                    #{order.display_id}
+                  </Text>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '4px' }}>
+                  <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
                     Versanddatum:
                   </Text>
                 </td>
-                <td align="right" style={{ paddingBottom: '12px' }}>
-                  <Text style={{ fontSize: '14px', fontWeight: '500', color: '#059669', margin: '0' }}>
+                <td align="right" style={{ paddingBottom: '4px' }}>
+                  <Text style={{ fontSize: '14px', fontWeight: '500', color: '#16a34a', margin: '0' }}>
                     {new Date(fulfillment.created_at).toLocaleDateString('de-DE', { 
                       year: 'numeric', 
                       month: 'long', 
@@ -140,22 +141,35 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                   </Text>
                 </td>
               </tr>
+              {fulfillment.tracking_number && (
+                <tr>
+                  <td style={{ paddingTop: '8px', paddingBottom: '4px' }}>
+                    <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
+                      Sendungsnummer:
+                    </Text>
+                  </td>
+                  <td align="right" style={{ paddingTop: '8px', paddingBottom: '4px' }}>
+                    <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1c1917', margin: '0' }}>
+                      {fulfillment.tracking_number}
+                    </Text>
+                  </td>
+                </tr>
+              )}
             </table>
           </td>
         </tr>
       </table>
 
       {/* Versandte Artikel */}
-      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px', paddingTop: '24px', borderTop: '1px solid #e7e5e4' }}>
         <tr>
           <td>
             <Text style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold', 
-              color: '#1a1a1a',
-              margin: '0 0 15px 0',
-              paddingBottom: '8px',
-              borderBottom: '2px solid #e2e8f0'
+              fontSize: '20px', 
+              fontWeight: '500', 
+              color: '#1c1917',
+              margin: '0 0 16px 0',
+              fontFamily: 'Georgia, serif'
             }}>
               Versandte Artikel
             </Text>
@@ -164,34 +178,54 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
         <tr>
           <td>
             <table width="100%" cellPadding="0" cellSpacing="0" style={{ 
-              border: '1px solid #e2e8f0'
+              border: '1px solid #e7e5e4',
+              borderRadius: '8px',
+              overflow: 'hidden'
             }}>
               {/* Tabellenkopf */}
-              <tr style={{ backgroundColor: '#f8f9fa' }}>
+              <tr style={{ backgroundColor: '#fafaf9' }}>
                 <td style={{ 
                   padding: '12px', 
-                  borderBottom: '1px solid #e2e8f0'
+                  borderBottom: '1px solid #e7e5e4',
+                  width: '80px'
                 }}>
                   <Text style={{ 
                     fontSize: '12px', 
-                    fontWeight: 'bold', 
-                    color: '#4a5568', 
+                    fontWeight: '600', 
+                    color: '#1c1917', 
                     margin: '0',
-                    textTransform: 'uppercase'
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Bild
+                  </Text>
+                </td>
+                <td style={{ 
+                  padding: '12px', 
+                  borderBottom: '1px solid #e7e5e4'
+                }}>
+                  <Text style={{ 
+                    fontSize: '12px', 
+                    fontWeight: '600', 
+                    color: '#1c1917', 
+                    margin: '0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
                   }}>
                     Artikel
                   </Text>
                 </td>
                 <td align="center" style={{ 
                   padding: '12px', 
-                  borderBottom: '1px solid #e2e8f0'
+                  borderBottom: '1px solid #e7e5e4'
                 }}>
                   <Text style={{ 
                     fontSize: '12px', 
-                    fontWeight: 'bold', 
-                    color: '#4a5568', 
+                    fontWeight: '600', 
+                    color: '#1c1917', 
                     margin: '0',
-                    textTransform: 'uppercase'
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
                   }}>
                     Menge
                   </Text>
@@ -201,16 +235,55 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
               {/* Artikel-Zeilen */}
               {order.items.map((item, index) => (
                 <tr key={item.id} style={{ 
-                  backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafbfc' 
+                  backgroundColor: '#ffffff'
                 }}>
                   <td style={{ 
                     padding: '14px 12px',
-                    borderBottom: index < order.items.length - 1 ? '1px solid #f1f5f9' : 'none'
+                    borderBottom: index < order.items.length - 1 ? '1px solid #e7e5e4' : 'none',
+                    width: '80px'
+                  }}>
+                    {item.thumbnail ? (
+                      <Img
+                        src={item.thumbnail}
+                        alt={item.product_title || 'Produktbild'}
+                        width="64"
+                        height="64"
+                        style={{
+                          borderRadius: '8px',
+                          objectFit: 'cover',
+                          border: '1px solid #e7e5e4',
+                          backgroundColor: '#fafaf9'
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '8px',
+                        backgroundColor: '#fafaf9',
+                        border: '1px solid #e7e5e4',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <Text style={{ 
+                          fontSize: '10px', 
+                          color: '#78716c',
+                          margin: '0'
+                        }}>
+                          Kein Bild
+                        </Text>
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ 
+                    padding: '14px 12px',
+                    borderBottom: index < order.items.length - 1 ? '1px solid #e7e5e4' : 'none'
                   }}>
                     <Text style={{ 
                       fontSize: '14px', 
                       fontWeight: '500', 
-                      color: '#1a1a1a', 
+                      color: '#1c1917', 
                       margin: '0 0 4px 0' 
                     }}>
                       {item.product_title}
@@ -218,7 +291,7 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                     {item.title !== item.product_title && (
                       <Text style={{ 
                         fontSize: '13px', 
-                        color: '#718096', 
+                        color: '#57534e', 
                         margin: '0' 
                       }}>
                         {item.title}
@@ -227,11 +300,11 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                   </td>
                   <td align="center" style={{ 
                     padding: '14px 12px',
-                    borderBottom: index < order.items.length - 1 ? '1px solid #f1f5f9' : 'none'
+                    borderBottom: index < order.items.length - 1 ? '1px solid #e7e5e4' : 'none'
                   }}>
                     <Text style={{ 
                       fontSize: '14px', 
-                      color: '#4a5568', 
+                      color: '#57534e', 
                       margin: '0' 
                     }}>
                       {item.quantity}
@@ -245,64 +318,59 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
       </table>
 
       {/* Lieferadresse */}
-      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px', paddingTop: '24px', borderTop: '1px solid #e7e5e4' }}>
         <tr>
           <td>
-            <Text style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold', 
-              color: '#1a1a1a',
-              margin: '0 0 15px 0',
-              paddingBottom: '8px',
-              borderBottom: '2px solid #e2e8f0'
-            }}>
-              Lieferadresse
-            </Text>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <table width="100%" cellPadding="16" cellSpacing="0" style={{ 
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff'
-            }}>
+            <table width="100%" cellPadding="0" cellSpacing="0">
               <tr>
                 <td>
                   <Text style={{ 
                     fontSize: '14px', 
                     fontWeight: '500', 
-                    color: '#1a1a1a', 
+                    color: '#1c1917', 
                     margin: '0 0 8px 0' 
+                  }}>
+                    Lieferadresse
+                  </Text>
+                  <Text style={{ 
+                    fontSize: '14px', 
+                    color: '#57534e', 
+                    margin: '0 0 2px 0',
+                    lineHeight: '20px'
                   }}>
                     {shippingAddress.first_name} {shippingAddress.last_name}
                   </Text>
                   <Text style={{ 
                     fontSize: '14px', 
-                    color: '#4a5568', 
-                    margin: '0 0 4px 0' 
+                    color: '#57534e', 
+                    margin: '0 0 2px 0',
+                    lineHeight: '20px'
                   }}>
                     {shippingAddress.address_1}
                   </Text>
                   {shippingAddress.address_2 && (
                     <Text style={{ 
                       fontSize: '14px', 
-                      color: '#4a5568', 
-                      margin: '0 0 4px 0' 
+                      color: '#57534e', 
+                      margin: '0 0 2px 0',
+                      lineHeight: '20px'
                     }}>
                       {shippingAddress.address_2}
                     </Text>
                   )}
                   <Text style={{ 
                     fontSize: '14px', 
-                    color: '#4a5568', 
-                    margin: '0 0 4px 0' 
+                    color: '#57534e', 
+                    margin: '0 0 2px 0',
+                    lineHeight: '20px'
                   }}>
                     {shippingAddress.postal_code} {shippingAddress.city}
                   </Text>
                   <Text style={{ 
                     fontSize: '14px', 
-                    color: '#4a5568', 
-                    margin: '0' 
+                    color: '#57534e', 
+                    margin: '0',
+                    lineHeight: '20px'
                   }}>
                     {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{shippingAddress.country_code}
                   </Text>
@@ -315,8 +383,8 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
 
       {/* Footer */}
       <Hr style={{ 
-        borderTop: '1px solid #e2e8f0', 
-        margin: '35px 0 20px 0' 
+        borderTop: '1px solid #e7e5e4', 
+        margin: '24px 0 20px 0' 
       }} />
       
       <table width="100%" cellPadding="0" cellSpacing="0">
@@ -324,15 +392,18 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
           <td align="center">
             <Text style={{ 
               fontSize: '13px', 
-              color: '#718096', 
+              color: '#57534e', 
               margin: '0 0 8px 0',
               lineHeight: '20px'
             }}>
-              Vielen Dank für Ihr Vertrauen! Bei Fragen zu Ihrem Versand kontaktieren Sie uns gerne unter office@strickere-jutta.at
+              Vielen Dank für Ihr Vertrauen! Bei Fragen zu Ihrem Versand kontaktieren Sie uns gerne unter{' '}
+              <a href="mailto:office@strickerei-jutta.at" style={{ color: '#1c1917', textDecoration: 'underline' }}>
+                office@strickerei-jutta.at
+              </a>
             </Text>
             <Text style={{ 
               fontSize: '12px', 
-              color: '#a0aec0', 
+              color: '#78716c', 
               margin: '0' 
             }}>
               Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht auf diese Nachricht.

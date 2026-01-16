@@ -29,16 +29,13 @@ export const ContactFormConfirmationTemplate: React.FC<ContactFormConfirmationTe
           {/* Header */}
           <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
             <tr>
-              <td align="center" style={{ 
-                backgroundColor: '#1c1917', 
-                padding: '20px',
-                borderRadius: '8px 8px 0 0'
-              }}>
+              <td align="center" style={{ paddingBottom: '24px', borderBottom: '1px solid #e7e5e4' }}>
                 <Text style={{ 
-                  fontSize: '26px', 
-                  fontWeight: 'bold', 
-                  color: '#ffffff',
-                  margin: '0'
+                  fontSize: '30px', 
+                  fontWeight: '500', 
+                  color: '#1c1917',
+                  margin: '0 0 8px 0',
+                  fontFamily: 'Georgia, serif'
                 }}>
                   Vielen Dank für Ihre Nachricht!
                 </Text>
@@ -47,69 +44,69 @@ export const ContactFormConfirmationTemplate: React.FC<ContactFormConfirmationTe
           </table>
 
           {/* Content */}
-          <table width="100%" cellPadding="20" cellSpacing="0" style={{ 
-            backgroundColor: '#ffffff',
-            marginBottom: '25px'
+          <table width="100%" cellPadding="0" cellSpacing="0" style={{ 
+            marginBottom: '24px'
           }}>
             <tr>
               <td>
                 <Text style={{ 
-                  fontSize: '16px',
-                  color: '#1a1a1a',
-                  margin: '0 0 15px 0',
-                  lineHeight: '24px'
+                  fontSize: '14px',
+                  color: '#57534e',
+                  margin: '0',
+                  lineHeight: '22px'
                 }}>
                   Liebe/r {firstName},
                 </Text>
                 <Text style={{ 
                   fontSize: '14px',
-                  color: '#4a5568',
-                  margin: '0 0 15px 0',
+                  color: '#57534e',
+                  margin: '8px 0 0 0',
                   lineHeight: '22px'
                 }}>
-                  wir haben Ihre Anfrage zum Thema <strong>"{subject}"</strong> erhalten und werden uns so schnell wie möglich bei Ihnen melden.
+                  wir haben Ihre Anfrage zum Thema <strong style={{ color: '#1c1917' }}>"{subject}"</strong> erhalten und werden uns so schnell wie möglich bei Ihnen melden.
                 </Text>
                 <Text style={{ 
                   fontSize: '14px',
-                  color: '#4a5568',
-                  margin: '0 0 15px 0',
+                  color: '#57534e',
+                  margin: '8px 0 0 0',
                   lineHeight: '22px'
                 }}>
                   In der Regel erhalten Sie innerhalb von 1-2 Werktagen eine Antwort von uns.
                 </Text>
                 <Text style={{ 
                   fontSize: '14px',
-                  color: '#4a5568',
-                  margin: '0',
+                  color: '#57534e',
+                  margin: '16px 0 0 0',
                   lineHeight: '22px'
                 }}>
                   Mit freundlichen Grüßen,<br />
-                  <strong>Ihr Team von Strickerei Jutta</strong>
+                  <strong style={{ color: '#1c1917' }}>Ihr Team von Strickerei Jutta</strong>
                 </Text>
               </td>
             </tr>
           </table>
 
           {/* Footer Info */}
-          <table width="100%" cellPadding="16" cellSpacing="0" style={{ 
-            backgroundColor: '#f8f9fa',
-            borderTop: '1px solid #e2e8f0'
+          <table width="100%" cellPadding="0" cellSpacing="0" style={{ 
+            paddingTop: '24px',
+            borderTop: '1px solid #e7e5e4',
+            marginTop: '24px'
           }}>
             <tr>
               <td>
                 <Text style={{ 
-                  fontSize: '12px',
-                  color: '#718096',
+                  fontSize: '13px',
+                  color: '#57534e',
                   margin: '0 0 8px 0',
-                  lineHeight: '18px'
+                  lineHeight: '20px'
                 }}>
-                  <strong>Kontaktinformationen:</strong>
+                  <strong style={{ color: '#1c1917' }}>Kontaktinformationen:</strong>
                 </Text>
                 <Text style={{ 
-                  fontSize: '12px',
-                  color: '#718096',
+                  fontSize: '13px',
+                  color: '#57534e',
                   margin: '0 0 4px 0',
-                  lineHeight: '18px'
+                  lineHeight: '20px'
                 }}>
                   Strickerei Jutta<br />
                   Wiener Neustädterstraße 47<br />
@@ -117,13 +114,13 @@ export const ContactFormConfirmationTemplate: React.FC<ContactFormConfirmationTe
                   Österreich
                 </Text>
                 <Text style={{ 
-                  fontSize: '12px',
-                  color: '#718096',
+                  fontSize: '13px',
+                  color: '#57534e',
                   margin: '8px 0 0 0',
-                  lineHeight: '18px'
+                  lineHeight: '20px'
                 }}>
                   Telefon: +43 2686 2259<br />
-                  E-Mail: office@strickerei-jutta.at
+                  E-Mail: <a href="mailto:office@strickerei-jutta.at" style={{ color: '#1c1917', textDecoration: 'underline' }}>office@strickerei-jutta.at</a>
                 </Text>
               </td>
             </tr>

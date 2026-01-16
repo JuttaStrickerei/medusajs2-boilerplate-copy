@@ -42,22 +42,19 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
           {/* Header */}
           <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
             <tr>
-              <td align="center" style={{ 
-                backgroundColor: '#1c1917', 
-                padding: '20px',
-                borderRadius: '8px 8px 0 0'
-              }}>
+              <td align="center" style={{ paddingBottom: '24px', borderBottom: '1px solid #e7e5e4' }}>
                 <Text style={{ 
-                  fontSize: '26px', 
-                  fontWeight: 'bold', 
-                  color: '#ffffff',
-                  margin: '0 0 8px 0'
+                  fontSize: '30px', 
+                  fontWeight: '500', 
+                  color: '#1c1917',
+                  margin: '0 0 8px 0',
+                  fontFamily: 'Georgia, serif'
                 }}>
                   Neue Kontaktanfrage
                 </Text>
                 <Text style={{ 
                   fontSize: '14px', 
-                  color: '#d6d3d1',
+                  color: '#57534e',
                   margin: '0'
                 }}>
                   Sie haben eine neue Nachricht über das Kontaktformular erhalten
@@ -67,39 +64,41 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
           </table>
 
           {/* Kontaktinformationen */}
-          <table width="100%" cellPadding="20" cellSpacing="0" style={{ 
-            backgroundColor: '#f8f9fa', 
-            marginBottom: '25px',
-            border: '1px solid #e2e8f0'
+          <table width="100%" cellPadding="0" cellSpacing="0" style={{ 
+            marginBottom: '24px',
+            padding: '16px',
+            border: '1px solid #e7e5e4',
+            borderRadius: '8px',
+            backgroundColor: '#fafaf9'
           }}>
             <tr>
               <td>
                 <Text style={{ 
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  color: '#1a1a1a',
-                  margin: '0 0 15px 0'
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#1c1917',
+                  margin: '0 0 12px 0'
                 }}>
                   Kontaktinformationen
                 </Text>
                 <table width="100%" cellPadding="0" cellSpacing="0">
                   <tr>
                     <td style={{ paddingBottom: '8px' }}>
-                      <Text style={{ fontSize: '14px', color: '#718096', margin: '0', display: 'inline' }}>
-                        <strong>Name:</strong>
+                      <Text style={{ fontSize: '14px', color: '#57534e', margin: '0', display: 'inline' }}>
+                        <strong style={{ color: '#1c1917' }}>Name:</strong>
                       </Text>
-                      <Text style={{ fontSize: '14px', color: '#1a1a1a', margin: '0 0 0 8px', display: 'inline' }}>
+                      <Text style={{ fontSize: '14px', color: '#1c1917', margin: '0 0 0 8px', display: 'inline' }}>
                         {firstName} {lastName}
                       </Text>
                     </td>
                   </tr>
                   <tr>
                     <td style={{ paddingBottom: '8px' }}>
-                      <Text style={{ fontSize: '14px', color: '#718096', margin: '0', display: 'inline' }}>
-                        <strong>E-Mail:</strong>
+                      <Text style={{ fontSize: '14px', color: '#57534e', margin: '0', display: 'inline' }}>
+                        <strong style={{ color: '#1c1917' }}>E-Mail:</strong>
                       </Text>
-                      <Text style={{ fontSize: '14px', color: '#1a1a1a', margin: '0 0 0 8px', display: 'inline' }}>
-                        <a href={`mailto:${email}`} style={{ color: '#059669', textDecoration: 'none' }}>
+                      <Text style={{ fontSize: '14px', color: '#1c1917', margin: '0 0 0 8px', display: 'inline' }}>
+                        <a href={`mailto:${email}`} style={{ color: '#1c1917', textDecoration: 'underline' }}>
                           {email}
                         </a>
                       </Text>
@@ -107,20 +106,20 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
                   </tr>
                   <tr>
                     <td style={{ paddingBottom: '8px' }}>
-                      <Text style={{ fontSize: '14px', color: '#718096', margin: '0', display: 'inline' }}>
-                        <strong>Telefon:</strong>
+                      <Text style={{ fontSize: '14px', color: '#57534e', margin: '0', display: 'inline' }}>
+                        <strong style={{ color: '#1c1917' }}>Telefon:</strong>
                       </Text>
-                      <Text style={{ fontSize: '14px', color: '#1a1a1a', margin: '0 0 0 8px', display: 'inline' }}>
+                      <Text style={{ fontSize: '14px', color: '#1c1917', margin: '0 0 0 8px', display: 'inline' }}>
                         {phone}
                       </Text>
                     </td>
                   </tr>
                   <tr>
                     <td style={{ paddingBottom: '8px' }}>
-                      <Text style={{ fontSize: '14px', color: '#718096', margin: '0', display: 'inline' }}>
-                        <strong>Betreff:</strong>
+                      <Text style={{ fontSize: '14px', color: '#57534e', margin: '0', display: 'inline' }}>
+                        <strong style={{ color: '#1c1917' }}>Betreff:</strong>
                       </Text>
-                      <Text style={{ fontSize: '14px', color: '#1a1a1a', margin: '0 0 0 8px', display: 'inline' }}>
+                      <Text style={{ fontSize: '14px', color: '#1c1917', margin: '0 0 0 8px', display: 'inline' }}>
                         {subject}
                       </Text>
                     </td>
@@ -128,10 +127,10 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
                   {submittedAt && (
                     <tr>
                       <td>
-                        <Text style={{ fontSize: '14px', color: '#718096', margin: '0', display: 'inline' }}>
-                          <strong>Eingegangen am:</strong>
+                        <Text style={{ fontSize: '14px', color: '#57534e', margin: '0', display: 'inline' }}>
+                          <strong style={{ color: '#1c1917' }}>Eingegangen am:</strong>
                         </Text>
-                        <Text style={{ fontSize: '14px', color: '#1a1a1a', margin: '0 0 0 8px', display: 'inline' }}>
+                        <Text style={{ fontSize: '14px', color: '#1c1917', margin: '0 0 0 8px', display: 'inline' }}>
                           {submittedAt}
                         </Text>
                       </td>
@@ -143,16 +142,15 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
           </table>
 
           {/* Nachricht */}
-          <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+          <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px', paddingTop: '24px', borderTop: '1px solid #e7e5e4' }}>
             <tr>
               <td>
                 <Text style={{ 
-                  fontSize: '18px', 
-                  fontWeight: 'bold', 
-                  color: '#1a1a1a',
-                  margin: '0 0 15px 0',
-                  paddingBottom: '8px',
-                  borderBottom: '2px solid #e2e8f0'
+                  fontSize: '20px', 
+                  fontWeight: '500', 
+                  color: '#1c1917',
+                  margin: '0 0 16px 0',
+                  fontFamily: 'Georgia, serif'
                 }}>
                   Nachricht
                 </Text>
@@ -161,14 +159,15 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
             <tr>
               <td>
                 <table width="100%" cellPadding="16" cellSpacing="0" style={{ 
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid #e7e5e4',
+                  borderRadius: '8px',
                   backgroundColor: '#ffffff'
                 }}>
                   <tr>
                     <td>
                       <Text style={{ 
                         fontSize: '14px', 
-                        color: '#4a5568', 
+                        color: '#57534e', 
                         margin: '0',
                         lineHeight: '22px',
                         whiteSpace: 'pre-wrap'
@@ -184,8 +183,8 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
 
           {/* Footer */}
           <Hr style={{ 
-            borderTop: '1px solid #e2e8f0', 
-            margin: '35px 0 20px 0' 
+            borderTop: '1px solid #e7e5e4', 
+            margin: '24px 0 20px 0' 
           }} />
           
           <table width="100%" cellPadding="0" cellSpacing="0">
@@ -193,15 +192,15 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
               <td align="center">
                 <Text style={{ 
                   fontSize: '13px', 
-                  color: '#718096', 
+                  color: '#57534e', 
                   margin: '0 0 8px 0',
                   lineHeight: '20px'
                 }}>
-                  <strong>Sie können direkt auf diese E-Mail antworten, um dem Kunden zu schreiben.</strong>
+                  <strong style={{ color: '#1c1917' }}>Sie können direkt auf diese E-Mail antworten, um dem Kunden zu schreiben.</strong>
                 </Text>
                 <Text style={{ 
                   fontSize: '12px', 
-                  color: '#a0aec0', 
+                  color: '#78716c', 
                   margin: '0' 
                 }}>
                   Diese E-Mail wurde automatisch über das Kontaktformular auf strickerei-jutta.at generiert.

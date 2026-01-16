@@ -140,7 +140,7 @@ const medusaConfig = {
             options: {
               channels: ['email'],
               api_key: RESEND_API_KEY,
-              from: RESEND_FROM_EMAIL,
+              from: RESEND_FROM_EMAIL.includes('<') ? RESEND_FROM_EMAIL : `Jutta Strickerei <${RESEND_FROM_EMAIL}>`,
             },
           }] : []),
           ...(MAILCHIMP_API_KEY && MAILCHIMP_SERVER && MAILCHIMP_LIST_ID ? [{
