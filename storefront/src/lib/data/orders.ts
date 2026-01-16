@@ -2,7 +2,7 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
-import { getAuthHeaders, getCacheOptions } from "./cookies"
+import { getAuthHeaders } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
 
 export const retrieveOrder = async (id: string) => {
@@ -10,10 +10,8 @@ export const retrieveOrder = async (id: string) => {
     ...(await getAuthHeaders()),
   }
 
-  const next = {
-    ...(await getCacheOptions("orders")),
-  }
-
+  // Orders können sich durch Webhooks (z.B. SendCloud Status-Updates) jederzeit ändern
+  // Daher kein aggressives Caching - immer frische Daten holen
   return sdk.client
     .fetch<HttpTypes.StoreOrderResponse>(`/store/orders/${id}`, {
       method: "GET",
@@ -22,8 +20,7 @@ export const retrieveOrder = async (id: string) => {
           "*payment_collections.payments,*items,*items.metadata,*items.variant,*items.product,+items.detail,*fulfillments,*fulfillments.labels,+fulfillments.location_id",
       },
       headers,
-      next,
-      cache: "force-cache",
+      cache: "no-store",
     })
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
@@ -38,10 +35,8 @@ export const listOrders = async (
     ...(await getAuthHeaders()),
   }
 
-  const next = {
-    ...(await getCacheOptions("orders")),
-  }
-
+  // Orders können sich durch Webhooks (z.B. SendCloud Status-Updates) jederzeit ändern
+  // Daher kein aggressives Caching - immer frische Daten holen
   return sdk.client
     .fetch<HttpTypes.StoreOrderListResponse>(`/store/orders`, {
       method: "GET",
@@ -53,8 +48,7 @@ export const listOrders = async (
         ...filters,
       },
       headers,
-      next,
-      cache: "force-cache",
+      cache: "no-store",
     })
     .then(({ orders }) => orders)
     .catch((err) => medusaError(err))
