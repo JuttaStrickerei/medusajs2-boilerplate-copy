@@ -8,14 +8,35 @@ import {
   OrderLineItemDTO,
 } from "@medusajs/framework/types"
 import axios from "axios"
+import { georgiaNormal, georgiaBold, georgiaItalic, georgiaBoldItalic } from "../../fonts/georgia-base64"
 
-const fonts = {
+// Helper function to convert Base64 string to Buffer for pdfmake
+const base64ToBuffer = (base64: string): Buffer => {
+  if (!base64) return Buffer.from("")
+  // Remove data URI prefix if present
+  const base64Data = base64.includes(",") ? base64.split(",")[1] : base64
+  return Buffer.from(base64Data, "base64")
+}
+
+// Configure fonts for pdfmake
+// Use Georgia if available, otherwise fallback to Helvetica
+const fonts: any = {
   Helvetica: {
     normal: "Helvetica",
     bold: "Helvetica-Bold",
     italics: "Helvetica-Oblique",
     bolditalics: "Helvetica-BoldOblique",
   },
+}
+
+// Add Georgia font if Base64 strings are provided
+if (georgiaNormal && georgiaBold) {
+  fonts.Georgia = {
+    normal: base64ToBuffer(georgiaNormal),
+    bold: base64ToBuffer(georgiaBold),
+    italics: georgiaItalic ? base64ToBuffer(georgiaItalic) : base64ToBuffer(georgiaNormal),
+    bolditalics: georgiaBoldItalic ? base64ToBuffer(georgiaBoldItalic) : base64ToBuffer(georgiaBold),
+  }
 }
 
 const printer = new PdfPrinter(fonts)
@@ -29,10 +50,17 @@ class InvoiceGeneratorService extends MedusaService({
   Invoice,
 }) {
   private async formatAmount(amount: number, currency: string): Promise<string> {
-    return new Intl.NumberFormat("de-DE", {
-      style: "currency",
-      currency: currency,
+    // Note: Medusa returns prices already in the main currency unit (Euro), not in cents
+    const formatted = new Intl.NumberFormat("de-DE", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount)
+    
+    // Replace currency code with symbol
+    if (currency.toLowerCase() === 'eur' || currency === 'EUR') {
+      return `${formatted} €`
+    }
+    return `${formatted} ${currency}`
   }
 
   private async imageUrlToBase64(url: string): Promise<string> {
@@ -196,10 +224,10 @@ class InvoiceGeneratorService extends MedusaService({
                       return 0.5
                     },
                     hLineColor: function() {
-                      return "#d1d5db"
+                      return "#e7e5e4"
                     },
                     vLineColor: function() {
-                      return "#d1d5db"
+                      return "#e7e5e4"
                     },
                     paddingLeft: function() { return 10 },
                     paddingRight: function() { return 10 },
@@ -269,7 +297,7 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
           },
           layout: {
             fillColor: function (rowIndex: number) {
-              return (rowIndex === 0) ? "#000000" : null
+              return (rowIndex === 0) ? "#fafaf9" : null
             },
             hLineWidth: function (i: number, node: any) {
               return i === 0 || i === node.table.body.length ? 0 : 0.5
@@ -278,7 +306,7 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
               return 0
             },
             hLineColor: function () {
-              return "#e2e8f0"
+              return "#e7e5e4"
             },
             paddingLeft: function (i: number) {
               return i === 0 ? 12 : 8
@@ -307,7 +335,7 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                 widths: [140, 90],
                 body: [
                   [
-                    { text: "Zwischensumme (inkl. MwSt):", style: "totalLabel" },
+                    { text: "Artikel", style: "totalLabel" },
                     { 
                       text: await this.formatAmount(
                         Number(params.order.subtotal), 
@@ -317,7 +345,7 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                     },
                   ],
                   [
-                    { text: "Versand:", style: "totalLabel" },
+                    { text: "Versand", style: "totalLabel" },
                     { 
                       text: await this.formatAmount(
                         Number(params.order.shipping_methods?.[0]?.total || 0), 
@@ -326,8 +354,8 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                       alignment: "right",
                     },
                   ],
-                  [
-                    { text: "Rabatt:", style: "totalLabel" },
+                  ...(Number(params.order.discount_total) > 0 ? [[
+                    { text: "Rabatt", style: "totalLabel" },
                     { 
                       text: await this.formatAmount(
                         Number(params.order.discount_total), 
@@ -335,13 +363,13 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                       style: "totalValue",
                       alignment: "right",
                     },
-                  ],
+                  ]] : []),
                   [
-                    { text: "", style: "totalLabel", margin: [0, 5, 0, 5], colSpan: 2 },
+                    { text: "", style: "totalLabel", margin: [0, 8, 0, 8], colSpan: 2, border: [false, true, false, false] },
                     {},  
                   ],
                   [
-                    { text: "GESAMTBETRAG:", style: "grandTotalLabel" },
+                    { text: "Gesamt", style: "grandTotalLabel" },
                     { 
                       text: await this.formatAmount(
                         Number(params.order.total), 
@@ -353,14 +381,16 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                 ],
               },
               layout: {
-                hLineWidth: function (i: number) {
-                  return i === 4 ? 1 : 0
+                hLineWidth: function (i: number, node: any) {
+                  const discountRow = Number(params.order.discount_total) > 0 ? 1 : 0
+                  const totalRowIndex = 3 + discountRow
+                  return i === totalRowIndex ? 1 : 0
                 },
                 vLineWidth: function () {
                   return 0
                 },
                 hLineColor: function () {
-                  return "#000000"
+                  return "#e7e5e4"
                 },
                 paddingLeft: function () {
                   return 0
@@ -368,8 +398,10 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                 paddingRight: function () {
                   return 0
                 },
-                paddingTop: function (i: number) {
-                  return i === 4 ? 10 : 4
+                paddingTop: function (i: number, node: any) {
+                  const discountRow = Number(params.order.discount_total) > 0 ? 1 : 0
+                  const totalRowIndex = 3 + discountRow
+                  return i === totalRowIndex ? 10 : 4
                 },
                 paddingBottom: function () {
                   return 4
@@ -421,97 +453,103 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
       styles: {
         companyName: {
           fontSize: 24,
-          bold: true,
-          color: "#000000",
+          bold: false,
+          color: "#1c1917",
+          font: georgiaNormal ? "Georgia" : "Helvetica",
         },
         companyAddress: {
           fontSize: 10,
-          color: "#333333",
+          color: "#57534e",
           lineHeight: 1.4,
         },
         companyContact: {
           fontSize: 10,
-          color: "#333333",
+          color: "#57534e",
           lineHeight: 1.2,
         },
         invoiceTitle: {
           fontSize: 24,
           bold: false,
-          color: "#000000",
+          color: "#1c1917",
+          font: georgiaNormal ? "Georgia" : "Helvetica",
         },
         label: {
           fontSize: 10,
-          color: "#555555",
+          color: "#57534e",
           margin: [0, 0, 8, 0],
         },
         value: {
           fontSize: 10,
           bold: true,
-          color: "#000000",
+          color: "#1c1917",
         },
         sectionHeader: {
           fontSize: 11,
           bold: true,
-          color: "#333333",
+          color: "#1c1917",
           letterSpacing: 1,
+          font: georgiaNormal ? "Georgia" : "Helvetica",
         },
         addressHeader: {
           fontSize: 11,
           bold: true,
-          color: "#000000",
+          color: "#1c1917",
           letterSpacing: 0.5,
+          font: georgiaNormal ? "Georgia" : "Helvetica",
         },
         addressText: {
           fontSize: 10,
-          color: "#333333",
+          color: "#57534e",
           lineHeight: 1.5,
         },
         tableHeader: {
           fontSize: 10,
           bold: true,
-          color: "#ffffff",
+          color: "#1c1917",
         },
         tableRow: {
           fontSize: 10,
-          color: "#333333",
+          color: "#1c1917",
         },
         totalLabel: {
           fontSize: 10,
-          color: "#333333",
+          color: "#57534e",
         },
         totalValue: {
           fontSize: 10,
-          color: "#000000",
+          color: "#1c1917",
         },
         grandTotalLabel: {
-          fontSize: 10,
-          bold: false,
-          color: "#000000",
+          fontSize: 12,
+          bold: true,
+          color: "#1c1917",
         },
         grandTotalValue: {
-          fontSize: 10,
-          bold: false,
-          color: "#000000",
+          fontSize: 12,
+          bold: true,
+          color: "#1c1917",
         },
         notesHeader: {
           fontSize: 11,
           bold: true,
-          color: "#333333",
+          color: "#1c1917",
           letterSpacing: 1,
+          font: georgiaNormal ? "Georgia" : "Helvetica",
         },
         notesText: {
           fontSize: 10,
-          color: "#555555",
+          color: "#57534e",
           lineHeight: 1.5,
         },
         thankYouText: {
-          fontSize: 10,
-          color: "#000000",
-          bold: true,
+          fontSize: 12,
+          color: "#1c1917",
+          bold: false,
+          font: georgiaNormal ? "Georgia" : "Helvetica",
         },
       },
       defaultStyle: {
-        font: "Helvetica",
+        font: georgiaNormal ? "Georgia" : "Helvetica",
       },
     }
   }
