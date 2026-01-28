@@ -38,8 +38,18 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   }
 
   // Calculate items total
-  // Note: item.total is BigNumberValue in Medusa 2.0, convert to number
-  const itemsTotal = order.items?.reduce((acc, item) => acc + Number(item.total || 0), 0) || 0
+  // In Medusa v2 totals are already in major currency units (e.g. Euro),
+  // so we must NOT divide by 100 anywhere here.
+  // Prefer the line total; fall back to unit_price * quantity if needed.
+  const itemsTotal =
+    order.items?.reduce((acc, item) => {
+      const lineTotal =
+        typeof (item as any).total === "number"
+          ? Number((item as any).total)
+          : Number((item as any).unit_price || 0) * Number(item.quantity || 1)
+
+      return acc + lineTotal
+    }, 0) || 0
   const shippingTotal = (order as any).shipping_total || 0
 
   return (
@@ -304,13 +314,25 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                     padding: '14px 12px',
                     borderBottom: index < order.items.length - 1 ? '1px solid #e7e5e4' : 'none'
                   }}>
-                    <Text style={{ 
-                      fontSize: '14px', 
-                      fontWeight: '500', 
-                      color: '#1c1917', 
-                      margin: '0' 
-                    }}>
-                      {formatCurrency(Number(item.total || 0) / (item.quantity || 1), order.currency_code)}
+                    <Text
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        color: "#1c1917",
+                        margin: "0",
+                      }}
+                    >
+                      {/* 
+                        Zeige den Zeilenpreis (Gesamtpreis für die Menge) in Hauptwährung.
+                        Medusa v2 liefert Beträge bereits in Hauptwährung, daher keine Division durch 100.
+                      */}
+                      {formatCurrency(
+                        typeof (item as any).total === "number"
+                          ? Number((item as any).total)
+                          : Number((item as any).unit_price || 0) *
+                            Number(item.quantity || 1),
+                        order.currency_code
+                      )}
                     </Text>
                   </td>
                 </tr>
