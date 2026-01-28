@@ -88,18 +88,12 @@ export default function ReturnShippingSelector({
 
             {/* Price */}
             <div className="flex-shrink-0 text-right">
-              {isFree ? (
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium text-sm">
-                  Kostenlos
-                </span>
-              ) : (
-                <span className="font-semibold text-stone-800">
-                  {convertToLocale({
-                    amount: price,
-                    currency_code: currencyCode,
-                  })}
-                </span>
-              )}
+              <span className="font-semibold text-stone-800">
+                {convertToLocale({
+                  amount: price,
+                  currency_code: currencyCode,
+                })}
+              </span>
             </div>
           </button>
         )

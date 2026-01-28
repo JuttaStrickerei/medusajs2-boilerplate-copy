@@ -395,12 +395,10 @@ export default function ReturnRequestTemplate({
                     </span>
                   </div>
                   <span className="font-medium text-stone-800">
-                    {shippingCost === 0
-                      ? "Kostenlos"
-                      : convertToLocale({
-                          amount: shippingCost,
-                          currency_code: currencyCode,
-                        })}
+                    {convertToLocale({
+                      amount: shippingCost,
+                      currency_code: currencyCode,
+                    })}
                   </span>
                 </div>
               </div>
