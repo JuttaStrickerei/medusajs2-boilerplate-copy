@@ -10,6 +10,7 @@ import { Button } from "@components/ui"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { ShoppingBag, Minus, Plus, Trash } from "@components/icons"
 import Spinner from "@modules/common/icons/spinner"
+import CheckoutButton from "@modules/checkout/components/checkout-button"
 
 interface CartDropdownProps {
   cart: HttpTypes.StoreCart | null
@@ -21,6 +22,7 @@ export default function CartDropdown({ cart, isOpen }: CartDropdownProps) {
   
   const totalItems = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0
   const isEmpty = !cart || totalItems === 0
+  const isAuthenticated = !!cart?.customer_id
   const currencyCode = cart?.currency_code || "EUR"
 
   // Helper function for consistent price formatting
@@ -221,11 +223,13 @@ export default function CartDropdown({ cart, isOpen }: CartDropdownProps) {
                   Warenkorb ansehen
                 </Button>
               </LocalizedClientLink>
-              <LocalizedClientLink href="/checkout" className="block">
-                <Button variant="primary" fullWidth>
-                  Zur Kasse
-                </Button>
-              </LocalizedClientLink>
+              {cart && (
+                <CheckoutButton
+                  cart={cart as HttpTypes.StoreCart}
+                  isAuthenticated={isAuthenticated}
+                  className="w-full h-10 text-sm"
+                />
+              )}
             </div>
           </div>
         )}
