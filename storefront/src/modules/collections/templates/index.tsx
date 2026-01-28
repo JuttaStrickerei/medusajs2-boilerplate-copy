@@ -35,7 +35,7 @@ export default function CollectionTemplate({
               Home
             </LocalizedClientLink>
             <span>/</span>
-            <LocalizedClientLink href="/store" className="hover:text-stone-800 transition-colors">
+            <LocalizedClientLink href="/collections" className="hover:text-stone-800 transition-colors">
               Kollektionen
             </LocalizedClientLink>
             <span>/</span>

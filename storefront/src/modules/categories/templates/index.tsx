@@ -62,7 +62,7 @@ export default function CategoryTemplate({
               Home
             </LocalizedClientLink>
             <span>/</span>
-            <LocalizedClientLink href="/store" className="hover:text-stone-800 transition-colors">
+            <LocalizedClientLink href="/categories" className="hover:text-stone-800 transition-colors">
               Kategorien
             </LocalizedClientLink>
             {parents.map((parent) => (

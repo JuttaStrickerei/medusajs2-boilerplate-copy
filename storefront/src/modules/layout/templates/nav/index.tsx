@@ -37,9 +37,9 @@ export default async function Nav() {
                   </LocalizedClientLink>
                   {/* Dropdown */}
                   <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="bg-white rounded-xl shadow-lg border border-stone-200 py-2 min-w-[200px]">
+                    <div className="bg-white rounded-xl shadow-lg border border-stone-200 py-2 min-w-[220px]">
                       <LocalizedClientLink
-                        href="/store"
+                        href="/collections"
                         className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-800 transition-colors font-medium border-b border-stone-100"
                       >
                         Alle Kollektionen
@@ -53,6 +53,12 @@ export default async function Nav() {
                           {collection.title}
                         </LocalizedClientLink>
                       ))}
+                      <LocalizedClientLink
+                        href="/store"
+                        className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-800 transition-colors font-medium border-t border-stone-100"
+                      >
+                        Alle Produkte
+                      </LocalizedClientLink>
                     </div>
                   </div>
                 </div>
@@ -68,7 +74,13 @@ export default async function Nav() {
                   </button>
                   {/* Dropdown */}
                   <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="bg-white rounded-xl shadow-lg border border-stone-200 py-2 min-w-[200px]">
+                    <div className="bg-white rounded-xl shadow-lg border border-stone-200 py-2 min-w-[220px]">
+                      <LocalizedClientLink
+                        href="/categories"
+                        className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-800 transition-colors font-medium border-b border-stone-100"
+                      >
+                        Alle Kategorien
+                      </LocalizedClientLink>
                       {categories.slice(0, 8).map((category) => (
                         <LocalizedClientLink
                           key={category.id}
