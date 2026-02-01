@@ -9,7 +9,7 @@ type WorkflowInput = {
 
 export const generateInvoicePdfWorkflow = createWorkflow(
   "generate-invoice-pdf",
-  (input: WorkflowInput) => {
+  function (input: WorkflowInput) {
     const { data: orders } = useQueryGraphStep({
       entity: "order",
       fields: [

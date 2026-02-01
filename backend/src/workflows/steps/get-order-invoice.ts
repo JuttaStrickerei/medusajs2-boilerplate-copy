@@ -39,6 +39,6 @@ export const getOrderInvoiceStep = createStep(
     }
     const invoiceGeneratorService = container.resolve(INVOICE_MODULE) as InvoiceGeneratorService
 
-    invoiceGeneratorService.deleteInvoices(invoice_id)
+    await invoiceGeneratorService.deleteInvoices(invoice_id)
   }
 )

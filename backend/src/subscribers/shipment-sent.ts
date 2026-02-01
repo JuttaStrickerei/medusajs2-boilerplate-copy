@@ -1,5 +1,5 @@
 import { Modules } from '@medusajs/framework/utils'
-import { INotificationModuleService, IOrderModuleService, IFulfillmentModuleService } from '@medusajs/framework/types'
+import { INotificationModuleService, IOrderModuleService, IFulfillmentModuleService, Logger } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
@@ -11,59 +11,66 @@ export default async function shipmentCreatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
+  const logger = container.resolve("logger") as Logger
   const notificationModuleService = container.resolve(Modules.NOTIFICATION)
   const orderModuleService = container.resolve(Modules.ORDER)
   const fulfillmentModuleService = container.resolve(Modules.FULFILLMENT)
   
-  console.log('the data.id is', data.id)
+  logger.info(`[ShipmentSent] Processing fulfillment: ${data.id}`)
 
   // Resolve the query directly from the container parameter
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   
-  const { data: order_fulfillment } = await query.graph({
-    entity: "order_fulfillment",
-    fields: [
-      "order_id",
-      "fulfillment_id",
-    ],
-    filters: {
-      fulfillment_id: data.id,
-    },
-  })
-
-  // The order ID will be available in order_fulfillment[0].order_id
-  const orderId = order_fulfillment[0].order_id
-  console.log(`Fulfillment ${data.id} is for order ${orderId}`)
-
-  // Retrieve order with relations
-  const order = await orderModuleService.retrieveOrder(orderId, { 
-    relations: ['items', 'summary', 'shipping_address'] 
-  })
-  console.log('order data:', order)
-
-  // Retrieve shipping address
-  const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
-    order.shipping_address.id
-  )
-  console.log('shippingAddress data:', shippingAddress)
-
-  // ⚠️ WICHTIG: Fulfillment-Daten abrufen!
-  const fulfillment = await fulfillmentModuleService.retrieveFulfillment(data.id, {
-    relations: ['items', 'delivery_address', 'labels']
-  })
-  console.log('fulfillment data:', fulfillment)
-
-  // Get company logo from invoice config
-  const invoiceGeneratorService = container.resolve(INVOICE_MODULE) as InvoiceGeneratorService
-  const invoiceConfigs = await invoiceGeneratorService.listInvoiceConfigs()
-  const companyLogo = invoiceConfigs[0]?.company_logo || null
-
   try {
+    const { data: order_fulfillment } = await query.graph({
+      entity: "order_fulfillment",
+      fields: [
+        "order_id",
+        "fulfillment_id",
+      ],
+      filters: {
+        fulfillment_id: data.id,
+      },
+    })
+
+    // Null-check for order_fulfillment
+    if (!order_fulfillment || order_fulfillment.length === 0) {
+      logger.warn(`[ShipmentSent] No order_fulfillment found for fulfillment ${data.id}`)
+      return
+    }
+
+    // The order ID will be available in order_fulfillment[0].order_id
+    const orderId = order_fulfillment[0].order_id
+    logger.info(`[ShipmentSent] Fulfillment ${data.id} is for order ${orderId}`)
+
+    // Retrieve order with relations
+    const order = await orderModuleService.retrieveOrder(orderId, { 
+      relations: ['items', 'summary', 'shipping_address'] 
+    })
+    logger.debug(`[ShipmentSent] Order data loaded for order ${orderId}`)
+
+    // Retrieve shipping address
+    const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
+      order.shipping_address.id
+    )
+    logger.debug(`[ShipmentSent] Shipping address loaded`)
+
+    // Fulfillment-Daten abrufen
+    const fulfillment = await fulfillmentModuleService.retrieveFulfillment(data.id, {
+      relations: ['items', 'delivery_address', 'labels']
+    })
+    logger.debug(`[ShipmentSent] Fulfillment data loaded`)
+
+    // Get company logo from invoice config
+    const invoiceGeneratorService = container.resolve(INVOICE_MODULE) as InvoiceGeneratorService
+    const invoiceConfigs = await invoiceGeneratorService.listInvoiceConfigs()
+    const companyLogo = invoiceConfigs[0]?.company_logo || null
+
     // PDF-Rechnung generieren
     const { result: { pdf_buffer } } = await generateInvoicePdfWorkflow(container)
       .run({
         input: {
-          order_id: orderId,  // Verwende die orderId, die wir bereits haben
+          order_id: orderId,
         },
       })
     
@@ -81,7 +88,7 @@ export default async function shipmentCreatedHandler({
           subject: 'Ihre Bestellung wurde versandt.'
         },
         order,
-        fulfillment,  // ← Jetzt wird es übergeben!
+        fulfillment,
         shippingAddress,
         companyLogo,
         preview: 'Vielen Dank für die Bestellung!'
@@ -89,15 +96,16 @@ export default async function shipmentCreatedHandler({
       attachments: [
         {
           content: base64Content,
-          filename: `invoice-${order.display_id}.pdf`, // Nutze die display_id für den Dateinamen
+          filename: `invoice-${order.display_id}.pdf`,
           content_type: "application/pdf",
           disposition: "attachment",
         },
       ],
     })
-    console.log('Shipment notification with invoice PDF sent successfully')
+    logger.info(`[ShipmentSent] Shipment notification with invoice PDF sent successfully for order ${orderId}`)
   } catch (error) {
-    console.error('Error sending fulfillment notification with PDF:', error)
+    logger.error(`[ShipmentSent] Error sending fulfillment notification with PDF for fulfillment ${data.id}:`, error)
+    // Don't throw - subscribers should never throw errors
   }
 }
 
