@@ -76,13 +76,29 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((item) => item.id !== productId))
   }, [])
 
+  // toggleWishlist uses functional update to avoid race conditions
+  // by checking the previous state directly instead of using isInWishlist
   const toggleWishlist = useCallback((product: { id: string; handle: string; title: string; thumbnail: string | null }) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id)
-    } else {
-      addToWishlist(product)
-    }
-  }, [isInWishlist, addToWishlist, removeFromWishlist])
+    setItems((prev) => {
+      const isCurrentlyInWishlist = prev.some((item) => item.id === product.id)
+      if (isCurrentlyInWishlist) {
+        // Remove from wishlist
+        return prev.filter((item) => item.id !== product.id)
+      } else {
+        // Add to wishlist
+        return [
+          ...prev,
+          {
+            id: product.id,
+            handle: product.handle,
+            title: product.title,
+            thumbnail: product.thumbnail,
+            addedAt: new Date().toISOString(),
+          },
+        ]
+      }
+    })
+  }, [])
 
   const clearWishlist = useCallback(() => {
     setItems([])

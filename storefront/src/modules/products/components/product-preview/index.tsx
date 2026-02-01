@@ -33,9 +33,9 @@ export default function ProductPreview({
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   
-  // Wishlist hook
-  const { isInWishlist, toggleWishlist } = useWishlist()
-  const isWishlisted = isInWishlist(product.id)
+  // Wishlist hook - consume items directly for reliable reactivity
+  const { items: wishlistItems, toggleWishlist } = useWishlist()
+  const isWishlisted = wishlistItems.some(item => item.id === product.id)
 
   const { cheapestPrice } = getProductPrice({ product })
   const isNew = product.created_at ? isProductNew(product.created_at) : false
