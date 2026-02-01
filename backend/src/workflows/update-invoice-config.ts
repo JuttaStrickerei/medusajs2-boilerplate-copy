@@ -15,8 +15,7 @@ type WorkflowInput = {
 
 export const updateInvoiceConfigWorkflow = createWorkflow(
   "update-invoice-config",
-
-  (input: WorkflowInput): WorkflowResponse<{ invoice_config: typeof InvoiceConfig }> => {
+  function (input: WorkflowInput): WorkflowResponse<{ invoice_config: typeof InvoiceConfig }> {
     const invoiceConfig = updateInvoiceConfigStep(input)
 
     return new WorkflowResponse({

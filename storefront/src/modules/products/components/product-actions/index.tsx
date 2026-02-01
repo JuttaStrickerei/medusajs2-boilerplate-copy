@@ -40,9 +40,9 @@ export default function ProductActions({
   const [addedToCart, setAddedToCart] = useState(false)
   const countryCode = useParams().countryCode as string
   
-  // Wishlist hook
-  const { isInWishlist, toggleWishlist } = useWishlist()
-  const isWishlisted = isInWishlist(product.id)
+  // Wishlist hook - consume items directly for reliable reactivity
+  const { items: wishlistItems, toggleWishlist } = useWishlist()
+  const isWishlisted = wishlistItems.some(item => item.id === product.id)
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {
