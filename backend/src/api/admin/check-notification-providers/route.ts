@@ -51,9 +51,9 @@ export const GET = async (
       },
     })
   } catch (error) {
+    // Security: Don't expose stack traces in production
     return res.status(500).json({
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
+      error: error instanceof Error ? error.message : "Internal server error",
     })
   }
 }

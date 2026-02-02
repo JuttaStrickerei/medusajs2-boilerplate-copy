@@ -19,9 +19,14 @@ export default async function orderPlacedHandler({
     })
     logger.debug(`[OrderPlaced] Order data loaded for order ${data.id}`)
     
-    const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
-      order.shipping_address.id
-    )
+    // Null-check for shipping_address (e.g., digital products may not have one)
+    if (!order.shipping_address?.id) {
+      logger.warn(`[OrderPlaced] No shipping address for order ${data.id}, using billing address or skipping`)
+    }
+    
+    const shippingAddress = order.shipping_address?.id 
+      ? await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
+      : order.shipping_address || null
     logger.debug(`[OrderPlaced] Shipping address loaded`)
 
     await notificationModuleService.createNotifications({

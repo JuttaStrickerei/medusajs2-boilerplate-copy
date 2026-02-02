@@ -49,10 +49,15 @@ export default async function shipmentCreatedHandler({
     })
     logger.debug(`[ShipmentSent] Order data loaded for order ${orderId}`)
 
-    // Retrieve shipping address
-    const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
-      order.shipping_address.id
-    )
+    // Null-check for shipping_address
+    if (!order.shipping_address?.id) {
+      logger.warn(`[ShipmentSent] No shipping address for order ${orderId}`)
+    }
+    
+    // Retrieve shipping address (with null-safety)
+    const shippingAddress = order.shipping_address?.id
+      ? await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
+      : order.shipping_address || null
     logger.debug(`[ShipmentSent] Shipping address loaded`)
 
     // Fulfillment-Daten abrufen

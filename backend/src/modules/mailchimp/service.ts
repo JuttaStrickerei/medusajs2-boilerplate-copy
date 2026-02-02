@@ -71,11 +71,11 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
   ): Promise<ProviderSendNotificationResultsDTO> {
     const { to, data } = notification
 
-    // Debug: Log incoming notification
-    this.logger_.info(`[Mailchimp] sendNewsletterSignup called - email: ${to}, first_name: ${data?.first_name || 'none'}, last_name: ${data?.last_name || 'none'}, hasApiKey: ${!!this.options.apiKey}, hasServer: ${!!this.options.server}, hasListId: ${!!this.options.listId}, server: ${this.options.server}, listId: ${this.options.listId ? `${this.options.listId.substring(0, 8)}...` : 'missing'}`)
+    // Debug: Log incoming notification (without PII)
+    this.logger_.debug(`[Mailchimp] sendNewsletterSignup called - hasApiKey: ${!!this.options.apiKey}, hasServer: ${!!this.options.server}, hasListId: ${!!this.options.listId}`)
 
     try {
-      this.logger_.info(`[Mailchimp] Calling Mailchimp API to add list member - listId: ${this.options.listId}, email: ${to}`)
+      this.logger_.debug(`[Mailchimp] Calling Mailchimp API to add list member`)
 
       const response = await this.mailchimp.lists.addListMember(
         this.options.listId, {
@@ -88,10 +88,9 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
         }
       )
 
-      // Debug: Log successful response
-      const mailchimpId = "id" in response ? response.id : "unknown"
+      // Debug: Log successful response (without PII)
       const status = response.status || "unknown"
-      this.logger_.info(`[Mailchimp] Successfully added NEW subscriber: ${to}, id: ${mailchimpId}, status: ${status}`)
+      this.logger_.info(`[Mailchimp] Successfully added new subscriber, status: ${status}`)
   
       return {
         id: "id" in response ? response.id : "",
@@ -102,14 +101,14 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
       const errorDetail = errorBody.detail || error.message || ""
       const errorStatus = error.response?.status
 
-      this.logger_.info(`[Mailchimp] Error for ${to}: title=${errorTitle}, status=${errorStatus}, detail=${errorDetail}`)
+      this.logger_.debug(`[Mailchimp] API error: title=${errorTitle}, status=${errorStatus}`)
 
       // "Member Exists" Fehler - E-Mail ist bereits in der Liste
       if (
         errorTitle === "Member Exists" ||
         (errorStatus === 400 && errorDetail.includes("already a list member"))
       ) {
-        this.logger_.info(`[Mailchimp] Email ALREADY SUBSCRIBED: ${to} - returning special status`)
+        this.logger_.debug(`[Mailchimp] Email already subscribed - returning special status`)
         
         // WICHTIG: Speziellen Identifier zurückgeben (großgeschrieben für Konsistenz)
         return {
@@ -119,7 +118,7 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
 
       // "Invalid Resource" Fehler - Ungültige E-Mail-Adresse
       if (errorTitle === "Invalid Resource" || errorDetail.includes("valid email")) {
-        this.logger_.error(`[Mailchimp] Invalid email address: ${to}`)
+        this.logger_.warn(`[Mailchimp] Invalid email address provided`)
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Bitte geben Sie eine gültige E-Mail-Adresse ein."
@@ -127,7 +126,7 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
       }
 
       // Andere Fehler
-      this.logger_.error(`[Mailchimp] Unexpected error for ${to}: ${errorDetail}`)
+      this.logger_.error(`[Mailchimp] Unexpected error: ${errorTitle}`)
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         `Newsletter-Anmeldung fehlgeschlagen: ${errorDetail}`

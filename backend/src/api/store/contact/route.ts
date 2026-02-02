@@ -26,7 +26,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       timeStyle: "short" 
     })
 
-    // E-Mail an office@strickerei-jutta.at senden
+    // E-Mail an office@strickerei-jutta.at senden (primary - must succeed)
     await notificationService.createNotifications({
       channel: "email",
       to: "office@strickerei-jutta.at",
@@ -47,22 +47,27 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       },
     })
 
-    // Bestätigungs-E-Mail an den Kunden senden
-    await notificationService.createNotifications({
-      channel: "email",
-      to: body.email,
-      template: EmailTemplates.CONTACT_FORM_CONFIRMATION,
-      data: {
-        emailOptions: {
-          subject: "Vielen Dank für Ihre Nachricht - Strickerei Jutta",
+    // Bestätigungs-E-Mail an den Kunden senden (secondary - failure should not fail the request)
+    try {
+      await notificationService.createNotifications({
+        channel: "email",
+        to: body.email,
+        template: EmailTemplates.CONTACT_FORM_CONFIRMATION,
+        data: {
+          emailOptions: {
+            subject: "Vielen Dank für Ihre Nachricht - Strickerei Jutta",
+          },
+          firstName: body.firstName,
+          subject: body.subject,
+          preview: "Bestätigung Ihrer Kontaktanfrage",
         },
-        firstName: body.firstName,
-        subject: body.subject,
-        preview: "Bestätigung Ihrer Kontaktanfrage",
-      },
-    })
+      })
+    } catch (confirmationError) {
+      // Log but don't fail - the main contact was received successfully
+      logger.warn(`[Contact] Confirmation email failed, but contact was received`)
+    }
     
-    logger.info(`[Contact] Message sent from ${body.email}`)
+    logger.debug(`[Contact] Message processed successfully`)
     
     res.status(200).json({ success: true, message: "Nachricht erfolgreich gesendet" })
   } catch (error: unknown) {

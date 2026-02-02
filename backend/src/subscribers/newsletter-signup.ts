@@ -10,7 +10,7 @@ export default async function newsletterSignupHandler({
   container,
 }: SubscriberArgs<{ email: string; first_name?: string; last_name?: string }>) {
   const logger = container.resolve("logger")
-  logger.info(`[Newsletter Subscriber] DEAKTIVIERT - Logik in API Route verschoben. Email: ${data.email}`)
+  logger.debug(`[Newsletter Subscriber] DEAKTIVIERT - Logik in API Route verschoben`)
   // Keine Aktion - Logik ist jetzt in der API Route
 }
 

@@ -63,11 +63,28 @@ class InvoiceGeneratorService extends MedusaService({
     return `${formatted} ${currency}`
   }
 
-  private async imageUrlToBase64(url: string): Promise<string> {
-    const response = await axios.get(url, { responseType: "arraybuffer" })
-    const base64 = Buffer.from(response.data).toString("base64")
-    const mimeType = response.headers["content-type"] || "image/png"
-    return `data:${mimeType};base64,${base64}`
+  private async imageUrlToBase64(url: string): Promise<string | null> {
+    try {
+      // Security: Validate URL protocol (only HTTPS allowed)
+      const parsed = new URL(url)
+      if (parsed.protocol !== "https:") {
+        console.warn(`[InvoiceGenerator] Invalid logo URL protocol: ${parsed.protocol}`)
+        return null
+      }
+      
+      const response = await axios.get(url, { 
+        responseType: "arraybuffer",
+        timeout: 5000, // 5 second timeout
+        maxContentLength: 2 * 1024 * 1024, // 2MB max
+        maxBodyLength: 2 * 1024 * 1024,
+      })
+      const base64 = Buffer.from(response.data).toString("base64")
+      const mimeType = response.headers["content-type"] || "image/png"
+      return `data:${mimeType};base64,${base64}`
+    } catch (error) {
+      console.warn(`[InvoiceGenerator] Failed to fetch logo: ${error}`)
+      return null
+    }
   }
 
   private async createInvoiceContent(
@@ -84,6 +101,11 @@ class InvoiceGeneratorService extends MedusaService({
       company_logo: null,
       notes: null,
     }
+
+    // Pre-fetch company logo (if configured)
+    const companyLogoBase64 = config.company_logo 
+      ? await this.imageUrlToBase64(config.company_logo) 
+      : null
 
     // Create table for order items
     const itemsTable = [
@@ -121,9 +143,9 @@ class InvoiceGeneratorService extends MedusaService({
           {
             width: "*",
             stack: [
-              ...(config.company_logo ? [
+              ...(companyLogoBase64 ? [
                 {
-                  image: await this.imageUrlToBase64(config.company_logo),
+                  image: companyLogoBase64,
                   width: 100,
                   height: 50,
                   fit: [100, 50],

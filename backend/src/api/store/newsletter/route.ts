@@ -28,7 +28,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
-    logger.info(`[Newsletter API] Processing signup for: ${email}`)
+    logger.debug(`[Newsletter API] Processing signup request`)
 
     // 1. Direkt Mailchimp aufrufen (NICHT über Event!)
     const mailchimpResult = await notificationModuleService.createNotifications({
@@ -41,7 +41,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       },
     })
 
-    logger.info(`[Newsletter API] Mailchimp result: ${JSON.stringify(mailchimpResult)}`)
+    logger.debug(`[Newsletter API] Mailchimp result received`)
 
     // 2. Prüfen ob bereits abonniert
     const notificationResult = Array.isArray(mailchimpResult) ? mailchimpResult[0] : mailchimpResult
@@ -49,7 +49,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const isAlreadySubscribed = externalId === "ALREADY_SUBSCRIBED"
 
     if (isAlreadySubscribed) {
-      logger.info(`[Newsletter API] ${email} is already subscribed`)
+      logger.debug(`[Newsletter API] Subscriber already exists`)
       
       return res.status(200).json({
         success: true,
@@ -59,7 +59,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     // 3. Neue Anmeldung: Bestätigungs-E-Mail senden
-    logger.info(`[Newsletter API] ${email} is NEW - sending confirmation email`)
+    logger.debug(`[Newsletter API] New subscriber - sending confirmation email`)
     
     await notificationModuleService.createNotifications({
       channel: "email",
@@ -75,7 +75,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       },
     })
 
-    logger.info(`[Newsletter API] Confirmation email sent to ${email}`)
+    logger.info(`[Newsletter API] Subscription completed successfully`)
 
     return res.status(200).json({
       success: true,
