@@ -1,13 +1,13 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Modules } from "@medusajs/framework/utils"
+import { Modules, MedusaError } from "@medusajs/framework/utils"
 import { INotificationModuleService } from "@medusajs/framework/types"
 import { z } from "zod"
 import { EmailTemplates } from "../../../modules/email-notifications/templates"
 
 export const newsletterSignupSchema = z.object({
   email: z.string().email(),
-  first_name: z.string().optional(),
-  last_name: z.string().optional(),
+  first_name: z.string().max(100).optional(),
+  last_name: z.string().max(100).optional(),
 })
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -15,18 +15,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const notificationModuleService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
   
   try {
-    const { email, first_name, last_name } = req.body as {
-      email: string
-      first_name?: string
-      last_name?: string
-    }
-
-    if (!email) {
+    // Use Zod validation instead of type assertion
+    const parseResult = newsletterSignupSchema.safeParse(req.body)
+    
+    if (!parseResult.success) {
       return res.status(400).json({
         success: false,
-        message: "E-Mail-Adresse ist erforderlich",
+        message: "Ungültige Eingabe",
+        errors: parseResult.error.errors,
       })
     }
+    
+    const { email, first_name, last_name } = parseResult.data
 
     logger.debug(`[Newsletter API] Processing signup request`)
 
@@ -92,7 +92,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   } catch (error: unknown) {
     logger.error(`[Newsletter API] Error: ${error instanceof Error ? error.message : "Unknown error"}`)
     
-    // Ungültige E-Mail
+    // Check for MedusaError with INVALID_DATA type (invalid email from Mailchimp)
+    if (error instanceof MedusaError && error.type === MedusaError.Types.INVALID_DATA) {
+      return res.status(400).json({
+        success: false,
+        message: "Bitte geben Sie eine gültige E-Mail-Adresse ein. Falls Sie sicher sind, dass Ihre Adresse korrekt ist, kontaktieren Sie uns bitte über unser Kontaktformular. Wir helfen Ihnen gerne weiter!",
+      })
+    }
+    
+    // Fallback: Check for string patterns (for backwards compatibility)
     if (
       error instanceof Error &&
       (error.message?.includes("gültige E-Mail") || 
