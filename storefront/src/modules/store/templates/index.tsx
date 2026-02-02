@@ -2,7 +2,6 @@ import { Suspense } from "react"
 import { HttpTypes } from "@medusajs/types"
 import RefinementList from "@modules/store/components/refinement-list"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
-import MobileSortSelect from "@modules/store/components/mobile-sort-select"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "./paginated-products"
 import { SkeletonProductGrid } from "@components/ui"
@@ -138,16 +137,11 @@ export default function StoreTemplate({
 
           {/* Products Grid */}
           <main className="flex-1">
-            {/* Mobile/Tablet Filter & Sort Bar */}
+            {/* Mobile/Tablet Filter Bar */}
             <div className="small:hidden mb-4">
               <div className="flex items-center gap-3">
                 {/* Filter Button with Drawer */}
                 <MobileFilterDrawer sortBy={sort} filters={filters} />
-                
-                {/* Sort Select */}
-                <div className="flex-1">
-                  <MobileSortSelect sortBy={sort} />
-                </div>
               </div>
               
               {/* Active Filter Count on Mobile */}

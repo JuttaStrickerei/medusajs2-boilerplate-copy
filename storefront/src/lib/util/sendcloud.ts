@@ -73,13 +73,12 @@ export function getCarrierName(fulfillmentData: SendcloudFulfillmentData | null)
 }
 
 /**
- * Check if a fulfillment has been shipped
+ * Check if a fulfillment has been shipped (shipped_at must be set!)
  */
 export function isFulfillmentShipped(fulfillment: {
   shipped_at?: Date | string | null
-  data?: Record<string, unknown> | null
 }): boolean {
-  return !!fulfillment.shipped_at || !!((fulfillment.data as SendcloudFulfillmentData)?.tracking_number)
+  return !!fulfillment.shipped_at
 }
 
 /**
@@ -92,26 +91,58 @@ export function isFulfillmentDelivered(fulfillment: {
 }
 
 /**
+ * Check if fulfillment is in "preparing" state (created but not yet shipped)
+ * This means: Label created, announced to carrier, but not picked up yet
+ */
+export function isFulfillmentPreparing(fulfillment: {
+  shipped_at?: Date | string | null
+  delivered_at?: Date | string | null
+  canceled_at?: Date | string | null
+  data?: Record<string, unknown> | null
+}): boolean {
+  // Has fulfillment data (parcel created) but not yet shipped
+  const hasData = !!(fulfillment.data as SendcloudFulfillmentData)?.parcel_id
+  return hasData && !fulfillment.shipped_at && !fulfillment.delivered_at && !fulfillment.canceled_at
+}
+
+/**
  * Get the status of a fulfillment
+ * 
+ * Status Flow:
+ * 1. "pending"    - No fulfillment / order being processed
+ * 2. "preparing"  - Fulfillment created, label generated, announced to carrier (NO tracking link shown)
+ * 3. "shipped"    - Carrier picked up, in transit (tracking link shown)
+ * 4. "delivered"  - Successfully delivered
+ * 5. "canceled"   - Fulfillment was canceled
  */
 export function getFulfillmentStatus(fulfillment: {
   shipped_at?: Date | string | null
   delivered_at?: Date | string | null
   canceled_at?: Date | string | null
+  packed_at?: Date | string | null
   data?: Record<string, unknown> | null
-}): "pending" | "shipped" | "delivered" | "canceled" {
+}): "pending" | "preparing" | "shipped" | "delivered" | "canceled" {
   if (fulfillment.canceled_at) return "canceled"
   if (fulfillment.delivered_at) return "delivered"
-  if (fulfillment.shipped_at || ((fulfillment.data as SendcloudFulfillmentData)?.tracking_number)) return "shipped"
+  if (fulfillment.shipped_at) return "shipped"
+  
+  // Check if fulfillment has been created (parcel_id exists or packed_at is set)
+  const fulfillmentData = fulfillment.data as SendcloudFulfillmentData | null
+  const hasParcel = !!fulfillmentData?.parcel_id
+  const isPacked = !!fulfillment.packed_at
+  
+  if (hasParcel || isPacked) return "preparing"
+  
   return "pending"
 }
 
 /**
  * Get a human-readable status label
  */
-export function getFulfillmentStatusLabel(status: "pending" | "shipped" | "delivered" | "canceled"): string {
+export function getFulfillmentStatusLabel(status: "pending" | "preparing" | "shipped" | "delivered" | "canceled"): string {
   const labels: Record<string, string> = {
     pending: "In Bearbeitung",
+    preparing: "Wird vorbereitet",
     shipped: "Versendet",
     delivered: "Zugestellt",
     canceled: "Storniert",

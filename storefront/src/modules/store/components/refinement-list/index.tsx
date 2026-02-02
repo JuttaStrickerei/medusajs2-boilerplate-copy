@@ -5,7 +5,7 @@ import { useCallback, useTransition, useState } from "react"
 import { cn } from "@lib/utils"
 import { ChevronDown, X } from "@components/icons"
 
-import SortProducts, { SortOptions } from "./sort-products"
+import { SortOptions } from "./sort-products"
 
 export interface ProductFilters {
   colors?: string[]
@@ -281,11 +281,6 @@ const RefinementList = ({ sortBy, filters, 'data-testid': dataTestId }: Refineme
           )}
         </div>
       )}
-
-      {/* Sort */}
-      <FilterSection title="Sortieren" defaultOpen>
-        <SortProducts sortBy={sortBy} setQueryParams={setQueryParams} />
-      </FilterSection>
 
       {/* Color Filter */}
       <FilterSection title="Farbe" count={selectedColors.length}>

@@ -88,6 +88,15 @@ export const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 export const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL;
 
 /**
+ * (optional) Mailchimp configuration for newsletter subscriptions
+ */
+export const MAILCHIMP_API_KEY = process.env.MAILCHIMP_API_KEY;
+export const MAILCHIMP_SERVER = process.env.MAILCHIMP_SERVER;
+export const MAILCHIMP_LIST_ID = process.env.MAILCHIMP_LIST_ID;
+export const MAILCHIMP_NEW_PRODUCTS_SUBJECT_LINE = process.env.MAILCHIMP_NEW_PRODUCTS_SUBJECT_LINE;
+export const MAILCHIMP_NEW_PRODUCTS_STOREFRONT_URL = process.env.MAILCHIMP_NEW_PRODUCTS_STOREFRONT_URL;
+
+/**
  * (optional) Stripe API key and webhook secret
  */
 export const STRIPE_API_KEY = process.env.STRIPE_API_KEY;

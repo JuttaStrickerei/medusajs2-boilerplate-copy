@@ -4,21 +4,30 @@ import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Checkout | Strickerei Jutta",
   description: "Sicher und einfach bestellen",
 }
 
-export default async function Checkout() {
+export default async function Checkout({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ countryCode: string }>
+  searchParams: Promise<{ step?: string }>
+}) {
+  const { countryCode } = await params
   const cart = await retrieveCart()
 
-  if (!cart) {
-    return notFound()
+  // Redirect to cart if no cart exists or cart is empty
+  if (!cart || !cart.items || cart.items.length === 0) {
+    redirect(`/${countryCode}/cart`)
   }
 
   const customer = await retrieveCustomer()
+  // Allow guest checkout - no redirect needed
 
   return (
     <div className="content-container py-8 small:py-12">

@@ -6,7 +6,7 @@ import { X, Filter, ChevronDown } from "@components/icons"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useTransition } from "react"
 import { cn } from "@lib/utils"
-import SortProducts, { SortOptions } from "../refinement-list/sort-products"
+import { SortOptions } from "../refinement-list/sort-products"
 
 export interface ProductFilters {
   colors?: string[]
@@ -319,11 +319,6 @@ export default function MobileFilterDrawer({ sortBy, filters }: MobileFilterDraw
                     </div>
                   </div>
                 )}
-
-                {/* Sort */}
-                <FilterSection title="Sortieren" defaultOpen>
-                  <SortProducts sortBy={sortBy} setQueryParams={setQueryParams} />
-                </FilterSection>
 
                 {/* Color Filter */}
                 <FilterSection title="Farbe">

@@ -107,6 +107,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const redirectUrl = formData.get("redirect_url") as string | null
 
   try {
     await sdk.auth
@@ -124,6 +125,12 @@ export async function login(_currentState: unknown, formData: FormData) {
     await transferCart()
   } catch (error: any) {
     return error.toString()
+  }
+
+  // Smart redirect: If redirect_url is provided, redirect there instead of account page
+  // Security: Only allow internal redirects (paths starting with / but not //)
+  if (redirectUrl && redirectUrl.startsWith("/") && !redirectUrl.startsWith("//")) {
+    redirect(redirectUrl)
   }
 }
 

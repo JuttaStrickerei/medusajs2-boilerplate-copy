@@ -21,6 +21,7 @@
     "email:dev": "email dev --dir=./src/modules/email-notifications/templates --port=3002"
   },
   "dependencies": {
+    "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@medusajs/admin-sdk": "^2.12.3",
     "@medusajs/admin-shared": "^2.12.3",
     "@medusajs/cli": "^2.12.3",
@@ -61,6 +62,7 @@
     "@swc/core": "1.5.7",
     "@swc/jest": "^0.2.39",
     "@types/jest": "^29.5.14",
+    "@types/mailchimp__mailchimp_marketing": "^3.0.22",
     "@types/node": "^20.19.27",
     "@types/pdfmake": "^0.2.12",
     "@types/react": "^18.3.27",

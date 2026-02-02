@@ -44,19 +44,25 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
   const fulfillments = (order.fulfillments || []) as FulfillmentWithData[]
   
   // Separate regular fulfillments from return fulfillments
+  // WICHTIG: Gecancelte Fulfillments ausfiltern!
   const regularFulfillments = fulfillments.filter(f => {
     const data = f.data as SendcloudFulfillmentData | null
-    return !data?.is_return
+    const isCanceled = !!f.canceled_at
+    return !data?.is_return && !isCanceled
   })
   
   const returnFulfillments = fulfillments.filter(f => {
     const data = f.data as SendcloudFulfillmentData | null
-    return data?.is_return === true
+    const isCanceled = !!f.canceled_at
+    return data?.is_return === true && !isCanceled
   })
 
-  // Check if order is fully delivered
+  // Check if order is fully delivered (nur aktive Fulfillments berücksichtigen)
   const isOrderDelivered = order.fulfillment_status === "delivered" || 
-    regularFulfillments.every(f => getFulfillmentStatus(f) === "delivered")
+    (regularFulfillments.length > 0 && regularFulfillments.every(f => {
+      const status = getFulfillmentStatus(f)
+      return status === "delivered"
+    }))
   
   // Check if there's an active return
   const hasActiveReturn = returnFulfillments.length > 0
@@ -262,7 +268,7 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
           const trackingNumber = fulfillment.labels?.[0]?.tracking_number || getTrackingNumber(fulfillmentData)
           const carrier = getCarrierName(fulfillmentData)
 
-          // Skip pending fulfillments
+          // Pending status - no fulfillment data yet
           if (status === "pending") {
             return (
               <div key={fulfillment.id} className="bg-stone-50 rounded-xl p-5 flex items-center gap-4">
@@ -270,15 +276,134 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                   <Clock size={20} className="text-stone-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-stone-700">Wird vorbereitet</p>
+                  <p className="font-medium text-stone-700">In Bearbeitung</p>
                   <p className="text-sm text-stone-500">
-                    Sendung {index + 1} wird für den Versand vorbereitet
+                    Ihre Bestellung wird bearbeitet
                   </p>
                 </div>
               </div>
             )
           }
 
+          // Preparing status - Label created, announced to carrier, but NOT yet shipped
+          // NO tracking link shown in this state!
+          if (status === "preparing") {
+            return (
+              <div key={fulfillment.id} className="bg-white rounded-xl border border-amber-200 overflow-hidden">
+                {/* Status Header - Preparing */}
+                <div className="px-5 py-4 flex items-center justify-between bg-amber-50 border-b border-amber-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                      <Package size={20} className="text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-amber-800">Wird für den Versand vorbereitet</p>
+                      {carrier && (
+                        <p className="text-sm text-amber-600">via {carrier}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {regularFulfillments.length > 1 && (
+                    <span className="text-sm text-amber-600">
+                      Sendung {index + 1} von {regularFulfillments.length}
+                    </span>
+                  )}
+                </div>
+
+                {/* Info - NO tracking link yet */}
+                <div className="p-5">
+                  <p className="text-sm text-stone-600">
+                    Ihr Paket wurde für den Versand vorbereitet und wird in Kürze vom Paketdienst abgeholt. 
+                    Sobald es unterwegs ist, erhalten Sie hier Ihren Tracking-Link.
+                  </p>
+                </div>
+              </div>
+            )
+          }
+
+          // Delivered fulfillment - show green success state
+          if (status === "delivered") {
+            return (
+              <div 
+                key={fulfillment.id} 
+                className="bg-white rounded-xl border border-green-200 overflow-hidden"
+              >
+                {/* Status Header - Delivered */}
+                <div className="px-5 py-4 flex items-center justify-between bg-green-50 border-b border-green-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                      <CheckCircle size={20} className="text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-green-800">Erfolgreich zugestellt</p>
+                      {carrier && (
+                        <p className="text-sm text-green-600">via {carrier}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {regularFulfillments.length > 1 && (
+                    <span className="text-sm text-green-600">
+                      Sendung {index + 1} von {regularFulfillments.length}
+                    </span>
+                  )}
+                </div>
+
+                {/* Tracking Info */}
+                <div className="p-5 space-y-4">
+                  {/* Delivered Date */}
+                  {fulfillment.delivered_at && (
+                    <div className="text-sm">
+                      <span className="text-stone-500">Zugestellt:</span>
+                      <span className="ml-2 text-green-700 font-medium">
+                        {formatDate(fulfillment.delivered_at)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Tracking Number */}
+                  {trackingNumber && (
+                    <div className="flex items-center gap-3 bg-stone-50 rounded-lg px-4 py-3">
+                      <div className="flex-1">
+                        <p className="text-xs text-stone-500 mb-0.5">Sendungsnummer</p>
+                        <p className="font-mono text-stone-800 font-medium">{trackingNumber}</p>
+                      </div>
+                      <button
+                        onClick={() => handleCopyTracking(trackingNumber, fulfillment.id)}
+                        className="p-2 text-stone-500 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
+                        title="Kopieren"
+                      >
+                        {copiedId === fulfillment.id ? (
+                          <CheckCircle size={18} className="text-green-600" />
+                        ) : (
+                          <Copy size={18} />
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Action Button */}
+                  {trackingUrl && (
+                    <a
+                      href={trackingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex"
+                    >
+                      <Button variant="secondary" size="sm">
+                        <Truck size={16} className="mr-2" />
+                        Sendungsverlauf
+                        <ExternalLink size={14} className="ml-2 opacity-60" />
+                      </Button>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )
+          }
+
+          // In transit fulfillment - show blue state
           return (
             <div 
               key={fulfillment.id} 

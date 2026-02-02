@@ -1,4 +1,4 @@
-import { Button, Link, Section, Text, Img, Hr } from '@react-email/components'
+import { Button, Link, Section, Text, Hr, Container } from '@react-email/components'
 import { Base } from './base'
 
 /**
@@ -37,47 +37,107 @@ export const InviteUserEmail = ({
 }: InviteUserEmailProps) => {
   return (
     <Base preview={preview}>
-      <Section className="mt-[32px]">
-        <Img
-          src="https://user-images.githubusercontent.com/59018053/229103275-b5e482bb-4601-46e6-8142-244f531cebdb.svg"
-          alt="Medusa"
-          className="mx-auto w-28"
-        />
+      <Section>
+        <Container style={{ maxWidth: '600px' }}>
+          {/* Header */}
+          <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '30px' }}>
+            <tr>
+              <td align="center" style={{ paddingBottom: '24px', borderBottom: '1px solid #e7e5e4' }}>
+                <Text style={{ 
+                  fontSize: '30px', 
+                  fontWeight: '500', 
+                  color: '#1c1917',
+                  margin: '0 0 8px 0',
+                  fontFamily: 'Georgia, serif'
+                }}>
+                  Einladung
+                </Text>
+                <Text style={{ 
+                  fontSize: '14px', 
+                  color: '#57534e',
+                  margin: '0'
+                }}>
+                  Sie wurden als Administrator eingeladen
+                </Text>
+              </td>
+            </tr>
+          </table>
+
+          {/* Content */}
+          <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px' }}>
+            <tr>
+              <td align="center">
+                <Text style={{ 
+                  fontSize: '14px',
+                  color: '#57534e',
+                  margin: '0 0 24px 0',
+                  lineHeight: '22px'
+                }}>
+                  Sie wurden eingeladen, Administrator zu werden.
+                </Text>
+                <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px', textAlign: 'center' }}>
+                  <tr>
+                    <td>
+                      <Button
+                        style={{
+                          backgroundColor: '#1c1917',
+                          color: '#ffffff',
+                          padding: '14px 32px',
+                          textDecoration: 'none',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          fontWeight: '500',
+                          display: 'inline-block'
+                        }}
+                        href={inviteLink}
+                      >
+                        Einladung annehmen
+                      </Button>
+                    </td>
+                  </tr>
+                </table>
+                <Text style={{ 
+                  fontSize: '14px',
+                  color: '#57534e',
+                  margin: '0 0 12px 0',
+                  lineHeight: '22px'
+                }}>
+                  oder kopieren Sie diese URL in Ihren Browser:
+                </Text>
+                <Text style={{
+                  maxWidth: '100%',
+                  wordBreak: 'break-all',
+                  overflowWrap: 'break-word',
+                  fontSize: '13px',
+                  color: '#1c1917'
+                }}>
+                  <Link
+                    href={inviteLink}
+                    style={{ color: '#1c1917', textDecoration: 'underline' }}
+                  >
+                    {inviteLink}
+                  </Link>
+                </Text>
+              </td>
+            </tr>
+          </table>
+
+          {/* Footer */}
+          <Hr style={{ 
+            borderTop: '1px solid #e7e5e4', 
+            margin: '24px 0 20px 0' 
+          }} />
+          <Text style={{ 
+            fontSize: '12px',
+            color: '#78716c',
+            lineHeight: '18px',
+            margin: '0'
+          }}>
+            Falls Sie diese Einladung nicht erwartet haben, können Sie diese E-Mail ignorieren. Die Einladung läuft in 24 Stunden ab. 
+            Wenn Sie Bedenken bezüglich der Sicherheit Ihres Kontos haben, antworten Sie bitte auf diese E-Mail.
+          </Text>
+        </Container>
       </Section>
-      <Section className="text-center">
-        <Text className="text-black text-[14px] leading-[24px]">
-          You&apos;ve been invited to be an administrator on <strong>Medusa</strong>.
-        </Text>
-        <Section className="mt-4 mb-[32px]">
-          <Button
-            className="bg-[#000000] rounded text-white text-[12px] font-semibold no-underline px-5 py-3"
-            href={inviteLink}
-          >
-            Accept Invitation
-          </Button>
-        </Section>
-        <Text className="text-black text-[14px] leading-[24px]">
-          or copy and paste this URL into your browser:
-        </Text>
-        <Text style={{
-          maxWidth: '100%',
-          wordBreak: 'break-all',
-          overflowWrap: 'break-word'
-        }}>
-          <Link
-            href={inviteLink}
-            className="text-blue-600 no-underline"
-          >
-            {inviteLink}
-          </Link>
-        </Text>
-      </Section>
-      <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
-      <Text className="text-[#666666] text-[12px] leading-[24px]">
-        If you were not expecting this invitation, you can ignore this email, as the
-        invitation will expire in 24 hours. If you are concerned about your account's safety,
-        please reply to this email to get in touch with us.
-      </Text>
     </Base>
   )
 }

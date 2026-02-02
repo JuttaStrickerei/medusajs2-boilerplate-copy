@@ -121,10 +121,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   text="100% Naturfasern"
                 />
                 <TrustBadgeSmall
-                  icon={<Truck size={18} />}
-                  text="Kostenloser Versand ab €150"
-                />
-                <TrustBadgeSmall
                   icon={<RefreshCw size={18} />}
                   text="30 Tage Rückgaberecht"
                 />

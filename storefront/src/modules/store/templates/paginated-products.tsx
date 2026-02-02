@@ -74,10 +74,10 @@ function matchesColorFilter(product: HttpTypes.StoreProduct, colors: string[]): 
 function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): boolean {
   if (!sizes || sizes.length === 0) return true
   
-  // Normalize sizes
+  // Normalize sizes - map filter values to possible variant values
   const normalizedSizes = sizes.map((s) => s.toLowerCase())
   
-  // Check variants for size option
+  // Check variants for size option - use exact matching only
   const hasMatchingSize = product.variants?.some((variant) => {
     return variant.options?.some((option) => {
       const optionTitle = option.option?.title?.toLowerCase() || ""
@@ -85,20 +85,18 @@ function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): bo
       
       // Check if this is a size option
       if (optionTitle === "size" || optionTitle === "größe" || optionTitle === "groesse") {
-        return normalizedSizes.some((size) => 
-          optionValue === size || 
-          optionValue.includes(size) ||
-          size.includes(optionValue)
-        )
+        // Use exact match only (case-insensitive)
+        return normalizedSizes.some((size) => optionValue === size)
       }
       return false
     })
   })
   
-  // Also check variant title for size mentions
+  // Also check variant title for exact size match
   const hasSizeInVariant = product.variants?.some((variant) => {
     const variantTitle = variant.title?.toLowerCase() || ""
-    return normalizedSizes.some((size) => variantTitle.includes(size))
+    // Use exact match only to avoid false positives
+    return normalizedSizes.some((size) => variantTitle === size)
   })
   
   return hasMatchingSize || hasSizeInVariant
