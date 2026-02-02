@@ -1,5 +1,5 @@
 import type {
-  MedusaRequest,
+  AuthenticatedMedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
@@ -7,9 +7,10 @@ import { Modules } from "@medusajs/framework/utils"
 /**
  * Helper endpoint to check notification providers setup
  * GET /admin/check-notification-providers
+ * Requires admin authentication
  */
 export const GET = async (
-  req: MedusaRequest,
+  req: AuthenticatedMedusaRequest,
   res: MedusaResponse
 ) => {
   try {
@@ -51,6 +52,10 @@ export const GET = async (
       },
     })
   } catch (error) {
+    // Log error for debugging (server-side only)
+    const logger = req.scope.resolve("logger")
+    logger.error("[CheckNotificationProviders] Error:", error)
+    
     // Security: Don't expose stack traces in production
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",

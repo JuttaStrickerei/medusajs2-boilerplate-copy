@@ -5,12 +5,12 @@ import { INotificationModuleService } from "@medusajs/framework/types"
 import { EmailTemplates } from "../../../modules/email-notifications/templates"
 
 const contactSchema = z.object({
-  firstName: z.string().min(1, "Vorname ist erforderlich"),
-  lastName: z.string().min(1, "Nachname ist erforderlich"),
+  firstName: z.string().min(1, "Vorname ist erforderlich").max(100, "Vorname ist zu lang"),
+  lastName: z.string().min(1, "Nachname ist erforderlich").max(100, "Nachname ist zu lang"),
   email: z.string().email("Ungültige E-Mail-Adresse"),
-  phone: z.string().optional(),
-  subject: z.string().min(1, "Betreff ist erforderlich"),
-  message: z.string().min(10, "Nachricht muss mindestens 10 Zeichen haben"),
+  phone: z.string().max(40, "Telefonnummer ist zu lang").optional(),
+  subject: z.string().min(1, "Betreff ist erforderlich").max(150, "Betreff ist zu lang"),
+  message: z.string().min(10, "Nachricht muss mindestens 10 Zeichen haben").max(5000, "Nachricht ist zu lang"),
 })
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {

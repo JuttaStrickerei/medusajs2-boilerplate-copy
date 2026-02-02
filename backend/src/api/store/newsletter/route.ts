@@ -61,19 +61,25 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // 3. Neue Anmeldung: Bestätigungs-E-Mail senden
     logger.debug(`[Newsletter API] New subscriber - sending confirmation email`)
     
-    await notificationModuleService.createNotifications({
-      channel: "email",
-      to: email,
-      template: EmailTemplates.NEWSLETTER_CONFIRMATION,
-      data: {
-        emailOptions: {
-          subject: "Willkommen bei Strickerei Jutta! 🧶",
+    // Wrap in try-catch - email failure should not fail the subscription
+    try {
+      await notificationModuleService.createNotifications({
+        channel: "email",
+        to: email,
+        template: EmailTemplates.NEWSLETTER_CONFIRMATION,
+        data: {
+          emailOptions: {
+            subject: "Willkommen bei Strickerei Jutta! 🧶",
+          },
+          firstName: first_name || undefined,
+          email: email,
+          preview: "Willkommen in unserem Newsletter!",
         },
-        firstName: first_name || undefined,
-        email: email,
-        preview: "Willkommen in unserem Newsletter!",
-      },
-    })
+      })
+    } catch (emailError) {
+      // Log but don't fail - the subscription was successful
+      logger.warn(`[Newsletter API] Confirmation email failed, but subscription succeeded`)
+    }
 
     logger.info(`[Newsletter API] Subscription completed successfully`)
 
