@@ -15,18 +15,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const notificationModuleService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
   
   try {
-    // Use Zod validation instead of type assertion
-    const parseResult = newsletterSignupSchema.safeParse(req.body)
+    // Use Zod validation (same pattern as contact route)
+    const { email, first_name, last_name } = newsletterSignupSchema.parse(req.body)
     
-    if (!parseResult.success) {
+    // Extra check for email (should be caught by Zod, but defense in depth)
+    if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Ungültige Eingabe",
-        errors: parseResult.error.errors,
+        message: "E-Mail-Adresse ist erforderlich",
       })
     }
-    
-    const { email, first_name, last_name } = parseResult.data
 
     logger.debug(`[Newsletter API] Processing signup request`)
 
@@ -91,6 +89,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   } catch (error: unknown) {
     logger.error(`[Newsletter API] Error: ${error instanceof Error ? error.message : "Unknown error"}`)
+    
+    // Zod validation error
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: "Ungültige Eingabe",
+        errors: error.errors,
+      })
+    }
     
     // Check for MedusaError with INVALID_DATA type (invalid email from Mailchimp)
     if (error instanceof MedusaError && error.type === MedusaError.Types.INVALID_DATA) {
