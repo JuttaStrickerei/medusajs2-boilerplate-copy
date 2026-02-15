@@ -5,6 +5,7 @@ import { useParams, usePathname } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { signout } from "@lib/data/customer"
+import { useCart } from "@lib/context/cart-context"
 import { 
   User, 
   MapPin, 
@@ -21,8 +22,11 @@ const AccountNav = ({
 }) => {
   const route = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
+  const { clearCart } = useCart()
 
   const handleLogout = async () => {
+    // FIX: Clear client cart state immediately so navbar count doesn't stay stale after logout.
+    clearCart()
     await signout(countryCode)
   }
 
