@@ -79,6 +79,8 @@ const medusaConfig = {
     },
     {resolve: './src/modules/invoice_generator',
     },
+    {resolve: './src/modules/wishlist',
+    },
     {
       key: Modules.FILE,
       resolve: '@medusajs/file',
