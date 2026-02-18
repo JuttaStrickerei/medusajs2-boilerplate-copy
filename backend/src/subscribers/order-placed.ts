@@ -2,6 +2,7 @@ import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService, Logger } from '@medusajs/framework/types'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
+import { BACKEND_URL } from '../lib/constants'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -13,7 +14,7 @@ export default async function orderPlacedHandler({
   const adminNotificationEmail =
     process.env.ADMIN_NOTIFICATION_EMAIL?.trim() || "office@strickerei-jutta.at"
   const adminBaseUrl =
-    process.env.MEDUSA_ADMIN_URL?.trim() || "http://localhost:9000/app"
+    process.env.MEDUSA_ADMIN_URL?.trim() || `${BACKEND_URL}/app`
   
   logger.info(`[OrderPlaced] Processing order: ${data.id}`)
 
