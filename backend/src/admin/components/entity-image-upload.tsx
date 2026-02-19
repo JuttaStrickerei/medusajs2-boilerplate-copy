@@ -154,11 +154,11 @@ const EntityImageUpload = ({
       <div className="px-6 py-4">
         {currentImage ? (
           <div className="flex flex-col gap-3">
-            <div className="relative overflow-hidden rounded-lg border border-ui-border-base">
+            <div className="relative overflow-hidden rounded-lg border border-ui-border-base bg-ui-bg-subtle">
               <img
                 src={currentImage}
                 alt={labels.title}
-                className="h-48 w-full object-cover"
+                className="w-full max-h-[280px] object-contain"
               />
             </div>
             <div className="flex gap-2">

@@ -35,11 +35,10 @@ export const listCollections = async (
       "/store/collections",
       {
         query: {
-          fields: "+metadata",
           ...queryParams,
+          fields: "+metadata",
         },
         next,
-        cache: "force-cache",
       }
     )
     .then(({ collections }) => ({ collections, count: collections.length }))
