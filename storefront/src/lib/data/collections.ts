@@ -34,7 +34,10 @@ export const listCollections = async (
     .fetch<{ collections: HttpTypes.StoreCollection[]; count: number }>(
       "/store/collections",
       {
-        query: queryParams,
+        query: {
+          fields: "+metadata",
+          ...queryParams,
+        },
         next,
         cache: "force-cache",
       }
