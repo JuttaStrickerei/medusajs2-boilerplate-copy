@@ -39,19 +39,21 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
   protected client_: SendcloudClient
   protected options_: SendcloudOptions
   protected container_: any
+  protected logger_: any
 
   constructor(container, options: SendcloudOptions) {
     super()
     this.options_ = options
     this.client_ = new SendcloudClient(options)
     this.container_ = container
+    this.logger_ = container.resolve?.("logger") || console
     
     if (process.env.NODE_ENV === "development") {
       this.client_.testConnection().then((success) => {
         if (!success) {
-          console.error("[SendcloudProvider] Failed to connect to Sendcloud")
+          this.logger_.error("[SendcloudProvider] Failed to connect to Sendcloud")
         } else {
-          console.log("[SendcloudProvider] Successfully connected to Sendcloud")
+          this.logger_.info("[SendcloudProvider] Successfully connected to Sendcloud")
         }
       })
     }
@@ -97,7 +99,7 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
 
       return [...regularOptions, ...returnOptions];
     } catch (error) {
-      console.error("[SendcloudProvider] Error fetching fulfillment options:", error);
+      this.logger_.error("[SendcloudProvider] Error fetching fulfillment options: " + (error instanceof Error ? error.message : String(error)));
       return [];
     }
   }
@@ -107,7 +109,7 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
       const shippingMethods = await this.getFulfillmentOptions()
       return shippingMethods.some(method => method.id === data.id)
     } catch (error) {
-      console.error("[SendcloudProvider] Error validating option:", error)
+      this.logger_.error("[SendcloudProvider] Error validating option: " + (error instanceof Error ? error.message : String(error)))
       return false
     }
   }
@@ -133,13 +135,11 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
   }
 
   /**
-   * Calculate shipping price for a Sendcloud method
-   * 
-   * Simple approach: Use the price from the method's countries data
-   * For now, we use the first country's price as the base price.
-   * 
-   * Future enhancement: When expanding internationally, this can be extended
-   * to look up the price based on context.shipping_address.country_code
+   * Calculate shipping price for a Sendcloud method.
+   *
+   * Strategy:
+   * 1. Try contract-based pricing via Sendcloud Shipping Price API (most accurate)
+   * 2. Fallback to country-price from method data (always works)
    */
   async calculatePrice(
     optionData: CalculateShippingOptionPriceDTO["optionData"],
@@ -147,7 +147,6 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
     context: CalculateShippingOptionPriceDTO["context"]
   ): Promise<CalculatedShippingOptionPrice> {
     try {
-      // Try to find sendcloud_id and countries in various places
       const methodData = optionData as Record<string, any>
       
       const sendcloudId = 
@@ -168,9 +167,21 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
         }
       }
 
-      // Get price - try destination country first, then fallback to first country
-      let priceFromSendcloud = 0
       const toCountry = context?.shipping_address?.country_code?.toUpperCase()
+      const toPostalCode = context?.shipping_address?.postal_code
+
+      const contractPrice = await this.tryContractBasedPricing(
+        sendcloudId, toCountry, toPostalCode, countries, context
+      )
+
+      if (contractPrice !== null) {
+        return {
+          calculated_amount: contractPrice,
+          is_calculated_price_tax_inclusive: false,
+        }
+      }
+
+      let priceFromSendcloud = 0
       
       if (toCountry && countries?.length) {
         const countryData = countries.find((c: any) => c.iso_2?.toUpperCase() === toCountry)
@@ -179,25 +190,92 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
         }
       }
       
-      // Fallback: use first country's price
       if (priceFromSendcloud === 0 && countries?.[0]?.price) {
         priceFromSendcloud = countries[0].price
       }
 
-      // Note: This storefront template treats amounts as euros (not cents)
-      const calculatedAmount = priceFromSendcloud
-
       return {
-        calculated_amount: calculatedAmount,
+        calculated_amount: priceFromSendcloud,
         is_calculated_price_tax_inclusive: false 
       }
     } catch (error) {
-      console.error("[SendcloudProvider] Error calculating price:", error)
+      this.logger_.error("[SendcloudProvider] Error calculating price: " + (error instanceof Error ? error.message : String(error)))
       if (error instanceof MedusaError) throw error
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE, 
         `Error calculating Sendcloud price: ${error instanceof Error ? error.message : String(error)}`
       )
+    }
+  }
+
+  private async tryContractBasedPricing(
+    sendcloudMethodId: number | string,
+    toCountry: string | undefined,
+    toPostalCode: string | undefined,
+    countries: any[],
+    context: any
+  ): Promise<number | null> {
+    if (!toCountry) return null
+
+    try {
+      const [addressData, contractsData] = await Promise.all([
+        this.client_.getSenderAddresses(),
+        this.client_.getContracts(),
+      ])
+
+      const senderAddresses = addressData.sender_addresses || []
+      const contracts = contractsData.contracts || []
+
+      if (senderAddresses.length === 0 || contracts.length === 0) return null
+
+      let totalWeightGrams = 0
+      const cart = context?.cart || context
+      if (cart?.items) {
+        for (const item of cart.items) {
+          const itemWeight = item.variant?.product?.weight || 0
+          totalWeightGrams += itemWeight * (item.quantity || 0)
+        }
+      }
+
+      const targetCountries = countries
+        ?.map((c: any) => c.iso_2?.toUpperCase())
+        .filter(Boolean) || []
+      const targetCarrier = (countries?.[0] as any)?.carrier
+
+      const matchingContracts = contracts.filter((contract) => {
+        if (!contract.is_active) return false
+        return (
+          targetCountries.includes(contract.country) &&
+          (!targetCarrier || targetCarrier === contract.carrier?.code)
+        )
+      })
+
+      if (matchingContracts.length !== 1 || senderAddresses.length === 0) return null
+
+      const sender = senderAddresses[0]
+      const contract = matchingContracts[0]
+
+      const priceResult = await this.client_.getShippingPrice({
+        shippingMethodId: Number(sendcloudMethodId),
+        fromCountry: sender.country,
+        toCountry,
+        weight: totalWeightGrams,
+        weightUnit: "gram",
+        contractId: contract.id,
+        fromPostalCode: sender.postal_code,
+        toPostalCode: toPostalCode,
+      })
+
+      if (priceResult && priceResult.length > 0 && priceResult[0]?.price) {
+        return Math.round(priceResult[0].price * 100)
+      }
+
+      return null
+    } catch (error) {
+      this.logger_.warn("[SendcloudProvider] Contract pricing failed, using fallback: " + 
+        (error instanceof Error ? error.message : String(error))
+      )
+      return null
     }
   }
 
@@ -334,7 +412,7 @@ async createReturnFulfillment(
 
   // Extract Sendcloud Method ID from shipping option data
   // The sendcloud_id can be in various locations depending on how the shipping option was configured
-  console.log("[SendcloudProvider] Return - shipping_option:", JSON.stringify(shipping_option, null, 2));
+  this.logger_.debug("[SendcloudProvider] Return - shipping_option: " + JSON.stringify(shipping_option, null, 2));
   
   const sendcloudMethodId = 
     (shipping_option.data?.data as any)?.sendcloud_id ||  // Nested in data.data
@@ -342,11 +420,11 @@ async createReturnFulfillment(
     (shipping_option as any)?.sendcloud_id ||              // Direct on shipping_option
     (shipping_option.service_zone?.fulfillment_set?.service_zones?.[0]?.shipping_options?.[0]?.data as any)?.sendcloud_id; // Deeply nested
     
-  console.log("[SendcloudProvider] Return - extracted sendcloud_id:", sendcloudMethodId);
+  this.logger_.debug("[SendcloudProvider] Return - extracted sendcloud_id: " + sendcloudMethodId);
   
   if (!sendcloudMethodId) {
-    console.error("[SendcloudProvider] Missing sendcloud_id in shipping_option.data");
-    console.error("[SendcloudProvider] shipping_option structure:", JSON.stringify(shipping_option, null, 2));
+    this.logger_.error("[SendcloudProvider] Missing sendcloud_id in shipping_option.data");
+    this.logger_.error("[SendcloudProvider] shipping_option structure: " + JSON.stringify(shipping_option, null, 2));
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
       "Sendcloud shipping method ID (data.sendcloud_id) is required in shipping option data."
@@ -376,7 +454,7 @@ async createReturnFulfillment(
       const query = this.container_.resolve("query");
       const firstLineItemId = items[0].line_item_id;
       
-      console.log("[SendcloudProvider] Fetching order data for line_item_id:", firstLineItemId);
+      this.logger_.debug("[SendcloudProvider] Fetching order data for line_item_id: " + firstLineItemId);
       
       // Query orders with the line item
       const { data: orders } = await query.graph({
@@ -401,17 +479,17 @@ async createReturnFulfillment(
         orderFound = true;
         customerAddress = matchingOrder.shipping_address;
         orderNumber = String(matchingOrder.display_id || matchingOrder.id);
-        console.log("[SendcloudProvider] Found order:", orderNumber, "with shipping address");
+        this.logger_.info("[SendcloudProvider] Found order: " + orderNumber + " with shipping address");
       }
     } catch (error) {
-      console.error("[SendcloudProvider] Failed to fetch order data:", error instanceof Error ? error.message : error);
+      this.logger_.error("[SendcloudProvider] Failed to fetch order data: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 
   // Strategy 3: Last resort - use placeholder data with Austria as default
   // (since most return methods are Austria-specific)
   if (!orderFound) {
-    console.warn("[SendcloudProvider] No order data found, using placeholder (may result in invalid labels)");
+    this.logger_.warn("[SendcloudProvider] No order data found, using placeholder (may result in invalid labels)");
     
     // Try to get country from delivery_address (which is the merchant address)
     const fallbackCountry = delivery_address?.country_code?.toLowerCase() || "at";
@@ -551,7 +629,7 @@ async createReturnFulfillment(
       }]
     };
   } catch (error) {
-    console.error("[SendcloudProvider] Return fulfillment failed:", error instanceof Error ? error.message : error);
+    this.logger_.error("[SendcloudProvider] Return fulfillment failed: " + (error instanceof Error ? error.message : String(error)));
     throw new MedusaError(
       MedusaError.Types.UNEXPECTED_STATE,
       `Failed to create return parcel in Sendcloud: ${(error as Error).message}`
@@ -574,7 +652,7 @@ async createReturnFulfillment(
 
     const sendcloudMethodId = (data?.data as Record<string, unknown>)?.sendcloud_id || (data as Record<string, unknown>)?.sendcloud_id;
     if (!sendcloudMethodId) {
-      console.error("[SendcloudProvider] Missing sendcloud_id in data");
+      this.logger_.error("[SendcloudProvider] Missing sendcloud_id in data");
       throw new MedusaError(MedusaError.Types.INVALID_DATA, "Sendcloud shipping method ID is required");
     }
 
@@ -657,7 +735,7 @@ async createReturnFulfillment(
         ]
       };
     } catch (error) {
-      console.error("[SendcloudProvider] Error creating Sendcloud parcel:", error);
+      this.logger_.error("[SendcloudProvider] Error creating Sendcloud parcel: " + (error instanceof Error ? error.message : String(error)));
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA, 
@@ -671,11 +749,10 @@ async createReturnFulfillment(
   ): Promise<Record<string, unknown>> {
     const parcelId = (data as any)?.parcel_id; 
     
-    console.log("[SendcloudProvider] cancelFulfillment called with parcel_id:", parcelId);
+    this.logger_.info("[SendcloudProvider] cancelFulfillment called with parcel_id: " + parcelId);
     
-    // If no parcel ID, we can still "cancel" in Medusa - just return success
     if (!parcelId) {
-      console.warn("[SendcloudProvider] No parcel ID found - cancelling only in Medusa");
+      this.logger_.warn("[SendcloudProvider] No parcel ID found - cancelling only in Medusa");
       return { 
         ...data, 
         cancelled_at: new Date().toISOString(),
@@ -685,7 +762,7 @@ async createReturnFulfillment(
   
     try {
       const result = await this.client_.cancelOrDeleteParcel(Number(parcelId));
-      console.log("[SendcloudProvider] Parcel cancelled in Sendcloud:", parcelId, result);
+      this.logger_.info("[SendcloudProvider] Parcel cancelled in Sendcloud: " + parcelId);
       return { 
         ...data, 
         cancelled_at: new Date().toISOString(),
@@ -695,7 +772,7 @@ async createReturnFulfillment(
     } catch (error) {
       const errorMessage = (error instanceof Error ? error.message : String(error)).toLowerCase();
       
-      console.log("[SendcloudProvider] Cancel error:", errorMessage);
+      this.logger_.debug("[SendcloudProvider] Cancel error: " + errorMessage);
       
       // Handle cases where parcel is already deleted/cancelled or doesn't exist
       // These should all be treated as "success" for the cancel operation
@@ -724,7 +801,7 @@ async createReturnFulfillment(
       
       for (const pattern of successPatterns) {
         if (errorMessage.includes(pattern)) {
-          console.log("[SendcloudProvider] Parcel", parcelId, "already cancelled/deleted - treating as success");
+          this.logger_.info("[SendcloudProvider] Parcel " + parcelId + " already cancelled/deleted - treating as success");
           return { 
             ...data, 
             cancelled_at: new Date().toISOString(),
@@ -734,7 +811,7 @@ async createReturnFulfillment(
       }
       
       // Only throw for genuine unexpected errors
-      console.error("[SendcloudProvider] Unexpected error cancelling Sendcloud parcel:", errorMessage);
+      this.logger_.error("[SendcloudProvider] Unexpected error cancelling Sendcloud parcel: " + errorMessage);
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         `Failed to cancel parcel in Sendcloud: ${errorMessage}`
@@ -793,7 +870,7 @@ async createReturnFulfillment(
       await this.updateMultipleFulfillments(fulfillments, fulfillmentStatus, fulfillmentModuleService);
         
     } catch (error) {
-      console.error("[SendcloudProvider] Error updating fulfillment status:", error);
+      this.logger_.error("[SendcloudProvider] Error updating fulfillment status: " + (error instanceof Error ? error.message : String(error)));
     }
   }
 
@@ -808,7 +885,7 @@ async createReturnFulfillment(
       try {
         // TODO: Implement actual status update when Medusa v2 provides the API
       } catch (error) {
-        console.error(`[SendcloudProvider] Error updating fulfillment ${fulfillment.id}:`, error);
+        this.logger_.error("[SendcloudProvider] Error updating fulfillment " + fulfillment.id + ": " + (error instanceof Error ? error.message : String(error)));
       }
     }
   }

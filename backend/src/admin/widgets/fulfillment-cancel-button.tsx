@@ -227,8 +227,8 @@ const FulfillmentCancelButtonWidget = ({
 
               {/* Action buttons row */}
               <div className="flex items-center gap-2 flex-wrap">
-                {/* Label Download Button */}
-                {hasLabel && (
+                {/* Label Download -- hide for delivered parcels (label no longer actionable) */}
+                {hasLabel && fulfillment.status !== "delivered" && (
                   <Button
                     variant="secondary"
                     size="small"
