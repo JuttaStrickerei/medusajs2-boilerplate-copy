@@ -144,7 +144,7 @@ export async function signout(countryCode: string) {
 
   await removeCartId()
 
-  const cartCacheTag = await getCacheTag("carts")
+  const cartCacheTag = await getCacheTag("cart")
   revalidateTag(cartCacheTag)
 
   redirect(`/${countryCode}/account`)
@@ -161,7 +161,7 @@ export async function transferCart() {
 
   await sdk.store.cart.transferCart(cartId, {}, headers)
 
-  const cartCacheTag = await getCacheTag("carts")
+  const cartCacheTag = await getCacheTag("cart")
   revalidateTag(cartCacheTag)
 }
 

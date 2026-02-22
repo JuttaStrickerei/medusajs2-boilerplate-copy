@@ -2,14 +2,19 @@ import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService, Logger } from '@medusajs/framework/types'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
+import { BACKEND_URL } from '../lib/constants'
 
 export default async function orderPlacedHandler({
   event: { data },
   container,
-}: SubscriberArgs<any>) {
+}: SubscriberArgs<{ id: string }>) {
   const logger = container.resolve("logger") as Logger
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
+  const adminNotificationEmail =
+    process.env.ADMIN_NOTIFICATION_EMAIL?.trim() || "office@strickerei-jutta.at"
+  const adminBaseUrl =
+    process.env.MEDUSA_ADMIN_URL?.trim() || `${BACKEND_URL}/app`
   
   logger.info(`[OrderPlaced] Processing order: ${data.id}`)
 
@@ -44,6 +49,25 @@ export default async function orderPlacedHandler({
       }
     })
     logger.info(`[OrderPlaced] Order confirmation sent successfully for order ${data.id}`)
+
+    // FIX: Send an additional admin notification without altering customer confirmation flow.
+    await notificationModuleService.createNotifications({
+      to: adminNotificationEmail,
+      from: adminNotificationEmail,
+      channel: "email",
+      template: EmailTemplates.ADMIN_ORDER_NOTIFICATION,
+      data: {
+        emailOptions: {
+          replyTo: adminNotificationEmail,
+          subject: `Neue Bestellung #${order.display_id} - Strickerei Jutta`,
+        },
+        order,
+        shippingAddress,
+        adminOrderUrl: `${adminBaseUrl}/orders/${order.id}`,
+        preview: `Neue Bestellung #${order.display_id}`,
+      },
+    })
+    logger.info(`[OrderPlaced] Admin notification sent successfully for order ${data.id}`)
   } catch (error) {
     logger.error(`[OrderPlaced] Error sending order confirmation notification for order ${data.id}:`, error)
     // Don't throw - subscribers should never throw errors

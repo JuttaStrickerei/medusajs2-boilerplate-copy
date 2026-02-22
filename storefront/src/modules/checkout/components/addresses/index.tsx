@@ -24,7 +24,9 @@ const Addresses = ({
   const router = useRouter()
   const pathname = usePathname()
 
-  const isOpen = searchParams.get("step") === "address"
+  const checkoutStep = searchParams.get("step")
+  // FIX: Keep the address section open on initial checkout load, even when no explicit step query exists.
+  const isOpen = !checkoutStep || checkoutStep === "address"
 
   const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address

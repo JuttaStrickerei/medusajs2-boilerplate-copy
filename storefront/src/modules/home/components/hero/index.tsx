@@ -78,9 +78,12 @@ const Hero = () => {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-stone-400 animate-bounce-soft">
-        <span className="text-xs tracking-widest uppercase mb-2">Scrollen</span>
-        <ArrowDown size={20} />
+      {/* FIX: Keep the scroll indicator centered on all viewport widths */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-8 flex justify-center">
+        <div className="flex flex-col items-center text-stone-400 animate-bounce-soft">
+          <span className="text-xs tracking-widest uppercase mb-2">Scrollen</span>
+          <ArrowDown size={20} />
+        </div>
       </div>
     </section>
   )

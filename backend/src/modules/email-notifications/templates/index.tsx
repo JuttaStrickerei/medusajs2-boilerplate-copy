@@ -7,6 +7,7 @@ import { ShipmentDeliveredTemplate, SHIPMENT_DELIVERED, isShipmentDeliveredTempl
 import { ContactFormTemplate, CONTACT_FORM, isContactFormTemplateData } from './contact-form'
 import { ContactFormConfirmationTemplate, CONTACT_FORM_CONFIRMATION, isContactFormConfirmationTemplateData } from './contact-form-confirmation'
 import { NewsletterConfirmationTemplate, NEWSLETTER_CONFIRMATION, isNewsletterConfirmationTemplateData } from './newsletter-confirmation'
+import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationTemplateData } from "./admin-order-notification"
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -15,7 +16,8 @@ export const EmailTemplates = {
   SHIPMENT_DELIVERED,
   CONTACT_FORM,
   CONTACT_FORM_CONFIRMATION,
-  NEWSLETTER_CONFIRMATION
+  NEWSLETTER_CONFIRMATION,
+  ADMIN_ORDER_NOTIFICATION
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -85,6 +87,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <NewsletterConfirmationTemplate {...data} />
 
+    case EmailTemplates.ADMIN_ORDER_NOTIFICATION:
+      if (!isAdminOrderNotificationTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ADMIN_ORDER_NOTIFICATION}"`
+        )
+      }
+      return <AdminOrderNotificationTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -100,5 +111,6 @@ export {
   ShipmentDeliveredTemplate,
   ContactFormTemplate,
   ContactFormConfirmationTemplate,
-  NewsletterConfirmationTemplate
+  NewsletterConfirmationTemplate,
+  AdminOrderNotificationTemplate
 }

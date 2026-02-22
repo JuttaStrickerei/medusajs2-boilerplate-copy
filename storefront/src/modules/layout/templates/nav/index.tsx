@@ -20,7 +20,7 @@ export default async function Nav() {
       {/* Main Navigation */}
       <header className="relative bg-white/95 backdrop-blur-md border-b border-stone-200">
         <nav className="content-container">
-          <div className="flex items-center justify-between h-16 small:h-20">
+          <div className="relative flex items-center justify-between h-16 small:h-20">
             {/* Left Navigation - Desktop */}
             <div className="hidden small:flex items-center space-x-8 flex-1">
               {collections && collections.length > 0 && (
@@ -110,12 +110,13 @@ export default async function Nav() {
             </div>
 
             {/* Center Logo */}
-            <div className="flex items-center justify-center flex-1 small:flex-none">
-              <LocalizedClientLink href="/" className="text-center group">
+            {/* FIX: Keep the logo visually centered across all viewport widths */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
+              <LocalizedClientLink href="/" className="text-center group pointer-events-auto">
                 <div className="font-serif text-xl small:text-2xl font-medium text-stone-800 tracking-tight group-hover:text-stone-600 transition-colors">
                   Strickerei Jutta
                 </div>
-                <div className="text-[10px] small:text-xs text-stone-500 tracking-[0.2em] uppercase">
+                <div className="hidden small:block text-xs text-stone-500 tracking-[0.2em] uppercase">
                   in 3. Generation
                 </div>
               </LocalizedClientLink>

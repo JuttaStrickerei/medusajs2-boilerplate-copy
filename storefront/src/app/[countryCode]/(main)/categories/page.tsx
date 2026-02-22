@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import Image from "next/image"
 
 import { listCategories } from "@lib/data/categories"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -60,20 +61,30 @@ export default async function CategoriesOverviewPage(props: Params) {
                         </h2>
                       </div>
 
-                      {/* Placeholder Image Area */}
+                      {/* Category Image or Placeholder */}
                       <div
                         className="relative aspect-[4/5] mx-3 mb-4 rounded-lg overflow-hidden
                                    bg-gradient-to-br from-stone-100 to-stone-200
                                    border border-stone-200/70"
                       >
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="flex flex-col items-center gap-2 text-stone-500">
-                            <span className="inline-flex h-10 w-10 rounded-full border border-stone-300 bg-white/70 shadow-sm" />
-                            <span className="text-[11px] tracking-[0.18em] uppercase">
-                              Kategorie
-                            </span>
+                        {(category.metadata?.image as string) ? (
+                          <Image
+                            src={category.metadata.image as string}
+                            alt={category.name}
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-2 text-stone-500">
+                              <span className="inline-flex h-10 w-10 rounded-full border border-stone-300 bg-white/70 shadow-sm" />
+                              <span className="text-[11px] tracking-[0.18em] uppercase">
+                                Kategorie
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </article>
                   </LocalizedClientLink>

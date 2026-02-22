@@ -1,6 +1,7 @@
 import { defineMiddlewares, validateAndTransformBody } from "@medusajs/framework/http"
 import { PostInvoiceConfigSchema } from "./admin/invoice-config/route"
 import { newsletterSignupSchema } from "./store/newsletter/route"
+import { wishlistMiddlewares } from "./store/wishlist/middlewares"
 
 export default defineMiddlewares({
   routes: [
@@ -18,5 +19,6 @@ export default defineMiddlewares({
         validateAndTransformBody(newsletterSignupSchema),
       ],
     },
+    ...wishlistMiddlewares,
   ],
 })

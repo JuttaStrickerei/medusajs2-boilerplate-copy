@@ -7,6 +7,7 @@ checkEnvVariables()
  */
 const S3_HOSTNAME = process.env.MEDUSA_CLOUD_S3_HOSTNAME
 const S3_PATHNAME = process.env.MEDUSA_CLOUD_S3_PATHNAME
+const MINIO_HOSTNAME = process.env.NEXT_PUBLIC_MINIO_ENDPOINT
 
 /**
  * @type {import('next').NextConfig}
@@ -48,6 +49,14 @@ const nextConfig = {
               protocol: "https",
               hostname: S3_HOSTNAME,
               pathname: S3_PATHNAME,
+            },
+          ]
+        : []),
+      ...(MINIO_HOSTNAME
+        ? [
+            {
+              protocol: "https",
+              hostname: MINIO_HOSTNAME,
             },
           ]
         : []),

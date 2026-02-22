@@ -26,7 +26,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
           </p>
         </div>
         <div className="text-sm text-stone-600">
-          Angemeldet als:{" "}
+          Angemeldet mit:{" "}
           <span
             className="font-medium text-stone-800"
             data-testid="customer-email"

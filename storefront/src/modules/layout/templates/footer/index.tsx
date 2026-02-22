@@ -13,6 +13,8 @@ export default async function Footer() {
 
   return (
     <footer className="bg-stone-800 text-stone-300">
+      {/* FIX: Add clear visual separator between the last CTA section and footer */}
+      <div className="w-full border-t border-stone-700" />
       {/* Main Footer */}
       <div className="content-container py-16 small:py-20">
         <div className="grid grid-cols-1 small:grid-cols-2 medium:grid-cols-4 gap-12 medium:gap-8">

@@ -32,8 +32,9 @@ export async function retrieveCart(cartId?: string, fields?: string) {
     ...(await getAuthHeaders()),
   }
 
+  // FIX: Keep cache tag naming consistent ("cart") so mutation revalidation invalidates the same cache namespace.
   const next = {
-    ...(await getCacheOptions("carts")),
+    ...(await getCacheOptions("cart")),
   }
 
   return await sdk.client
@@ -74,13 +75,13 @@ export async function getOrSetCart(countryCode: string) {
 
     await setCartId(cart.id)
 
-    const cartCacheTag = await getCacheTag("carts")
+    const cartCacheTag = await getCacheTag("cart")
     revalidateTag(cartCacheTag)
   }
 
   if (cart && cart?.region_id !== region.id) {
     await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
-    const cartCacheTag = await getCacheTag("carts")
+    const cartCacheTag = await getCacheTag("cart")
     revalidateTag(cartCacheTag)
   }
 
@@ -101,7 +102,7 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
   return sdk.store.cart
     .update(cartId, data, {}, headers)
     .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
-      const cartCacheTag = await getCacheTag("carts")
+      const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
@@ -146,7 +147,7 @@ export async function addToCart({
       headers
     )
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
+      const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
@@ -179,7 +180,7 @@ export async function updateLineItem({
   await sdk.store.cart
     .updateLineItem(cartId, lineId, { quantity }, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
+      const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
@@ -207,7 +208,7 @@ export async function deleteLineItem(lineId: string) {
   await sdk.store.cart
     .deleteLineItem(cartId, lineId, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
+      const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
@@ -230,7 +231,7 @@ export async function setShippingMethod({
   return sdk.store.cart
     .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
+      const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
     })
     .catch(medusaError)
@@ -247,7 +248,7 @@ export async function initiatePaymentSession(
   return sdk.store.payment
     .initiatePaymentSession(cart, data, {}, headers)
     .then(async (resp) => {
-      const cartCacheTag = await getCacheTag("carts")
+      const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
       return resp
     })
@@ -268,7 +269,7 @@ export async function applyPromotions(codes: string[]) {
   return sdk.store.cart
     .update(cartId, { promo_codes: codes }, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
+      const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
@@ -404,7 +405,7 @@ export async function placeOrder(cartId?: string) {
   const cartRes = await sdk.store.cart
     .complete(id, {}, headers)
     .then(async (cartRes) => {
-      const cartCacheTag = await getCacheTag("carts")
+      const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
       return cartRes
     })
@@ -440,7 +441,7 @@ export async function updateRegion(countryCode: string, currentPath: string) {
 
   if (cartId) {
     await updateCart({ region_id: region.id })
-    const cartCacheTag = await getCacheTag("carts")
+    const cartCacheTag = await getCacheTag("cart")
     revalidateTag(cartCacheTag)
   }
 

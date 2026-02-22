@@ -1,30 +1,13 @@
 import { HttpTypes } from "@medusajs/types"
+import { translatePaymentStatus, translateFulfillmentStatus } from "@lib/util/translate-status"
 
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
   showStatus?: boolean
 }
 
-// Status translations
-const fulfillmentStatusMap: Record<string, string> = {
-  not_fulfilled: "In Bearbeitung",
-  partially_fulfilled: "Teilweise versendet",
-  fulfilled: "Versendet",
-  partially_shipped: "Teilweise versendet",
-  shipped: "Versendet",
-  partially_delivered: "Teilweise geliefert",
-  delivered: "Geliefert",
-  canceled: "Storniert",
-}
-
-const paymentStatusMap: Record<string, string> = {
-  not_paid: "Nicht bezahlt",
-  awaiting: "Ausstehend",
-  captured: "Bezahlt",
-  partially_refunded: "Teilweise erstattet",
-  refunded: "Erstattet",
-  canceled: "Storniert",
-}
+// FIX: Use centralized translation functions from translate-status.ts
+// so all payment/fulfillment statuses are consistently translated to German.
 
 const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
   const formatDate = (dateStr: string) => {
@@ -34,14 +17,6 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
       month: "short",
       year: "numeric",
     })
-  }
-
-  const getFulfillmentStatus = (status: string) => {
-    return fulfillmentStatusMap[status] || status.split("_").join(" ")
-  }
-
-  const getPaymentStatus = (status: string) => {
-    return paymentStatusMap[status] || status.split("_").join(" ")
   }
 
   return (
@@ -83,7 +58,7 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
               className="text-stone-800" 
               data-testid="order-status"
             >
-              {getFulfillmentStatus(order.fulfillment_status)}
+              {translateFulfillmentStatus(order.fulfillment_status)}
             </span>
           </p>
           <p className="text-stone-600">
@@ -92,7 +67,7 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
               className="text-stone-800"
               data-testid="order-payment-status"
             >
-              {getPaymentStatus(order.payment_status)}
+              {translatePaymentStatus(order.payment_status)}
             </span>
           </p>
         </div>
