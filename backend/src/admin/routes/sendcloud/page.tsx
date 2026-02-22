@@ -140,9 +140,9 @@ const SendcloudOverviewPage = () => {
       <div className="flex items-center gap-3 px-6 py-3">
         <Select
           size="small"
-          value={statusFilter}
+          value={statusFilter || "all"}
           onValueChange={(val) => {
-            setStatusFilter(val)
+            setStatusFilter(val === "all" ? "" : val)
             setCurrentPage(1)
           }}
         >
@@ -150,7 +150,7 @@ const SendcloudOverviewPage = () => {
             <Select.Value placeholder="Alle Status" />
           </Select.Trigger>
           <Select.Content>
-            <Select.Item value="">Alle Status</Select.Item>
+            <Select.Item value="all">Alle Status</Select.Item>
             {Object.entries(STATUS_LABELS).map(([value, label]) => (
               <Select.Item key={value} value={value}>
                 {label}
@@ -161,9 +161,9 @@ const SendcloudOverviewPage = () => {
 
         <Select
           size="small"
-          value={returnFilter}
+          value={returnFilter || "all"}
           onValueChange={(val) => {
-            setReturnFilter(val)
+            setReturnFilter(val === "all" ? "" : val)
             setCurrentPage(1)
           }}
         >
@@ -171,7 +171,7 @@ const SendcloudOverviewPage = () => {
             <Select.Value placeholder="Alle Typen" />
           </Select.Trigger>
           <Select.Content>
-            <Select.Item value="">Alle Typen</Select.Item>
+            <Select.Item value="all">Alle Typen</Select.Item>
             <Select.Item value="false">Versand</Select.Item>
             <Select.Item value="true">Retoure</Select.Item>
           </Select.Content>
