@@ -9,6 +9,21 @@ const MAX_RETRIES = 5
 const BASE_DELAY_MS = 1000 // 1 second
 
 /**
+ * Clear cart cookie via API endpoint (httpOnly cookies cannot be cleared client-side)
+ */
+const clearCartCookie = async (): Promise<void> => {
+  try {
+    await fetch("/api/clear-cart-cookie", {
+      method: "POST",
+      credentials: "same-origin",
+    })
+  } catch (error) {
+    console.error("Error clearing cart cookie:", error)
+    // Silently fail - cart will be invalidated on next page load anyway
+  }
+}
+
+/**
  * @name CompletePaymentPage
  * @description Loading page for completing off-site payments (PayPal, 3D Secure, Klarna).
  * Shows a graceful loading state while the cart is being completed.
@@ -70,8 +85,8 @@ export default function CompletePaymentPage() {
         if (response?.type === "order" && response.order?.id) {
           const { order } = response
 
-          // Clear the cart cookie
-          document.cookie = "_medusa_cart_id=; max-age=0; path=/"
+          // Clear the cart cookie via API (httpOnly cookie cannot be cleared client-side)
+          await clearCartCookie()
 
           setStatus("success")
 
@@ -131,7 +146,8 @@ export default function CompletePaymentPage() {
         if (existingOrder?.id) {
           // Order was already created by webhook! Proceed to success
           console.log("Found existing order via fallback:", existingOrder.id)
-          document.cookie = "_medusa_cart_id=; max-age=0; path=/"
+          // Clear the cart cookie via API (httpOnly cookie cannot be cleared client-side)
+          await clearCartCookie()
           setStatus("success")
           setTimeout(() => {
             window.location.href = `/${countryCode || "de"}/order/${existingOrder.id}/confirmed`
