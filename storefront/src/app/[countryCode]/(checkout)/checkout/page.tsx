@@ -1,3 +1,4 @@
+import { getCartId } from "@lib/data/cookies"
 import { retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
@@ -19,11 +20,28 @@ export default async function Checkout({
   searchParams: Promise<{ step?: string }>
 }) {
   const { countryCode } = await params
+  const cartId = await getCartId()
   const cart = await retrieveCart()
 
-  // Redirect to cart if no cart exists or cart is empty
-  if (!cart || !cart.items || cart.items.length === 0) {
+  // Cart exists but is empty → always redirect to cart (normal empty-cart case)
+  if (cart && (!cart.items || cart.items.length === 0)) {
     redirect(`/${countryCode}/cart`)
+  }
+
+  // Cart fetch returned null
+  if (!cart) {
+    // No cookie either → user navigated to checkout with no cart at all
+    if (!cartId) {
+      redirect(`/${countryCode}/cart`)
+    }
+    // Cookie existed but cart is gone → race condition after order placement.
+    // The placeOrder redirect will arrive momentarily; show a neutral holding state
+    // instead of throwing a 500 or flashing a redirect to /cart.
+    return (
+      <div className="content-container py-8 small:py-12 flex items-center justify-center min-h-[200px]">
+        <p className="text-stone-600">Weiterleitung zur Bestellbestätigung…</p>
+      </div>
+    )
   }
 
   const customer = await retrieveCustomer()

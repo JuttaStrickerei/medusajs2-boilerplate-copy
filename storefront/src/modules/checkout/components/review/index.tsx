@@ -1,15 +1,45 @@
 "use client"
 
 import { clx } from "@medusajs/ui"
+import { useState } from "react"
+import Spinner from "@modules/common/icons/spinner"
 import PaymentButton from "../payment-button"
 import { useSearchParams } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { CheckCircle, Shield, FileText } from "@components/icons"
 
 const Review = ({ cart }: { cart: any }) => {
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const searchParams = useSearchParams()
 
   const isOpen = searchParams.get("step") === "review"
+
+  // Guard: order placement has started. Show full-page overlay to prevent any
+  // interruption, race conditions, or error flashes during the ~5s processing.
+  if (isPlacingOrder) {
+    return (
+      <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
+        <div className="relative">
+          {/* Animated outer ring */}
+          <div className="absolute inset-0 rounded-full border-4 border-stone-200 border-t-stone-800 animate-spin" style={{ width: 80, height: 80 }} />
+          {/* Inner checkmark */}
+          <div className="relative flex items-center justify-center" style={{ width: 80, height: 80 }}>
+            <CheckCircle size={40} className="text-stone-800" />
+          </div>
+        </div>
+        <h2 className="font-serif text-2xl mt-8 text-stone-800 text-center">
+          Ihre Bestellung wird bearbeitet…
+        </h2>
+        <p className="text-stone-500 mt-3 text-center max-w-md px-4">
+          Bitte haben Sie einen Moment Geduld. Wir bestätigen Ihre Zahlung und erstellen Ihre Bestellung.
+        </p>
+        <div className="mt-8 flex items-center gap-2 text-sm text-stone-400">
+          <Spinner size={16} />
+          <span>Verbindung sichern…</span>
+        </div>
+      </div>
+    )
+  }
 
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
@@ -52,15 +82,15 @@ const Review = ({ cart }: { cart: any }) => {
               <div className="text-sm text-stone-600">
                 <p>
                   Mit dem Klick auf &quot;Bestellung aufgeben&quot; bestätigen Sie, dass Sie unsere{" "}
-                  <LocalizedClientLink href="/agb" className="text-stone-800 underline underline-offset-2 hover:text-stone-600">
+                  <LocalizedClientLink href="/terms" className="text-stone-800 underline underline-offset-2 hover:text-stone-600" prefetch={false}>
                     AGB
                   </LocalizedClientLink>
                   ,{" "}
-                  <LocalizedClientLink href="/widerrufsrecht" className="text-stone-800 underline underline-offset-2 hover:text-stone-600">
+                  <LocalizedClientLink href="/shipping" className="text-stone-800 underline underline-offset-2 hover:text-stone-600" prefetch={false}>
                     Widerrufsbelehrung
                   </LocalizedClientLink>{" "}
                   und{" "}
-                  <LocalizedClientLink href="/datenschutz" className="text-stone-800 underline underline-offset-2 hover:text-stone-600">
+                  <LocalizedClientLink href="/privacy" className="text-stone-800 underline underline-offset-2 hover:text-stone-600" prefetch={false}>
                     Datenschutzerklärung
                   </LocalizedClientLink>{" "}
                   gelesen und akzeptiert haben.
@@ -76,7 +106,11 @@ const Review = ({ cart }: { cart: any }) => {
           </div>
 
           {/* Payment Button */}
-          <PaymentButton cart={cart} data-testid="submit-order-button" />
+          <PaymentButton
+            cart={cart}
+            data-testid="submit-order-button"
+            onPlacingOrder={() => setIsPlacingOrder(true)}
+          />
         </div>
       )}
     </div>

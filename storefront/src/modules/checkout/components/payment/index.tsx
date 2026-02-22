@@ -232,7 +232,7 @@ const Payment = ({
               <div>
                 <p className="text-sm font-medium text-stone-800">
                   {paymentInfoMap[selectedPaymentMethod]?.title ||
-                    selectedPaymentMethod}
+                    (selectedPaymentMethod === "card" ? "Kartenzahlung" : selectedPaymentMethod)}
                 </p>
               </div>
             </div>

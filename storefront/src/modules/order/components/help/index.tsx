@@ -22,7 +22,7 @@ const Help = () => {
         </li>
         <li>
           <LocalizedClientLink 
-            href="/contact"
+            href="/shipping"
             className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-800 transition-colors"
           >
             <RefreshCw size={14} />
