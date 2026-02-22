@@ -155,69 +155,6 @@ export type SendcloudCancelResponse = {
   message: string
 }
 
-// Contract Types
-export type SendcloudContract = {
-  id: number
-  name: string
-  carrier: {
-    code: string
-    name: string
-  }
-  country: string
-  is_active: boolean
-}
-
-export type SendcloudContractsResponse = {
-  contracts: SendcloudContract[]
-}
-
-// Sender Address Types
-export type SendcloudSenderAddress = {
-  id: number
-  company_name: string
-  contact_name: string
-  email: string
-  telephone: string
-  street: string
-  house_number: string
-  postal_code: string
-  city: string
-  country: string
-}
-
-export type SendcloudSenderAddressesResponse = {
-  sender_addresses: SendcloudSenderAddress[]
-}
-
-// Shipping Price Types
-export type SendcloudShippingPrice = {
-  shipping_method_id: number
-  price: number
-  currency: string
-}
-
-// Service Point Types
-export type SendcloudServicePoint = {
-  id: number
-  name: string
-  street: string
-  house_number: string
-  postal_code: string
-  city: string
-  country: string
-  carrier: string
-  latitude: string
-  longitude: string
-  open_tomorrow: boolean
-  open_upcoming_week: boolean
-  distance: number
-  formatted_opening_times: Record<string, { open: string; close: string }[]>
-}
-
-export type SendcloudServicePointsResponse = {
-  service_points: SendcloudServicePoint[]
-}
-
 // Error Types
 export type SendcloudError = {
   message: string
