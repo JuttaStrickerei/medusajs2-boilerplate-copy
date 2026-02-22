@@ -4,6 +4,7 @@ import {
   markFulfillmentAsDeliveredWorkflow,
   updateFulfillmentWorkflow 
 } from "@medusajs/medusa/core-flows";
+import { SENDCLOUD_SHIPMENT_MODULE } from "../../../modules/sendcloud-shipment";
 
 /**
  * Sendcloud Webhook Handler
@@ -383,10 +384,33 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       });
     }
 
+    // Sync status to sendcloud_shipment table (best-effort, never blocks webhook response)
+    try {
+      const shipmentService = req.scope.resolve(SENDCLOUD_SHIPMENT_MODULE) as any
+      const existing = await shipmentService.listSendcloudShipments({
+        sendcloud_id: String(parcelId),
+      })
+
+      if (existing.length > 0) {
+        const updateData: Record<string, unknown> = {
+          id: existing[0].id,
+          status: medusaStatus === "shipped" ? "announced" : medusaStatus,
+          tracking_number: trackingNumber,
+          tracking_url: parcel.tracking_url || existing[0].tracking_url,
+          carrier: parcel.carrier?.code || existing[0].carrier,
+        }
+        if (medusaStatus === "delivered") updateData.delivered_at = new Date()
+        if (medusaStatus === "shipped" && !existing[0].shipped_at) updateData.shipped_at = new Date()
+
+        await shipmentService.updateSendcloudShipments(updateData)
+        console.log(`[SendcloudWebhook] Synced status to sendcloud_shipment table`)
+      }
+    } catch (syncError: any) {
+      console.warn(`[SendcloudWebhook] Shipment table sync failed (non-blocking): ${syncError.message}`)
+    }
+
     const duration = Date.now() - startTime;
-    console.log(`[SendcloudWebhook] ════════════════════════════════════════════`);
     console.log(`[SendcloudWebhook] ✅ Webhook processed in ${duration}ms`);
-    console.log(`[SendcloudWebhook] ════════════════════════════════════════════`);
 
     return res.status(200).json({
       success: true,

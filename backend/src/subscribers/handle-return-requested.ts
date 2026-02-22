@@ -4,6 +4,7 @@ import {
 } from "@medusajs/framework"
 import { Modules, OrderWorkflowEvents } from "@medusajs/framework/utils"
 import { SendcloudClient } from "../modules/sendcloud/client"
+import { SENDCLOUD_SHIPMENT_MODULE } from "../modules/sendcloud-shipment"
 
 /**
  * Subscriber that enriches return fulfillments with order data
@@ -253,6 +254,39 @@ export default async function returnFulfillmentEnricher({
         })
 
         console.log("[ReturnEnricher] ✓ Fulfillment updated with label data")
+
+        // Sync return shipment to sendcloud_shipment table
+        try {
+          const shipmentService = container.resolve(SENDCLOUD_SHIPMENT_MODULE) as any
+          const existingShipments = await shipmentService.listSendcloudShipments({
+            sendcloud_id: String(parcelId),
+          })
+          if (existingShipments.length === 0) {
+            const customerAddr = order.shipping_address || {}
+            await shipmentService.createSendcloudShipments({
+              order_id: data.order_id,
+              sendcloud_id: String(parcelId),
+              tracking_number: trackingNumber,
+              tracking_url: trackingUrl,
+              carrier: null,
+              status: "announced",
+              is_return: true,
+              recipient_name: `${customerAddr.first_name || ""} ${customerAddr.last_name || ""}`.trim() || "Customer",
+              recipient_company: customerAddr.company || null,
+              recipient_address: customerAddr.address_1 || "Unknown",
+              recipient_house_number: customerAddr.address_2 || "0",
+              recipient_city: customerAddr.city || "Unknown",
+              recipient_postal_code: customerAddr.postal_code || "00000",
+              recipient_country: customerAddr.country_code?.toUpperCase() || "AT",
+              sendcloud_response: updatedFulfillmentData,
+              label_url: proxyLabelUrl,
+            })
+            console.log("[ReturnEnricher] ✓ Return shipment synced to sendcloud_shipment table")
+          }
+        } catch (syncErr) {
+          console.warn("[ReturnEnricher] Shipment table sync failed (non-blocking):", (syncErr as Error).message)
+        }
+
         console.log("[ReturnEnricher] ====== SUBSCRIBER COMPLETED SUCCESSFULLY ======")
 
       } catch (sendcloudError) {
