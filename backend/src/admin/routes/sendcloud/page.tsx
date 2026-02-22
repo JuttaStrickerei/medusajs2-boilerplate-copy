@@ -7,12 +7,10 @@ import {
   Badge,
   Button,
   Select,
-  Input,
 } from "@medusajs/ui"
 import { TruckFast, ArrowDownTray, ArrowPath } from "@medusajs/icons"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { Link } from "react-router-dom"
 
 type SendcloudShipment = {
   id: string
@@ -211,12 +209,12 @@ const SendcloudOverviewPage = () => {
               {shipments.map((shipment) => (
                 <Table.Row key={shipment.id}>
                   <Table.Cell>
-                    <Link
-                      to={`/orders/${shipment.order_id}`}
+                    <a
+                      href={`/app/orders/${shipment.order_id}`}
                       className="text-ui-fg-interactive hover:underline"
                     >
                       {shipment.order_id.slice(0, 8)}...
-                    </Link>
+                    </a>
                   </Table.Cell>
                   <Table.Cell>
                     <Text size="small" weight="plus">
