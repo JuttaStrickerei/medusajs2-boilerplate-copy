@@ -9,8 +9,7 @@ import {
   Select,
 } from "@medusajs/ui"
 import { TruckFast, ArrowPath } from "@medusajs/icons"
-import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 type SendcloudShipment = {
   id: string
@@ -84,32 +83,43 @@ const SendcloudOverviewPage = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<string>("")
   const [returnFilter, setReturnFilter] = useState<string>("")
+  const [shipments, setShipments] = useState<SendcloudShipment[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const pageSize = 20
 
-  const queryParams = new URLSearchParams({
-    limit: pageSize.toString(),
-    offset: ((currentPage - 1) * pageSize).toString(),
-  })
-  if (statusFilter) queryParams.set("status", statusFilter)
-  if (returnFilter) queryParams.set("is_return", returnFilter)
+  const fetchShipments = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["sendcloud-shipments", currentPage, statusFilter, returnFilter],
-    queryFn: async () => {
+    const queryParams = new URLSearchParams({
+      limit: pageSize.toString(),
+      offset: ((currentPage - 1) * pageSize).toString(),
+    })
+    if (statusFilter) queryParams.set("status", statusFilter)
+    if (returnFilter) queryParams.set("is_return", returnFilter)
+
+    try {
       const response = await fetch(
         `/admin/sendcloud-shipments?${queryParams}`,
-        {
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        }
+        { credentials: "include", headers: { "Content-Type": "application/json" } }
       )
       if (!response.ok) throw new Error("Fehler beim Laden der Sendungen")
-      return response.json() as Promise<ShipmentsResponse>
-    },
-  })
+      const data: ShipmentsResponse = await response.json()
+      setShipments(data.sendcloud_shipments || [])
+      setTotalCount(data.count || 0)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unbekannter Fehler")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [currentPage, statusFilter, returnFilter])
 
-  const shipments = data?.sendcloud_shipments || []
-  const totalCount = data?.count || 0
+  useEffect(() => {
+    fetchShipments()
+  }, [fetchShipments])
+
   const totalPages = Math.ceil(totalCount / pageSize)
 
   return (
@@ -121,7 +131,7 @@ const SendcloudOverviewPage = () => {
             {totalCount} Sendung{totalCount !== 1 ? "en" : ""} insgesamt
           </Text>
         </div>
-        <Button variant="secondary" size="small" onClick={() => refetch()}>
+        <Button variant="secondary" size="small" onClick={() => fetchShipments()}>
           <ArrowPath className="mr-1" />
           Aktualisieren
         </Button>
@@ -176,9 +186,7 @@ const SendcloudOverviewPage = () => {
 
       {error && (
         <div className="flex items-center justify-center py-12">
-          <Text className="text-ui-fg-error">
-            Fehler: {error instanceof Error ? error.message : "Unbekannter Fehler"}
-          </Text>
+          <Text className="text-ui-fg-error">Fehler: {error}</Text>
         </div>
       )}
 
