@@ -6,18 +6,24 @@ import { Modules } from "@medusajs/framework/utils"
 import { Logger } from "@medusajs/framework/types"
 import { SENDCLOUD_SHIPMENT_MODULE } from "../modules/sendcloud-shipment"
 
+type FulfillmentCreatedPayload = {
+  order_id: string
+  fulfillment_id: string
+  no_notification?: boolean
+}
+
 /**
  * Syncs Sendcloud fulfillment data into the sendcloud_shipment table.
  *
- * Triggered on shipment.created -- runs AFTER the fulfillment provider
- * has created the parcel in Sendcloud and returned the data.
+ * Triggered on order.fulfillment_created -- fires when a new fulfillment
+ * is created (NOT when it's marked as shipped, which is shipment.created).
  * Only processes Sendcloud fulfillments (checks provider_id).
  * Idempotent: skips if a record for this parcel_id already exists.
  */
 export default async function syncSendcloudShipment({
   event: { data },
   container,
-}: SubscriberArgs<{ id: string }>) {
+}: SubscriberArgs<FulfillmentCreatedPayload>) {
   let logger: Logger
   try {
     logger = container.resolve("logger") as Logger
@@ -25,13 +31,13 @@ export default async function syncSendcloudShipment({
     logger = console as any
   }
 
-  const fulfillmentId = data.id
-  logger.info(`[SyncSCShipment] Processing fulfillment: ${fulfillmentId}`)
+  const fulfillmentId = data.fulfillment_id
+  const orderId = data.order_id
+  logger.info(`[SyncSCShipment] Processing fulfillment: ${fulfillmentId} for order: ${orderId}`)
 
   try {
     const fulfillmentService = container.resolve(Modules.FULFILLMENT) as any
     const shipmentService = container.resolve(SENDCLOUD_SHIPMENT_MODULE) as any
-    const query = container.resolve("query") as any
 
     const fulfillment = await fulfillmentService.retrieveFulfillment(fulfillmentId, {
       relations: ["labels", "delivery_address"],
@@ -57,20 +63,6 @@ export default async function syncSendcloudShipment({
     if (existing.length > 0) {
       logger.info(`[SyncSCShipment] Record already exists for parcel ${parcelId}, skipping`)
       return
-    }
-
-    let orderId = "unknown"
-    try {
-      const { data: orderFulfillments } = await query.graph({
-        entity: "order_fulfillment",
-        fields: ["order_id", "fulfillment_id"],
-        filters: { fulfillment_id: fulfillmentId },
-      })
-      if (orderFulfillments?.[0]?.order_id) {
-        orderId = orderFulfillments[0].order_id
-      }
-    } catch (err) {
-      logger.warn(`[SyncSCShipment] Could not resolve order_id: ${err instanceof Error ? err.message : String(err)}`)
     }
 
     const addr = fulfillment.delivery_address || {}
@@ -108,5 +100,5 @@ export default async function syncSendcloudShipment({
 }
 
 export const config: SubscriberConfig = {
-  event: "shipment.created",
+  event: "order.fulfillment_created",
 }

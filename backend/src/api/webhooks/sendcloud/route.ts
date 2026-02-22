@@ -404,6 +404,47 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
         await shipmentService.updateSendcloudShipments(updateData)
         console.log(`[SendcloudWebhook] Synced status to sendcloud_shipment table`)
+      } else if (foundFulfillment) {
+        const addr = (foundFulfillment as any).delivery_address || {}
+        const ffData = (foundFulfillment.data || {}) as Record<string, any>
+        const isReturn = ffData.is_return === true
+
+        let orderId = "unknown"
+        try {
+          const query = req.scope.resolve("query") as any
+          const { data: orderFulfillments } = await query.graph({
+            entity: "order_fulfillment",
+            fields: ["order_id"],
+            filters: { fulfillment_id: medusaFulfillmentId },
+          })
+          if (orderFulfillments?.[0]?.order_id) {
+            orderId = orderFulfillments[0].order_id
+          }
+        } catch { /* best-effort */ }
+
+        await shipmentService.createSendcloudShipments({
+          order_id: orderId,
+          sendcloud_id: String(parcelId),
+          tracking_number: trackingNumber,
+          tracking_url: parcel.tracking_url || null,
+          carrier: parcel.carrier?.code || null,
+          status: medusaStatus === "shipped" ? "announced" : medusaStatus,
+          is_return: isReturn,
+          recipient_name:
+            addr.first_name && addr.last_name
+              ? `${addr.first_name} ${addr.last_name}`.trim()
+              : addr.company || "Unknown",
+          recipient_company: addr.company || null,
+          recipient_address: addr.address_1 || "Unknown",
+          recipient_house_number: addr.address_2 || "0",
+          recipient_city: addr.city || "Unknown",
+          recipient_postal_code: addr.postal_code || "00000",
+          recipient_country: addr.country_code?.toUpperCase() || "AT",
+          sendcloud_response: ffData,
+          label_url: ffData.label_url || null,
+          shipped_at: medusaStatus === "shipped" ? new Date() : null,
+        })
+        console.log(`[SendcloudWebhook] Created missing shipment record for parcel ${parcelId}`)
       }
     } catch (syncError: any) {
       console.warn(`[SendcloudWebhook] Shipment table sync failed (non-blocking): ${syncError.message}`)
