@@ -46,7 +46,11 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
     this.options_ = options
     this.client_ = new SendcloudClient(options)
     this.container_ = container
-    this.logger_ = container.resolve?.("logger") || console
+    try {
+      this.logger_ = container.resolve("logger")
+    } catch {
+      this.logger_ = console
+    }
     
     if (process.env.NODE_ENV === "development") {
       this.client_.testConnection().then((success) => {
@@ -215,6 +219,10 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
     countries: any[],
     context: any
   ): Promise<number | null> {
+    // Disabled until contracts are configured in Sendcloud account.
+    // Enable by removing this early return.
+    return null
+
     if (!toCountry) return null
 
     try {
