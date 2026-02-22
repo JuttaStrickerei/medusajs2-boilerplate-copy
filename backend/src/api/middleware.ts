@@ -2,6 +2,7 @@ import { defineMiddlewares, validateAndTransformBody } from "@medusajs/framework
 import { PostInvoiceConfigSchema } from "./admin/invoice-config/route"
 import { newsletterSignupSchema } from "./store/newsletter/route"
 import { wishlistMiddlewares } from "./store/wishlist/middlewares"
+import { adminSendcloudShipmentMiddlewares } from "./admin/sendcloud-shipments/middlewares"
 
 export default defineMiddlewares({
   routes: [
@@ -20,5 +21,6 @@ export default defineMiddlewares({
       ],
     },
     ...wishlistMiddlewares,
+    ...adminSendcloudShipmentMiddlewares,
   ],
 })

@@ -8,7 +8,11 @@ import {
   SendcloudCreateParcelResponse,
   SendcloudCancelResponse,
   SendcloudParcelResponse,
-  SendcloudErrorResponse
+  SendcloudErrorResponse,
+  SendcloudContractsResponse,
+  SendcloudSenderAddressesResponse,
+  SendcloudShippingPrice,
+  SendcloudServicePointsResponse,
 } from "./types"
 
 export class SendcloudClient {
@@ -277,5 +281,67 @@ export class SendcloudClient {
 
   async getLabel(parcelId: number): Promise<{ label: { normal_printer: string[] } }> {
     return await this.sendRequest<{ label: { normal_printer: string[] } }>(`/labels/${parcelId}`)
+  }
+
+  async getContracts(): Promise<SendcloudContractsResponse> {
+    return await this.sendRequest<SendcloudContractsResponse>("/contracts")
+  }
+
+  async getSenderAddresses(): Promise<SendcloudSenderAddressesResponse> {
+    return await this.sendRequest<SendcloudSenderAddressesResponse>("/user/addresses/sender")
+  }
+
+  async getShippingPrice(params: {
+    shippingMethodId: number
+    fromCountry: string
+    toCountry: string
+    weight: number
+    weightUnit: "gram" | "kilogram"
+    contractId: number
+    fromPostalCode?: string
+    toPostalCode?: string
+  }): Promise<SendcloudShippingPrice[]> {
+    const queryParams = new URLSearchParams({
+      shipping_method_id: params.shippingMethodId.toString(),
+      from_country: params.fromCountry,
+      to_country: params.toCountry,
+      weight: params.weight.toString(),
+      weight_unit: params.weightUnit,
+      contract: params.contractId.toString(),
+    })
+
+    if (params.fromPostalCode) {
+      queryParams.append("from_postal_code", params.fromPostalCode)
+    }
+    if (params.toPostalCode) {
+      queryParams.append("to_postal_code", params.toPostalCode)
+    }
+
+    return await this.sendRequest<SendcloudShippingPrice[]>(
+      `/shipping-price?${queryParams}`
+    )
+  }
+
+  async getServicePoints(params: {
+    country: string
+    postalCode: string
+    carrier?: string
+    latitude?: string
+    longitude?: string
+    radius?: number
+  }): Promise<SendcloudServicePointsResponse> {
+    const queryParams = new URLSearchParams({
+      country: params.country,
+      postal_code: params.postalCode,
+    })
+
+    if (params.carrier) queryParams.append("carrier", params.carrier)
+    if (params.latitude) queryParams.append("latitude", params.latitude)
+    if (params.longitude) queryParams.append("longitude", params.longitude)
+    if (params.radius) queryParams.append("radius", params.radius.toString())
+
+    return await this.sendRequest<SendcloudServicePointsResponse>(
+      `/service-points?${queryParams}`
+    )
   }
 }

@@ -81,6 +81,9 @@ const medusaConfig = {
     },
     {resolve: './src/modules/wishlist',
     },
+    ...(SENDCLOUD_PUBLIC_KEY && SENDCLOUD_SECRET_KEY ? [{
+      resolve: './src/modules/sendcloud-shipment',
+    }] : []),
     {
       key: Modules.FILE,
       resolve: '@medusajs/file',

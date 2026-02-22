@@ -18,7 +18,8 @@ import ErrorMessage from "../error-message"
 const PaymentButton: React.FC<{
   cart: HttpTypes.StoreCart
   "data-testid": string
-}> = ({ cart, "data-testid": dataTestId }) => {
+  onPlacingOrder?: () => void
+}> = ({ cart, "data-testid": dataTestId, onPlacingOrder }) => {
   // Determine if the checkout is ready for payment submission.
   const notReady =
     !cart ||
@@ -35,6 +36,7 @@ const PaymentButton: React.FC<{
       <StripePaymentButton
         notReady={notReady}
         cart={cart}
+        onPlacingOrder={onPlacingOrder}
         data-testid={dataTestId}
       />
     )
@@ -43,7 +45,11 @@ const PaymentButton: React.FC<{
   // Render the Manual Test Payment button
   if (isManual(paymentSession?.provider_id)) {
     return (
-      <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
+      <ManualTestPaymentButton
+        notReady={notReady}
+        onPlacingOrder={onPlacingOrder}
+        data-testid={dataTestId}
+      />
     )
   }
 
@@ -65,10 +71,12 @@ const PaymentButton: React.FC<{
 const StripePaymentButton = ({
   cart,
   notReady,
+  onPlacingOrder,
   "data-testid": dataTestId,
 }: {
   cart: HttpTypes.StoreCart
   notReady: boolean
+  onPlacingOrder?: () => void
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
@@ -81,13 +89,17 @@ const StripePaymentButton = ({
 
   // A memoized function to handle order completion.
   const onPaymentCompleted = useCallback(async () => {
-    await placeOrder().catch((err) => {
-      setErrorMessage(err.message)
-    }).finally(() => {
-      // Ensure the submitting state is always reset.
+    try {
+      await placeOrder()
+    } catch (err: unknown) {
+      // NEXT_REDIRECT: keep loading until redirect completes
+      if (err && typeof err === "object" && (err as { digest?: string }).digest === "NEXT_REDIRECT") {
+        return
+      }
+      setErrorMessage(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten")
       setSubmitting(false)
-    })
-  }, [setErrorMessage, setSubmitting])
+    }
+  }, [])
 
   /**
    * @description Handles the payment submission process. This function is triggered
@@ -101,12 +113,15 @@ const StripePaymentButton = ({
     }
 
     setSubmitting(true)
+    // Notify parent immediately so it can lock the UI against stale re-renders.
+    onPlacingOrder?.()
 
     const clientSecret = paymentSession.data.client_secret as string
 
     // The `return_url` is crucial for redirect-based payment methods.
-    // It points to a dedicated API route that will complete the order on the server.
-    const returnUrl = `${window.location.origin}/api/capture-payment/${cart.id}?country_code=${countryCode}`
+    // For off-site payments (PayPal, etc.), redirect to a loading page that
+    // completes the cart client-side and shows a graceful loading state.
+    const returnUrl = `${window.location.origin}/${countryCode}/complete-payment?cart_id=${cart.id}&country_code=${countryCode}`
 
     // Validierung: Prüfe ob PaymentElement gemountet ist
     if (!elements) {
@@ -135,11 +150,8 @@ const StripePaymentButton = ({
       redirect: "if_required",
     })
 
-    // If `confirmPayment` resolves without an error, it means no redirect occurred.
-    // This could be a successful on-site payment (like a card) or a client-side error.
-    setSubmitting(false)
-
     if (error) {
+      setSubmitting(false)
       // Display any errors that occurred during the payment confirmation process.
       setErrorMessage(error.message ?? "An unknown error occurred")
       return
@@ -147,6 +159,7 @@ const StripePaymentButton = ({
 
     // If no error and no redirect, the on-site payment was successful.
     // We can now finalize the order on the client side.
+    // Do NOT reset submitting here – keep loading until redirect completes.
     await onPaymentCompleted()
   }
 
@@ -184,26 +197,32 @@ const StripePaymentButton = ({
  */
 const ManualTestPaymentButton = ({
   notReady,
+  onPlacingOrder,
   "data-testid": dataTestId,
 }: {
   notReady: boolean
+  onPlacingOrder?: () => void
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
-      .catch((err) => {
-        setErrorMessage(err.message)
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
+    try {
+      await placeOrder()
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && (err as { digest?: string }).digest === "NEXT_REDIRECT") {
+        return
+      }
+      setErrorMessage(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten")
+      setSubmitting(false)
+    }
   }
 
   const handlePayment = () => {
     setSubmitting(true)
+    // Notify parent immediately so it can lock the UI against stale re-renders.
+    onPlacingOrder?.()
     onPaymentCompleted()
   }
 
