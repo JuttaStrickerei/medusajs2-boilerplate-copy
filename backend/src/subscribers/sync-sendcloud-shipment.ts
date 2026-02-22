@@ -67,7 +67,15 @@ export default async function syncSendcloudShipment({
 
     const addr = fulfillment.delivery_address || {}
     const isReturn = ffData.is_return === true
-    const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+
+    const publicDomain = process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
+      || process.env.MEDUSA_BACKEND_URL
+      || "http://localhost:9000"
+    const backendUrl = publicDomain.startsWith("http") ? publicDomain : `https://${publicDomain}`
+
+    const labelUrl = ffData.sendcloud_label_url
+      || ffData.label_url
+      || `${backendUrl}/labels/${parcelId}`
 
     await shipmentService.createSendcloudShipments({
       order_id: orderId,
@@ -90,7 +98,7 @@ export default async function syncSendcloudShipment({
       recipient_email: null,
       recipient_phone: addr.phone || null,
       sendcloud_response: ffData,
-      label_url: ffData.label_url || `${backendUrl}/labels/${parcelId}`,
+      label_url: labelUrl,
     })
 
     logger.info(`[SyncSCShipment] Created shipment record for parcel ${parcelId} (order: ${orderId})`)

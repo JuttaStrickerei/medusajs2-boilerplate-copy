@@ -181,7 +181,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       // First try to find by parcel_id in data (most reliable)
       const allFulfillments = await fulfillmentModuleService.listFulfillments(
         { provider_id: [providerId] },
-        { relations: ["labels"] }
+        { relations: ["labels", "delivery_address"] }
       );
 
       console.log(`[SendcloudWebhook] 🔍 Searching ${allFulfillments.length} Sendcloud fulfillments...`);

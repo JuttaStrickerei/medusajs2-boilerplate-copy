@@ -8,7 +8,7 @@ import {
   Button,
   Select,
 } from "@medusajs/ui"
-import { TruckFast, ArrowPath } from "@medusajs/icons"
+import { TruckFast, ArrowPath, DocumentText } from "@medusajs/icons"
 import { useState, useEffect, useCallback } from "react"
 
 type SendcloudShipment = {
@@ -207,7 +207,7 @@ const SendcloudOverviewPage = () => {
                 <Table.HeaderCell>Carrier</Table.HeaderCell>
                 <Table.HeaderCell>Status</Table.HeaderCell>
                 <Table.HeaderCell>Typ</Table.HeaderCell>
-                <Table.HeaderCell>Tracking</Table.HeaderCell>
+                <Table.HeaderCell>Aktionen</Table.HeaderCell>
                 <Table.HeaderCell>Erstellt</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -226,6 +226,11 @@ const SendcloudOverviewPage = () => {
                     <Text size="small" weight="plus">
                       {shipment.recipient_name}
                     </Text>
+                    {shipment.recipient_company && (
+                      <Text size="xsmall" className="text-ui-fg-muted">
+                        {shipment.recipient_company}
+                      </Text>
+                    )}
                   </Table.Cell>
                   <Table.Cell>
                     <Text size="small">
@@ -259,18 +264,31 @@ const SendcloudOverviewPage = () => {
                     </Badge>
                   </Table.Cell>
                   <Table.Cell>
-                    {shipment.tracking_url ? (
-                      <Button
-                        variant="transparent"
-                        size="small"
-                        onClick={() => window.open(shipment.tracking_url!, "_blank")}
-                      >
-                        <TruckFast className="mr-1" />
-                        Tracking
-                      </Button>
-                    ) : (
-                      <Text size="small" className="text-ui-fg-muted">-</Text>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {shipment.label_url && (
+                        <Button
+                          variant="transparent"
+                          size="small"
+                          onClick={() => window.open(shipment.label_url!, "_blank")}
+                        >
+                          <DocumentText className="mr-1" />
+                          Label
+                        </Button>
+                      )}
+                      {shipment.tracking_url && (
+                        <Button
+                          variant="transparent"
+                          size="small"
+                          onClick={() => window.open(shipment.tracking_url!, "_blank")}
+                        >
+                          <TruckFast className="mr-1" />
+                          Tracking
+                        </Button>
+                      )}
+                      {!shipment.label_url && !shipment.tracking_url && (
+                        <Text size="small" className="text-ui-fg-muted">-</Text>
+                      )}
+                    </div>
                   </Table.Cell>
                   <Table.Cell>
                     <Text size="small">{formatDate(shipment.created_at)}</Text>
