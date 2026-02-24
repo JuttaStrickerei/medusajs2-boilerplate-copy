@@ -33,12 +33,14 @@
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-radix": "^2.8.0",
+    "vanilla-cookieconsent": "^3.1.0",
     "webpack": "^5"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
     "@medusajs/types": "latest",
     "@medusajs/ui-preset": "latest",
+    "@types/gtag.js": "^0.0.20",
     "@types/lodash": "^4.14.195",
     "@types/node": "17.0.21",
     "@types/pg": "^8.11.0",

@@ -66,6 +66,9 @@ importers:
       tailwindcss-radix:
         specifier: ^2.8.0
         version: 2.9.0
+      vanilla-cookieconsent:
+        specifier: ^3.1.0
+        version: 3.1.0
       webpack:
         specifier: ^5
         version: 5.104.1
@@ -79,6 +82,9 @@ importers:
       '@medusajs/ui-preset':
         specifier: latest
         version: 2.12.3(tailwindcss@3.4.19)
+      '@types/gtag.js':
+        specifier: ^0.0.20
+        version: 0.0.20
       '@types/lodash':
         specifier: ^4.14.195
         version: 4.17.21
@@ -2038,6 +2044,9 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
+
+  '@types/gtag.js@0.0.20':
+    resolution: {integrity: sha512-wwAbk3SA2QeU67unN7zPxjEHmPmlXwZXZvQEpbEUQuMCRGgKyE1m6XDuTUA9b6pCGb/GqJmdfMOY5LuDjJSbbg==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -4020,6 +4029,9 @@ packages:
 
   v8-compile-cache@2.4.0:
     resolution: {integrity: sha512-ocyWc3bAHBB/guyqJQVI5o4BZkPhznPYUG2ea80Gond/BgNWpap8TOmLSeeQG7bnh2KMISxskdADG59j7zruhw==}
+
+  vanilla-cookieconsent@3.1.0:
+    resolution: {integrity: sha512-/McNRtm/3IXzb9dhqMIcbquoU45SzbN2VB+To4jxEPqMmp7uVniP6BhGLjU8MC7ZCDsNQVOp27fhQTM/ruIXAA==}
 
   watchpack@2.4.4:
     resolution: {integrity: sha512-c5EGNOiyxxV5qmTtAB7rbiXxi1ooX1pQKMLX/MIabJjRA0SJBQOjKF+KSVfHkr9U1cADPon0mRiVe/riyaiDUA==}
@@ -6503,6 +6515,8 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
+  '@types/gtag.js@0.0.20': {}
+
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
@@ -8855,6 +8869,8 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   v8-compile-cache@2.4.0: {}
+
+  vanilla-cookieconsent@3.1.0: {}
 
   watchpack@2.4.4:
     dependencies:

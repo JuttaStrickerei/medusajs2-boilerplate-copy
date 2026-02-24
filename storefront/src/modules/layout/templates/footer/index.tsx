@@ -2,6 +2,7 @@ import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Instagram, Facebook, Mail, Phone, MapPin } from "@components/icons"
+import { CookieSettingsButton } from "@components/cookie-consent/CookieSettingsButton"
 
 export default async function Footer() {
   const { collections } = await listCollections({
@@ -201,6 +202,7 @@ export default async function Footer() {
 
             {/* Legal Links */}
             <div className="flex items-center gap-6 text-sm text-stone-500">
+              <CookieSettingsButton />
               <LocalizedClientLink
                 href="/privacy"
                 className="hover:text-white transition-colors"

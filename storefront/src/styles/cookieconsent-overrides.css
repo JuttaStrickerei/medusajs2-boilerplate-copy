@@ -1,0 +1,94 @@
+/**
+ * CookieConsent Brand Overrides
+ * Matches the Strickerei Jutta stone-based design system.
+ */
+
+:root {
+  /* Background and text */
+  --cc-bg: #fafaf9; /* stone-50 */
+  --cc-text-color: #292524; /* stone-800 */
+
+  /* Primary button (Accept All) */
+  --cc-btn-primary-bg: #292524; /* stone-800 */
+  --cc-btn-primary-color: #fafaf9; /* stone-50 */
+  --cc-btn-primary-hover-bg: #44403c; /* stone-700 */
+  --cc-btn-primary-hover-color: #fafaf9;
+  --cc-btn-primary-border-color: #292524;
+  --cc-btn-primary-hover-border-color: #44403c;
+
+  /* Secondary button (Reject/Necessary) */
+  --cc-btn-secondary-bg: #f5f5f4; /* stone-100 */
+  --cc-btn-secondary-color: #292524; /* stone-800 */
+  --cc-btn-secondary-hover-bg: #e7e5e4; /* stone-200 */
+  --cc-btn-secondary-hover-color: #292524;
+  --cc-btn-secondary-border-color: #e7e5e4;
+  --cc-btn-secondary-hover-border-color: #d6d3d1;
+
+  /* Tertiary button (Manage/Settings) */
+  --cc-btn-tertiary-bg: transparent;
+  --cc-btn-tertiary-color: #57534e; /* stone-600 */
+  --cc-btn-tertiary-hover-bg: #f5f5f4;
+  --cc-btn-tertiary-hover-color: #292524;
+  --cc-btn-tertiary-border-color: transparent;
+
+  /* Toggle switch */
+  --cc-toggle-on-bg: #292524; /* stone-800 */
+  --cc-toggle-on-knob-bg: #fafaf9;
+  --cc-toggle-off-bg: #d6d3d1; /* stone-300 */
+  --cc-toggle-off-knob-bg: #fafaf9;
+
+  /* Cookie category blocks */
+  --cc-cookie-category-block-bg: #f5f5f4; /* stone-100 */
+  --cc-cookie-category-block-hover-bg: #e7e5e4; /* stone-200 */
+  --cc-cookie-category-expanded-block-bg: #f5f5f4;
+  --cc-cookie-category-expanded-block-hover-bg: #e7e5e4;
+
+  /* Separator */
+  --cc-separator-border-color: #e7e5e4; /* stone-200 */
+
+  /* Border radius */
+  --cc-modal-border-radius: 8px;
+  --cc-btn-border-radius: 6px;
+
+  /* Font family - inherit from site */
+  --cc-font-family: inherit;
+
+  /* Badge ("Immer aktiv") */
+  --cc-pm-badge-bg: #292524;
+  --cc-pm-badge-color: #fafaf9;
+  --cc-pm-badge-font-size: 0.7em;
+
+  /* Links */
+  --cc-link-color: #57534e;
+
+  /* Table */
+  --cc-table-head-bg: #f5f5f4;
+  --cc-table-row-border: #e7e5e4;
+}
+
+/* Override for dark mode if needed */
+.dark #cc-main {
+  --cc-bg: #1c1917; /* stone-900 */
+  --cc-text-color: #f5f5f4; /* stone-100 */
+  --cc-btn-primary-bg: #f5f5f4;
+  --cc-btn-primary-color: #1c1917;
+  --cc-btn-secondary-bg: #292524;
+  --cc-btn-secondary-color: #f5f5f4;
+  --cc-cookie-category-block-bg: #292524;
+}
+
+/* Ensure cookie banner is above other elements */
+#cc-main {
+  z-index: 9999;
+}
+
+/* Fix modal positioning on mobile */
+@media (max-width: 640px) {
+  #cc-main .cm {
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    border-radius: 0 !important;
+  }
+}
