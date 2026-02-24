@@ -238,7 +238,56 @@ const medusaConfig = {
               filterableAttributes: ['material', 'tags', 'collection', 'type'],
             },
             primaryKey: 'id',
-          }
+          },
+          // ========================================
+          // CATEGORIES - Product Categories Index
+          // ========================================
+          product_categories: {
+            indexName: 'categories',  // Use 'categories' as the index name in MeiliSearch
+            indexSettings: {
+              searchableAttributes: [
+                'name',         // Priorität 1: Category name
+                'description',  // Priorität 2: Description
+                'handle',       // Priorität 3: URL handle
+                'metadata',     // Priorität 4: Additional metadata
+              ],
+              displayedAttributes: [
+                'id',
+                'name',
+                'description',
+                'handle',
+                'metadata',
+                'parent_category_id',
+                'rank',
+              ],
+              filterableAttributes: ['parent_category_id', 'handle'],
+              sortableAttributes: ['name', 'rank'],
+            },
+            primaryKey: 'id',
+          },
+          // ========================================
+          // COLLECTIONS - Product Collections Index
+          // ========================================
+          product_collections: {
+            indexName: 'collections',  // Use 'collections' as the index name in MeiliSearch
+            indexSettings: {
+              searchableAttributes: [
+                'title',        // Priorität 1: Collection title
+                'handle',       // Priorität 2: URL handle
+                'metadata',     // Priorität 3: Additional metadata
+              ],
+              displayedAttributes: [
+                'id',
+                'title',
+                'handle',
+                'metadata',
+                'thumbnail',
+              ],
+              filterableAttributes: ['handle'],
+              sortableAttributes: ['title', 'created_at'],
+            },
+            primaryKey: 'id',
+          },
         }
       }
     }] : [])
