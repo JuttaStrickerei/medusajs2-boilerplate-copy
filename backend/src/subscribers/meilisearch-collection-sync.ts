@@ -109,16 +109,16 @@ export default async function meilisearchCollectionSyncHandler({
   event,
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const { eventName, data } = event;
+  const { name, data } = event;
   const collectionId = data.id;
 
-  switch (eventName) {
+  switch (name) {
     case COLLECTION_EVENTS.CREATED:
     case COLLECTION_EVENTS.UPDATED:
-      await handleCollectionUpsert(collectionId, container, eventName);
+      await handleCollectionUpsert(collectionId, container, name);
       break;
     case COLLECTION_EVENTS.DELETED:
-      await handleCollectionDelete(collectionId, container, eventName);
+      await handleCollectionDelete(collectionId, container, name);
       break;
     default:
       // Unknown event type - ignore

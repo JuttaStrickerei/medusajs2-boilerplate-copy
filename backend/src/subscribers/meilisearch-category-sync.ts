@@ -112,16 +112,16 @@ export default async function meilisearchCategorySyncHandler({
   event,
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const { eventName, data } = event;
+  const { name, data } = event;
   const categoryId = data.id;
 
-  switch (eventName) {
+  switch (name) {
     case CATEGORY_EVENTS.CREATED:
     case CATEGORY_EVENTS.UPDATED:
-      await handleCategoryUpsert(categoryId, container, eventName);
+      await handleCategoryUpsert(categoryId, container, name);
       break;
     case CATEGORY_EVENTS.DELETED:
-      await handleCategoryDelete(categoryId, container, eventName);
+      await handleCategoryDelete(categoryId, container, name);
       break;
     default:
       // Unknown event type - ignore

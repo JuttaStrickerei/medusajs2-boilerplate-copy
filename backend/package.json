@@ -48,6 +48,7 @@
     "axios": "^1.13.2",
     "express": "^4.22.1",
     "medusajs-launch-utils": "^0.0.10",
+    "meilisearch": "^0.38.0",
     "minio": "^8.0.6",
     "pdfmake": "^0.2.20",
     "pg": "^8.16.3",

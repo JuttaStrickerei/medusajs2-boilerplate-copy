@@ -110,7 +110,7 @@ export default async function backfill({ container }: ExecArgs) {
         title: col.title,
         handle: col.handle,
         metadata: col.metadata || {},
-        thumbnail: col.thumbnail || null,
+        thumbnail: (col as any).thumbnail || null,
         created_at: col.created_at || new Date().toISOString(),
       }));
 
