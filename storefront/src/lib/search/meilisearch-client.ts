@@ -1,9 +1,9 @@
-import { MeiliSearch } from 'meilisearch'
+import { MeiliSearch, MultiSearchQuery, MultiSearchResult } from 'meilisearch'
 
 // Singleton Client
 let client: MeiliSearch | null = null
 
-function getMeiliSearchClient(): MeiliSearch | null {
+export function getMeiliSearchClient(): MeiliSearch | null {
   if (client) return client
 
   const host = process.env.NEXT_PUBLIC_SEARCH_ENDPOINT
@@ -18,7 +18,7 @@ function getMeiliSearchClient(): MeiliSearch | null {
   return client
 }
 
-// TypeScript Interface für MeiliSearch Produkte
+// TypeScript Interfaces für MeiliSearch Entities
 export interface MeiliSearchProduct {
   id: string
   title: string
@@ -31,6 +31,34 @@ export interface MeiliSearchProduct {
   collection: string | null
   type: string | null
   variant_sku: string[]
+}
+
+export interface MeiliSearchCategory {
+  id: string
+  name: string
+  description: string | null
+  handle: string
+  metadata: Record<string, any> | null
+  parent_category_id: string | null
+  rank: number
+}
+
+export interface MeiliSearchCollection {
+  id: string
+  title: string
+  handle: string
+  metadata: Record<string, any> | null
+  thumbnail: string | null
+  created_at: string
+}
+
+/**
+ * Combined search result type
+ */
+export interface MultiSearchResults {
+  products: MeiliSearchProduct[]
+  categories: MeiliSearchCategory[]
+  collections: MeiliSearchCollection[]
 }
 
 /**
@@ -46,7 +74,7 @@ export async function searchProductsInMeiliSearch(
   }
 
   const meiliClient = getMeiliSearchClient()
-  
+
   if (!meiliClient) {
     return []
   }
@@ -75,6 +103,108 @@ export async function searchProductsInMeiliSearch(
   } catch (error) {
     console.error('MeiliSearch search error:', error)
     return []
+  }
+}
+
+/**
+ * Multi-search across products, categories, and collections
+ * Uses MeiliSearch's multiSearch API for efficient querying
+ */
+export async function searchAllInMeiliSearch(
+  query: string,
+  limit: number = 10
+): Promise<MultiSearchResults> {
+  const emptyResults: MultiSearchResults = {
+    products: [],
+    categories: [],
+    collections: [],
+  }
+
+  if (!query || query.trim().length < 2) {
+    return emptyResults
+  }
+
+  const meiliClient = getMeiliSearchClient()
+
+  if (!meiliClient) {
+    return emptyResults
+  }
+
+  try {
+    const queries: MultiSearchQuery[] = [
+      {
+        indexUid: 'products',
+        q: query,
+        limit,
+        attributesToRetrieve: [
+          'id',
+          'title',
+          'description',
+          'material',
+          'subtitle',
+          'tags',
+          'thumbnail',
+          'handle',
+          'collection',
+          'type',
+        ],
+      },
+      {
+        indexUid: 'categories',
+        q: query,
+        limit,
+        attributesToRetrieve: [
+          'id',
+          'name',
+          'description',
+          'handle',
+          'metadata',
+          'parent_category_id',
+          'rank',
+        ],
+      },
+      {
+        indexUid: 'collections',
+        q: query,
+        limit,
+        attributesToRetrieve: [
+          'id',
+          'title',
+          'handle',
+          'metadata',
+          'thumbnail',
+          'created_at',
+        ],
+      },
+    ]
+
+    const multiSearchResults = await meiliClient.multiSearch<{
+      products: MeiliSearchProduct
+      categories: MeiliSearchCategory
+      collections: MeiliSearchCollection
+    }>({ queries })
+
+    // Extract results from each index
+    const results: MultiSearchResults = {
+      products: [],
+      categories: [],
+      collections: [],
+    }
+
+    multiSearchResults.results.forEach((result) => {
+      if (result.indexUid === 'products') {
+        results.products = result.hits as MeiliSearchProduct[]
+      } else if (result.indexUid === 'categories') {
+        results.categories = result.hits as MeiliSearchCategory[]
+      } else if (result.indexUid === 'collections') {
+        results.collections = result.hits as MeiliSearchCollection[]
+      }
+    })
+
+    return results
+  } catch (error) {
+    console.error('MeiliSearch multi-search error:', error)
+    return emptyResults
   }
 }
 

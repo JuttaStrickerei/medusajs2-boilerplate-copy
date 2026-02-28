@@ -5,6 +5,7 @@ import "styles/globals.css"
 import { ToastProvider } from "@components/ui"
 import { WishlistProvider } from "@lib/context/wishlist-context"
 import { CartProvider } from "@lib/context/cart-context"
+import CookieConsentProvider from "@components/cookie-consent/CookieConsentProvider"
 
 // Font configurations
 const inter = Inter({
@@ -69,6 +70,8 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             </ToastProvider>
           </WishlistProvider>
         </CartProvider>
+        {/* Cookie consent — must be last so it renders above everything */}
+        <CookieConsentProvider />
       </body>
     </html>
   )

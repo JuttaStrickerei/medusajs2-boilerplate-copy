@@ -1,24 +1,35 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
-import { Search, X, ArrowRight } from "@components/icons"
+import { Search, X, ArrowRight, Grid3X3, Tag, Folder } from "@components/icons"
 import { cn } from "@lib/utils"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
-import { searchProducts } from "@lib/data/products"
+import { searchAllEntities } from "@lib/data/products"
 import { convertToLocale } from "@lib/util/money"
 import Spinner from "@modules/common/icons/spinner"
+import { MultiSearchCategory, MultiSearchCollection } from "@lib/search/meilisearch-client"
 
 interface SearchModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
+interface SearchResults {
+  products: HttpTypes.StoreProduct[]
+  categories: MultiSearchCategory[]
+  collections: MultiSearchCollection[]
+}
+
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<HttpTypes.StoreProduct[]>([])
+  const [results, setResults] = useState<SearchResults>({
+    products: [],
+    categories: [],
+    collections: [],
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -37,12 +48,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose()
     }
-    
+
     if (isOpen) {
       document.addEventListener("keydown", handleEscape)
       document.body.style.overflow = "hidden"
     }
-    
+
     return () => {
       document.removeEventListener("keydown", handleEscape)
       document.body.style.overflow = ""
@@ -52,7 +63,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   // Debounced search
   useEffect(() => {
     if (!query.trim()) {
-      setResults([])
+      setResults({ products: [], categories: [], collections: [] })
       setHasSearched(false)
       return
     }
@@ -60,13 +71,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const timeoutId = setTimeout(async () => {
       setIsLoading(true)
       setHasSearched(true)
-      
+
       try {
-        const products = await searchProducts(query, countryCode as string)
-        setResults(products)
+        const searchResults = await searchAllEntities(query, countryCode as string)
+        setResults(searchResults)
       } catch (error) {
         console.error("Search error:", error)
-        setResults([])
+        setResults({ products: [], categories: [], collections: [] })
       } finally {
         setIsLoading(false)
       }
@@ -83,22 +94,32 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
   }
 
-  const handleProductClick = () => {
+  const handleResultClick = () => {
     setQuery("")
-    setResults([])
+    setResults({ products: [], categories: [], collections: [] })
     onClose()
   }
+
+  const hasResults =
+    results.products.length > 0 ||
+    results.categories.length > 0 ||
+    results.collections.length > 0
+
+  const totalResults =
+    results.products.length +
+    results.categories.length +
+    results.collections.length
 
   if (!isOpen) return null
 
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="fixed inset-x-0 top-0 z-[101] p-4 small:p-8">
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -111,7 +132,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Produkte suchen..."
+                placeholder="Produkte, Kategorien oder Kollektionen suchen..."
                 className="flex-1 px-4 py-5 text-lg outline-none placeholder:text-stone-400"
                 autoComplete="off"
               />
@@ -140,69 +161,167 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               <div className="flex items-center justify-center py-12">
                 <Spinner className="w-6 h-6 animate-spin text-stone-400" />
               </div>
-            ) : results.length > 0 ? (
+            ) : hasResults ? (
               <div className="divide-y divide-stone-100">
-                {results.slice(0, 6).map((product) => (
-                  <LocalizedClientLink
-                    key={product.id}
-                    href={`/products/${product.handle}`}
-                    onClick={handleProductClick}
-                    className="flex items-center gap-4 px-6 py-4 hover:bg-stone-50 transition-colors"
-                  >
-                    {/* Thumbnail */}
-                    <div className="w-16 h-16 bg-stone-100 rounded-lg overflow-hidden flex-shrink-0">
-                      {product.thumbnail ? (
-                        <Image
-                          src={product.thumbnail}
-                          alt={product.title || ""}
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-stone-300">
-                          <Search size={20} />
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-stone-800 truncate">
-                        {product.title}
-                      </h4>
-                      {product.collection && (
-                        <p className="text-sm text-stone-500 truncate">
-                          {product.collection.title}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Price */}
-                    {product.variants?.[0]?.calculated_price && (
-                      <div className="text-right flex-shrink-0">
-                        <span className="font-medium text-stone-800">
-                          {convertToLocale({
-                            amount: (product.variants[0].calculated_price as any).calculated_amount_with_tax || 
-                                   (product.variants[0].calculated_price as any).calculated_amount,
-                            currency_code: (product.variants[0].calculated_price as any).currency_code || "EUR",
-                          })}
-                        </span>
+                {/* Products Section */}
+                {results.products.length > 0 && (
+                  <div>
+                    <div className="px-6 py-3 bg-stone-50 border-b border-stone-100">
+                      <div className="flex items-center gap-2 text-sm font-medium text-stone-600">
+                        <Tag size={16} />
+                        Produkte ({results.products.length})
                       </div>
-                    )}
+                    </div>
+                    <div className="divide-y divide-stone-100">
+                      {results.products.slice(0, 5).map((product) => (
+                        <LocalizedClientLink
+                          key={product.id}
+                          href={`/products/${product.handle}`}
+                          onClick={handleResultClick}
+                          className="flex items-center gap-4 px-6 py-4 hover:bg-stone-50 transition-colors"
+                        >
+                          {/* Thumbnail */}
+                          <div className="w-14 h-14 bg-stone-100 rounded-lg overflow-hidden flex-shrink-0">
+                            {product.thumbnail ? (
+                              <Image
+                                src={product.thumbnail}
+                                alt={product.title || ""}
+                                width={56}
+                                height={56}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-stone-300">
+                                <Tag size={20} />
+                              </div>
+                            )}
+                          </div>
 
-                    <ArrowRight size={16} className="text-stone-400 flex-shrink-0" />
-                  </LocalizedClientLink>
-                ))}
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-stone-800 truncate">
+                              {product.title}
+                            </h4>
+                            {product.collection && (
+                              <p className="text-sm text-stone-500 truncate">
+                                {product.collection.title}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Price */}
+                          {product.variants?.[0]?.calculated_price && (
+                            <div className="text-right flex-shrink-0">
+                              <span className="font-medium text-stone-800">
+                                {convertToLocale({
+                                  amount: (product.variants[0].calculated_price as any).calculated_amount_with_tax ||
+                                         (product.variants[0].calculated_price as any).calculated_amount,
+                                  currency_code: (product.variants[0].calculated_price as any).currency_code || "EUR",
+                                })}
+                              </span>
+                            </div>
+                          )}
+
+                          <ArrowRight size={16} className="text-stone-400 flex-shrink-0" />
+                        </LocalizedClientLink>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Categories Section */}
+                {results.categories.length > 0 && (
+                  <div>
+                    <div className="px-6 py-3 bg-stone-50 border-b border-stone-100">
+                      <div className="flex items-center gap-2 text-sm font-medium text-stone-600">
+                        <Grid3X3 size={16} />
+                        Kategorien ({results.categories.length})
+                      </div>
+                    </div>
+                    <div className="divide-y divide-stone-100">
+                      {results.categories.slice(0, 3).map((category) => (
+                        <LocalizedClientLink
+                          key={category.id}
+                          href={`/categories/${category.handle}`}
+                          onClick={handleResultClick}
+                          className="flex items-center gap-4 px-6 py-4 hover:bg-stone-50 transition-colors"
+                        >
+                          <div className="w-14 h-14 bg-stone-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Grid3X3 size={24} className="text-stone-400" />
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-stone-800 truncate">
+                              {category.name}
+                            </h4>
+                            {category.description && (
+                              <p className="text-sm text-stone-500 truncate">
+                                {category.description}
+                              </p>
+                            )}
+                          </div>
+
+                          <ArrowRight size={16} className="text-stone-400 flex-shrink-0" />
+                        </LocalizedClientLink>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Collections Section */}
+                {results.collections.length > 0 && (
+                  <div>
+                    <div className="px-6 py-3 bg-stone-50 border-b border-stone-100">
+                      <div className="flex items-center gap-2 text-sm font-medium text-stone-600">
+                        <Folder size={16} />
+                        Kollektionen ({results.collections.length})
+                      </div>
+                    </div>
+                    <div className="divide-y divide-stone-100">
+                      {results.collections.slice(0, 3).map((collection) => (
+                        <LocalizedClientLink
+                          key={collection.id}
+                          href={`/collections/${collection.handle}`}
+                          onClick={handleResultClick}
+                          className="flex items-center gap-4 px-6 py-4 hover:bg-stone-50 transition-colors"
+                        >
+                          <div className="w-14 h-14 bg-stone-100 rounded-lg overflow-hidden flex-shrink-0">
+                            {collection.thumbnail ? (
+                              <Image
+                                src={collection.thumbnail}
+                                alt={collection.title}
+                                width={56}
+                                height={56}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-stone-300">
+                                <Folder size={24} />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-stone-800 truncate">
+                              {collection.title}
+                            </h4>
+                          </div>
+
+                          <ArrowRight size={16} className="text-stone-400 flex-shrink-0" />
+                        </LocalizedClientLink>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* View All Link */}
-                {results.length > 6 && (
+                {totalResults > 8 && (
                   <LocalizedClientLink
                     href={`/results/${encodeURIComponent(query)}`}
-                    onClick={handleProductClick}
+                    onClick={handleResultClick}
                     className="flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium text-stone-600 hover:text-stone-800 hover:bg-stone-50 transition-colors"
                   >
-                    Alle {results.length} Ergebnisse anzeigen
+                    Alle {totalResults} Ergebnisse anzeigen
                     <ArrowRight size={16} />
                   </LocalizedClientLink>
                 )}
@@ -212,7 +331,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search size={24} className="text-stone-400" />
                 </div>
-                <p className="text-stone-600 mb-1">Keine Ergebnisse für "{query}"</p>
+                <p className="text-stone-600 mb-1">Keine Ergebnisse für &quot;{query}&quot;</p>
                 <p className="text-sm text-stone-400">
                   Versuchen Sie einen anderen Suchbegriff
                 </p>
@@ -239,4 +358,3 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     </>
   )
 }
-
