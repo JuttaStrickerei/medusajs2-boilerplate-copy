@@ -26,18 +26,18 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
 
   if (!images || images.length === 0) {
     return (
-      <div className="aspect-product bg-stone-100 rounded-2xl flex items-center justify-center">
+      <div className="aspect-square bg-stone-100 rounded-2xl flex items-center justify-center">
         <span className="text-stone-400">Kein Bild verfügbar</span>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {/* Main Image */}
       <div
         className={cn(
-          "group relative aspect-product bg-stone-100 rounded-2xl overflow-hidden",
+          "group relative aspect-square bg-stone-100 rounded-2xl overflow-hidden",
           "cursor-zoom-in transition-shadow duration-300",
           "hover:shadow-lg"
         )}
