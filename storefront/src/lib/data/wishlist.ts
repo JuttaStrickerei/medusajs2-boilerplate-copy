@@ -36,7 +36,8 @@ export async function getServerWishlist(): Promise<WishlistItemResponse[]> {
     })
 
     return wishlist_items
-  } catch {
+  } catch (error) {
+    console.error("[Wishlist] GET /store/wishlist failed:", error)
     return []
   }
 }
@@ -61,7 +62,8 @@ export async function addServerWishlistItem(
       },
     })
     return true
-  } catch {
+  } catch (error) {
+    console.error("[Wishlist] POST /store/wishlist failed:", error)
     return false
   }
 }
@@ -84,7 +86,8 @@ export async function removeServerWishlistItem(
       },
     })
     return true
-  } catch {
+  } catch (error) {
+    console.error("[Wishlist] DELETE /store/wishlist failed:", error)
     return false
   }
 }
