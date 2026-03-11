@@ -6,15 +6,13 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { HttpTypes } from "@medusajs/types"
 import { signout } from "@lib/data/customer"
 import { useCart } from "@lib/context/cart-context"
-import { dispatchAuthLogout } from "@lib/events/auth-events"
 import { 
   User, 
   MapPin, 
   Package, 
   LogOut, 
   ChevronRight,
-  LayoutGrid,
-  Heart,
+  LayoutGrid
 } from "@components/icons"
 
 const AccountNav = ({
@@ -27,7 +25,7 @@ const AccountNav = ({
   const { clearCart } = useCart()
 
   const handleLogout = async () => {
-    dispatchAuthLogout()
+    // FIX: Clear client cart state immediately so navbar count doesn't stay stale after logout.
     clearCart()
     await signout(countryCode)
   }
@@ -37,7 +35,6 @@ const AccountNav = ({
     { href: "/account/profile", label: "Profil", icon: User, testId: "profile-link" },
     { href: "/account/addresses", label: "Adressen", icon: MapPin, testId: "addresses-link" },
     { href: "/account/orders", label: "Bestellungen", icon: Package, testId: "orders-link" },
-    { href: "/account/wishlist", label: "Wunschliste", icon: Heart, testId: "wishlist-link" },
   ]
 
   return (

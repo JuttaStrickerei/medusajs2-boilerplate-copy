@@ -3,22 +3,17 @@
 import { sdk } from "@lib/config"
 import { getAuthHeaders } from "./cookies"
 
-export type WishlistItemResponse = {
+type WishlistItemResponse = {
   id: string
   customer_id: string
   product_id: string
   variant_id: string | null
-  product_handle: string | null
-  product_title: string | null
-  product_thumbnail: string | null
   created_at: string
   updated_at: string
 }
 
-export async function checkIsAuthenticated(): Promise<boolean> {
-  const headers = await getAuthHeaders()
-  return "authorization" in headers
-}
+// FIX: Server-side wishlist persistence for logged-in users.
+// These server actions call the custom /store/wishlist API routes.
 
 export async function getServerWishlist(): Promise<WishlistItemResponse[]> {
   const headers = await getAuthHeaders()
@@ -36,8 +31,7 @@ export async function getServerWishlist(): Promise<WishlistItemResponse[]> {
     })
 
     return wishlist_items
-  } catch (error) {
-    console.error("[Wishlist] GET /store/wishlist failed:", error)
+  } catch {
     return []
   }
 }
@@ -62,8 +56,7 @@ export async function addServerWishlistItem(
       },
     })
     return true
-  } catch (error) {
-    console.error("[Wishlist] POST /store/wishlist failed:", error)
+  } catch {
     return false
   }
 }
@@ -86,8 +79,7 @@ export async function removeServerWishlistItem(
       },
     })
     return true
-  } catch (error) {
-    console.error("[Wishlist] DELETE /store/wishlist failed:", error)
+  } catch {
     return false
   }
 }
