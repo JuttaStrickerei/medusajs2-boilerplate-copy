@@ -6,12 +6,11 @@ import ProductActions from "@modules/products/components/product-actions"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
 import ProductTabs from "@modules/products/components/product-tabs"
 import RelatedProducts from "@modules/products/components/related-products"
-import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Badge } from "@components/ui"
-import { Sparkles, Truck, RefreshCw, Shield } from "@components/icons"
+import { Sparkles, RefreshCw, Shield } from "@components/icons"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -35,16 +34,16 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         <div className="content-container py-4">
           <nav className="flex items-center gap-2 text-sm text-stone-500 flex-wrap">
             <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
-              Home
+              Startseite
             </LocalizedClientLink>
             <span>/</span>
             <LocalizedClientLink href="/store" className="hover:text-stone-800 transition-colors">
-              Shop
+              Alle Produkte
             </LocalizedClientLink>
             {product.collection && (
               <>
                 <span>/</span>
-                <LocalizedClientLink 
+                <LocalizedClientLink
                   href={`/collections/${product.collection.handle}`}
                   className="hover:text-stone-800 transition-colors"
                 >
@@ -65,17 +64,16 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           data-testid="product-container"
         >
           <div className="grid grid-cols-1 medium:grid-cols-2 gap-8 medium:gap-12 large:gap-16">
-            {/* Image Gallery - Left Side */}
+            {/* Image Gallery */}
             <div className="medium:sticky medium:top-24 medium:self-start">
               <ImageGallery images={product?.images || []} />
             </div>
 
-            {/* Product Info - Right Side */}
+            {/* Product Info */}
             <div className="space-y-8">
-              {/* Product Header */}
+              {/* Header: Badge + Title + Subtitle + Description */}
               <div className="space-y-4">
-                {/* Badges */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   {product.collection && (
                     <LocalizedClientLink href={`/collections/${product.collection.handle}`}>
                       <Badge variant="secondary" className="hover:bg-stone-200 transition-colors">
@@ -83,16 +81,28 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                       </Badge>
                     </LocalizedClientLink>
                   )}
+                  {product.tags && product.tags.length > 0 && product.tags.map((tag) => (
+                    <Badge key={tag.id} variant="secondary" className="bg-stone-100 text-stone-600">
+                      {tag.value}
+                    </Badge>
+                  ))}
                 </div>
 
-                {/* Title */}
                 <h1 className="font-serif text-3xl small:text-4xl font-medium text-stone-800">
                   {product.title}
                 </h1>
 
-                {/* Subtitle/Description */}
                 {product.subtitle && (
                   <p className="text-lg text-stone-600">{product.subtitle}</p>
+                )}
+
+                {product.description && (
+                  <p
+                    className="text-base text-stone-600 leading-relaxed whitespace-pre-line"
+                    data-testid="product-description"
+                  >
+                    {product.description}
+                  </p>
                 )}
               </div>
 
@@ -130,22 +140,15 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         </div>
       </section>
 
-      {/* Product Details Tabs */}
+      {/* Product Details (Tabs) */}
       <section className="bg-stone-50 border-y border-stone-200">
         <div className="content-container py-12 small:py-16">
           <ProductTabs product={product} />
         </div>
       </section>
 
-      {/* Product Info (Additional Details) */}
-      <section className="bg-white">
-        <div className="content-container py-12 small:py-16">
-          <ProductInfo product={product} />
-        </div>
-      </section>
-
       {/* Related Products */}
-      <section className="bg-stone-50">
+      <section className="bg-white">
         <div
           className="content-container py-16 small:py-20"
           data-testid="related-products-container"
@@ -167,7 +170,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   )
 }
 
-// Small Trust Badge for Product Page
 function TrustBadgeSmall({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <div className="flex items-center gap-3 text-stone-600">

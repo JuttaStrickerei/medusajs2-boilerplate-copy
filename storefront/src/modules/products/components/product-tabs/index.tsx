@@ -12,20 +12,32 @@ type ProductTabsProps = {
 }
 
 const ProductTabs = ({ product }: ProductTabsProps) => {
+  const hasProductInfo = !!(
+    product.material ||
+    product.origin_country ||
+    product.type?.value ||
+    product.weight ||
+    (product.length && product.width && product.height)
+  )
+
   const tabs = [
+    ...(hasProductInfo
+      ? [
+          {
+            label: "Produktdetails",
+            component: <ProductInfoTab product={product} />,
+          },
+        ]
+      : []),
     {
-      label: "Product Information",
-      component: <ProductInfoTab product={product} />,
-    },
-    {
-      label: "Shipping & Returns",
+      label: "Versand & Retouren",
       component: <ShippingInfoTab />,
     },
   ]
 
   return (
-    <div className="w-full">
-      <Accordion type="multiple">
+    <div className="w-full max-w-3xl mx-auto">
+      <Accordion type="multiple" defaultValue={hasProductInfo ? ["Produktdetails"] : []}>
         {tabs.map((tab, i) => (
           <Accordion.Item
             key={i}
@@ -41,38 +53,47 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   )
 }
 
+type ProductDetailRow = {
+  label: string
+  value: string
+}
+
 const ProductInfoTab = ({ product }: ProductTabsProps) => {
+  const details: ProductDetailRow[] = []
+
+  if (product.material) {
+    details.push({ label: "Material", value: product.material })
+  }
+  if (product.origin_country) {
+    details.push({ label: "Herkunftsland", value: product.origin_country })
+  }
+  if (product.type?.value) {
+    details.push({ label: "Produkttyp", value: product.type.value })
+  }
+  if (product.weight) {
+    details.push({ label: "Gewicht", value: `${product.weight} g` })
+  }
+  if (product.length && product.width && product.height) {
+    details.push({
+      label: "Maße",
+      value: `${product.length} × ${product.width} × ${product.height} cm`,
+    })
+  }
+
+  if (details.length === 0) return null
+
   return (
-    <div className="text-small-regular py-8">
-      <div className="grid grid-cols-2 gap-x-8">
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Material</span>
-            <p>{product.material ? product.material : "-"}</p>
+    <div className="py-6">
+      <div className="grid grid-cols-1 small:grid-cols-2 gap-4">
+        {details.map((detail) => (
+          <div
+            key={detail.label}
+            className="flex items-baseline justify-between small:flex-col small:items-start gap-1 py-3 border-b border-stone-100 last:border-b-0"
+          >
+            <span className="text-sm text-stone-500">{detail.label}</span>
+            <span className="text-sm font-medium text-stone-800">{detail.value}</span>
           </div>
-          <div>
-            <span className="font-semibold">Country of origin</span>
-            <p>{product.origin_country ? product.origin_country : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Type</span>
-            <p>{product.type ? product.type.value : "-"}</p>
-          </div>
-        </div>
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Weight</span>
-            <p>{product.weight ? `${product.weight} g` : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Dimensions</span>
-            <p>
-              {product.length && product.width && product.height
-                ? `${product.length}L x ${product.width}W x ${product.height}H`
-                : "-"}
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   )
@@ -80,36 +101,48 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
 
 const ShippingInfoTab = () => {
   return (
-    <div className="text-small-regular py-8">
-      <div className="grid grid-cols-1 gap-y-8">
-        <div className="flex items-start gap-x-2">
-          <FastDelivery />
+    <div className="py-6">
+      <div className="grid grid-cols-1 gap-6">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-600">
+            <FastDelivery />
+          </div>
           <div>
-            <span className="font-semibold">Fast delivery</span>
-            <p className="max-w-sm">
-              Your package will arrive in 3-5 business days at your pick up
-              location or in the comfort of your home.
+            <span className="text-sm font-semibold text-stone-800 block mb-1">
+              Schnelle Lieferung
+            </span>
+            <p className="text-sm text-stone-600 leading-relaxed max-w-md">
+              Ihr Paket erreicht Sie innerhalb von 3–5 Werktagen — bequem zu
+              Ihnen nach Hause oder an Ihre Wunschadresse.
             </p>
           </div>
         </div>
-        <div className="flex items-start gap-x-2">
-          <Refresh />
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-600">
+            <Refresh />
+          </div>
           <div>
-            <span className="font-semibold">Simple exchanges</span>
-            <p className="max-w-sm">
-              Is the fit not quite right? No worries - we&apos;ll exchange your
-              product for a new one.
+            <span className="text-sm font-semibold text-stone-800 block mb-1">
+              Einfacher Umtausch
+            </span>
+            <p className="text-sm text-stone-600 leading-relaxed max-w-md">
+              Passt die Größe nicht ganz? Kein Problem — wir tauschen Ihr
+              Produkt unkompliziert gegen ein neues.
             </p>
           </div>
         </div>
-        <div className="flex items-start gap-x-2">
-          <Back />
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-600">
+            <Back />
+          </div>
           <div>
-            <span className="font-semibold">Easy returns</span>
-            <p className="max-w-sm">
-              Just return your product and we&apos;ll refund your money. No
-              questions asked – we&apos;ll do our best to make sure your return
-              is hassle-free.
+            <span className="text-sm font-semibold text-stone-800 block mb-1">
+              Unkomplizierte Retouren
+            </span>
+            <p className="text-sm text-stone-600 leading-relaxed max-w-md">
+              Senden Sie Ihr Produkt einfach zurück und wir erstatten Ihnen den
+              Kaufpreis. Ohne Wenn und Aber — wir machen Ihnen die Rückgabe so
+              einfach wie möglich.
             </p>
           </div>
         </div>
