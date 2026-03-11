@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { checkIsAuthenticated } from "@lib/data/wishlist"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
 import { Heart, ArrowRight, User } from "@components/icons"
@@ -11,7 +10,9 @@ export default function WishlistTemplate() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
 
   useEffect(() => {
-    checkIsAuthenticated().then(setIsLoggedIn)
+    fetch("/api/wishlist", { credentials: "include" })
+      .then((res) => setIsLoggedIn(res.ok))
+      .catch(() => setIsLoggedIn(false))
   }, [])
 
   if (isLoggedIn === null) {
