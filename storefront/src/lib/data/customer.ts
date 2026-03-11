@@ -152,17 +152,30 @@ export async function signout(countryCode: string) {
 
 export async function transferCart() {
   const cartId = await getCartId()
+  const headers = await getAuthHeaders()
 
-  if (!cartId) {
+  if (cartId) {
+    await sdk.store.cart.transferCart(cartId, {}, headers)
+    const cartCacheTag = await getCacheTag("cart")
+    revalidateTag(cartCacheTag)
     return
   }
 
-  const headers = await getAuthHeaders()
+  // No guest cart — try to restore the customer's existing cart
+  try {
+    const { cart } = await sdk.client.fetch<{ cart: { id: string } | null }>(
+      "/store/customer-cart",
+      { method: "GET", headers }
+    )
 
-  await sdk.store.cart.transferCart(cartId, {}, headers)
-
-  const cartCacheTag = await getCacheTag("cart")
-  revalidateTag(cartCacheTag)
+    if (cart?.id) {
+      await setCartId(cart.id)
+      const cartCacheTag = await getCacheTag("cart")
+      revalidateTag(cartCacheTag)
+    }
+  } catch {
+    // No existing cart found, a new one will be created on next action
+  }
 }
 
 export const addCustomerAddress = async (

@@ -1,4 +1,4 @@
-import { defineMiddlewares, validateAndTransformBody } from "@medusajs/framework/http"
+import { defineMiddlewares, authenticate, validateAndTransformBody } from "@medusajs/framework/http"
 import { PostInvoiceConfigSchema } from "./admin/invoice-config/route"
 import { newsletterSignupSchema } from "./store/newsletter/route"
 import { wishlistMiddlewares } from "./store/wishlist/middlewares"
@@ -19,6 +19,11 @@ export default defineMiddlewares({
       middlewares: [
         validateAndTransformBody(newsletterSignupSchema),
       ],
+    },
+    {
+      matcher: "/store/customer-cart",
+      method: "GET",
+      middlewares: [authenticate("customer", ["session", "bearer"])],
     },
     ...wishlistMiddlewares,
     ...adminSendcloudShipmentMiddlewares,

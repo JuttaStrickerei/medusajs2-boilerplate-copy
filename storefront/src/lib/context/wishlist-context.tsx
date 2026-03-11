@@ -75,6 +75,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const isLoggedInRef = useRef(false)
+  const itemsRef = useRef<WishlistItem[]>([])
   const pathname = usePathname()
 
   const loadServerWishlistAndMerge = useCallback(async () => {
@@ -183,6 +184,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true }
   }, [pathname, isInitialized, loadServerWishlistAndMerge])
 
+  // Keep ref in sync
+  useEffect(() => {
+    itemsRef.current = items
+  }, [items])
+
   // Persist to localStorage for guests only
   useEffect(() => {
     if (isInitialized && !isLoggedInRef.current) {
@@ -223,30 +229,31 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const toggleWishlist = useCallback((product: { id: string; handle: string; title: string; thumbnail: string | null }) => {
-    setItems((prev) => {
-      const exists = prev.some((item) => item.id === product.id)
+    const exists = itemsRef.current.some((item) => item.id === product.id)
 
-      if (exists) {
-        if (isLoggedInRef.current) {
-          removeServerWishlistItem(product.id)
-        }
-        return prev.filter((item) => item.id !== product.id)
+    if (exists) {
+      setItems((prev) => prev.filter((item) => item.id !== product.id))
+      if (isLoggedInRef.current) {
+        removeServerWishlistItem(product.id)
       }
-
+    } else {
+      setItems((prev) => {
+        if (prev.some((item) => item.id === product.id)) return prev
+        return [
+          ...prev,
+          {
+            id: product.id,
+            handle: product.handle,
+            title: product.title,
+            thumbnail: product.thumbnail,
+            addedAt: new Date().toISOString(),
+          },
+        ]
+      })
       if (isLoggedInRef.current) {
         addServerWishlistItem(product.id)
       }
-      return [
-        ...prev,
-        {
-          id: product.id,
-          handle: product.handle,
-          title: product.title,
-          thumbnail: product.thumbnail,
-          addedAt: new Date().toISOString(),
-        },
-      ]
-    })
+    }
   }, [])
 
   const clearWishlist = useCallback(() => {
