@@ -142,8 +142,6 @@ export async function signout(countryCode: string) {
   const customerCacheTag = await getCacheTag("customers")
   revalidateTag(customerCacheTag)
 
-  await removeCartId()
-
   const cartCacheTag = await getCacheTag("cart")
   revalidateTag(cartCacheTag)
 

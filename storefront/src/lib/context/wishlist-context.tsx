@@ -215,17 +215,13 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       ]
     })
 
-    if (isLoggedInRef.current) {
-      addServerWishlistItem(product.id)
-    }
+    addServerWishlistItem(product.id)
   }, [])
 
   const removeFromWishlist = useCallback((productId: string) => {
     setItems((prev) => prev.filter((item) => item.id !== productId))
 
-    if (isLoggedInRef.current) {
-      removeServerWishlistItem(productId)
-    }
+    removeServerWishlistItem(productId)
   }, [])
 
   const toggleWishlist = useCallback((product: { id: string; handle: string; title: string; thumbnail: string | null }) => {
@@ -233,9 +229,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
     if (exists) {
       setItems((prev) => prev.filter((item) => item.id !== product.id))
-      if (isLoggedInRef.current) {
-        removeServerWishlistItem(product.id)
-      }
+      removeServerWishlistItem(product.id)
     } else {
       setItems((prev) => {
         if (prev.some((item) => item.id === product.id)) return prev
@@ -250,18 +244,14 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
           },
         ]
       })
-      if (isLoggedInRef.current) {
-        addServerWishlistItem(product.id)
-      }
+      addServerWishlistItem(product.id)
     }
   }, [])
 
   const clearWishlist = useCallback(() => {
-    if (isLoggedInRef.current) {
-      items.forEach((item) => removeServerWishlistItem(item.id))
-    }
+    itemsRef.current.forEach((item) => removeServerWishlistItem(item.id))
     setItems([])
-  }, [items])
+  }, [])
 
   return (
     <WishlistContext.Provider

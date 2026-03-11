@@ -37,7 +37,7 @@ const AccountNav = ({
     { href: "/account/profile", label: "Profil", icon: User, testId: "profile-link" },
     { href: "/account/addresses", label: "Adressen", icon: MapPin, testId: "addresses-link" },
     { href: "/account/orders", label: "Bestellungen", icon: Package, testId: "orders-link" },
-    { href: "/wishlist", label: "Wunschliste", icon: Heart, testId: "wishlist-link" },
+    { href: "/account/wishlist", label: "Wunschliste", icon: Heart, testId: "wishlist-link" },
   ]
 
   return (
