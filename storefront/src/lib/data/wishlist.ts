@@ -3,17 +3,22 @@
 import { sdk } from "@lib/config"
 import { getAuthHeaders } from "./cookies"
 
-type WishlistItemResponse = {
+export type WishlistItemResponse = {
   id: string
   customer_id: string
   product_id: string
   variant_id: string | null
+  product_handle: string | null
+  product_title: string | null
+  product_thumbnail: string | null
   created_at: string
   updated_at: string
 }
 
-// FIX: Server-side wishlist persistence for logged-in users.
-// These server actions call the custom /store/wishlist API routes.
+export async function checkIsAuthenticated(): Promise<boolean> {
+  const headers = await getAuthHeaders()
+  return "authorization" in headers
+}
 
 export async function getServerWishlist(): Promise<WishlistItemResponse[]> {
   const headers = await getAuthHeaders()

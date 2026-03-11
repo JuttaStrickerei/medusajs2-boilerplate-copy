@@ -1,11 +1,15 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react"
+import { usePathname } from "next/navigation"
 import {
   getServerWishlist,
   addServerWishlistItem,
   removeServerWishlistItem,
+  checkIsAuthenticated,
+  type WishlistItemResponse,
 } from "@lib/data/wishlist"
+import { onAuthLogin, onAuthLogout } from "@lib/events/auth-events"
 
 const WISHLIST_STORAGE_KEY = "medusa_wishlist"
 
@@ -29,106 +33,160 @@ type WishlistContextType = {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined)
 
-// FIX: Dual-mode wishlist – localStorage for guests, server-side for logged-in users.
-// On mount, we try fetching the server wishlist. If the user is logged in, the server
-// returns items and we merge any localStorage leftovers into the server, then clear
-// localStorage. If not logged in, we fall back to localStorage.
+function readLocalStorage(): WishlistItem[] {
+  if (typeof window === "undefined") return []
+  try {
+    const stored = localStorage.getItem(WISHLIST_STORAGE_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function writeLocalStorage(items: WishlistItem[]) {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(items))
+  } catch {
+    // quota exceeded or blocked
+  }
+}
+
+function clearLocalStorage() {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.removeItem(WISHLIST_STORAGE_KEY)
+  } catch {
+    // blocked
+  }
+}
+
+function serverItemToLocal(item: WishlistItemResponse): WishlistItem {
+  return {
+    id: item.product_id,
+    handle: item.product_handle ?? "",
+    title: item.product_title ?? "",
+    thumbnail: item.product_thumbnail ?? null,
+    addedAt: item.created_at,
+  }
+}
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const isLoggedInRef = useRef(false)
+  const pathname = usePathname()
 
-  // On mount: try to load server wishlist, fall back to localStorage for guests
+  const loadServerWishlistAndMerge = useCallback(async () => {
+    const serverItems = await getServerWishlist()
+
+    const serverConverted = serverItems.map(serverItemToLocal)
+    const serverProductIds = new Set(serverItems.map((si) => si.product_id))
+
+    const localItems = readLocalStorage()
+    const itemsToAdd: WishlistItem[] = []
+
+    for (const localItem of localItems) {
+      if (!serverProductIds.has(localItem.id)) {
+        addServerWishlistItem(localItem.id)
+        itemsToAdd.push(localItem)
+      } else {
+        // Server has this product -- enrich with local metadata if server data is missing
+        const idx = serverConverted.findIndex((c) => c.id === localItem.id)
+        if (idx !== -1 && !serverConverted[idx].handle && localItem.handle) {
+          serverConverted[idx] = {
+            ...serverConverted[idx],
+            handle: localItem.handle,
+            title: localItem.title,
+            thumbnail: localItem.thumbnail,
+          }
+        }
+      }
+    }
+
+    clearLocalStorage()
+    isLoggedInRef.current = true
+
+    const merged = [...serverConverted, ...itemsToAdd]
+    setItems(merged)
+  }, [])
+
+  const loadGuestWishlist = useCallback(() => {
+    isLoggedInRef.current = false
+    setItems(readLocalStorage())
+  }, [])
+
+  // Initial load
   useEffect(() => {
     let cancelled = false
 
     async function init() {
       if (typeof window === "undefined") return
 
-      // Try loading from server (returns [] if not logged in)
-      try {
-        const serverItems = await getServerWishlist()
-
-        if (cancelled) return
-
-        if (serverItems.length > 0) {
-          // User is logged in and has server wishlist items
-          isLoggedInRef.current = true
-
-          // Convert server items to the frontend format
-          const converted: WishlistItem[] = serverItems.map((si) => ({
-            id: si.product_id,
-            handle: "",
-            title: "",
-            thumbnail: null,
-            addedAt: si.created_at,
-          }))
-
-          // Merge any localStorage items that are not yet on the server
-          const localStored = localStorage.getItem(WISHLIST_STORAGE_KEY)
-          if (localStored) {
-            try {
-              const localItems: WishlistItem[] = JSON.parse(localStored)
-              const serverProductIds = new Set(serverItems.map((si) => si.product_id))
-
-              for (const localItem of localItems) {
-                if (!serverProductIds.has(localItem.id)) {
-                  // Add missing local item to server (fire-and-forget)
-                  addServerWishlistItem(localItem.id)
-                  converted.push(localItem)
-                } else {
-                  // Server has this product – use local metadata (handle, title, thumbnail)
-                  const idx = converted.findIndex((c) => c.id === localItem.id)
-                  if (idx !== -1 && localItem.handle) {
-                    converted[idx] = { ...converted[idx], ...localItem, addedAt: converted[idx].addedAt }
-                  }
-                }
-              }
-
-              // Clear localStorage since server is now source of truth
-              localStorage.removeItem(WISHLIST_STORAGE_KEY)
-            } catch {
-              // Corrupted localStorage, ignore
-              localStorage.removeItem(WISHLIST_STORAGE_KEY)
-            }
-          }
-
-          setItems(converted)
-          setIsInitialized(true)
-          return
-        }
-
-        // Server returned empty – could be logged in with empty wishlist or guest.
-        // Check if we have a JWT cookie by seeing if getServerWishlist didn't error
-        // but returned []. We still try localStorage.
-      } catch {
-        // Not logged in or server error — use localStorage
-      }
+      const isAuth = await checkIsAuthenticated()
 
       if (cancelled) return
 
-      // Fall back to localStorage (guest mode)
-      isLoggedInRef.current = false
-      try {
-        const stored = localStorage.getItem(WISHLIST_STORAGE_KEY)
-        if (stored) {
-          setItems(JSON.parse(stored))
-        }
-      } catch {
-        // Corrupted localStorage
+      if (isAuth) {
+        await loadServerWishlistAndMerge()
+      } else {
+        loadGuestWishlist()
       }
-      setIsInitialized(true)
+
+      if (!cancelled) {
+        setIsInitialized(true)
+      }
     }
 
     init()
     return () => { cancelled = true }
-  }, [])
+  }, [loadServerWishlistAndMerge, loadGuestWishlist])
 
-  // Save to localStorage only for guests
+  // Listen for auth events (fast path for explicit login/logout actions)
   useEffect(() => {
-    if (isInitialized && typeof window !== "undefined" && !isLoggedInRef.current) {
-      localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(items))
+    const unsubLogin = onAuthLogin(async () => {
+      await loadServerWishlistAndMerge()
+    })
+
+    const unsubLogout = onAuthLogout(() => {
+      isLoggedInRef.current = false
+      setItems([])
+      clearLocalStorage()
+    })
+
+    return () => {
+      unsubLogin()
+      unsubLogout()
+    }
+  }, [loadServerWishlistAndMerge])
+
+  // Re-check auth state on navigation (catches login redirect, page transitions)
+  useEffect(() => {
+    if (!isInitialized) return
+
+    let cancelled = false
+
+    async function recheckAuth() {
+      const isAuth = await checkIsAuthenticated()
+      if (cancelled) return
+
+      if (isAuth && !isLoggedInRef.current) {
+        await loadServerWishlistAndMerge()
+      } else if (!isAuth && isLoggedInRef.current) {
+        isLoggedInRef.current = false
+        setItems([])
+        clearLocalStorage()
+      }
+    }
+
+    recheckAuth()
+    return () => { cancelled = true }
+  }, [pathname, isInitialized, loadServerWishlistAndMerge])
+
+  // Persist to localStorage for guests only
+  useEffect(() => {
+    if (isInitialized && !isLoggedInRef.current) {
+      writeLocalStorage(items)
     }
   }, [items, isInitialized])
 
@@ -138,9 +196,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   const addToWishlist = useCallback((product: { id: string; handle: string; title: string; thumbnail: string | null }) => {
     setItems((prev) => {
-      if (prev.some((item) => item.id === product.id)) {
-        return prev
-      }
+      if (prev.some((item) => item.id === product.id)) return prev
       return [
         ...prev,
         {
@@ -153,7 +209,6 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       ]
     })
 
-    // Sync to server for logged-in users (fire-and-forget)
     if (isLoggedInRef.current) {
       addServerWishlistItem(product.id)
     }
@@ -162,7 +217,6 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const removeFromWishlist = useCallback((productId: string) => {
     setItems((prev) => prev.filter((item) => item.id !== productId))
 
-    // Sync to server for logged-in users (fire-and-forget)
     if (isLoggedInRef.current) {
       removeServerWishlistItem(productId)
     }
@@ -170,38 +224,34 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   const toggleWishlist = useCallback((product: { id: string; handle: string; title: string; thumbnail: string | null }) => {
     setItems((prev) => {
-      const isCurrentlyInWishlist = prev.some((item) => item.id === product.id)
-      if (isCurrentlyInWishlist) {
-        // Remove – sync to server
+      const exists = prev.some((item) => item.id === product.id)
+
+      if (exists) {
         if (isLoggedInRef.current) {
           removeServerWishlistItem(product.id)
         }
         return prev.filter((item) => item.id !== product.id)
-      } else {
-        // Add – sync to server
-        if (isLoggedInRef.current) {
-          addServerWishlistItem(product.id)
-        }
-        return [
-          ...prev,
-          {
-            id: product.id,
-            handle: product.handle,
-            title: product.title,
-            thumbnail: product.thumbnail,
-            addedAt: new Date().toISOString(),
-          },
-        ]
       }
+
+      if (isLoggedInRef.current) {
+        addServerWishlistItem(product.id)
+      }
+      return [
+        ...prev,
+        {
+          id: product.id,
+          handle: product.handle,
+          title: product.title,
+          thumbnail: product.thumbnail,
+          addedAt: new Date().toISOString(),
+        },
+      ]
     })
   }, [])
 
   const clearWishlist = useCallback(() => {
-    // For server-side, remove each item individually (fire-and-forget)
     if (isLoggedInRef.current) {
-      items.forEach((item) => {
-        removeServerWishlistItem(item.id)
-      })
+      items.forEach((item) => removeServerWishlistItem(item.id))
     }
     setItems([])
   }, [items])

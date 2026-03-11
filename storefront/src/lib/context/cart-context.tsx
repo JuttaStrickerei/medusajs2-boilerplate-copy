@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react"
 import { HttpTypes } from "@medusajs/types"
 import { retrieveCart } from "@lib/data/cart"
+import { onAuthLogin, onAuthLogout } from "@lib/events/auth-events"
 
 type CartContextType = {
   cart: HttpTypes.StoreCart | null
@@ -73,41 +74,46 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       refreshCart()
     }
 
-    // Debounced focus handler to prevent unnecessary requests
     const handleFocus = () => {
       const now = Date.now()
-      
-      // Skip if we refreshed recently (within debounce window)
+
       if (now - lastFocusTimeRef.current < FOCUS_DEBOUNCE_MS) {
         return
       }
-      
-      // Clear any pending debounce
+
       if (focusDebounceRef.current) {
         clearTimeout(focusDebounceRef.current)
       }
-      
-      // Debounce the focus refresh
+
       focusDebounceRef.current = setTimeout(() => {
         lastFocusTimeRef.current = Date.now()
         refreshCart()
-      }, 100) // Small delay to batch rapid focus events
+      }, 100)
     }
 
-    // Custom event for cart updates (immediate)
     window.addEventListener("cart-updated", handleCartUpdate)
-    
-    // Focus event with debouncing
     window.addEventListener("focus", handleFocus)
+
+    // Refresh cart after login (transferCart may have associated it with the customer)
+    const unsubLogin = onAuthLogin(() => {
+      setTimeout(() => refreshCart(), 300)
+    })
+
+    // Clear cart on logout
+    const unsubLogout = onAuthLogout(() => {
+      clearCart()
+    })
 
     return () => {
       window.removeEventListener("cart-updated", handleCartUpdate)
       window.removeEventListener("focus", handleFocus)
+      unsubLogin()
+      unsubLogout()
       if (focusDebounceRef.current) {
         clearTimeout(focusDebounceRef.current)
       }
     }
-  }, [refreshCart])
+  }, [refreshCart, clearCart])
 
   const itemCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0
 

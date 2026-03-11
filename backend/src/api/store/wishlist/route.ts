@@ -8,7 +8,7 @@ import { addWishlistItemWorkflow } from "../../../workflows/add-wishlist-item"
 import { removeWishlistItemWorkflow } from "../../../workflows/remove-wishlist-item"
 import { AddWishlistItemSchema, RemoveWishlistItemSchema } from "./middlewares"
 
-// GET /store/wishlist — retrieve all wishlist items for the authenticated customer
+// GET /store/wishlist — retrieve all wishlist items with enriched product data
 export async function GET(
   req: AuthenticatedMedusaRequest,
   res: MedusaResponse
@@ -23,7 +23,44 @@ export async function GET(
     { order: { created_at: "DESC" } }
   )
 
-  return res.json({ wishlist_items: items })
+  if (items.length === 0) {
+    return res.json({ wishlist_items: [] })
+  }
+
+  const query = req.scope.resolve("query") as any
+  const productIds = items.map((item) => item.product_id)
+
+  let productMap = new Map<string, { handle: string; title: string; thumbnail: string | null }>()
+
+  try {
+    const { data: products } = await query.graph({
+      entity: "product",
+      fields: ["id", "handle", "title", "thumbnail"],
+      filters: { id: productIds },
+    })
+
+    for (const p of products) {
+      productMap.set(p.id, {
+        handle: p.handle,
+        title: p.title,
+        thumbnail: p.thumbnail,
+      })
+    }
+  } catch {
+    // If product query fails, return items without enrichment
+  }
+
+  const enrichedItems = items.map((item) => {
+    const product = productMap.get(item.product_id)
+    return {
+      ...item,
+      product_handle: product?.handle ?? null,
+      product_title: product?.title ?? null,
+      product_thumbnail: product?.thumbnail ?? null,
+    }
+  })
+
+  return res.json({ wishlist_items: enrichedItems })
 }
 
 // POST /store/wishlist — add a product to the wishlist

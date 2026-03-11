@@ -6,6 +6,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { HttpTypes } from "@medusajs/types"
 import { signout } from "@lib/data/customer"
 import { useCart } from "@lib/context/cart-context"
+import { dispatchAuthLogout } from "@lib/events/auth-events"
 import { 
   User, 
   MapPin, 
@@ -25,7 +26,7 @@ const AccountNav = ({
   const { clearCart } = useCart()
 
   const handleLogout = async () => {
-    // FIX: Clear client cart state immediately so navbar count doesn't stay stale after logout.
+    dispatchAuthLogout()
     clearCart()
     await signout(countryCode)
   }
