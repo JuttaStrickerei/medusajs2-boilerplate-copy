@@ -14,6 +14,8 @@ type RefinementListProps = {
   sortBy: SortOptions
   filters?: ProductFilters
   filterOptions: DynamicFilterOptions
+  hideCategories?: boolean
+  hideCollections?: boolean
   search?: boolean
   'data-testid'?: string
 }
@@ -69,7 +71,7 @@ function FilterSection({ title, children, defaultOpen = true, count, scrollable 
   )
 }
 
-const RefinementList = ({ filters: filtersProp, filterOptions, 'data-testid': dataTestId }: RefinementListProps) => {
+const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, hideCollections, 'data-testid': dataTestId }: RefinementListProps) => {
   const {
     filters,
     activeFilterCount,
@@ -175,7 +177,7 @@ const RefinementList = ({ filters: filtersProp, filterOptions, 'data-testid': da
       )}
 
       {/* Category Filter */}
-      {filterOptions.categories.length > 0 && (
+      {!hideCategories && filterOptions.categories.length > 0 && (
         <FilterSection title="Kategorie" count={filters.category ? 1 : 0} scrollable>
           <div className="space-y-1.5">
             {filterOptions.categories.map((cat) => (
@@ -197,7 +199,7 @@ const RefinementList = ({ filters: filtersProp, filterOptions, 'data-testid': da
       )}
 
       {/* Collection Filter */}
-      {filterOptions.collections.length > 0 && (
+      {!hideCollections && filterOptions.collections.length > 0 && (
         <FilterSection title="Kollektion" count={filters.collection ? 1 : 0} scrollable>
           <div className="space-y-1.5">
             {filterOptions.collections.map((col) => (

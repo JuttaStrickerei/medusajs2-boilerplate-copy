@@ -232,29 +232,64 @@ function computePriceRanges(products: HttpTypes.StoreProduct[]): PriceRangeOptio
   )
 }
 
+export interface FilterScope {
+  categoryId?: string
+  collectionId?: string
+}
+
 export async function getProductFilterOptions(
-  countryCode: string
+  countryCode: string,
+  scope?: FilterScope
 ): Promise<DynamicFilterOptions> {
+  const productQuery: Record<string, any> = {
+    limit: 100,
+    fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+collection_id",
+  }
+
+  if (scope?.categoryId) {
+    productQuery.category_id = [scope.categoryId]
+  }
+  if (scope?.collectionId) {
+    productQuery.collection_id = [scope.collectionId]
+  }
+
   const [productsResult, allCategories, collectionsResult] = await Promise.all([
     listProducts({
       countryCode,
-      queryParams: {
-        limit: 100,
-        fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
-      },
+      queryParams: productQuery,
     }),
     listCategories({ limit: 100 }),
     listCollections({ limit: "100" }),
   ])
 
   const products = productsResult.response.products
+  let categories = allCategories.filter((c) => !c.parent_category)
+  let collections = collectionsResult.collections
+
+  if (scope?.categoryId) {
+    // On a category page: only show collections that actually contain products in this category
+    const productCollectionIds = new Set(
+      products.map((p: any) => p.collection_id).filter(Boolean)
+    )
+    collections = collections.filter((c) => productCollectionIds.has(c.id))
+  }
+
+  if (scope?.collectionId) {
+    // On a collection page: only show categories that have products in this collection
+    const productCategoryIds = new Set(
+      products.flatMap((p: any) => (p.categories || []).map((c: any) => c.id))
+    )
+    if (productCategoryIds.size > 0) {
+      categories = categories.filter((c) => productCategoryIds.has(c.id))
+    }
+  }
 
   return {
     colors: extractColorsFromProducts(products),
     sizes: extractSizesFromProducts(products),
     materials: extractMaterialsFromProducts(products),
     priceRanges: computePriceRanges(products),
-    categories: allCategories.filter((c) => !c.parent_category),
-    collections: collectionsResult.collections,
+    categories,
+    collections,
   }
 }

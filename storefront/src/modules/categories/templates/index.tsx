@@ -90,7 +90,7 @@ export default function CategoryTemplate({
           {/* Filters Sidebar - Desktop/Tablet */}
           <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
             <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5">
-              <RefinementList sortBy={sort} filters={filters} filterOptions={filterOptions} data-testid="sort-by-container" />
+              <RefinementList sortBy={sort} filters={filters} filterOptions={filterOptions} hideCategories data-testid="sort-by-container" />
             </div>
           </aside>
 
@@ -130,7 +130,7 @@ export default function CategoryTemplate({
             {/* Mobile/Tablet Filter Bar */}
             <div className="small:hidden mb-4">
               <div className="flex items-center gap-3">
-                <MobileFilterDrawer sortBy={sort} filters={filters} filterOptions={filterOptions} />
+                <MobileFilterDrawer sortBy={sort} filters={filters} filterOptions={filterOptions} hideCategories />
               </div>
             </div>
 

@@ -14,6 +14,8 @@ interface MobileFilterDrawerProps {
   sortBy: SortOptions
   filters?: ProductFilters
   filterOptions: DynamicFilterOptions
+  hideCategories?: boolean
+  hideCollections?: boolean
 }
 
 function FilterSection({
@@ -68,7 +70,7 @@ function FilterSection({
   )
 }
 
-export default function MobileFilterDrawer({ filters: filtersProp, filterOptions }: MobileFilterDrawerProps) {
+export default function MobileFilterDrawer({ filters: filtersProp, filterOptions, hideCategories, hideCollections }: MobileFilterDrawerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const {
@@ -225,7 +227,7 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
                 )}
 
                 {/* Category Filter */}
-                {filterOptions.categories.length > 0 && (
+                {!hideCategories && filterOptions.categories.length > 0 && (
                   <FilterSection title="Kategorie" count={filters.category ? 1 : 0} scrollable>
                     <div className="space-y-1">
                       {filterOptions.categories.map((cat) => (
@@ -247,7 +249,7 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
                 )}
 
                 {/* Collection Filter */}
-                {filterOptions.collections.length > 0 && (
+                {!hideCollections && filterOptions.collections.length > 0 && (
                   <FilterSection title="Kollektion" count={filters.collection ? 1 : 0} scrollable>
                     <div className="space-y-1">
                       {filterOptions.collections.map((col) => (
