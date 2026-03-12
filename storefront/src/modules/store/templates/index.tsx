@@ -1,58 +1,64 @@
 import { Suspense } from "react"
-import { HttpTypes } from "@medusajs/types"
 import RefinementList from "@modules/store/components/refinement-list"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "./paginated-products"
 import { SkeletonProductGrid } from "@components/ui"
+import { DynamicFilterOptions } from "@lib/data/filter-options"
 
 export interface ProductFilters {
   colors?: string[]
   sizes?: string[]
   materials?: string[]
   priceRange?: string
+  category?: string
+  collection?: string
 }
 
 interface StoreTemplateProps {
   sortBy?: SortOptions
   page?: string
   countryCode: string
-  categories?: HttpTypes.StoreProductCategory[]
-  collections?: HttpTypes.StoreCollection[]
   colors?: string
   sizes?: string
   materials?: string
   priceRange?: string
+  category?: string
+  collection?: string
+  filterOptions: DynamicFilterOptions
 }
 
 export default function StoreTemplate({
   sortBy,
   page,
   countryCode,
-  categories,
-  collections,
   colors,
   sizes,
   materials,
   priceRange,
+  category,
+  collection,
+  filterOptions,
 }: StoreTemplateProps) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
   
-  // Parse filter strings into arrays
   const filters: ProductFilters = {
     colors: colors ? colors.split(",") : undefined,
     sizes: sizes ? sizes.split(",") : undefined,
     materials: materials ? materials.split(",") : undefined,
     priceRange: priceRange || undefined,
+    category: category || undefined,
+    collection: collection || undefined,
   }
 
-  // Count active filters
   const activeFilterCount = 
     (filters.colors?.length || 0) + 
     (filters.sizes?.length || 0) + 
     (filters.materials?.length || 0) + 
-    (filters.priceRange ? 1 : 0)
+    (filters.priceRange ? 1 : 0) +
+    (filters.category ? 1 : 0) +
+    (filters.collection ? 1 : 0)
 
   return (
     <div className="bg-stone-50 min-h-screen">
@@ -88,50 +94,12 @@ export default function StoreTemplate({
         <div className="flex flex-col small:flex-row gap-6 small:gap-8">
           {/* Filters Sidebar - Desktop/Tablet */}
           <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
-            <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5">
-              {/* Refinement List (includes Sort + Filters) */}
-              <RefinementList sortBy={sort} filters={filters} />
-
-              {/* Categories */}
-              {categories && categories.length > 0 && (
-                <div className="pt-4 border-t border-stone-200">
-                  <h3 className="text-sm font-medium text-stone-800 mb-3">Kategorien</h3>
-                  <ul className="space-y-2">
-                    {categories
-                      .filter((c) => !c.parent_category)
-                      .slice(0, 8)
-                      .map((category) => (
-                        <li key={category.id}>
-                          <a
-                            href={`/categories/${category.handle}`}
-                            className="text-sm text-stone-600 hover:text-stone-800 transition-colors"
-                          >
-                            {category.name}
-                          </a>
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Collections */}
-              {collections && collections.length > 0 && (
-                <div className="pt-4 border-t border-stone-200">
-                  <h3 className="text-sm font-medium text-stone-800 mb-3">Kollektionen</h3>
-                  <ul className="space-y-2">
-                    {collections.slice(0, 8).map((collection) => (
-                      <li key={collection.id}>
-                        <a
-                          href={`/collections/${collection.handle}`}
-                          className="text-sm text-stone-600 hover:text-stone-800 transition-colors"
-                        >
-                          {collection.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5 max-h-[calc(100vh-7rem)] overflow-y-auto">
+              <RefinementList
+                sortBy={sort}
+                filters={filters}
+                filterOptions={filterOptions}
+              />
             </div>
           </aside>
 
@@ -140,11 +108,13 @@ export default function StoreTemplate({
             {/* Mobile/Tablet Filter Bar */}
             <div className="small:hidden mb-4">
               <div className="flex items-center gap-3">
-                {/* Filter Button with Drawer */}
-                <MobileFilterDrawer sortBy={sort} filters={filters} />
+                <MobileFilterDrawer
+                  sortBy={sort}
+                  filters={filters}
+                  filterOptions={filterOptions}
+                />
               </div>
               
-              {/* Active Filter Count on Mobile */}
               {activeFilterCount > 0 && (
                 <p className="mt-3 text-sm text-stone-600">
                   {activeFilterCount} {activeFilterCount === 1 ? "Filter" : "Filter"} aktiv
@@ -159,6 +129,7 @@ export default function StoreTemplate({
                 page={pageNumber}
                 countryCode={countryCode}
                 filters={filters}
+                filterOptions={filterOptions}
               />
             </Suspense>
           </main>

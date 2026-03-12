@@ -5,6 +5,7 @@ import { Pagination } from "@modules/store/components/pagination"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { HttpTypes } from "@medusajs/types"
 import { ProductFilters } from "./index"
+import { DynamicFilterOptions } from "@lib/data/filter-options"
 
 const PRODUCT_LIMIT = 12
 
@@ -16,102 +17,66 @@ type PaginatedProductsParams = {
   order?: string
 }
 
-// Price range boundaries (in cents)
-const priceRanges: Record<string, { min: number; max: number }> = {
-  "0-100": { min: 0, max: 10000 },
-  "100-200": { min: 10000, max: 20000 },
-  "200-300": { min: 20000, max: 30000 },
-  "300+": { min: 30000, max: Infinity },
-}
+const COLOR_OPTION_TITLES = ["color", "farbe", "colour"]
+const SIZE_OPTION_TITLES = ["size", "größe", "groesse"]
 
-// Color name mappings (German -> English and vice versa)
-const colorMappings: Record<string, string[]> = {
-  schwarz: ["schwarz", "black"],
-  weiß: ["weiß", "weiss", "white"],
-  grau: ["grau", "gray", "grey"],
-  beige: ["beige", "cream", "creme"],
-  braun: ["braun", "brown"],
-  blau: ["blau", "blue"],
-  navy: ["navy", "dunkelblau", "dark blue"],
-  rot: ["rot", "red"],
-  grün: ["grün", "gruen", "green"],
-}
-
-// Helper to check if product matches color filter
 function matchesColorFilter(product: HttpTypes.StoreProduct, colors: string[]): boolean {
   if (!colors || colors.length === 0) return true
   
-  // Expand colors to include all variations
-  const expandedColors = colors.flatMap((color) => {
-    const mapped = colorMappings[color.toLowerCase()]
-    return mapped || [color.toLowerCase()]
-  })
+  const normalizedColors = colors.map((c) => c.toLowerCase())
   
-  // Check variants for color option
   const hasMatchingColor = product.variants?.some((variant) => {
     return variant.options?.some((option) => {
       const optionTitle = option.option?.title?.toLowerCase() || ""
       const optionValue = option.value?.toLowerCase() || ""
       
-      // Check if this is a color option
-      if (optionTitle === "color" || optionTitle === "farbe" || optionTitle === "colour") {
-        return expandedColors.some((color) => 
-          optionValue.includes(color) || color.includes(optionValue)
+      if (COLOR_OPTION_TITLES.includes(optionTitle)) {
+        return normalizedColors.some((color) => 
+          optionValue === color || optionValue.includes(color) || color.includes(optionValue)
         )
       }
       return false
     })
   })
   
-  // Also check product title/metadata for color mentions
   const productTitle = product.title?.toLowerCase() || ""
-  const hasColorInTitle = expandedColors.some((color) => productTitle.includes(color))
+  const hasColorInTitle = normalizedColors.some((color) => productTitle.includes(color))
   
   return hasMatchingColor || hasColorInTitle
 }
 
-// Helper to check if product matches size filter
 function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): boolean {
   if (!sizes || sizes.length === 0) return true
   
-  // Normalize sizes - map filter values to possible variant values
   const normalizedSizes = sizes.map((s) => s.toLowerCase())
   
-  // Check variants for size option - use exact matching only
   const hasMatchingSize = product.variants?.some((variant) => {
     return variant.options?.some((option) => {
       const optionTitle = option.option?.title?.toLowerCase() || ""
       const optionValue = option.value?.toLowerCase() || ""
       
-      // Check if this is a size option
-      if (optionTitle === "size" || optionTitle === "größe" || optionTitle === "groesse") {
-        // Use exact match only (case-insensitive)
+      if (SIZE_OPTION_TITLES.includes(optionTitle)) {
         return normalizedSizes.some((size) => optionValue === size)
       }
       return false
     })
   })
   
-  // Also check variant title for exact size match
   const hasSizeInVariant = product.variants?.some((variant) => {
     const variantTitle = variant.title?.toLowerCase() || ""
-    // Use exact match only to avoid false positives
     return normalizedSizes.some((size) => variantTitle === size)
   })
   
   return hasMatchingSize || hasSizeInVariant
 }
 
-// Helper to check if product matches material filter
 function matchesMaterialFilter(product: HttpTypes.StoreProduct, materials: string[]): boolean {
   if (!materials || materials.length === 0) return true
   
-  // Check product metadata, tags, or description for materials
   const productDescription = product.description?.toLowerCase() || ""
   const productTitle = product.title?.toLowerCase() || ""
   const productMaterial = (product.material as string)?.toLowerCase() || ""
   
-  // Check if material is in product data
   const hasMaterialMatch = materials.some((material) => {
     const materialLower = material.toLowerCase()
     return (
@@ -121,7 +86,6 @@ function matchesMaterialFilter(product: HttpTypes.StoreProduct, materials: strin
     )
   })
   
-  // Also check tags if available
   const hasMaterialTag = product.tags?.some((tag) => {
     const tagValue = tag.value?.toLowerCase() || ""
     return materials.some((material) => tagValue.includes(material.toLowerCase()))
@@ -130,14 +94,16 @@ function matchesMaterialFilter(product: HttpTypes.StoreProduct, materials: strin
   return hasMaterialMatch || hasMaterialTag
 }
 
-// Helper to check if product matches price filter
-function matchesPriceFilter(product: HttpTypes.StoreProduct, priceRange: string | undefined): boolean {
+function matchesPriceFilter(
+  product: HttpTypes.StoreProduct,
+  priceRange: string | undefined,
+  priceRanges: DynamicFilterOptions["priceRanges"]
+): boolean {
   if (!priceRange) return true
   
-  const range = priceRanges[priceRange]
+  const range = priceRanges.find((r) => r.value === priceRange)
   if (!range) return true
   
-  // Get the lowest price from all variants
   const prices = product.variants?.map((variant) => {
     const calculatedPrice = variant.calculated_price
     if (calculatedPrice?.calculated_amount !== undefined) {
@@ -150,13 +116,13 @@ function matchesPriceFilter(product: HttpTypes.StoreProduct, priceRange: string 
   
   const minPrice = Math.min(...prices)
   
-  return minPrice >= range.min && minPrice < range.max
+  return minPrice >= range.min && (range.max === Infinity ? true : minPrice < range.max)
 }
 
-// Apply all filters to products
 function filterProducts(
   products: HttpTypes.StoreProduct[],
-  filters?: ProductFilters
+  filters: ProductFilters | undefined,
+  priceRanges: DynamicFilterOptions["priceRanges"]
 ): HttpTypes.StoreProduct[] {
   if (!filters) return products
   
@@ -164,7 +130,7 @@ function filterProducts(
     const matchesColor = matchesColorFilter(product, filters.colors || [])
     const matchesSize = matchesSizeFilter(product, filters.sizes || [])
     const matchesMaterial = matchesMaterialFilter(product, filters.materials || [])
-    const matchesPrice = matchesPriceFilter(product, filters.priceRange)
+    const matchesPrice = matchesPriceFilter(product, filters.priceRange, priceRanges)
     
     return matchesColor && matchesSize && matchesMaterial && matchesPrice
   })
@@ -178,6 +144,7 @@ export default async function PaginatedProducts({
   productsIds,
   countryCode,
   filters,
+  filterOptions,
 }: {
   sortBy?: SortOptions
   page: number
@@ -186,17 +153,22 @@ export default async function PaginatedProducts({
   productsIds?: string[]
   countryCode: string
   filters?: ProductFilters
+  filterOptions?: DynamicFilterOptions
 }) {
   const queryParams: PaginatedProductsParams = {
-    limit: 100, // Fetch more to allow for client-side filtering
+    limit: 100,
   }
 
-  if (collectionId) {
-    queryParams["collection_id"] = [collectionId]
+  // Category/collection from URL filter params take precedence over direct props
+  const effectiveCategoryId = filters?.category || categoryId
+  const effectiveCollectionId = filters?.collection || collectionId
+
+  if (effectiveCollectionId) {
+    queryParams["collection_id"] = [effectiveCollectionId]
   }
 
-  if (categoryId) {
-    queryParams["category_id"] = [categoryId]
+  if (effectiveCategoryId) {
+    queryParams["category_id"] = [effectiveCategoryId]
   }
 
   if (productsIds) {
@@ -216,14 +188,13 @@ export default async function PaginatedProducts({
   let {
     response: { products, count },
   } = await listProductsWithSort({
-    page: 1, // Always fetch from start for filtering
+    page: 1,
     queryParams,
     sortBy,
     countryCode,
   })
 
-  // Apply client-side filters
-  const hasFilters = filters && (
+  const hasClientFilters = filters && (
     (filters.colors && filters.colors.length > 0) ||
     (filters.sizes && filters.sizes.length > 0) ||
     (filters.materials && filters.materials.length > 0) ||
@@ -233,18 +204,16 @@ export default async function PaginatedProducts({
   let filteredProducts = products
   let filteredCount = count
 
-  if (hasFilters) {
-    filteredProducts = filterProducts(products, filters)
+  if (hasClientFilters) {
+    filteredProducts = filterProducts(products, filters, filterOptions?.priceRanges || [])
     filteredCount = filteredProducts.length
   }
 
-  // Apply pagination to filtered results
   const startIndex = (page - 1) * PRODUCT_LIMIT
   const paginatedProducts = filteredProducts.slice(startIndex, startIndex + PRODUCT_LIMIT)
   
   const totalPages = Math.ceil(filteredCount / PRODUCT_LIMIT)
 
-  // Show message when no products match filters
   if (filteredProducts.length === 0) {
     return (
       <div className="text-center py-16">
@@ -269,7 +238,7 @@ export default async function PaginatedProducts({
       {/* Results count */}
       <div className="mb-6 text-sm text-stone-600">
         {filteredCount} {filteredCount === 1 ? "Produkt" : "Produkte"} gefunden
-        {hasFilters && " (gefiltert)"}
+        {hasClientFilters && " (gefiltert)"}
       </div>
       
       <ul

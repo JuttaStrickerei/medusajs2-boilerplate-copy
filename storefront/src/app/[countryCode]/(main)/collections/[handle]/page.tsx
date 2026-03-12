@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 
 import { getCollectionByHandle, listCollections } from "@lib/data/collections"
 import { listRegions } from "@lib/data/regions"
+import { getProductFilterOptions } from "@lib/data/filter-options"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
 import CollectionTemplate from "@modules/collections/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -94,13 +95,14 @@ export default async function CollectionPage(props: Props) {
     notFound()
   }
 
-  // Parse filter strings into arrays
   const filters = {
     colors: colors ? colors.split(",") : undefined,
     sizes: sizes ? sizes.split(",") : undefined,
     materials: materials ? materials.split(",") : undefined,
     priceRange: priceRange || undefined,
   }
+
+  const filterOptions = await getProductFilterOptions(params.countryCode)
 
   return (
     <CollectionTemplate
@@ -109,6 +111,7 @@ export default async function CollectionPage(props: Props) {
       sortBy={sortBy}
       countryCode={params.countryCode}
       filters={filters}
+      filterOptions={filterOptions}
     />
   )
 }

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
+import { getProductFilterOptions } from "@lib/data/filter-options"
 import { StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -89,13 +90,14 @@ export default async function CategoryPage(props: Props) {
     notFound()
   }
 
-  // Parse filter strings into arrays
   const filters = {
     colors: colors ? colors.split(",") : undefined,
     sizes: sizes ? sizes.split(",") : undefined,
     materials: materials ? materials.split(",") : undefined,
     priceRange: priceRange || undefined,
   }
+
+  const filterOptions = await getProductFilterOptions(params.countryCode)
 
   return (
     <CategoryTemplate
@@ -104,6 +106,7 @@ export default async function CategoryPage(props: Props) {
       page={page}
       countryCode={params.countryCode}
       filters={filters}
+      filterOptions={filterOptions}
     />
   )
 }
