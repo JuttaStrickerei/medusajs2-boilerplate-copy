@@ -154,23 +154,15 @@ function extractMaterialsFromProducts(products: HttpTypes.StoreProduct[]): Mater
 
   for (const product of products) {
     const materialValue = product.material as string | undefined
-    if (materialValue?.trim()) {
-      const key = materialValue.trim().toLowerCase()
-      if (!materialSet.has(key)) {
-        materialSet.set(key, materialValue.trim())
-      }
-    }
+    if (!materialValue?.trim()) continue
 
-    // Also check tags for material-related tags
-    if (product.tags) {
-      for (const tag of product.tags) {
-        const tagVal = tag.value?.trim()
-        if (tagVal) {
-          const key = tagVal.toLowerCase()
-          if (!materialSet.has(key)) {
-            materialSet.set(key, tagVal)
-          }
-        }
+    // Split comma-separated materials into individual entries
+    const parts = materialValue.split(",").map((p) => p.trim()).filter(Boolean)
+
+    for (const part of parts) {
+      const key = part.toLowerCase()
+      if (!materialSet.has(key)) {
+        materialSet.set(key, part)
       }
     }
   }

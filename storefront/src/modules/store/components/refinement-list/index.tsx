@@ -1,21 +1,14 @@
 "use client"
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useTransition, useState } from "react"
+import { useState } from "react"
 import { cn } from "@lib/utils"
 import { ChevronDown, X } from "@components/icons"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
+import { useProductFilters, FilterState } from "@lib/hooks/use-product-filters"
 
 import { SortOptions } from "./sort-products"
 
-export interface ProductFilters {
-  colors?: string[]
-  sizes?: string[]
-  materials?: string[]
-  priceRange?: string
-  category?: string
-  collection?: string
-}
+export type ProductFilters = Partial<FilterState>
 
 type RefinementListProps = {
   sortBy: SortOptions
@@ -30,9 +23,10 @@ interface FilterSectionProps {
   children: React.ReactNode
   defaultOpen?: boolean
   count?: number
+  scrollable?: boolean
 }
 
-function FilterSection({ title, children, defaultOpen = true, count }: FilterSectionProps) {
+function FilterSection({ title, children, defaultOpen = true, count, scrollable }: FilterSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
@@ -61,129 +55,33 @@ function FilterSection({ title, children, defaultOpen = true, count }: FilterSec
       <div
         className={cn(
           "overflow-hidden transition-all duration-200",
-          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
         )}
       >
-        <div className="pt-2 pb-1">{children}</div>
+        <div className={cn(
+          "pt-2 pb-1",
+          scrollable && "max-h-52 overflow-y-auto pr-1"
+        )}>
+          {children}
+        </div>
       </div>
     </div>
   )
 }
 
-const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTestId }: RefinementListProps) => {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-
-  const selectedColors = filters?.colors || []
-  const selectedSizes = filters?.sizes || []
-  const selectedMaterials = filters?.materials || []
-  const selectedPriceRange = filters?.priceRange || ""
-  const selectedCategory = filters?.category || ""
-  const selectedCollection = filters?.collection || ""
-
-  const updateFilters = useCallback(
-    (filterName: string, values: string[]) => {
-      const params = new URLSearchParams(searchParams.toString())
-      
-      if (values.length > 0) {
-        params.set(filterName, values.join(","))
-      } else {
-        params.delete(filterName)
-      }
-      
-      params.delete("page")
-      
-      startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`, { scroll: false })
-      })
-    },
-    [searchParams, pathname, router]
-  )
-
-  const setSingleFilter = useCallback(
-    (name: string, value: string, currentValue: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      
-      if (value === currentValue) {
-        params.delete(name)
-      } else {
-        params.set(name, value)
-      }
-      
-      params.delete("page")
-      
-      startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`, { scroll: false })
-      })
-    },
-    [searchParams, pathname, router]
-  )
-
-  const toggleColor = (color: string) => {
-    const newColors = selectedColors.includes(color)
-      ? selectedColors.filter((c) => c !== color)
-      : [...selectedColors, color]
-    updateFilters("colors", newColors)
-  }
-
-  const toggleSize = (size: string) => {
-    const newSizes = selectedSizes.includes(size)
-      ? selectedSizes.filter((s) => s !== size)
-      : [...selectedSizes, size]
-    updateFilters("sizes", newSizes)
-  }
-
-  const toggleMaterial = (material: string) => {
-    const newMaterials = selectedMaterials.includes(material)
-      ? selectedMaterials.filter((m) => m !== material)
-      : [...selectedMaterials, material]
-    updateFilters("materials", newMaterials)
-  }
-
-  const setPriceRange = (range: string) => {
-    setSingleFilter("priceRange", range, selectedPriceRange)
-  }
-
-  const setCategory = (categoryId: string) => {
-    setSingleFilter("category", categoryId, selectedCategory)
-  }
-
-  const setCollection = (collectionId: string) => {
-    setSingleFilter("collection", collectionId, selectedCollection)
-  }
-
-  const clearAllFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete("colors")
-    params.delete("sizes")
-    params.delete("materials")
-    params.delete("priceRange")
-    params.delete("category")
-    params.delete("collection")
-    params.delete("page")
-    
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
-    })
-  }
-
-  const hasActiveFilters = 
-    selectedColors.length > 0 || 
-    selectedSizes.length > 0 || 
-    selectedMaterials.length > 0 || 
-    selectedPriceRange !== "" ||
-    selectedCategory !== "" ||
-    selectedCollection !== ""
-
-  const activeFilterCount = 
-    selectedColors.length + 
-    selectedSizes.length + 
-    selectedMaterials.length + 
-    (selectedPriceRange ? 1 : 0) +
-    (selectedCategory ? 1 : 0) +
-    (selectedCollection ? 1 : 0)
+const RefinementList = ({ filters: filtersProp, filterOptions, 'data-testid': dataTestId }: RefinementListProps) => {
+  const {
+    filters,
+    activeFilterCount,
+    hasActiveFilters,
+    toggleColor,
+    toggleSize,
+    toggleMaterial,
+    setPriceRange,
+    setCategory,
+    setCollection,
+    clearAllFilters,
+  } = useProductFilters(filtersProp)
 
   const getCategoryLabel = (id: string) =>
     filterOptions.categories.find((c) => c.id === id)?.name || id
@@ -192,7 +90,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
     filterOptions.collections.find((c) => c.id === id)?.title || id
 
   return (
-    <div className={cn("space-y-1", isPending && "opacity-60 pointer-events-none")} data-testid={dataTestId}>
+    <div className="space-y-1" data-testid={dataTestId}>
       {/* Header */}
       <div className="flex items-center justify-between pb-3 mb-2 border-b border-stone-200">
         <h2 className="text-sm font-semibold text-stone-800 uppercase tracking-wide">
@@ -216,25 +114,25 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
       {/* Active Filter Tags */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-1.5 pb-3 mb-1">
-          {selectedCategory && (
+          {filters.category && (
             <button
-              onClick={() => setCategory(selectedCategory)}
+              onClick={() => setCategory(filters.category)}
               className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
             >
-              {getCategoryLabel(selectedCategory)}
+              {getCategoryLabel(filters.category)}
               <X size={10} />
             </button>
           )}
-          {selectedCollection && (
+          {filters.collection && (
             <button
-              onClick={() => setCollection(selectedCollection)}
+              onClick={() => setCollection(filters.collection)}
               className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
             >
-              {getCollectionLabel(selectedCollection)}
+              {getCollectionLabel(filters.collection)}
               <X size={10} />
             </button>
           )}
-          {selectedColors.map((color) => (
+          {filters.colors.map((color) => (
             <button
               key={color}
               onClick={() => toggleColor(color)}
@@ -244,7 +142,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
               <X size={10} />
             </button>
           ))}
-          {selectedSizes.map((size) => (
+          {filters.sizes.map((size) => (
             <button
               key={size}
               onClick={() => toggleSize(size)}
@@ -254,7 +152,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
               <X size={10} />
             </button>
           ))}
-          {selectedMaterials.map((material) => (
+          {filters.materials.map((material) => (
             <button
               key={material}
               onClick={() => toggleMaterial(material)}
@@ -264,12 +162,12 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
               <X size={10} />
             </button>
           ))}
-          {selectedPriceRange && (
+          {filters.priceRange && (
             <button
-              onClick={() => setPriceRange(selectedPriceRange)}
+              onClick={() => setPriceRange(filters.priceRange)}
               className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
             >
-              {filterOptions.priceRanges.find((r) => r.value === selectedPriceRange)?.label || selectedPriceRange}
+              {filterOptions.priceRanges.find((r) => r.value === filters.priceRange)?.label || filters.priceRange}
               <X size={10} />
             </button>
           )}
@@ -278,7 +176,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
 
       {/* Category Filter */}
       {filterOptions.categories.length > 0 && (
-        <FilterSection title="Kategorie" count={selectedCategory ? 1 : 0}>
+        <FilterSection title="Kategorie" count={filters.category ? 1 : 0} scrollable>
           <div className="space-y-1.5">
             {filterOptions.categories.map((cat) => (
               <button
@@ -286,7 +184,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
                 onClick={() => setCategory(cat.id)}
                 className={cn(
                   "block w-full text-left px-2 py-1.5 text-sm rounded transition-colors",
-                  selectedCategory === cat.id
+                  filters.category === cat.id
                     ? "bg-stone-800 text-white"
                     : "text-stone-600 hover:bg-stone-100 hover:text-stone-800"
                 )}
@@ -300,7 +198,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
 
       {/* Collection Filter */}
       {filterOptions.collections.length > 0 && (
-        <FilterSection title="Kollektion" count={selectedCollection ? 1 : 0}>
+        <FilterSection title="Kollektion" count={filters.collection ? 1 : 0} scrollable>
           <div className="space-y-1.5">
             {filterOptions.collections.map((col) => (
               <button
@@ -308,7 +206,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
                 onClick={() => setCollection(col.id)}
                 className={cn(
                   "block w-full text-left px-2 py-1.5 text-sm rounded transition-colors",
-                  selectedCollection === col.id
+                  filters.collection === col.id
                     ? "bg-stone-800 text-white"
                     : "text-stone-600 hover:bg-stone-100 hover:text-stone-800"
                 )}
@@ -322,7 +220,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
 
       {/* Color Filter */}
       {filterOptions.colors.length > 0 && (
-        <FilterSection title="Farbe" count={selectedColors.length}>
+        <FilterSection title="Farbe" count={filters.colors.length}>
           <div className="flex flex-wrap gap-2">
             {filterOptions.colors.map((color) => (
               <button
@@ -330,7 +228,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
                 onClick={() => toggleColor(color.value)}
                 className={cn(
                   "w-6 h-6 rounded-full border-2 transition-all",
-                  selectedColors.includes(color.value)
+                  filters.colors.includes(color.value)
                     ? "border-stone-800 ring-2 ring-stone-300 ring-offset-1"
                     : "border-stone-200 hover:border-stone-400",
                   color.value === "weiß" && "shadow-sm"
@@ -346,7 +244,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
 
       {/* Size Filter */}
       {filterOptions.sizes.length > 0 && (
-        <FilterSection title="Größe" count={selectedSizes.length}>
+        <FilterSection title="Größe" count={filters.sizes.length}>
           <div className="flex flex-wrap gap-1.5">
             {filterOptions.sizes.map((size) => (
               <button
@@ -354,7 +252,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
                 onClick={() => toggleSize(size.value)}
                 className={cn(
                   "px-2.5 py-1 text-xs font-medium rounded border transition-colors",
-                  selectedSizes.includes(size.value)
+                  filters.sizes.includes(size.value)
                     ? "bg-stone-800 text-white border-stone-800"
                     : "bg-white text-stone-600 border-stone-300 hover:border-stone-500"
                 )}
@@ -368,7 +266,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
 
       {/* Material Filter */}
       {filterOptions.materials.length > 0 && (
-        <FilterSection title="Material" count={selectedMaterials.length}>
+        <FilterSection title="Material" count={filters.materials.length} scrollable>
           <div className="space-y-2">
             {filterOptions.materials.map((material) => (
               <label
@@ -377,7 +275,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
               >
                 <input
                   type="checkbox"
-                  checked={selectedMaterials.includes(material.value)}
+                  checked={filters.materials.includes(material.value)}
                   onChange={() => toggleMaterial(material.value)}
                   className="w-4 h-4 rounded border-stone-300 text-stone-800 focus:ring-stone-500 focus:ring-offset-0"
                 />
@@ -392,7 +290,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
 
       {/* Price Range Filter */}
       {filterOptions.priceRanges.length > 0 && (
-        <FilterSection title="Preis" count={selectedPriceRange ? 1 : 0}>
+        <FilterSection title="Preis" count={filters.priceRange ? 1 : 0}>
           <div className="space-y-2">
             {filterOptions.priceRanges.map((range) => (
               <label
@@ -403,7 +301,7 @@ const RefinementList = ({ sortBy, filters, filterOptions, 'data-testid': dataTes
                   type="radio"
                   name="priceRange"
                   value={range.value}
-                  checked={selectedPriceRange === range.value}
+                  checked={filters.priceRange === range.value}
                   onChange={() => setPriceRange(range.value)}
                   className="w-4 h-4 border-stone-300 text-stone-800 focus:ring-stone-500 focus:ring-offset-0"
                 />

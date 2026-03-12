@@ -3,20 +3,12 @@
 import { Fragment, useState } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 import { X, Filter, ChevronDown } from "@components/icons"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useTransition } from "react"
 import { cn } from "@lib/utils"
 import { SortOptions } from "../refinement-list/sort-products"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
+import { useProductFilters, FilterState } from "@lib/hooks/use-product-filters"
 
-export interface ProductFilters {
-  colors?: string[]
-  sizes?: string[]
-  materials?: string[]
-  priceRange?: string
-  category?: string
-  collection?: string
-}
+export type ProductFilters = Partial<FilterState>
 
 interface MobileFilterDrawerProps {
   sortBy: SortOptions
@@ -24,16 +16,18 @@ interface MobileFilterDrawerProps {
   filterOptions: DynamicFilterOptions
 }
 
-function FilterSection({ 
-  title, 
-  children, 
+function FilterSection({
+  title,
+  children,
   defaultOpen = false,
   count,
-}: { 
+  scrollable,
+}: {
   title: string
   children: React.ReactNode
   defaultOpen?: boolean
   count?: number
+  scrollable?: boolean
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
@@ -63,122 +57,32 @@ function FilterSection({
       <div
         className={cn(
           "overflow-hidden transition-all duration-300 ease-in-out",
-          isOpen ? "max-h-[500px] pb-4" : "max-h-0"
+          isOpen ? "max-h-[600px] pb-4" : "max-h-0"
         )}
       >
-        {children}
+        <div className={cn(scrollable && "max-h-56 overflow-y-auto pr-1")}>
+          {children}
+        </div>
       </div>
     </div>
   )
 }
 
-export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: MobileFilterDrawerProps) {
+export default function MobileFilterDrawer({ filters: filtersProp, filterOptions }: MobileFilterDrawerProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
 
-  const selectedColors = filters?.colors || []
-  const selectedSizes = filters?.sizes || []
-  const selectedMaterials = filters?.materials || []
-  const selectedPriceRange = filters?.priceRange || ""
-  const selectedCategory = filters?.category || ""
-  const selectedCollection = filters?.collection || ""
-
-  const activeFilterCount = 
-    selectedColors.length + 
-    selectedSizes.length + 
-    selectedMaterials.length + 
-    (selectedPriceRange ? 1 : 0) +
-    (selectedCategory ? 1 : 0) +
-    (selectedCollection ? 1 : 0)
-
-  const updateFilters = useCallback(
-    (filterName: string, values: string[]) => {
-      const params = new URLSearchParams(searchParams.toString())
-      
-      if (values.length > 0) {
-        params.set(filterName, values.join(","))
-      } else {
-        params.delete(filterName)
-      }
-      
-      params.delete("page")
-      
-      startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`, { scroll: false })
-      })
-    },
-    [searchParams, pathname, router]
-  )
-
-  const setSingleFilter = useCallback(
-    (name: string, value: string, currentValue: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      
-      if (value === currentValue) {
-        params.delete(name)
-      } else {
-        params.set(name, value)
-      }
-      
-      params.delete("page")
-      
-      startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`, { scroll: false })
-      })
-    },
-    [searchParams, pathname, router]
-  )
-
-  const toggleColor = (color: string) => {
-    const newColors = selectedColors.includes(color)
-      ? selectedColors.filter((c) => c !== color)
-      : [...selectedColors, color]
-    updateFilters("colors", newColors)
-  }
-
-  const toggleSize = (size: string) => {
-    const newSizes = selectedSizes.includes(size)
-      ? selectedSizes.filter((s) => s !== size)
-      : [...selectedSizes, size]
-    updateFilters("sizes", newSizes)
-  }
-
-  const toggleMaterial = (material: string) => {
-    const newMaterials = selectedMaterials.includes(material)
-      ? selectedMaterials.filter((m) => m !== material)
-      : [...selectedMaterials, material]
-    updateFilters("materials", newMaterials)
-  }
-
-  const setPriceRange = (range: string) => {
-    setSingleFilter("priceRange", range, selectedPriceRange)
-  }
-
-  const setCategory = (categoryId: string) => {
-    setSingleFilter("category", categoryId, selectedCategory)
-  }
-
-  const setCollection = (collectionId: string) => {
-    setSingleFilter("collection", collectionId, selectedCollection)
-  }
-
-  const clearAllFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete("colors")
-    params.delete("sizes")
-    params.delete("materials")
-    params.delete("priceRange")
-    params.delete("category")
-    params.delete("collection")
-    params.delete("page")
-    
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
-    })
-  }
+  const {
+    filters,
+    activeFilterCount,
+    hasActiveFilters,
+    toggleColor,
+    toggleSize,
+    toggleMaterial,
+    setPriceRange,
+    setCategory,
+    setCollection,
+    clearAllFilters,
+  } = useProductFilters(filtersProp)
 
   const getCategoryLabel = (id: string) =>
     filterOptions.categories.find((c) => c.id === id)?.name || id
@@ -243,12 +147,9 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
               </div>
 
               {/* Content */}
-              <div className={cn(
-                "flex-1 overflow-y-auto px-5",
-                isPending && "opacity-60 pointer-events-none"
-              )}>
+              <div className="flex-1 overflow-y-auto px-5">
                 {/* Active Filters */}
-                {activeFilterCount > 0 && (
+                {hasActiveFilters && (
                   <div className="py-4 border-b border-stone-200">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-medium text-stone-800">
@@ -262,25 +163,25 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {selectedCategory && (
+                      {filters.category && (
                         <button
-                          onClick={() => setCategory(selectedCategory)}
+                          onClick={() => setCategory(filters.category)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
                         >
-                          {getCategoryLabel(selectedCategory)}
+                          {getCategoryLabel(filters.category)}
                           <X size={14} />
                         </button>
                       )}
-                      {selectedCollection && (
+                      {filters.collection && (
                         <button
-                          onClick={() => setCollection(selectedCollection)}
+                          onClick={() => setCollection(filters.collection)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
                         >
-                          {getCollectionLabel(selectedCollection)}
+                          {getCollectionLabel(filters.collection)}
                           <X size={14} />
                         </button>
                       )}
-                      {selectedColors.map((color) => (
+                      {filters.colors.map((color) => (
                         <button
                           key={color}
                           onClick={() => toggleColor(color)}
@@ -290,7 +191,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                           <X size={14} />
                         </button>
                       ))}
-                      {selectedSizes.map((size) => (
+                      {filters.sizes.map((size) => (
                         <button
                           key={size}
                           onClick={() => toggleSize(size)}
@@ -300,7 +201,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                           <X size={14} />
                         </button>
                       ))}
-                      {selectedMaterials.map((material) => (
+                      {filters.materials.map((material) => (
                         <button
                           key={material}
                           onClick={() => toggleMaterial(material)}
@@ -310,12 +211,12 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                           <X size={14} />
                         </button>
                       ))}
-                      {selectedPriceRange && (
+                      {filters.priceRange && (
                         <button
-                          onClick={() => setPriceRange(selectedPriceRange)}
+                          onClick={() => setPriceRange(filters.priceRange)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
                         >
-                          {filterOptions.priceRanges.find((r) => r.value === selectedPriceRange)?.label}
+                          {filterOptions.priceRanges.find((r) => r.value === filters.priceRange)?.label}
                           <X size={14} />
                         </button>
                       )}
@@ -325,7 +226,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
 
                 {/* Category Filter */}
                 {filterOptions.categories.length > 0 && (
-                  <FilterSection title="Kategorie" count={selectedCategory ? 1 : 0}>
+                  <FilterSection title="Kategorie" count={filters.category ? 1 : 0} scrollable>
                     <div className="space-y-1">
                       {filterOptions.categories.map((cat) => (
                         <button
@@ -333,7 +234,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                           onClick={() => setCategory(cat.id)}
                           className={cn(
                             "block w-full text-left px-3 py-2 text-sm rounded-lg transition-colors",
-                            selectedCategory === cat.id
+                            filters.category === cat.id
                               ? "bg-stone-800 text-white"
                               : "text-stone-700 hover:bg-stone-100"
                           )}
@@ -347,7 +248,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
 
                 {/* Collection Filter */}
                 {filterOptions.collections.length > 0 && (
-                  <FilterSection title="Kollektion" count={selectedCollection ? 1 : 0}>
+                  <FilterSection title="Kollektion" count={filters.collection ? 1 : 0} scrollable>
                     <div className="space-y-1">
                       {filterOptions.collections.map((col) => (
                         <button
@@ -355,7 +256,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                           onClick={() => setCollection(col.id)}
                           className={cn(
                             "block w-full text-left px-3 py-2 text-sm rounded-lg transition-colors",
-                            selectedCollection === col.id
+                            filters.collection === col.id
                               ? "bg-stone-800 text-white"
                               : "text-stone-700 hover:bg-stone-100"
                           )}
@@ -369,7 +270,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
 
                 {/* Color Filter */}
                 {filterOptions.colors.length > 0 && (
-                  <FilterSection title="Farbe" count={selectedColors.length}>
+                  <FilterSection title="Farbe" count={filters.colors.length}>
                     <div className="flex flex-wrap gap-3">
                       {filterOptions.colors.map((color) => (
                         <button
@@ -377,7 +278,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                           onClick={() => toggleColor(color.value)}
                           className={cn(
                             "w-9 h-9 rounded-full border-2 transition-all",
-                            selectedColors.includes(color.value)
+                            filters.colors.includes(color.value)
                               ? "border-stone-800 ring-2 ring-stone-300 ring-offset-1"
                               : "border-stone-200",
                             color.value === "weiß" && "shadow-sm"
@@ -392,7 +293,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
 
                 {/* Size Filter */}
                 {filterOptions.sizes.length > 0 && (
-                  <FilterSection title="Größe" count={selectedSizes.length}>
+                  <FilterSection title="Größe" count={filters.sizes.length}>
                     <div className="flex flex-wrap gap-2">
                       {filterOptions.sizes.map((size) => (
                         <button
@@ -400,7 +301,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                           onClick={() => toggleSize(size.value)}
                           className={cn(
                             "px-4 py-2 text-sm font-medium rounded-lg border transition-colors",
-                            selectedSizes.includes(size.value)
+                            filters.sizes.includes(size.value)
                               ? "bg-stone-800 text-white border-stone-800"
                               : "bg-white text-stone-700 border-stone-300"
                           )}
@@ -414,7 +315,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
 
                 {/* Material Filter */}
                 {filterOptions.materials.length > 0 && (
-                  <FilterSection title="Material" count={selectedMaterials.length}>
+                  <FilterSection title="Material" count={filters.materials.length} scrollable>
                     <div className="space-y-3">
                       {filterOptions.materials.map((material) => (
                         <label
@@ -423,7 +324,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                         >
                           <input
                             type="checkbox"
-                            checked={selectedMaterials.includes(material.value)}
+                            checked={filters.materials.includes(material.value)}
                             onChange={() => toggleMaterial(material.value)}
                             className="w-5 h-5 rounded border-stone-300 text-stone-800 focus:ring-stone-500"
                           />
@@ -438,7 +339,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
 
                 {/* Price Range Filter */}
                 {filterOptions.priceRanges.length > 0 && (
-                  <FilterSection title="Preis" count={selectedPriceRange ? 1 : 0}>
+                  <FilterSection title="Preis" count={filters.priceRange ? 1 : 0}>
                     <div className="space-y-3">
                       {filterOptions.priceRanges.map((range) => (
                         <label
@@ -449,7 +350,7 @@ export default function MobileFilterDrawer({ sortBy, filters, filterOptions }: M
                             type="radio"
                             name="priceRange"
                             value={range.value}
-                            checked={selectedPriceRange === range.value}
+                            checked={filters.priceRange === range.value}
                             onChange={() => setPriceRange(range.value)}
                             className="w-5 h-5 border-stone-300 text-stone-800 focus:ring-stone-500"
                           />

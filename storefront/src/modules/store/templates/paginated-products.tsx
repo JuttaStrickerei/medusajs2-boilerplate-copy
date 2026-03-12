@@ -72,26 +72,30 @@ function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): bo
 
 function matchesMaterialFilter(product: HttpTypes.StoreProduct, materials: string[]): boolean {
   if (!materials || materials.length === 0) return true
-  
-  const productDescription = product.description?.toLowerCase() || ""
+
+  const selectedMaterials = materials.map((m) => m.toLowerCase())
+
+  // Split product.material on comma to get individual materials
+  const rawMaterial = (product.material as string) || ""
+  const productMaterials = rawMaterial
+    .split(",")
+    .map((p) => p.trim().toLowerCase())
+    .filter(Boolean)
+
+  // Check if any selected material matches any of the product's individual materials
+  const hasMaterialMatch = selectedMaterials.some((selected) =>
+    productMaterials.some((pm) => pm === selected || pm.includes(selected))
+  )
+
+  if (hasMaterialMatch) return true
+
+  // Fallback: check title and description
   const productTitle = product.title?.toLowerCase() || ""
-  const productMaterial = (product.material as string)?.toLowerCase() || ""
-  
-  const hasMaterialMatch = materials.some((material) => {
-    const materialLower = material.toLowerCase()
-    return (
-      productDescription.includes(materialLower) ||
-      productTitle.includes(materialLower) ||
-      productMaterial.includes(materialLower)
-    )
-  })
-  
-  const hasMaterialTag = product.tags?.some((tag) => {
-    const tagValue = tag.value?.toLowerCase() || ""
-    return materials.some((material) => tagValue.includes(material.toLowerCase()))
-  })
-  
-  return hasMaterialMatch || hasMaterialTag
+  const productDescription = product.description?.toLowerCase() || ""
+
+  return selectedMaterials.some((mat) =>
+    productTitle.includes(mat) || productDescription.includes(mat)
+  )
 }
 
 function matchesPriceFilter(
