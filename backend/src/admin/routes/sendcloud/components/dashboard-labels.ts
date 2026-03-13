@@ -1,0 +1,133 @@
+export const LABELS = {
+  page: {
+    title: "Versand-Dashboard",
+    subtitle: "Bestellungen verarbeiten und Sendungen verwalten",
+    refreshButton: "Aktualisieren",
+    tabOpenOrders: "Offene Bestellungen",
+    tabActiveShipments: "Aktive Sendungen",
+  },
+
+  openOrders: {
+    title: "Offene Bestellungen",
+    emptyTitle: "Keine offenen Bestellungen",
+    emptyDescription: "Alle Bestellungen sind vollständig versendet.",
+    errorLoad: "Bestellungen konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+    loading: "Bestellungen werden geladen...",
+    orderPrefix: "Bestellung",
+    items: "Artikel",
+    itemsSingular: "Artikel",
+    totalWeight: "Gesamtgewicht",
+    fulfillButton: "Versenden",
+    destination: "Ziel",
+    remainingItems: "weitere Artikel zu versenden",
+    noWeight: "Kein Gewicht",
+    defaultWeight: "500g Standard",
+    sortOldestFirst: "Älteste zuerst (FIFO)",
+  },
+
+  shipments: {
+    title: "Aktive Sendungen",
+    emptyTitle: "Keine aktiven Sendungen",
+    emptyDescription: "Erstellen Sie eine Sendung über den Reiter 'Offene Bestellungen'.",
+    errorLoad: "Sendungen konnten nicht geladen werden.",
+    loading: "Sendungen werden geladen...",
+    colOrder: "Bestellung",
+    colRecipient: "Empfänger",
+    colDestination: "Ziel",
+    colCarrier: "Carrier",
+    colStatus: "Status",
+    colType: "Typ",
+    colActions: "Aktionen",
+    colCreated: "Erstellt",
+    labelButton: "Label",
+    trackingButton: "Tracking",
+    cancelButton: "Stornieren",
+    typeOutbound: "Versand",
+    typeReturn: "Retoure",
+    total: "Sendungen insgesamt",
+    totalSingular: "Sendung insgesamt",
+    labelNotAvailable: "Label noch nicht verfügbar",
+    page: "Seite",
+    of: "von",
+    prev: "Zurück",
+    next: "Weiter",
+  },
+
+  wizard: {
+    stepItemSelection: "Artikel auswählen",
+    stepConfirmation: "Bestätigen",
+    stepCompletion: "Fertig",
+    selectAll: "Alle auswählen",
+    deselectAll: "Alle abwählen",
+    selectedSummary: (count: number, weight: string) =>
+      `${count} Artikel ausgewählt — Gesamtgewicht: ${weight} kg`,
+    noItemsSelected: "Keine Artikel ausgewählt",
+    noItemsToFulfill: "Alle Artikel dieser Bestellung wurden bereits versendet.",
+    weightWarning: "Kein Gewicht hinterlegt — Standard 500g wird verwendet",
+    quantity: "Menge",
+    weight: "Gewicht",
+    sku: "SKU",
+    perItem: "pro Stück",
+    continue: "Weiter",
+    back: "Zurück",
+    cancel: "Abbrechen",
+    confirmTitle: "Sendung bestätigen",
+    confirmSubtitle: "Bitte prüfen Sie die Daten vor dem Erstellen.",
+    shippingTo: "Versand an",
+    itemsToShip: "Artikel zum Versand",
+    totalWeight: "Gesamtgewicht",
+    createShipment: "Sendung erstellen & Label generieren",
+    creating: "Sendung wird erstellt...",
+    successTitle: "Sendung erfolgreich erstellt!",
+    trackingNumber: "Trackingnummer",
+    downloadLabel: "Label herunterladen (A6)",
+    printLabel: "Label drucken",
+    labelDownloadFailed: "Label konnte nicht heruntergeladen werden. Versuchen Sie es über die Sendungsliste erneut.",
+    doneNextOrder: "Fertig — Nächste Bestellung",
+    remainingNote: (count: number) =>
+      `Diese Bestellung hat noch ${count} weitere Artikel zu versenden.`,
+    locationSelect: "Lagerstandort",
+    noLocations: "Kein Lagerstandort konfiguriert. Bitte richten Sie einen Standort in den Einstellungen ein.",
+    loadingOrder: "Bestelldaten werden geladen...",
+    orderLoadFailed: "Bestellung konnte nicht geladen werden.",
+  },
+
+  status: {
+    preparing: "Vorbereitung",
+    shipped: "Unterwegs",
+    delivered: "Zugestellt",
+    canceled: "Storniert",
+    exception: "Problem",
+    returned: "Retourniert",
+    unknown: "Unbekannt",
+  } as Record<string, string>,
+
+  statusColors: {
+    preparing: "orange",
+    shipped: "blue",
+    delivered: "green",
+    canceled: "red",
+    exception: "red",
+    returned: "purple",
+    unknown: "grey",
+  } as Record<string, "green" | "blue" | "red" | "orange" | "grey" | "purple">,
+
+  errors: {
+    timeout: "Verbindung zum Server fehlgeschlagen. Bitte prüfen Sie Ihre Internetverbindung.",
+    retry: "Erneut versuchen",
+    weightExceeds: "Paketgewicht überschreitet das Limit für diese Versandmethode. Entfernen Sie Artikel oder wählen Sie eine andere Methode.",
+    invalidAddress: "Ungültige Lieferadresse. Bitte prüfen Sie die Adressdaten der Bestellung.",
+    noCredit: "Sendcloud-Guthaben nicht ausreichend. Bitte laden Sie Ihr Konto auf.",
+    methodUnavailable: "Versandmethode nicht verfügbar. Bitte prüfen Sie die Sendcloud-Konfiguration.",
+    defaultError: "Sendung konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.",
+  },
+} as const
+
+export function mapFulfillmentError(message: string): string {
+  const lower = message.toLowerCase()
+  if (lower.includes("weight") && lower.includes("exceed")) return LABELS.errors.weightExceeds
+  if (lower.includes("address")) return LABELS.errors.invalidAddress
+  if (lower.includes("credit") || lower.includes("balance")) return LABELS.errors.noCredit
+  if (lower.includes("shipment method") || lower.includes("shipping method")) return LABELS.errors.methodUnavailable
+  return LABELS.errors.defaultError
+}
