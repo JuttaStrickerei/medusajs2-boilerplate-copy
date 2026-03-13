@@ -1,6 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
 import { 
+  cancelOrderFulfillmentWorkflow,
   markFulfillmentAsDeliveredWorkflow,
   updateFulfillmentWorkflow 
 } from "@medusajs/medusa/core-flows";
@@ -340,18 +341,73 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
         case "canceled": {
           console.log(`[SendcloudWebhook] ❌ Parcel canceled: ${medusaFulfillmentId}`);
-          await updateFulfillmentWorkflow(req.scope).run({
-            input: {
-              id: medusaFulfillmentId,
-              metadata: {
-                ...currentMetadata,
-                sendcloud_status: statusMessage,
-                sendcloud_status_id: parcel.status.id,
-                sendcloud_canceled_at: timestamp,
-                sendcloud_last_update: timestamp,
+
+          if (foundFulfillment.canceled_at) {
+            console.log(`[SendcloudWebhook] Already canceled, updating metadata only`);
+            await updateFulfillmentWorkflow(req.scope).run({
+              input: {
+                id: medusaFulfillmentId,
+                metadata: {
+                  ...currentMetadata,
+                  sendcloud_status: statusMessage,
+                  sendcloud_status_id: parcel.status.id,
+                  sendcloud_canceled_at: timestamp,
+                  sendcloud_last_update: timestamp,
+                }
               }
+            });
+            break;
+          }
+
+          let orderId: string | null = null;
+          try {
+            const queryService = req.scope.resolve("query") as any;
+            const { data: orderFulfillments } = await queryService.graph({
+              entity: "order_fulfillment",
+              fields: ["order_id"],
+              filters: { fulfillment_id: medusaFulfillmentId },
+            });
+            orderId = orderFulfillments?.[0]?.order_id || null;
+          } catch (e) {
+            console.warn(`[SendcloudWebhook] Could not resolve order_id: ${(e as Error).message}`);
+          }
+
+          if (orderId) {
+            try {
+              await cancelOrderFulfillmentWorkflow(req.scope).run({
+                input: { order_id: orderId, fulfillment_id: medusaFulfillmentId },
+              });
+              console.log(`[SendcloudWebhook] ✅ Fulfillment + order canceled via workflow`);
+            } catch (cancelError: any) {
+              console.warn(`[SendcloudWebhook] Cancel workflow failed (${cancelError.message}), falling back to metadata update`);
+              await updateFulfillmentWorkflow(req.scope).run({
+                input: {
+                  id: medusaFulfillmentId,
+                  metadata: {
+                    ...currentMetadata,
+                    sendcloud_status: statusMessage,
+                    sendcloud_status_id: parcel.status.id,
+                    sendcloud_canceled_at: timestamp,
+                    sendcloud_last_update: timestamp,
+                  }
+                }
+              });
             }
-          });
+          } else {
+            console.warn(`[SendcloudWebhook] No order_id found, metadata update only`);
+            await updateFulfillmentWorkflow(req.scope).run({
+              input: {
+                id: medusaFulfillmentId,
+                metadata: {
+                  ...currentMetadata,
+                  sendcloud_status: statusMessage,
+                  sendcloud_status_id: parcel.status.id,
+                  sendcloud_canceled_at: timestamp,
+                  sendcloud_last_update: timestamp,
+                }
+              }
+            });
+          }
           break;
         }
 
