@@ -97,7 +97,7 @@ export function OpenOrdersSection({ orders, isLoading, isError, onFulfill }: Ope
     <div className="flex flex-col gap-y-3 p-4">
       <div className="flex items-center justify-between px-2">
         <Text size="small" className="text-ui-fg-subtle">
-          {orders.length} {LABELS.openOrders.title.toLowerCase()} — {LABELS.openOrders.sortOldestFirst}
+          {orders.length} {LABELS.openOrders.title.toLowerCase()} — {LABELS.openOrders.sortNewestFirst}
         </Text>
       </div>
 

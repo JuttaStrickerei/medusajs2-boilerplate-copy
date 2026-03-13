@@ -93,6 +93,10 @@ const SENDCLOUD_STATUS_MAP: Record<string, MedusaFulfillmentStatus> = {
   // Canceled states
   "cancelled": "canceled",
   "canceled": "canceled",
+  "cancellation requested": "canceled",
+  "being cancelled": "canceled",
+  "shipment is being cancelled": "canceled",
+  "this shipment is already being cancelled": "canceled",
   "deleted": "canceled",
   "parcel deleted": "canceled",
   
@@ -118,7 +122,15 @@ const get = (obj: any, path: string, defaultValue: any = undefined) => {
 // Map Sendcloud status to Medusa status
 const mapSendcloudStatus = (statusMessage: string): MedusaFulfillmentStatus => {
   const normalized = statusMessage.toLowerCase().trim();
-  return SENDCLOUD_STATUS_MAP[normalized] || "shipped"; // Default to shipped for unknown statuses
+
+  const mapped = SENDCLOUD_STATUS_MAP[normalized];
+  if (mapped) return mapped;
+
+  if (normalized.includes("cancel")) return "canceled";
+  if (normalized.includes("return")) return "returned";
+  if (normalized.includes("deliver") && normalized.includes("fail")) return "not_delivered";
+
+  return "pending";
 };
 
 // Check if this is the first time we're seeing a "shipped" status

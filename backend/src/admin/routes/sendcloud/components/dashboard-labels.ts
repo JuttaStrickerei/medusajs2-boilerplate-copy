@@ -22,7 +22,7 @@ export const LABELS = {
     remainingItems: "weitere Artikel zu versenden",
     noWeight: "Kein Gewicht",
     defaultWeight: "500g Standard",
-    sortOldestFirst: "Älteste zuerst (FIFO)",
+    sortNewestFirst: "Neueste zuerst",
   },
 
   shipments: {

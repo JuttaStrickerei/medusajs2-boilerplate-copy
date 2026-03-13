@@ -31,17 +31,14 @@ const SendcloudDashboardPage = () => {
         query: {
           fields:
             "id,display_id,created_at,email,fulfillment_status,shipping_address.*,items.*,items.variant.*,items.variant.product.*,shipping_methods.*,fulfillments.*,fulfillments.items.*",
-          order: "created_at",
+          order: "-created_at",
           limit: 100,
         },
       })
       const data = response as any
       const orders = (data.orders || []) as OpenOrder[]
-      return orders.filter(
-        (o) =>
-          o.fulfillment_status !== "fulfilled" &&
-          o.fulfillment_status !== "canceled"
-      )
+      const OPEN_STATUSES = new Set(["not_fulfilled", "partially_fulfilled"])
+      return orders.filter((o) => OPEN_STATUSES.has(o.fulfillment_status))
     },
     refetchInterval: REFETCH_INTERVAL,
   })
