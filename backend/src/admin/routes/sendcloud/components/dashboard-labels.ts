@@ -54,9 +54,9 @@ export const LABELS = {
   },
 
   wizard: {
-    stepItemSelection: "Artikel auswählen",
-    stepConfirmation: "Bestätigen",
-    stepCompletion: "Fertig",
+    stepItemSelection: "1. Artikel auswählen",
+    stepConfirmation: "2. Bestätigen",
+    stepPackAndShip: "3. Packen & Versenden",
     selectAll: "Alle auswählen",
     deselectAll: "Alle abwählen",
     selectedSummary: (count: number, weight: string) =>
@@ -76,20 +76,29 @@ export const LABELS = {
     shippingTo: "Versand an",
     itemsToShip: "Artikel zum Versand",
     totalWeight: "Gesamtgewicht",
-    createShipment: "Sendung erstellen & Label generieren",
+    createShipment: "Sendung erstellen",
     creating: "Sendung wird erstellt...",
-    successTitle: "Sendung erfolgreich erstellt!",
     trackingNumber: "Trackingnummer",
-    downloadLabel: "Label herunterladen (A6)",
-    printLabel: "Label drucken",
-    labelDownloadFailed: "Label konnte nicht heruntergeladen werden. Versuchen Sie es über die Sendungsliste erneut.",
-    doneNextOrder: "Fertig — Nächste Bestellung",
-    remainingNote: (count: number) =>
-      `Diese Bestellung hat noch ${count} weitere Artikel zu versenden.`,
     locationSelect: "Lagerstandort",
     noLocations: "Kein Lagerstandort konfiguriert. Bitte richten Sie einen Standort in den Einstellungen ein.",
     loadingOrder: "Bestelldaten werden geladen...",
     orderLoadFailed: "Bestellung konnte nicht geladen werden.",
+
+    packTitle: "Packen & Versenden",
+    packStep1Title: "Artikel einpacken",
+    packStep1Desc: "Packen Sie folgende Artikel in das Paket:",
+    packStep2Title: "Lieferschein & Label drucken",
+    packStep2Desc: "Drucken Sie das Dokument — Seite 1 (Lieferschein) kommt ins Paket, Seite 2 (Label) auf das Paket.",
+    packStep2Button: "Lieferschein + Label herunterladen",
+    packStep2Downloading: "Wird erstellt...",
+    packStep2Failed: "Dokument konnte nicht erstellt werden. Versuchen Sie es erneut.",
+    packStep2LabelOnly: "Nur Label herunterladen (A6)",
+    packStep3Title: "Paket verschließen",
+    packStep3Desc: "Legen Sie den Lieferschein ins Paket, verschließen Sie es und kleben Sie das Label auf.",
+    packDone: "Fertig — Nächste Bestellung",
+    packItemPacked: "Eingepackt",
+    remainingNote: (count: number) =>
+      `Diese Bestellung hat noch ${count} weitere Artikel zu versenden.`,
   },
 
   status: {
