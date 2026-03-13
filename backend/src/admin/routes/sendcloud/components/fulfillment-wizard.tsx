@@ -164,58 +164,47 @@ export function FulfillmentWizard({ orderId, onClose, onCompleted }: Fulfillment
     },
   })
 
-  const downloadCombinedDocument = useCallback(async () => {
+  const getParcelId = useCallback((): string | null => {
     const ffData = createdFulfillment?.data || {}
-    const parcelId = ffData.parcel_id
-    if (!parcelId || !orderId) {
-      toast.error("Keine Parcel-ID vorhanden")
-      return
-    }
-
-    setIsDownloading(true)
-    try {
-      const response = await fetch(
-        `/admin/sendcloud/shipping-documents/${parcelId}?order_id=${orderId}`,
-        { credentials: "include" }
-      )
-      if (!response.ok) throw new Error("Download failed")
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `versand-${order?.display_id || parcelId}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      setDocumentDownloaded(true)
-      toast.success("Dokument heruntergeladen")
-    } catch {
-      toast.error(LABELS.wizard.packStep2Failed)
-    } finally {
-      setIsDownloading(false)
-    }
-  }, [createdFulfillment, orderId, order?.display_id])
-
-  const downloadLabelOnly = useCallback(async () => {
-    const parcelId = createdFulfillment?.data?.parcel_id
-    if (!parcelId) return
-    try {
-      const response = await fetch(`/labels/${parcelId}?format=a6`)
-      if (!response.ok) throw new Error("Label download failed")
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `label-${parcelId}-A6.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    } catch {
-      toast.error("Label konnte nicht heruntergeladen werden")
-    }
+    return ffData.parcel_id ? String(ffData.parcel_id) : null
   }, [createdFulfillment])
+
+  const downloadDocument = useCallback(
+    async (type: "combined" | "packing-slip" | "label") => {
+      const parcelId = getParcelId()
+      if (!parcelId || !orderId) {
+        toast.error("Keine Parcel-ID vorhanden")
+        return
+      }
+
+      setIsDownloading(true)
+      try {
+        const response = await fetch(
+          `/admin/sendcloud/shipping-documents/${parcelId}?order_id=${orderId}&type=${type}`,
+          { credentials: "include" }
+        )
+        if (!response.ok) throw new Error("Download failed")
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        const displayId = order?.display_id || parcelId
+        const names = { combined: `versand-${displayId}`, "packing-slip": `lieferschein-${displayId}`, label: `label-${displayId}` }
+        a.download = `${names[type]}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        setDocumentDownloaded(true)
+        toast.success("Dokument heruntergeladen")
+      } catch {
+        toast.error(LABELS.wizard.packStep2Failed)
+      } finally {
+        setIsDownloading(false)
+      }
+    },
+    [getParcelId, orderId, order?.display_id]
+  )
 
   const handleDone = useCallback(() => {
     setStep(1)
@@ -335,8 +324,7 @@ export function FulfillmentWizard({ orderId, onClose, onCompleted }: Fulfillment
               setPackedItems={setPackedItems}
               documentDownloaded={documentDownloaded}
               isDownloading={isDownloading}
-              downloadCombinedDocument={downloadCombinedDocument}
-              downloadLabelOnly={downloadLabelOnly}
+              downloadDocument={downloadDocument}
               createdFulfillment={createdFulfillment}
               remainingCount={remainingAfterFulfill}
             />
@@ -525,8 +513,7 @@ function StepPackAndShip({
   setPackedItems,
   documentDownloaded,
   isDownloading,
-  downloadCombinedDocument,
-  downloadLabelOnly,
+  downloadDocument,
   createdFulfillment,
   remainingCount,
 }: {
@@ -535,8 +522,7 @@ function StepPackAndShip({
   setPackedItems: React.Dispatch<React.SetStateAction<Set<string>>>
   documentDownloaded: boolean
   isDownloading: boolean
-  downloadCombinedDocument: () => Promise<void>
-  downloadLabelOnly: () => Promise<void>
+  downloadDocument: (type: "combined" | "packing-slip" | "label") => Promise<void>
   createdFulfillment: any
   remainingCount: number
 }) {
@@ -556,7 +542,6 @@ function StepPackAndShip({
 
   return (
     <div className="flex flex-col gap-y-6">
-      {/* Header with tracking info */}
       {trackingNumber && (
         <div className="flex items-center justify-between rounded-lg bg-ui-bg-subtle p-3">
           <div>
@@ -574,11 +559,7 @@ function StepPackAndShip({
       {/* Sub-step 1: Pack items */}
       <div className="rounded-lg border border-ui-border-base overflow-hidden">
         <div className={`flex items-center gap-x-3 px-4 py-3 ${allPacked ? "bg-ui-bg-interactive/10" : "bg-ui-bg-field"}`}>
-          <div className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
-            allPacked ? "bg-ui-tag-green-bg text-ui-tag-green-text" : "bg-ui-bg-base border border-ui-border-base text-ui-fg-subtle"
-          }`}>
-            {allPacked ? "✓" : "1"}
-          </div>
+          <StepCircle done={allPacked} number={1} />
           <div>
             <Text size="small" weight="plus">{LABELS.wizard.packStep1Title}</Text>
             <Text size="xsmall" className="text-ui-fg-subtle">{LABELS.wizard.packStep1Desc}</Text>
@@ -610,51 +591,59 @@ function StepPackAndShip({
                     {item.variant_title ? ` (${item.variant_title})` : ""}
                   </Text>
                 </div>
-                {isPacked && (
-                  <Badge color="green" size="2xsmall">{LABELS.wizard.packItemPacked}</Badge>
-                )}
+                {isPacked && <Badge color="green" size="2xsmall">{LABELS.wizard.packItemPacked}</Badge>}
               </div>
             )
           })}
         </div>
       </div>
 
-      {/* Sub-step 2: Print combined document */}
+      {/* Sub-step 2: Print documents */}
       <div className="rounded-lg border border-ui-border-base overflow-hidden">
         <div className={`flex items-center gap-x-3 px-4 py-3 ${documentDownloaded ? "bg-ui-bg-interactive/10" : "bg-ui-bg-field"}`}>
-          <div className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
-            documentDownloaded ? "bg-ui-tag-green-bg text-ui-tag-green-text" : "bg-ui-bg-base border border-ui-border-base text-ui-fg-subtle"
-          }`}>
-            {documentDownloaded ? "✓" : "2"}
-          </div>
+          <StepCircle done={documentDownloaded} number={2} />
           <div>
             <Text size="small" weight="plus">{LABELS.wizard.packStep2Title}</Text>
             <Text size="xsmall" className="text-ui-fg-subtle">{LABELS.wizard.packStep2Desc}</Text>
           </div>
         </div>
-        <div className="px-4 py-3 flex flex-col gap-y-2">
+        <div className="px-4 py-3 flex flex-col gap-y-3">
           <Button
-            onClick={downloadCombinedDocument}
+            onClick={() => downloadDocument("combined")}
             disabled={isDownloading}
             isLoading={isDownloading}
             className="w-full"
           >
             {isDownloading ? LABELS.wizard.packStep2Downloading : LABELS.wizard.packStep2Button}
           </Button>
-          <Button variant="transparent" size="small" onClick={downloadLabelOnly} className="w-full">
-            {LABELS.wizard.packStep2LabelOnly}
-          </Button>
+
+          <div className="flex items-center gap-x-2">
+            <div className="flex-1 rounded-lg border border-ui-border-base p-3 flex items-center justify-between">
+              <div>
+                <Text size="small" weight="plus">Lieferschein</Text>
+                <Text size="xsmall" className="text-ui-fg-muted">→ ins Paket legen</Text>
+              </div>
+              <Button variant="secondary" size="small" onClick={() => downloadDocument("packing-slip")} disabled={isDownloading}>
+                PDF
+              </Button>
+            </div>
+            <div className="flex-1 rounded-lg border border-ui-border-base p-3 flex items-center justify-between">
+              <div>
+                <Text size="small" weight="plus">Versandlabel</Text>
+                <Text size="xsmall" className="text-ui-fg-muted">→ auf das Paket kleben</Text>
+              </div>
+              <Button variant="secondary" size="small" onClick={() => downloadDocument("label")} disabled={isDownloading}>
+                PDF
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Sub-step 3: Close package */}
       <div className="rounded-lg border border-ui-border-base overflow-hidden">
         <div className={`flex items-center gap-x-3 px-4 py-3 ${allPacked && documentDownloaded ? "bg-ui-bg-interactive/10" : "bg-ui-bg-field"}`}>
-          <div className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
-            allPacked && documentDownloaded ? "bg-ui-tag-green-bg text-ui-tag-green-text" : "bg-ui-bg-base border border-ui-border-base text-ui-fg-subtle"
-          }`}>
-            {allPacked && documentDownloaded ? "✓" : "3"}
-          </div>
+          <StepCircle done={allPacked && documentDownloaded} number={3} />
           <div>
             <Text size="small" weight="plus">{LABELS.wizard.packStep3Title}</Text>
             <Text size="xsmall" className="text-ui-fg-subtle">{LABELS.wizard.packStep3Desc}</Text>
@@ -662,12 +651,21 @@ function StepPackAndShip({
         </div>
       </div>
 
-      {/* Remaining items note */}
       {remainingCount > 0 && (
         <div className="rounded-lg bg-ui-bg-field-component p-3">
           <Text size="small" className="text-ui-fg-subtle">{LABELS.wizard.remainingNote(remainingCount)}</Text>
         </div>
       )}
+    </div>
+  )
+}
+
+function StepCircle({ done, number }: { done: boolean; number: number }) {
+  return (
+    <div className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
+      done ? "bg-ui-tag-green-bg text-ui-tag-green-text" : "bg-ui-bg-base border border-ui-border-base text-ui-fg-subtle"
+    }`}>
+      {done ? "✓" : String(number)}
     </div>
   )
 }
