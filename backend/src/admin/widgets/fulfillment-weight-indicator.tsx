@@ -1,7 +1,40 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
-import { Container, Text, Badge, Checkbox, Tooltip } from "@medusajs/ui"
+import { Container, Text, Badge } from "@medusajs/ui"
 import { DetailWidgetProps, AdminOrder } from "@medusajs/framework/types"
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, Component, type ReactNode } from "react"
+
+// ──────────────────────────────────────────────────────────────
+// Error boundary — prevents widget from crashing the order page
+// ──────────────────────────────────────────────────────────────
+
+class WidgetErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("[WeightIndicator] Widget error:", error)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null
+    }
+    return this.props.children
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Types
+// ──────────────────────────────────────────────────────────────
 
 type ItemWeight = {
   line_item_id: string
@@ -39,17 +72,11 @@ type WeightPreviewResponse = {
   is_carrier_group: boolean
 }
 
-/**
- * Weight indicator widget for the order detail sidebar.
- *
- * Shows per-item weights, flags items using the 500g fallback,
- * and previews which Sendcloud shipping method would be selected
- * based on carrier group configuration.
- *
- * Interactive checkboxes let the admin simulate partial fulfillment
- * selection with live method feedback.
- */
-const FulfillmentWeightIndicator = ({
+// ──────────────────────────────────────────────────────────────
+// Main widget (wrapped in error boundary at export)
+// ──────────────────────────────────────────────────────────────
+
+const FulfillmentWeightIndicatorInner = ({
   data: order,
 }: DetailWidgetProps<AdminOrder>) => {
   const [preview, setPreview] = useState<WeightPreviewResponse | null>(null)
@@ -82,7 +109,7 @@ const FulfillmentWeightIndicator = ({
           }
         }
       } catch (err) {
-        console.error("[WeightIndicator] Error:", err)
+        console.error("[WeightIndicator] Fetch error:", err)
       } finally {
         setLoading(false)
       }
@@ -103,20 +130,24 @@ const FulfillmentWeightIndicator = ({
         } else {
           next.add(lineItemId)
         }
-
-        const selectedItems = preview?.items
-          .filter((i) => next.has(i.line_item_id))
-          .map((i) => ({ line_item_id: i.line_item_id, quantity: i.quantity }))
-
-        if (selectedItems && selectedItems.length > 0) {
-          fetchPreview(selectedItems)
-        }
-
         return next
       })
     },
-    [preview, fetchPreview]
+    []
   )
+
+  // Re-fetch when selection changes (debounced via separate effect)
+  useEffect(() => {
+    if (!initialized || !preview) return
+
+    const selectedItems = preview.items
+      .filter((i) => selectedItemIds.has(i.line_item_id))
+      .map((i) => ({ line_item_id: i.line_item_id, quantity: i.quantity }))
+
+    if (selectedItems.length > 0) {
+      fetchPreview(selectedItems)
+    }
+  }, [selectedItemIds, initialized])
 
   const selectedWeight = useMemo(() => {
     if (!preview) return 0
@@ -129,7 +160,7 @@ const FulfillmentWeightIndicator = ({
 
   const selectedMethodForDisplay = useMemo(() => {
     if (!preview?.is_carrier_group || !preview.all_methods.length) {
-      return preview?.selected_method
+      return preview?.selected_method || null
     }
 
     const sorted = [...preview.all_methods].sort(
@@ -148,12 +179,7 @@ const FulfillmentWeightIndicator = ({
     )
   }, [preview, selectedWeightKg])
 
-  if (loading) return null
-  if (!preview || preview.items.length === 0) return null
-
-  const hasUnfulfilled = preview.items.length > 0
-
-  if (!hasUnfulfilled) return null
+  if (loading || !preview || preview.items.length === 0) return null
 
   return (
     <Container className="divide-y p-0">
@@ -188,9 +214,11 @@ const FulfillmentWeightIndicator = ({
               key={item.line_item_id}
               className="flex items-center gap-2"
             >
-              <Checkbox
+              <input
+                type="checkbox"
                 checked={isChecked}
-                onCheckedChange={() => handleToggleItem(item.line_item_id)}
+                onChange={() => handleToggleItem(item.line_item_id)}
+                className="h-3.5 w-3.5 rounded border-ui-border-base text-ui-fg-interactive accent-ui-fg-interactive"
               />
               <div className="flex-1 min-w-0">
                 <Text size="xsmall" className="truncate">
@@ -200,11 +228,9 @@ const FulfillmentWeightIndicator = ({
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {!item.has_weight && (
-                  <Tooltip content="Kein Gewicht definiert — 500g Standard">
-                    <Text size="xsmall" className="text-ui-fg-warning">
-                      ⚠️
-                    </Text>
-                  </Tooltip>
+                  <Text size="xsmall" className="text-ui-fg-warning" title="Kein Gewicht definiert — 500g Standard">
+                    ⚠️
+                  </Text>
                 )}
                 <Text size="xsmall" className="text-ui-fg-subtle font-mono">
                   {(item.subtotal_grams / 1000).toFixed(2)} kg
@@ -237,7 +263,9 @@ const FulfillmentWeightIndicator = ({
         </div>
 
         {/* Threshold proximity warning */}
-        {preview.is_carrier_group && selectedMethodForDisplay && (
+        {preview.is_carrier_group && selectedMethodForDisplay &&
+          selectedMethodForDisplay.min_weight_kg != null &&
+          selectedMethodForDisplay.max_weight_kg != null && (
           <ThresholdWarning
             method={selectedMethodForDisplay as CarrierGroupMethod}
             weightKg={selectedWeightKg}
@@ -248,10 +276,6 @@ const FulfillmentWeightIndicator = ({
   )
 }
 
-/**
- * Displays the selected shipping method as a colored badge.
- * Color changes when crossing a weight threshold.
- */
 function MethodBadge({
   method,
   weightKg,
@@ -276,7 +300,6 @@ function MethodBadge({
     (m) => m.sendcloud_id === method.sendcloud_id
   )
 
-  // Color scheme: first tier = green, middle = blue, last = orange
   const color: "green" | "blue" | "orange" =
     methodIndex === 0
       ? "green"
@@ -296,9 +319,6 @@ function MethodBadge({
   )
 }
 
-/**
- * Shows a subtle hint when the weight is close to a tier boundary.
- */
 function ThresholdWarning({
   method,
   weightKg,
@@ -324,6 +344,16 @@ function ThresholdWarning({
     </Text>
   )
 }
+
+// ──────────────────────────────────────────────────────────────
+// Export with error boundary wrapper
+// ──────────────────────────────────────────────────────────────
+
+const FulfillmentWeightIndicator = (props: DetailWidgetProps<AdminOrder>) => (
+  <WidgetErrorBoundary>
+    <FulfillmentWeightIndicatorInner {...props} />
+  </WidgetErrorBoundary>
+)
 
 export const config = defineWidgetConfig({
   zone: "order.details.side.before",
