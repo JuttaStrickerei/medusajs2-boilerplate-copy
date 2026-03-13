@@ -67,7 +67,28 @@ const medusaConfig = {
             id: 'sendcloud',
             options: {
               public_key: SENDCLOUD_PUBLIC_KEY,
-              secret_key: SENDCLOUD_SECRET_KEY
+              secret_key: SENDCLOUD_SECRET_KEY,
+              // Carrier groups for weight-based dynamic method selection.
+              // Each group bundles Sendcloud shipping methods that cover different
+              // weight tiers of the same carrier/service. At fulfillment time the
+              // correct method is selected automatically based on package weight.
+              //
+              // To find Sendcloud method IDs: create a shipping option in admin
+              // with the Sendcloud provider — the dropdown lists all methods with
+              // their IDs, or call GET /admin/check-sendcloud-setup.
+              //
+              // Uncomment and fill in your actual Sendcloud method IDs:
+              //
+              // carrier_groups: [
+              //   {
+              //     id: "dpd_at",
+              //     name: "DPD Austria",
+              //     methods: [
+              //       { sendcloud_id: 8, name: "DPD Classic Kleinpaket", min_weight_kg: 0, max_weight_kg: 3 },
+              //       { sendcloud_id: 9, name: "DPD Classic", min_weight_kg: 3, max_weight_kg: 31.5 },
+              //     ]
+              //   },
+              // ],
             }
           },
           {
