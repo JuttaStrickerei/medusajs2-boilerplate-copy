@@ -37,7 +37,11 @@ const SendcloudDashboardPage = () => {
       })
       const data = response as any
       const orders = (data.orders || []) as OpenOrder[]
-      const OPEN_STATUSES = new Set(["not_fulfilled", "partially_fulfilled"])
+      const OPEN_STATUSES = new Set([
+        "not_fulfilled",
+        "partially_fulfilled",
+        "canceled",
+      ])
       return orders.filter((o) => OPEN_STATUSES.has(o.fulfillment_status))
     },
     refetchInterval: REFETCH_INTERVAL,
