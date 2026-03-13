@@ -112,6 +112,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
     if (statusFilter) {
       shipments = shipments.filter((s: any) => s.status === statusFilter)
+    } else {
+      shipments = shipments.filter((s: any) => s.status !== "canceled")
     }
     if (typeFilter !== undefined) {
       const wantReturn = typeFilter === "true"

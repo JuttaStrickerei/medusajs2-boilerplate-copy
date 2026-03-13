@@ -142,11 +142,19 @@ export function FulfillmentWizard({ orderId, onClose, onCompleted }: Fulfillment
       const items = Array.from(selectedItems.entries()).map(([id, quantity]) => ({ id, quantity }))
       const body: Record<string, unknown> = { items }
       if (locationId) body.location_id = locationId
-      return sdk.client.fetch(`/admin/orders/${orderId}/fulfillments`, { method: "POST", body })
+      await sdk.client.fetch(`/admin/orders/${orderId}/fulfillments`, { method: "POST", body })
+
+      const refreshed = await sdk.client.fetch(`/admin/orders/${orderId}`, {
+        method: "GET",
+        query: { fields: "+fulfillments.*,+fulfillments.labels.*" },
+      }) as any
+      const fulfillments = (refreshed?.order?.fulfillments || [])
+        .filter((f: any) => !f.canceled_at)
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      return fulfillments[0] || null
     },
-    onSuccess: (data: any) => {
-      const ff = data?.order?.fulfillments?.slice(-1)?.[0] || data?.fulfillment
-      setCreatedFulfillment(ff)
+    onSuccess: (latestFf: any) => {
+      setCreatedFulfillment(latestFf)
       setStep(3)
       queryClient.invalidateQueries({ queryKey: ["dashboard-open-orders"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-shipments"] })
