@@ -4,11 +4,13 @@ import {
   ProviderUploadFileDTO,
   ProviderDeleteFileDTO,
   ProviderFileResultDTO,
-  ProviderGetFileDTO
+  ProviderGetFileDTO,
+  ProviderGetPresignedUploadUrlDTO
 } from '@medusajs/framework/types';
 import { Client } from 'minio';
 import path from 'path';
 import { ulid } from 'ulid';
+import { Readable } from 'stream';
 
 type InjectedDependencies = {
   logger: Logger
@@ -29,8 +31,6 @@ export interface MinioFileProviderOptions {
 }
 
 const DEFAULT_BUCKET = 'medusa-media'
-// Add delay constants
-const DELETE_DELAY_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 /**
  * Service to handle file storage using MinIO.
@@ -41,8 +41,6 @@ class MinioFileProviderService extends AbstractFileProviderService {
   protected readonly logger_: Logger
   protected client: Client
   protected readonly bucket: string
-  // Track pending deletions
-  protected pendingDeletions: Map<string, NodeJS.Timeout>
 
   constructor({ logger }: InjectedDependencies, options: MinioFileProviderOptions) {
     super()
@@ -66,9 +64,6 @@ class MinioFileProviderService extends AbstractFileProviderService {
       accessKey: this.config_.accessKey,
       secretKey: this.config_.secretKey
     })
-
-    // Initialize the pending deletions map
-    this.pendingDeletions = new Map()
 
     // Initialize bucket and policy
     this.initializeBucket().catch(error => {
@@ -168,7 +163,18 @@ class MinioFileProviderService extends AbstractFileProviderService {
     try {
       const parsedFilename = path.parse(file.filename)
       const fileKey = `${parsedFilename.name}-${ulid()}${parsedFilename.ext}`
-      const content = Buffer.from(file.content, 'base64')
+
+      let content: Buffer
+      try {
+        const decoded = Buffer.from(file.content, 'base64')
+        if (decoded.toString('base64') === file.content) {
+          content = decoded
+        } else {
+          content = Buffer.from(file.content, 'utf8')
+        }
+      } catch {
+        content = Buffer.from(file.content, 'binary')
+      }
 
       // Upload file with public-read access
       await this.client.putObject(
@@ -201,57 +207,27 @@ class MinioFileProviderService extends AbstractFileProviderService {
     }
   }
 
-  /**
-   * Schedules file deletion after a delay instead of immediate deletion
-   */
   async delete(
-    fileData: ProviderDeleteFileDTO
+    files: ProviderDeleteFileDTO | ProviderDeleteFileDTO[]
   ): Promise<void> {
-    if (!fileData?.fileKey) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        'No file key provided'
-      )
-    }
+    try {
+      const fileArray = Array.isArray(files) ? files : [files]
 
-    // If a deletion is already scheduled for this file, cancel it
-    if (this.pendingDeletions.has(fileData.fileKey)) {
-      clearTimeout(this.pendingDeletions.get(fileData.fileKey)!)
-      this.pendingDeletions.delete(fileData.fileKey)
-    }
+      for (const file of fileArray) {
+        if (!file?.fileKey) {
+          continue
+        }
 
-    // Log that deletion has been scheduled
-    this.logger_.info(`Scheduling deletion of file ${fileData.fileKey} in 5 minutes`)
-
-    // Schedule the deletion
-    const timeoutId = setTimeout(async () => {
-      try {
-        await this.client.removeObject(this.bucket, fileData.fileKey)
-        this.logger_.info(`Successfully deleted file ${fileData.fileKey} from MinIO bucket ${this.bucket} after delay`)
-        // Remove from pending deletions
-        this.pendingDeletions.delete(fileData.fileKey)
-      } catch (error) {
-        // Log error but don't throw if file doesn't exist
-        this.logger_.warn(`Failed to delete file ${fileData.fileKey} after delay: ${error.message}`)
-        this.pendingDeletions.delete(fileData.fileKey)
+        try {
+          await this.client.removeObject(this.bucket, file.fileKey)
+          this.logger_.info(`Deleted file ${file.fileKey} from MinIO bucket ${this.bucket}`)
+        } catch (error) {
+          this.logger_.warn(`Failed to delete file ${file.fileKey}: ${error.message}`)
+        }
       }
-    }, DELETE_DELAY_MS)
-
-    // Store the timeout ID
-    this.pendingDeletions.set(fileData.fileKey, timeoutId)
-  }
-
-  /**
-   * Optional: Add method to cancel a pending deletion
-   */
-  async cancelScheduledDeletion(fileKey: string): Promise<boolean> {
-    if (this.pendingDeletions.has(fileKey)) {
-      clearTimeout(this.pendingDeletions.get(fileKey)!)
-      this.pendingDeletions.delete(fileKey)
-      this.logger_.info(`Cancelled scheduled deletion for file ${fileKey}`)
-      return true
+    } catch (error) {
+      this.logger_.error(`Delete operation failed: ${error.message}`)
     }
-    return false
   }
 
   async getPresignedDownloadUrl(
@@ -277,6 +253,98 @@ class MinioFileProviderService extends AbstractFileProviderService {
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         `Failed to generate presigned URL: ${error.message}`
+      )
+    }
+  }
+
+  async getPresignedUploadUrl(
+    fileData: ProviderGetPresignedUploadUrlDTO
+  ): Promise<ProviderFileResultDTO> {
+    if (!fileData?.filename) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        'No filename provided'
+      )
+    }
+
+    try {
+      const parsedFilename = path.parse(fileData.filename)
+      const fileKey = `${parsedFilename.name}-${ulid()}${parsedFilename.ext}`
+      
+      // Default expiry is 1 hour (3600 seconds)
+      const expiry = fileData.expiresIn || 3600
+      
+      // Generate presigned URL for PUT operation
+      const url = await this.client.presignedPutObject(
+        this.bucket,
+        fileKey,
+        expiry
+      )
+
+      this.logger_.info(`Generated presigned upload URL for file ${fileKey}`)
+
+      return {
+        url,
+        key: fileKey
+      }
+    } catch (error) {
+      this.logger_.error(`Failed to generate presigned upload URL: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Failed to generate presigned upload URL: ${error.message}`
+      )
+    }
+  }
+
+  async getDownloadStream(fileData: ProviderGetFileDTO): Promise<Readable> {
+    if (!fileData?.fileKey) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        'No fileKey provided'
+      )
+    }
+
+    try {
+      const stream = await this.client.getObject(this.bucket, fileData.fileKey)
+      this.logger_.info(`Generated download stream for file ${fileData.fileKey}`)
+      return stream
+    } catch (error) {
+      this.logger_.error(`Failed to get download stream: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Failed to get download stream: ${error.message}`
+      )
+    }
+  }
+
+  async getAsBuffer(fileData: ProviderGetFileDTO): Promise<Buffer> {
+    if (!fileData?.fileKey) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        'No fileKey provided'
+      )
+    }
+
+    try {
+      const stream = await this.client.getObject(this.bucket, fileData.fileKey)
+      const chunks: Buffer[] = []
+      
+      return new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(chunk))
+        stream.on('end', () => resolve(Buffer.concat(chunks)))
+        stream.on('error', (error) => {
+          this.logger_.error(`Failed to get file as buffer: ${error.message}`)
+          reject(new MedusaError(
+            MedusaError.Types.UNEXPECTED_STATE,
+            `Failed to get file as buffer: ${error.message}`
+          ))
+        })
+      })
+    } catch (error) {
+      this.logger_.error(`Failed to get file as buffer: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Failed to get file as buffer: ${error.message}`
       )
     }
   }

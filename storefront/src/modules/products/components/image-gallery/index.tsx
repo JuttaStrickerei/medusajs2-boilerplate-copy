@@ -7,12 +7,20 @@ import { cn } from "@lib/utils"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
+  thumbnail?: string | null
 }
 
-const ImageGallery = ({ images }: ImageGalleryProps) => {
+const ImageGallery = ({ images: rawImages, thumbnail }: ImageGalleryProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
+
+  const images =
+    rawImages && rawImages.length > 0
+      ? rawImages
+      : thumbnail
+        ? [{ id: "thumbnail", url: thumbnail } as HttpTypes.StoreProductImage]
+        : []
 
   const selectedImage = images[selectedIndex]
 

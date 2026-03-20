@@ -66,7 +66,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <div className="grid grid-cols-1 medium:grid-cols-[1fr_1fr] gap-6 medium:gap-10 large:gap-14 items-start">
             {/* Image Gallery */}
             <div className="medium:sticky medium:top-20 medium:self-start">
-              <ImageGallery images={product?.images || []} />
+              <ImageGallery images={product?.images || []} thumbnail={product?.thumbnail} />
             </div>
 
             {/* Product Info */}
