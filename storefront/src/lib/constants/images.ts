@@ -4,7 +4,7 @@
  */
 export const IMAGES = {
   home: {
-    manufaktur: '/images/home/manufaktur.webp',
+    manufaktur: '/images/home/manufaktur.png',
   },
   about: {
     historie: '/images/about/historie.webp',

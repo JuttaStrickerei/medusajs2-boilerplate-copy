@@ -7,7 +7,6 @@ import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
-import { Sparkles, RefreshCw, Shield } from "@components/icons"
 import { IMAGES } from "@lib/constants/images"
 
 export const metadata: Metadata = {
@@ -36,38 +35,15 @@ export default async function Home(props: {
       {/* Hero Section */}
       <Hero />
 
-      {/* Trust Badges Section */}
-      <section className="py-12 small:py-16 bg-stone-50 border-y border-stone-200">
-        <div className="content-container">
-          <div className="grid grid-cols-2 medium:grid-cols-3 gap-8">
-            <TrustBadge
-              icon={<Sparkles size={24} />}
-              title="Handarbeit"
-              description="Jedes Stück ein Unikat"
-            />
-            <TrustBadge
-              icon={<Shield size={24} />}
-              title="Premium Qualität"
-              description="100% Naturfasern"
-            />
-            <TrustBadge
-              icon={<RefreshCw size={24} />}
-              title="30 Tage Rückgabe"
-              description="Einfach"
-            />
-          </div>
-        </div>
-      </section>
-
       {/* Featured Products */}
       <FeaturedProducts collections={collections} region={region} />
 
-      {/* About Section */}
+      {/* About Section — Bild wie auf /about: 4:3, gleiche Breite wie Timeline (max-w-5xl) */}
       <section className="section-container bg-stone-50">
         <div className="content-container">
-          <div className="grid medium:grid-cols-2 gap-12 medium:gap-16 items-center">
+          <div className="grid medium:grid-cols-2 gap-12 medium:gap-16 items-center max-w-5xl mx-auto">
             {/* Image */}
-            <div className="relative aspect-[4/5] bg-stone-200 rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] w-full bg-stone-200 rounded-2xl overflow-hidden">
               <Image
                 src={IMAGES.home.manufaktur}
                 alt="Strickerei Jutta Manufaktur - Traditionelle Handwerkskunst in 3. Generation"
@@ -117,26 +93,5 @@ export default async function Home(props: {
         </div>
       </section>
     </>
-  )
-}
-
-// Trust Badge Component
-function TrustBadge({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode
-  title: string
-  description: string
-}) {
-  return (
-    <div className="text-center">
-      <div className="w-12 h-12 bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-3 text-white">
-        {icon}
-      </div>
-      <h3 className="font-medium text-stone-800 mb-1">{title}</h3>
-      <p className="text-sm text-stone-500">{description}</p>
-    </div>
   )
 }
