@@ -8,7 +8,6 @@ import {
 } from "@medusajs/ui"
 import { PhotoSolid, ArrowDownTray } from "@medusajs/icons"
 import { useState, useRef, useCallback } from "react"
-import { useMutation } from "@tanstack/react-query"
 import { sdk } from "../lib/sdk"
 
 type UploadResult = {
@@ -32,6 +31,7 @@ const UploadImageListWidget = () => {
   const [open, setOpen] = useState(false)
   const [csvFile, setCsvFile] = useState<File | null>(null)
   const [result, setResult] = useState<UploadResult | null>(null)
+  const [isPending, setIsPending] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const readFileAsText = useCallback((file: File): Promise<string> => {
@@ -55,28 +55,27 @@ const UploadImageListWidget = () => {
     URL.revokeObjectURL(url)
   }, [result, csvFile])
 
-  const uploadMutation = useMutation({
-    mutationFn: async () => {
-      if (!csvFile) throw new Error("CSV file is required")
-
+  const handleProcess = useCallback(async () => {
+    if (!csvFile) return
+    setIsPending(true)
+    try {
       const csv = await readFileAsText(csvFile)
-
-      return sdk.client.fetch<UploadResult>(
+      const data = await sdk.client.fetch<UploadResult>(
         "/admin/products/upload-image-list",
         { method: "POST", body: { csv } }
       )
-    },
-    onSuccess: (data) => {
       setResult(data)
       const msg = data.summary.productsUpdated > 0
         ? `Processed ${data.summary.imagesUploaded} images, updated ${data.summary.productsUpdated} existing products`
         : `Processed ${data.summary.imagesUploaded} images — download the CSV to import`
       toast.success(msg)
-    },
-    onError: (error: Error) => {
+    } catch (err) {
+      const error = err as Error
       toast.error(error.message || "Failed to process images")
-    },
-  })
+    } finally {
+      setIsPending(false)
+    }
+  }, [csvFile, readFileAsText])
 
   const handleClose = () => {
     setOpen(false)
@@ -118,9 +117,9 @@ const UploadImageListWidget = () => {
               {!result && (
                 <Button
                   size="small"
-                  onClick={() => uploadMutation.mutate()}
-                  disabled={!csvFile || uploadMutation.isPending}
-                  isLoading={uploadMutation.isPending}
+                  onClick={handleProcess}
+                  disabled={!csvFile || isPending}
+                  isLoading={isPending}
                 >
                   Process Images
                 </Button>
@@ -181,7 +180,7 @@ const UploadImageListWidget = () => {
                   </Button>
                 </div>
 
-                {uploadMutation.isPending && (
+                {isPending && (
                   <div className="rounded-lg border border-ui-border-base bg-ui-bg-subtle p-4">
                     <Text
                       size="small"
