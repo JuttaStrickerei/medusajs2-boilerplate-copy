@@ -31,8 +31,6 @@ export interface MinioFileProviderOptions {
 }
 
 const DEFAULT_BUCKET = 'medusa-media'
-// Add delay constants
-const DELETE_DELAY_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 /**
  * Service to handle file storage using MinIO.
@@ -43,8 +41,6 @@ class MinioFileProviderService extends AbstractFileProviderService {
   protected readonly logger_: Logger
   protected client: Client
   protected readonly bucket: string
-  // Track pending deletions
-  protected pendingDeletions: Map<string, NodeJS.Timeout>
 
   constructor({ logger }: InjectedDependencies, options: MinioFileProviderOptions) {
     super()
@@ -68,9 +64,6 @@ class MinioFileProviderService extends AbstractFileProviderService {
       accessKey: this.config_.accessKey,
       secretKey: this.config_.secretKey
     })
-
-    // Initialize the pending deletions map
-    this.pendingDeletions = new Map()
 
     // Initialize bucket and policy
     this.initializeBucket().catch(error => {
@@ -214,57 +207,27 @@ class MinioFileProviderService extends AbstractFileProviderService {
     }
   }
 
-  /**
-   * Schedules file deletion after a delay instead of immediate deletion
-   */
   async delete(
-    fileData: ProviderDeleteFileDTO
+    files: ProviderDeleteFileDTO | ProviderDeleteFileDTO[]
   ): Promise<void> {
-    if (!fileData?.fileKey) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        'No file key provided'
-      )
-    }
+    try {
+      const fileArray = Array.isArray(files) ? files : [files]
 
-    // If a deletion is already scheduled for this file, cancel it
-    if (this.pendingDeletions.has(fileData.fileKey)) {
-      clearTimeout(this.pendingDeletions.get(fileData.fileKey)!)
-      this.pendingDeletions.delete(fileData.fileKey)
-    }
+      for (const file of fileArray) {
+        if (!file?.fileKey) {
+          continue
+        }
 
-    // Log that deletion has been scheduled
-    this.logger_.info(`Scheduling deletion of file ${fileData.fileKey} in 5 minutes`)
-
-    // Schedule the deletion
-    const timeoutId = setTimeout(async () => {
-      try {
-        await this.client.removeObject(this.bucket, fileData.fileKey)
-        this.logger_.info(`Successfully deleted file ${fileData.fileKey} from MinIO bucket ${this.bucket} after delay`)
-        // Remove from pending deletions
-        this.pendingDeletions.delete(fileData.fileKey)
-      } catch (error) {
-        // Log error but don't throw if file doesn't exist
-        this.logger_.warn(`Failed to delete file ${fileData.fileKey} after delay: ${error.message}`)
-        this.pendingDeletions.delete(fileData.fileKey)
+        try {
+          await this.client.removeObject(this.bucket, file.fileKey)
+          this.logger_.info(`Deleted file ${file.fileKey} from MinIO bucket ${this.bucket}`)
+        } catch (error) {
+          this.logger_.warn(`Failed to delete file ${file.fileKey}: ${error.message}`)
+        }
       }
-    }, DELETE_DELAY_MS)
-
-    // Store the timeout ID
-    this.pendingDeletions.set(fileData.fileKey, timeoutId)
-  }
-
-  /**
-   * Optional: Add method to cancel a pending deletion
-   */
-  async cancelScheduledDeletion(fileKey: string): Promise<boolean> {
-    if (this.pendingDeletions.has(fileKey)) {
-      clearTimeout(this.pendingDeletions.get(fileKey)!)
-      this.pendingDeletions.delete(fileKey)
-      this.logger_.info(`Cancelled scheduled deletion for file ${fileKey}`)
-      return true
+    } catch (error) {
+      this.logger_.error(`Delete operation failed: ${error.message}`)
     }
-    return false
   }
 
   async getPresignedDownloadUrl(
@@ -308,8 +271,10 @@ class MinioFileProviderService extends AbstractFileProviderService {
       const parsedFilename = path.parse(fileData.filename)
       const fileKey = `${parsedFilename.name}-${ulid()}${parsedFilename.ext}`
       
+      // Default expiry is 1 hour (3600 seconds)
       const expiry = fileData.expiresIn || 3600
-      
+
+      // Generate presigned URL for PUT operation
       const url = await this.client.presignedPutObject(
         this.bucket,
         fileKey,

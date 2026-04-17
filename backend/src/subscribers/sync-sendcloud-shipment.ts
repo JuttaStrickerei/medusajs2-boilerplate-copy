@@ -73,8 +73,7 @@ export default async function syncSendcloudShipment({
       || "http://localhost:9000"
     const backendUrl = publicDomain.startsWith("http") ? publicDomain : `https://${publicDomain}`
 
-    const labelUrl = ffData.sendcloud_label_url
-      || ffData.label_url
+    const labelUrl = ffData.label_url
       || `${backendUrl}/labels/${parcelId}`
 
     await shipmentService.createSendcloudShipments({

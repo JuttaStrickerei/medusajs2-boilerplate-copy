@@ -13,10 +13,17 @@ import {
   CreateShippingOptionDTO
 } from "@medusajs/framework/types"
 import { SendcloudClient } from "./client"
-import { SendcloudOptions, SendcloudCreateParcelRequest, SendcloudParcelItem } from "./types"
+import {
+  SendcloudOptions,
+  SendcloudCreateParcelRequest,
+  SendcloudParcelItem,
+  CarrierGroup,
+  CarrierGroupMethod,
+  CarrierGroupData,
+  WeightMethodSelection,
+} from "./types"
 
 
-// MODIFIED MappedOrderItem interface with extended product info
 interface MappedOrderItem {
   id: string;
   title: string;
@@ -26,9 +33,10 @@ interface MappedOrderItem {
   unitPrice: number;
   hs_code?: string | null;
   origin_country?: string | null;
-  product_id?: string;      // Medusa product ID
-  product_handle?: string;  // Product handle for URL generation
-  thumbnail?: string;       // Product image URL
+  product_id?: string;
+  product_handle?: string;
+  thumbnail?: string;
+  used_weight_fallback?: boolean;
 }
 
 // NOTE: SendcloudParcelItem interface is now imported from types.ts
@@ -52,6 +60,10 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
       this.logger_ = console
     }
     
+    if (this.options_.carrier_groups?.length) {
+      this.validateCarrierGroups(this.options_.carrier_groups)
+    }
+
     if (process.env.NODE_ENV === "development") {
       this.client_.testConnection().then((success) => {
         if (!success) {
@@ -101,11 +113,69 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
         },
       }));
 
-      return [...regularOptions, ...returnOptions];
+      // Generate virtual carrier group options from config
+      const carrierGroupOptions = this.buildCarrierGroupOptions(
+        regularResponse.shipping_methods
+      );
+
+      return [...carrierGroupOptions, ...regularOptions, ...returnOptions];
     } catch (error) {
       this.logger_.error("[SendcloudProvider] Error fetching fulfillment options: " + (error instanceof Error ? error.message : String(error)));
       return [];
     }
+  }
+
+  /**
+   * Build virtual fulfillment options from configured carrier groups.
+   * Each carrier group becomes one selectable option in the Medusa admin,
+   * with all weight-tier methods embedded in its data field.
+   *
+   * Uses the first method's Sendcloud data (countries, carrier) as the
+   * representative data for pricing and display.
+   */
+  private buildCarrierGroupOptions(
+    allSendcloudMethods: import("./types").SendcloudShippingMethod[]
+  ): FulfillmentOption[] {
+    const groups = this.options_.carrier_groups
+    if (!groups?.length) return []
+
+    const methodMap = new Map(allSendcloudMethods.map((m) => [m.id, m]))
+
+    return groups.map((group) => {
+      // Resolve the first method to get countries/carrier for the group
+      const primaryMethod = methodMap.get(group.methods[0]?.sendcloud_id)
+
+      const enrichedMethods = group.methods.map((m) => {
+        const resolved = methodMap.get(m.sendcloud_id)
+        return {
+          ...m,
+          name: m.name || resolved?.name || `Method ${m.sendcloud_id}`,
+        }
+      })
+
+      const rangeLabel = enrichedMethods.length > 0
+        ? `${enrichedMethods[0].min_weight_kg}–${enrichedMethods[enrichedMethods.length - 1].max_weight_kg} kg`
+        : ""
+
+      return {
+        id: `sendcloud_group_${group.id}`,
+        name: `${group.name} [${rangeLabel}]`,
+        provider_id: SendcloudFulfillmentProviderService.identifier,
+        price_type: "calculated" as const,
+        data: {
+          carrier_group: true,
+          carrier_group_id: group.id,
+          carrier_group_name: group.name,
+          carrier: primaryMethod?.carrier || "unknown",
+          sendcloud_id: group.methods[0]?.sendcloud_id,
+          methods: enrichedMethods,
+          countries: primaryMethod?.countries || [],
+          min_weight: String(enrichedMethods[0]?.min_weight_kg ?? "0"),
+          max_weight: String(enrichedMethods[enrichedMethods.length - 1]?.max_weight_kg ?? "0"),
+          is_return: false,
+        },
+      }
+    })
   }
 
   async validateOption(data: Record<string, unknown>): Promise<boolean> {
@@ -305,6 +375,7 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
       const loggableOrderLineItem: any = orderLineItem; 
 
       let weightInGrams = 500; 
+      let usedWeightFallback = true;
       let itemSku: string | undefined = loggableOrderLineItem.variant?.sku || ffItem.sku;
       let itemTitle: string = loggableOrderLineItem.variant?.title || loggableOrderLineItem.title || "Unknown Item";
       let itemUnitPrice: number = loggableOrderLineItem.unit_price || 0; 
@@ -318,10 +389,12 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
         hsCode = loggableOrderLineItem.variant.hs_code; 
         originCountry = loggableOrderLineItem.variant.origin_country; 
 
-        if (typeof loggableOrderLineItem.variant.weight === 'number') {
+        if (typeof loggableOrderLineItem.variant.weight === 'number' && loggableOrderLineItem.variant.weight > 0) {
           weightInGrams = loggableOrderLineItem.variant.weight;
-        } else if (loggableOrderLineItem.variant.product && typeof loggableOrderLineItem.variant.product.weight === 'number') {
+          usedWeightFallback = false;
+        } else if (loggableOrderLineItem.variant.product && typeof loggableOrderLineItem.variant.product.weight === 'number' && loggableOrderLineItem.variant.product.weight > 0) {
           weightInGrams = loggableOrderLineItem.variant.product.weight;
+          usedWeightFallback = false;
         }
 
         // Extract product info for Sendcloud
@@ -336,6 +409,12 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
       if (!thumbnail && loggableOrderLineItem.thumbnail) {
         thumbnail = loggableOrderLineItem.thumbnail;
       }
+
+      if (usedWeightFallback) {
+        this.logger_.warn(
+          `[SendcloudProvider] Item "${itemTitle}" (${itemSku || 'no SKU'}) has no weight defined — using 500g default`
+        );
+      }
   
       mappedItems.push({
         id: loggableOrderLineItem.id, 
@@ -349,6 +428,7 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
         product_id: productId,
         product_handle: productHandle,
         thumbnail: thumbnail,
+        used_weight_fallback: usedWeightFallback,
       });
     });
   
@@ -363,6 +443,132 @@ class SendcloudFulfillmentProviderService extends AbstractFulfillmentProviderSer
     }, 0);
 
     return Math.max(totalGrams / 1000, 0.001).toFixed(3);
+  }
+
+  /**
+   * Select the correct Sendcloud shipping method from a carrier group
+   * based on the actual parcel weight.
+   *
+   * Selection rules:
+   *   1. Boundaries are inclusive: min_weight_kg <= weight <= max_weight_kg
+   *   2. If multiple methods match (overlap), the narrowest range wins
+   *   3. If no method matches, throws with actionable error message
+   */
+  private selectMethodByWeight(
+    methods: CarrierGroupMethod[],
+    weightKg: number,
+    carrierGroupName: string
+  ): WeightMethodSelection {
+    const sorted = [...methods].sort((a, b) => a.min_weight_kg - b.min_weight_kg)
+
+    const candidates = sorted.filter(
+      (m) => weightKg >= m.min_weight_kg && weightKg <= m.max_weight_kg
+    )
+
+    if (candidates.length === 0) {
+      const rangeDescriptions = sorted
+        .map((m) => `${m.name || `Method ${m.sendcloud_id}`}: ${m.min_weight_kg}–${m.max_weight_kg} kg`)
+        .join(", ")
+
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `No Sendcloud method in carrier group "${carrierGroupName}" covers weight ${weightKg.toFixed(3)} kg. ` +
+        `Available ranges: [${rangeDescriptions}]. ` +
+        `Adjust the items or update the carrier group configuration.`
+      )
+    }
+
+    // Narrowest range wins when there are overlapping methods
+    const selected = candidates.reduce((best, current) => {
+      const bestRange = best.max_weight_kg - best.min_weight_kg
+      const currentRange = current.max_weight_kg - current.min_weight_kg
+      return currentRange < bestRange ? current : best
+    })
+
+    const result: WeightMethodSelection = {
+      sendcloud_id: selected.sendcloud_id,
+      method_name: selected.name || `Method ${selected.sendcloud_id}`,
+      min_weight_kg: selected.min_weight_kg,
+      max_weight_kg: selected.max_weight_kg,
+      actual_weight_kg: weightKg,
+    }
+
+    this.logger_.info(
+      `[SendcloudProvider] Weight-based selection: ${result.actual_weight_kg.toFixed(3)} kg → ` +
+      `"${result.method_name}" (${result.min_weight_kg}–${result.max_weight_kg} kg, ` +
+      `sendcloud_id: ${result.sendcloud_id})`
+    )
+
+    return result
+  }
+
+  /**
+   * Detect whether the fulfillment data contains a carrier group configuration
+   * and extract it. Returns null for legacy single-method data (backward compat).
+   */
+  private extractCarrierGroupData(
+    data: Record<string, unknown>
+  ): CarrierGroupData | null {
+    const nested = data?.data as Record<string, unknown> | undefined
+    const flat = data as Record<string, unknown>
+
+    const source = nested?.carrier_group === true ? nested
+                 : flat?.carrier_group === true   ? flat
+                 : null
+
+    if (!source || !Array.isArray(source.methods) || source.methods.length === 0) {
+      return null
+    }
+
+    return source as unknown as CarrierGroupData
+  }
+
+  /**
+   * Validate carrier group configuration at startup.
+   * Logs warnings for gaps and overlaps but does NOT throw —
+   * these are advisory, the actual error is thrown at fulfillment time
+   * if no method matches.
+   */
+  private validateCarrierGroups(groups: CarrierGroup[]): void {
+    for (const group of groups) {
+      if (!group.methods || group.methods.length === 0) {
+        this.logger_.warn(
+          `[SendcloudProvider] Carrier group "${group.name}" (${group.id}) has no methods configured`
+        )
+        continue
+      }
+
+      const sorted = [...group.methods].sort((a, b) => a.min_weight_kg - b.min_weight_kg)
+
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const current = sorted[i]
+        const next = sorted[i + 1]
+
+        // Gap detection: current.max < next.min
+        if (current.max_weight_kg < next.min_weight_kg) {
+          this.logger_.warn(
+            `[SendcloudProvider] Carrier group "${group.name}": weight gap between ` +
+            `${current.max_weight_kg} kg and ${next.min_weight_kg} kg ` +
+            `(${current.name || current.sendcloud_id} → ${next.name || next.sendcloud_id})`
+          )
+        }
+
+        // Overlap detection: current.max > next.min
+        if (current.max_weight_kg > next.min_weight_kg) {
+          this.logger_.warn(
+            `[SendcloudProvider] Carrier group "${group.name}": weight overlap between ` +
+            `${current.name || current.sendcloud_id} (max: ${current.max_weight_kg} kg) and ` +
+            `${next.name || next.sendcloud_id} (min: ${next.min_weight_kg} kg)`
+          )
+        }
+      }
+
+      this.logger_.info(
+        `[SendcloudProvider] Carrier group "${group.name}" validated: ` +
+        `${group.methods.length} method(s) covering ` +
+        `${sorted[0].min_weight_kg}–${sorted[sorted.length - 1].max_weight_kg} kg`
+      )
+    }
   }
 
   /**
@@ -418,26 +624,37 @@ async createReturnFulfillment(
     );
   }
 
-  // Extract Sendcloud Method ID from shipping option data
-  // The sendcloud_id can be in various locations depending on how the shipping option was configured
+  // Extract Sendcloud Method ID from shipping option data.
+  // Supports both carrier group (dynamic weight-based) and legacy (fixed ID).
   this.logger_.debug("[SendcloudProvider] Return - shipping_option: " + JSON.stringify(shipping_option, null, 2));
-  
-  const sendcloudMethodId = 
-    (shipping_option.data?.data as any)?.sendcloud_id ||  // Nested in data.data
-    (shipping_option.data as any)?.sendcloud_id ||         // Direct in data
-    (shipping_option as any)?.sendcloud_id ||              // Direct on shipping_option
-    (shipping_option.service_zone?.fulfillment_set?.service_zones?.[0]?.shipping_options?.[0]?.data as any)?.sendcloud_id; // Deeply nested
+
+  // Check for carrier group in the shipping option data (various nesting levels)
+  const returnShippingData: Record<string, any> = shipping_option.data || shipping_option;
+  const returnCarrierGroupData = this.extractCarrierGroupData(returnShippingData);
+
+  let sendcloudMethodId: number | string | undefined;
+  let returnSelectedMethodInfo: WeightMethodSelection | null = null;
+
+  if (!returnCarrierGroupData) {
+    // Legacy single-method extraction
+    sendcloudMethodId = 
+      (shipping_option.data?.data as any)?.sendcloud_id ||
+      (shipping_option.data as any)?.sendcloud_id ||
+      (shipping_option as any)?.sendcloud_id ||
+      (shipping_option.service_zone?.fulfillment_set?.service_zones?.[0]?.shipping_options?.[0]?.data as any)?.sendcloud_id;
     
-  this.logger_.debug("[SendcloudProvider] Return - extracted sendcloud_id: " + sendcloudMethodId);
-  
-  if (!sendcloudMethodId) {
-    this.logger_.error("[SendcloudProvider] Missing sendcloud_id in shipping_option.data");
-    this.logger_.error("[SendcloudProvider] shipping_option structure: " + JSON.stringify(shipping_option, null, 2));
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      "Sendcloud shipping method ID (data.sendcloud_id) is required in shipping option data."
-    );
+    this.logger_.debug("[SendcloudProvider] Return - extracted sendcloud_id (legacy): " + sendcloudMethodId);
+    
+    if (!sendcloudMethodId) {
+      this.logger_.error("[SendcloudProvider] Missing sendcloud_id in shipping_option.data");
+      this.logger_.error("[SendcloudProvider] shipping_option structure: " + JSON.stringify(shipping_option, null, 2));
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Sendcloud shipping method ID (data.sendcloud_id) is required in shipping option data."
+      );
+    }
   }
+  // For carrier groups: sendcloudMethodId will be set after weight calculation below
 
   // Extract order data from workflow or fetch via container
   let order: any = 
@@ -568,6 +785,17 @@ async createReturnFulfillment(
     totalWeightKg = Math.max(totalWeightGrams / 1000, 0.001).toFixed(3);
   }
 
+  // If carrier group: now that we have the weight, select the correct method
+  if (returnCarrierGroupData) {
+    const weightKgForSelection = parseFloat(totalWeightKg);
+    returnSelectedMethodInfo = this.selectMethodByWeight(
+      returnCarrierGroupData.methods,
+      weightKgForSelection,
+      returnCarrierGroupData.carrier_group_name || returnCarrierGroupData.carrier_group_id || "unknown"
+    );
+    sendcloudMethodId = returnSelectedMethodInfo.sendcloud_id;
+  }
+
   // ====================================================================
   // Create Sendcloud Parcel Data
   // ====================================================================
@@ -626,9 +854,14 @@ async createReturnFulfillment(
         parcel_id: createdParcel.id,
         tracking_number: createdParcel.tracking_number,
         tracking_url: createdParcel.tracking_url,
-        label_url: proxyLabelUrl, // Full URL for admin panel
-        sendcloud_label_url: createdParcel.label?.normal_printer?.[0], // Direct Sendcloud URL as backup
+        label_url: proxyLabelUrl,
+        sendcloud_label_url: createdParcel.label?.normal_printer?.[0],
         is_return: true,
+        ...(returnSelectedMethodInfo ? {
+          selected_method_name: returnSelectedMethodInfo.method_name,
+          selected_method_weight_range: `${returnSelectedMethodInfo.min_weight_kg}–${returnSelectedMethodInfo.max_weight_kg} kg`,
+          actual_weight_kg: returnSelectedMethodInfo.actual_weight_kg,
+        } : {}),
       },
       labels: [{
         tracking_number: createdParcel.tracking_number || "",
@@ -658,12 +891,6 @@ async createReturnFulfillment(
       );
     }
 
-    const sendcloudMethodId = (data?.data as Record<string, unknown>)?.sendcloud_id || (data as Record<string, unknown>)?.sendcloud_id;
-    if (!sendcloudMethodId) {
-      this.logger_.error("[SendcloudProvider] Missing sendcloud_id in data");
-      throw new MedusaError(MedusaError.Types.INVALID_DATA, "Sendcloud shipping method ID is required");
-    }
-
     const itemsForSendcloudParcel = this.mapOrderItems(items, order);
     
     if (!itemsForSendcloudParcel.length) {
@@ -671,6 +898,32 @@ async createReturnFulfillment(
     }
 
     const totalWeightKgString = this.calculateTotalWeight(itemsForSendcloudParcel);
+    const totalWeightKg = parseFloat(totalWeightKgString);
+
+    // Determine the Sendcloud method ID: carrier group (dynamic) or legacy (fixed)
+    let sendcloudMethodId: number | string;
+    let selectedMethodInfo: WeightMethodSelection | null = null;
+
+    const carrierGroupData = this.extractCarrierGroupData(data);
+
+    if (carrierGroupData) {
+      selectedMethodInfo = this.selectMethodByWeight(
+        carrierGroupData.methods,
+        totalWeightKg,
+        carrierGroupData.carrier_group_name || carrierGroupData.carrier_group_id || "unknown"
+      );
+      sendcloudMethodId = selectedMethodInfo.sendcloud_id;
+    } else {
+      sendcloudMethodId = (
+        (data?.data as Record<string, any>)?.sendcloud_id ||
+        (data as Record<string, any>)?.sendcloud_id
+      ) as number | string | undefined;
+
+      if (!sendcloudMethodId) {
+        this.logger_.error("[SendcloudProvider] Missing sendcloud_id in data");
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, "Sendcloud shipping method ID is required");
+      }
+    }
 
     if (!order.shipping_address.address_1 || !order.shipping_address.city || 
         !order.shipping_address.postal_code || !order.shipping_address.country_code) {
@@ -729,10 +982,15 @@ async createReturnFulfillment(
           parcel_id: response.parcel.id,
           tracking_number: response.parcel.tracking_number,
           tracking_url: response.parcel.tracking_url,
-          label_url: proxyLabelUrl, // Full URL for admin panel
-          sendcloud_label_url: response.parcel.label?.normal_printer?.[0], // Direct Sendcloud URL as backup
+          label_url: proxyLabelUrl,
+          sendcloud_label_url: response.parcel.label?.normal_printer?.[0],
           carrier: response.parcel.carrier?.code,
-          status: response.parcel.status?.message
+          status: response.parcel.status?.message,
+          ...(selectedMethodInfo ? {
+            selected_method_name: selectedMethodInfo.method_name,
+            selected_method_weight_range: `${selectedMethodInfo.min_weight_kg}–${selectedMethodInfo.max_weight_kg} kg`,
+            actual_weight_kg: selectedMethodInfo.actual_weight_kg,
+          } : {}),
         },
         labels: [
           {

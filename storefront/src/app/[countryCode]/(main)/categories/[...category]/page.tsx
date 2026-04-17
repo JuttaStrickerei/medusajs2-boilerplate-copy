@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
+import { getProductFilterOptions } from "@lib/data/filter-options"
 import { StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -16,6 +17,7 @@ type Props = {
     sizes?: string
     materials?: string
     priceRange?: string
+    collection?: string
   }>
 }
 
@@ -81,7 +83,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function CategoryPage(props: Props) {
   const searchParams = await props.searchParams
   const params = await props.params
-  const { sortBy, page, colors, sizes, materials, priceRange } = searchParams
+  const { sortBy, page, colors, sizes, materials, priceRange, collection } = searchParams
 
   const productCategory = await getCategoryByHandle(params.category)
 
@@ -89,13 +91,17 @@ export default async function CategoryPage(props: Props) {
     notFound()
   }
 
-  // Parse filter strings into arrays
   const filters = {
     colors: colors ? colors.split(",") : undefined,
     sizes: sizes ? sizes.split(",") : undefined,
     materials: materials ? materials.split(",") : undefined,
     priceRange: priceRange || undefined,
+    collection: collection || undefined,
   }
+
+  const filterOptions = await getProductFilterOptions(params.countryCode, {
+    categoryId: productCategory.id,
+  })
 
   return (
     <CategoryTemplate
@@ -104,6 +110,7 @@ export default async function CategoryPage(props: Props) {
       page={page}
       countryCode={params.countryCode}
       filters={filters}
+      filterOptions={filterOptions}
     />
   )
 }

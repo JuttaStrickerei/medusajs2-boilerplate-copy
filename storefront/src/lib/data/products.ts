@@ -75,7 +75,7 @@ export const listProducts = async ({
           // Include country_code for tax calculation
           ...(taxCountryCode && { country_code: taxCountryCode }),
           fields:
-            "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+            "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+images",
           ...queryParams,
         },
         headers,
@@ -290,7 +290,7 @@ export const searchAllEntities = async (
             limit: 10,
             region_id: region.id,
             ...(taxCountryCode && { country_code: taxCountryCode }),
-            fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+            fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+images",
           },
           headers,
           cache: "no-store",
@@ -325,7 +325,7 @@ export const searchAllEntities = async (
         limit: 10,
         region_id: region.id,
         ...(taxCountryCode && { country_code: taxCountryCode }),
-        fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+        fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+images",
       },
       headers,
       cache: "no-store",

@@ -13,7 +13,7 @@ const faqs = [
     questions: [
       {
         q: "Welche Zahlungsmethoden akzeptieren Sie?",
-        a: "Wir akzeptieren Kreditkarten (Visa, Mastercard, American Express), PayPal, Klarna, eps-Überweisung und Vorkasse per Banküberweisung.",
+        a: "Sie können bequem per Kreditkarte bezahlen sowie über PayPal und Klarna. Andere Zahlungsarten werden derzeit nicht angeboten.",
       },
       {
         q: "Kann ich meine Bestellung ändern oder stornieren?",
@@ -30,15 +30,15 @@ const faqs = [
     questions: [
       {
         q: "Wie lange dauert die Lieferung?",
-        a: "Innerhalb Österreichs 2-4 Werktage, in die EU 4-7 Werktage, in die Schweiz 5-8 Werktage.",
+        a: "Wir liefern nur nach Österreich. Mit einer Lieferzeit von etwa 2 Wochen ab Versand können Sie rechnen.",
       },
       {
         q: "Kann ich meine Sendung verfolgen?",
         a: "Ja, Sie erhalten eine Versandbestätigung mit Tracking-Nummer per E-Mail.",
       },
       {
-        q: "Liefern Sie auch international?",
-        a: "Ja, wir liefern in alle EU-Länder und die Schweiz. Für andere Länder kontaktieren Sie uns bitte.",
+        q: "Liefern Sie auch ins Ausland?",
+        a: "Nein. Wir versenden nur an Adressen in Österreich. Eine Lieferung in andere Länder ist nicht möglich.",
       },
     ],
   },
@@ -51,28 +51,11 @@ const faqs = [
       },
       {
         q: "Wer trägt die Kosten für die Rücksendung?",
-        a: "Bei Rückgaben aus Österreich übernehmen wir die Kosten. Für andere Länder trägt der Kunde die Rücksendekosten.",
+        a: "Die Kosten für die Rücksendung trägt der Kunde. Bitte wählen Sie eine versicherte Versandart, damit die Ware sicher bei uns ankommt.",
       },
       {
         q: "Wie erhalte ich mein Geld zurück?",
         a: "Nach Prüfung der Ware erstatten wir den Betrag innerhalb von 5-7 Werktagen auf Ihr ursprüngliches Zahlungsmittel.",
-      },
-    ],
-  },
-  {
-    category: "Produkte & Pflege",
-    questions: [
-      {
-        q: "Aus welchen Materialien bestehen Ihre Produkte?",
-        a: "Wir verwenden ausschließlich hochwertige Naturfasern wie Merinowolle, Kaschmir, Alpaka und Bio-Baumwolle.",
-      },
-      {
-        q: "Wie pflege ich meine Strickwaren richtig?",
-        a: "Besuchen Sie unsere Pflegehinweise-Seite für detaillierte Anleitungen. Generell empfehlen wir Handwäsche oder Wollwaschgang bei max. 30°C.",
-      },
-      {
-        q: "Sind Ihre Produkte nachhaltig?",
-        a: "Ja, wir legen großen Wert auf Nachhaltigkeit: von der Auswahl der Materialien bis zur lokalen Produktion in Österreich.",
       },
     ],
   },

@@ -195,9 +195,14 @@ const Shipping: React.FC<ShippingProps> = ({
         <div className="space-y-6">
           {/* Shipping Options */}
           <div>
-            <p className="text-sm text-stone-600 mb-4">
-              Wie soll Ihre Bestellung geliefert werden?
-            </p>
+            <div className="mb-4 space-y-2">
+              <p className="text-sm text-stone-600">
+                Wie soll Ihre Bestellung geliefert werden?
+              </p>
+              <p className="text-xs text-stone-500 leading-relaxed">
+                Lieferzeit in Österreich: voraussichtlich ca. 2 Wochen ab Versand.
+              </p>
+            </div>
 
             <div data-testid="delivery-options-container" className="space-y-3">
               {/* Pickup Option */}

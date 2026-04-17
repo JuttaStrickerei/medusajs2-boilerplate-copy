@@ -8,6 +8,7 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
 import { ProductFilters } from "@modules/store/templates"
+import { DynamicFilterOptions } from "@lib/data/filter-options"
 
 export default function CollectionTemplate({
   sortBy,
@@ -15,12 +16,14 @@ export default function CollectionTemplate({
   page,
   countryCode,
   filters,
+  filterOptions,
 }: {
   sortBy?: SortOptions
   collection: HttpTypes.StoreCollection
   page?: string
   countryCode: string
   filters?: ProductFilters
+  filterOptions: DynamicFilterOptions
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
@@ -50,7 +53,7 @@ export default function CollectionTemplate({
           {/* Filters Sidebar - Desktop/Tablet */}
           <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
             <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5">
-              <RefinementList sortBy={sort} filters={filters} />
+              <RefinementList sortBy={sort} filters={filters} filterOptions={filterOptions} hideCollections />
             </div>
           </aside>
 
@@ -71,7 +74,7 @@ export default function CollectionTemplate({
             {/* Mobile/Tablet Filter Bar */}
             <div className="small:hidden mb-4">
               <div className="flex items-center gap-3">
-                <MobileFilterDrawer sortBy={sort} filters={filters} />
+                <MobileFilterDrawer sortBy={sort} filters={filters} filterOptions={filterOptions} hideCollections />
               </div>
             </div>
 
@@ -89,6 +92,7 @@ export default function CollectionTemplate({
                 collectionId={collection.id}
                 countryCode={countryCode}
                 filters={filters}
+                filterOptions={filterOptions}
               />
             </Suspense>
           </main>

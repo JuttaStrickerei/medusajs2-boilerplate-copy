@@ -142,10 +142,39 @@ export default function ProductActions({
     setQuantity((prev) => Math.max(1, Math.min(10, prev + delta)))
   }
 
+  const missingOptions = useMemo(() => {
+    if (!product.options || product.options.length === 0) return []
+    return product.options.filter(
+      (opt) => !options[opt.id]
+    )
+  }, [product.options, options])
+
+  const allOptionsSelected = missingOptions.length === 0
+
+  const translateOptionTitle = (title: string): string => {
+    const map: Record<string, string> = {
+      color: "Farbe",
+      colour: "Farbe",
+      size: "Größe",
+      material: "Material",
+      style: "Stil",
+      length: "Länge",
+      width: "Breite",
+    }
+    return map[title.trim().toLowerCase()] ?? title
+  }
+
   const getButtonText = () => {
     if (addedToCart) return "Hinzugefügt!"
-    if (!selectedVariant && Object.keys(options).length === 0) return "Variante wählen"
-    if (!inStock || !isValidVariant) return "Nicht verfügbar"
+
+    if (!allOptionsSelected) {
+      const nextMissing = missingOptions[0]
+      const label = translateOptionTitle(nextMissing.title ?? "Option")
+      return `Bitte ${label} wählen`
+    }
+
+    if (!isValidVariant) return "Kombination nicht verfügbar"
+    if (!inStock) return "Ausverkauft"
     return "In den Warenkorb"
   }
 
@@ -221,7 +250,7 @@ export default function ProductActions({
                     Auf Lager
                   </>
                 ) : (
-                  "Nicht verfügbar"
+                  "Ausverkauft"
                 )}
               </span>
             )}

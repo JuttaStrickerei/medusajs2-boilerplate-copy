@@ -4,7 +4,8 @@ import { Truck, RefreshCw, Package, Clock, Shield } from "@components/icons"
 
 export const metadata: Metadata = {
   title: "Versand & Rückgabe",
-  description: "Informationen zu Versand, Lieferung und Rückgabe bei Strickerei Jutta.",
+  description:
+    "Versand und Lieferzeit (ca. 2 Wochen innerhalb Österreichs) sowie Rückgabe bei Strickerei Jutta.",
 }
 
 export default function ShippingPage() {
@@ -47,15 +48,12 @@ export default function ShippingPage() {
             </h2>
 
             <div className="space-y-6">
-              <div className="grid grid-cols-1 small:grid-cols-2 gap-6">
-                <div className="p-4 bg-stone-50 rounded-xl">
-                  <h3 className="font-medium text-stone-800 mb-2">Österreich</h3>
-                  <p className="text-stone-600 text-sm">Versand per Post</p>
-                </div>
-                <div className="p-4 bg-stone-50 rounded-xl">
-                  <h3 className="font-medium text-stone-800 mb-2">EU & Schweiz</h3>
-                  <p className="text-stone-600 text-sm">in Zukunft möglich</p>
-                </div>
+              <div className="p-4 bg-stone-50 rounded-xl">
+                <h3 className="font-medium text-stone-800 mb-2">Lieferung innerhalb Österreichs</h3>
+                <p className="text-stone-600 text-sm">
+                  Wir versenden per Post ausschließlich an Adressen in Österreich. Ein Versand ins Ausland ist nicht
+                  möglich.
+                </p>
               </div>
 
               <div className="border-t border-stone-200 pt-6">
@@ -64,7 +62,9 @@ export default function ShippingPage() {
                   <div>
                     <h3 className="font-medium text-stone-800 mb-1">Lieferzeit</h3>
                     <p className="text-stone-600 text-sm">
-                      Innerhalb Österreichs: 2-4 Werktage
+                      Mit einer Lieferzeit von etwa{" "}
+                      <span className="font-medium text-stone-700">2 Wochen</span> ab Versand Ihrer Bestellung können
+                      Sie rechnen.
                     </p>
                   </div>
                 </div>

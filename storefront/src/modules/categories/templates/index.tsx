@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
-import InteractiveLink from "@modules/common/components/interactive-link"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -10,6 +9,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { HttpTypes } from "@medusajs/types"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
 import { ProductFilters } from "@modules/store/templates"
+import { DynamicFilterOptions } from "@lib/data/filter-options"
 
 export default function CategoryTemplate({
   category,
@@ -17,12 +17,14 @@ export default function CategoryTemplate({
   page,
   countryCode,
   filters,
+  filterOptions,
 }: {
   category: HttpTypes.StoreProductCategory
   sortBy?: SortOptions
   page?: string
   countryCode: string
   filters?: ProductFilters
+  filterOptions: DynamicFilterOptions
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
@@ -88,7 +90,7 @@ export default function CategoryTemplate({
           {/* Filters Sidebar - Desktop/Tablet */}
           <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
             <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5">
-              <RefinementList sortBy={sort} filters={filters} data-testid="sort-by-container" />
+              <RefinementList sortBy={sort} filters={filters} filterOptions={filterOptions} hideCategories data-testid="sort-by-container" />
             </div>
           </aside>
 
@@ -128,7 +130,7 @@ export default function CategoryTemplate({
             {/* Mobile/Tablet Filter Bar */}
             <div className="small:hidden mb-4">
               <div className="flex items-center gap-3">
-                <MobileFilterDrawer sortBy={sort} filters={filters} />
+                <MobileFilterDrawer sortBy={sort} filters={filters} filterOptions={filterOptions} hideCategories />
               </div>
             </div>
 
@@ -146,6 +148,7 @@ export default function CategoryTemplate({
                 categoryId={category.id}
                 countryCode={countryCode}
                 filters={filters}
+                filterOptions={filterOptions}
               />
             </Suspense>
           </main>

@@ -67,7 +67,17 @@ const medusaConfig = {
             id: 'sendcloud',
             options: {
               public_key: SENDCLOUD_PUBLIC_KEY,
-              secret_key: SENDCLOUD_SECRET_KEY
+              secret_key: SENDCLOUD_SECRET_KEY,
+              carrier_groups: [
+                {
+                  id: "dpd_at_classic",
+                  name: "DPD AT Classic",
+                  methods: [
+                    { sendcloud_id: 2799, name: "DPD AT Classic KP", min_weight_kg: 0.001, max_weight_kg: 3.001 },
+                    { sendcloud_id: 2794, name: "DPD AT Classic", min_weight_kg: 3.001, max_weight_kg: 31.501 },
+                  ]
+                },
+              ],
             }
           },
           {

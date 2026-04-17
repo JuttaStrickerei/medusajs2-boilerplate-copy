@@ -1,19 +1,80 @@
 // src/modules/sendcloud/types.ts
+
+// ──────────────────────────────────────────────────────────────
+// Carrier Group Types (weight-based dynamic method selection)
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * A single Sendcloud shipping method within a carrier group,
+ * identified by its Sendcloud method ID and a weight range in KG.
+ *
+ * Weight boundaries are inclusive on both sides: min <= weight <= max.
+ */
+export type CarrierGroupMethod = {
+  sendcloud_id: number
+  name?: string
+  min_weight_kg: number
+  max_weight_kg: number
+}
+
+/**
+ * A carrier group bundles multiple Sendcloud shipping methods
+ * that belong to the same carrier/service but cover different weight tiers.
+ *
+ * Configured in medusa-config.js under the sendcloud provider options.
+ */
+export type CarrierGroup = {
+  id: string
+  name: string
+  methods: CarrierGroupMethod[]
+}
+
+/**
+ * Shape of the data field stored in a shipping option when a carrier group
+ * fulfillment option is selected. The `carrier_group` flag distinguishes
+ * it from legacy single-method data.
+ */
+export type CarrierGroupData = {
+  carrier_group: true
+  carrier_group_id: string
+  carrier_group_name: string
+  sendcloud_id: number
+  methods: CarrierGroupMethod[]
+  countries: SendcloudCountry[]
+  is_return: boolean
+}
+
+/**
+ * Result of the weight-based method selection.
+ */
+export type WeightMethodSelection = {
+  sendcloud_id: number
+  method_name: string
+  min_weight_kg: number
+  max_weight_kg: number
+  actual_weight_kg: number
+}
+
+// ──────────────────────────────────────────────────────────────
+// Module Options
+// ──────────────────────────────────────────────────────────────
+
 export type SendcloudOptions = {
   public_key: string
   secret_key: string
-  brand_domain?: string;
+  brand_domain?: string
+  carrier_groups?: CarrierGroup[]
   return_address?: {
-    name: string;
-    company_name?: string;
-    address: string;
-    house_number: string;
-    city: string;
-    postal_code: string;
-    country: string;
-    email?: string;
-    telephone?: string;
-  };
+    name: string
+    company_name?: string
+    address: string
+    house_number: string
+    city: string
+    postal_code: string
+    country: string
+    email?: string
+    telephone?: string
+  }
 }
 
 // Price and Currency Types

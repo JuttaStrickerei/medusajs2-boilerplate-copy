@@ -7,12 +7,20 @@ import { cn } from "@lib/utils"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
+  thumbnail?: string | null
 }
 
-const ImageGallery = ({ images }: ImageGalleryProps) => {
+const ImageGallery = ({ images: rawImages, thumbnail }: ImageGalleryProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
+
+  const images =
+    rawImages && rawImages.length > 0
+      ? rawImages
+      : thumbnail
+        ? [{ id: "thumbnail", url: thumbnail } as HttpTypes.StoreProductImage]
+        : []
 
   const selectedImage = images[selectedIndex]
 
@@ -26,18 +34,18 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
 
   if (!images || images.length === 0) {
     return (
-      <div className="aspect-product bg-stone-100 rounded-2xl flex items-center justify-center">
+      <div className="aspect-square bg-stone-100 rounded-2xl flex items-center justify-center">
         <span className="text-stone-400">Kein Bild verfügbar</span>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {/* Main Image */}
       <div
         className={cn(
-          "relative aspect-product bg-stone-100 rounded-2xl overflow-hidden",
+          "group relative aspect-square bg-stone-100 rounded-2xl overflow-hidden",
           "cursor-zoom-in transition-shadow duration-300",
           "hover:shadow-lg"
         )}
@@ -48,7 +56,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
         {selectedImage?.url && (
           <Image
             src={selectedImage.url}
-            alt={`Product image ${selectedIndex + 1}`}
+            alt={`Produktbild ${selectedIndex + 1}`}
             fill
             priority={selectedIndex === 0}
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -66,11 +74,13 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
           />
         )}
 
-        {/* Image Navigation Arrows */}
         {images.length > 1 && (
           <>
             <button
-              onClick={() => setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))}
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+              }}
               className={cn(
                 "absolute left-3 top-1/2 -translate-y-1/2 z-10",
                 "w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-md",
@@ -86,7 +96,10 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
               </svg>
             </button>
             <button
-              onClick={() => setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))}
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+              }}
               className={cn(
                 "absolute right-3 top-1/2 -translate-y-1/2 z-10",
                 "w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-md",
@@ -104,7 +117,6 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
           </>
         )}
 
-        {/* Image Counter */}
         {images.length > 1 && (
           <div className="absolute bottom-3 right-3 z-10 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-stone-600">
             {selectedIndex + 1} / {images.length}
@@ -114,26 +126,26 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
 
       {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
           {images.map((image, index) => (
             <button
               key={image.id}
               onClick={() => setSelectedIndex(index)}
               className={cn(
-                "relative flex-shrink-0 w-20 h-24 rounded-lg overflow-hidden",
-                "transition-all duration-200",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400",
+                "relative flex-shrink-0 w-[72px] h-[88px] rounded-lg overflow-hidden",
+                "transition-all duration-200 border-2",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-stone-400",
                 selectedIndex === index
-                  ? "ring-2 ring-stone-800 opacity-100"
-                  : "ring-1 ring-stone-200 opacity-60 hover:opacity-100 hover:ring-stone-300"
+                  ? "border-stone-800 opacity-100"
+                  : "border-transparent opacity-70 hover:opacity-100"
               )}
             >
               {image.url && (
                 <Image
                   src={image.url}
-                  alt={`Thumbnail ${index + 1}`}
+                  alt={`Vorschau ${index + 1}`}
                   fill
-                  sizes="80px"
+                  sizes="72px"
                   className="object-cover"
                 />
               )}

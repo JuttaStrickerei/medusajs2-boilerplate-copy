@@ -3,74 +3,112 @@
 import Back from "@modules/common/icons/back"
 import FastDelivery from "@modules/common/icons/fast-delivery"
 import Refresh from "@modules/common/icons/refresh"
-
-import Accordion from "./accordion"
 import { HttpTypes } from "@medusajs/types"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
 }
 
-const ProductTabs = ({ product }: ProductTabsProps) => {
-  const tabs = [
-    {
-      label: "Product Information",
-      component: <ProductInfoTab product={product} />,
-    },
-    {
-      label: "Shipping & Returns",
-      component: <ShippingInfoTab />,
-    },
-  ]
-
-  return (
-    <div className="w-full">
-      <Accordion type="multiple">
-        {tabs.map((tab, i) => (
-          <Accordion.Item
-            key={i}
-            title={tab.label}
-            headingSize="medium"
-            value={tab.label}
-          >
-            {tab.component}
-          </Accordion.Item>
-        ))}
-      </Accordion>
-    </div>
-  )
+type ProductDetail = {
+  label: string
+  value: string
 }
 
-const ProductInfoTab = ({ product }: ProductTabsProps) => {
+function getProductDetails(product: HttpTypes.StoreProduct): ProductDetail[] {
+  const details: ProductDetail[] = []
+
+  if (product.material) {
+    details.push({ label: "Material", value: product.material })
+  }
+  if (product.origin_country) {
+    details.push({ label: "Herkunftsland", value: product.origin_country })
+  }
+  if (product.type?.value) {
+    details.push({ label: "Produkttyp", value: product.type.value })
+  }
+  if (product.weight) {
+    details.push({ label: "Gewicht", value: `${product.weight} g` })
+  }
+  if (product.length && product.width && product.height) {
+    details.push({
+      label: "Maße",
+      value: `${product.length} × ${product.width} × ${product.height} cm`,
+    })
+  }
+
+  return details
+}
+
+const ProductTabs = ({ product }: ProductTabsProps) => {
+  const details = getProductDetails(product)
+  const hasDetails = details.length > 0
+
   return (
-    <div className="text-small-regular py-8">
-      <div className="grid grid-cols-2 gap-x-8">
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Material</span>
-            <p>{product.material ? product.material : "-"}</p>
+    <div className="grid grid-cols-1 medium:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      {/* Produktdetails Card */}
+      {hasDetails && (
+        <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-stone-800 tracking-wide uppercase">
+                Produktdetails
+              </h3>
+            </div>
           </div>
-          <div>
-            <span className="font-semibold">Country of origin</span>
-            <p>{product.origin_country ? product.origin_country : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Type</span>
-            <p>{product.type ? product.type.value : "-"}</p>
+          <div className="px-6 py-5">
+            <div className="space-y-0 divide-y divide-stone-100">
+              {details.map((detail) => (
+                <div
+                  key={detail.label}
+                  className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+                >
+                  <span className="text-sm text-stone-500">{detail.label}</span>
+                  <span className="text-sm font-medium text-stone-800">
+                    {detail.value}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Weight</span>
-            <p>{product.weight ? `${product.weight} g` : "-"}</p>
+      )}
+
+      {/* Versand & Retouren Card */}
+      <div className={`bg-white rounded-2xl border border-stone-200 overflow-hidden ${!hasDetails ? "medium:col-span-2 max-w-lg mx-auto w-full" : ""}`}>
+        <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold text-stone-800 tracking-wide uppercase">
+              Versand & Retouren
+            </h3>
           </div>
-          <div>
-            <span className="font-semibold">Dimensions</span>
-            <p>
-              {product.length && product.width && product.height
-                ? `${product.length}L x ${product.width}W x ${product.height}H`
-                : "-"}
-            </p>
+        </div>
+        <div className="px-6 py-5">
+          <div className="space-y-5">
+            <ShippingItem
+              icon={<FastDelivery />}
+              title="Lieferung"
+              description="Etwa 2 Wochen — Versand innerhalb Österreichs, bequem zu Ihnen nach Hause."
+            />
+            <ShippingItem
+              icon={<Refresh />}
+              title="Einfacher Umtausch"
+              description="Passt nicht? Wir tauschen unkompliziert."
+            />
+            <ShippingItem
+              icon={<Back />}
+              title="Unkomplizierte Retouren"
+              description="Kostenlose Rücksendung innerhalb von 30 Tagen."
+            />
           </div>
         </div>
       </div>
@@ -78,41 +116,27 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
   )
 }
 
-const ShippingInfoTab = () => {
+function ShippingItem({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode
+  title: string
+  description: string
+}) {
   return (
-    <div className="text-small-regular py-8">
-      <div className="grid grid-cols-1 gap-y-8">
-        <div className="flex items-start gap-x-2">
-          <FastDelivery />
-          <div>
-            <span className="font-semibold">Fast delivery</span>
-            <p className="max-w-sm">
-              Your package will arrive in 3-5 business days at your pick up
-              location or in the comfort of your home.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-x-2">
-          <Refresh />
-          <div>
-            <span className="font-semibold">Simple exchanges</span>
-            <p className="max-w-sm">
-              Is the fit not quite right? No worries - we&apos;ll exchange your
-              product for a new one.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-x-2">
-          <Back />
-          <div>
-            <span className="font-semibold">Easy returns</span>
-            <p className="max-w-sm">
-              Just return your product and we&apos;ll refund your money. No
-              questions asked – we&apos;ll do our best to make sure your return
-              is hassle-free.
-            </p>
-          </div>
-        </div>
+    <div className="flex items-start gap-3">
+      <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-stone-100 flex items-center justify-center text-stone-500">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <span className="text-sm font-medium text-stone-800 block">
+          {title}
+        </span>
+        <span className="text-xs text-stone-500 leading-relaxed">
+          {description}
+        </span>
       </div>
     </div>
   )
