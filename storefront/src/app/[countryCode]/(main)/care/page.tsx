@@ -43,73 +43,66 @@ export default function CarePage() {
             <h2 className="font-serif text-xl font-medium text-stone-800 mb-6">
               Allgemeine Pflegetipps
             </h2>
-            <div className="prose prose-stone max-w-none">
-              <ul className="text-stone-600 space-y-3">
-                <li>Waschen Sie Strickwaren nur wenn nötig - oft reicht Lüften an der frischen Luft</li>
-                <li>Verwenden Sie immer ein spezielles Wollwaschmittel</li>
-                <li>Niemals auswringen - sanft in ein Handtuch drücken</li>
-                <li>Liegend trocknen, um die Form zu erhalten</li>
-                <li>Nicht im direkten Sonnenlicht trocknen</li>
-                <li>Bei Bedarf auf niedriger Stufe dämpfen, nicht bügeln</li>
-              </ul>
-            </div>
+            <ul className="text-stone-600 text-sm leading-relaxed space-y-3 list-disc pl-5 marker:text-stone-400">
+              <li>Waschen Sie Strickwaren nur wenn nötig – oft reicht Lüften an der frischen Luft</li>
+              <li>Verwenden Sie immer ein spezielles Wollwaschmittel</li>
+              <li>Niemals auswringen – sanft in ein Handtuch drücken</li>
+              <li>Liegend trocknen, um die Form zu erhalten</li>
+              <li>Nicht im direkten Sonnenlicht trocknen</li>
+              <li>Bei Bedarf auf niedriger Stufe dämpfen, nicht bügeln</li>
+            </ul>
           </div>
 
           {/* Material Specific */}
           <div className="space-y-6">
             <div className="bg-white rounded-2xl border border-stone-200 p-8">
-              <h3 className="font-medium text-stone-800 mb-4 text-lg">Merinowolle</h3>
-              <div className="text-stone-600 text-sm space-y-2">
-                <p><strong>Waschen:</strong> Handwäsche oder Wollwaschgang bei max. 30°C</p>
-                <p><strong>Trocknen:</strong> Liegend trocknen, nicht im Trockner</p>
-                <p><strong>Lagerung:</strong> Gefaltet lagern, nie aufhängen (Ausleiern)</p>
-                <p><strong>Pilling:</strong> Leichtes Pilling ist normal, mit Wollkamm entfernen</p>
+              <h2 className="font-serif text-xl font-medium text-stone-800 mb-6">
+                Merinowolle
+              </h2>
+              <div className="text-stone-600 text-sm leading-relaxed space-y-3">
+                <p>
+                  <span className="font-medium text-stone-700">Waschen:</span>{" "}
+                  Handwäsche oder Wollwaschgang bei max. 30&nbsp;°C
+                </p>
+                <p>
+                  <span className="font-medium text-stone-700">Trocknen:</span>{" "}
+                  Liegend trocknen, nicht im Trockner
+                </p>
+                <p>
+                  <span className="font-medium text-stone-700">Lagerung:</span>{" "}
+                  Gefaltet lagern, nie aufhängen (Ausleiern)
+                </p>
+                <p>
+                  <span className="font-medium text-stone-700">Pilling:</span>{" "}
+                  Leichtes Pilling ist normal, mit Wollkamm entfernen
+                </p>
               </div>
             </div>
 
             <div className="bg-white rounded-2xl border border-stone-200 p-8">
-              <h3 className="font-medium text-stone-800 mb-4 text-lg">Kaschmir</h3>
-              <div className="text-stone-600 text-sm space-y-2">
-                <p><strong>Waschen:</strong> Handwäsche bei max. 30°C mit Kaschmirwaschmittel</p>
-                <p><strong>Trocknen:</strong> Liegend auf einem Handtuch trocknen</p>
-                <p><strong>Lagerung:</strong> In Seidenpapier einwickeln, mit Zedernholz gegen Motten</p>
-                <p><strong>Besonderheit:</strong> Nach dem ersten Tragen 24h ruhen lassen</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-stone-200 p-8">
-              <h3 className="font-medium text-stone-800 mb-4 text-lg">Alpaka</h3>
-              <div className="text-stone-600 text-sm space-y-2">
-                <p><strong>Waschen:</strong> Handwäsche oder Wollwaschgang bei max. 30°C</p>
-                <p><strong>Trocknen:</strong> Liegend trocknen, Form zurechtzupfen</p>
-                <p><strong>Lagerung:</strong> Gefaltet und luftig lagern</p>
-                <p><strong>Besonderheit:</strong> Alpaka ist von Natur aus geruchsresistent</p>
+              <h2 className="font-serif text-xl font-medium text-stone-800 mb-6">
+                Kaschmir
+              </h2>
+              <div className="text-stone-600 text-sm leading-relaxed space-y-3">
+                <p>
+                  <span className="font-medium text-stone-700">Waschen:</span>{" "}
+                  Handwäsche bei max. 30&nbsp;°C mit Kaschmirwaschmittel
+                </p>
+                <p>
+                  <span className="font-medium text-stone-700">Trocknen:</span>{" "}
+                  Liegend auf einem Handtuch trocknen
+                </p>
+                <p>
+                  <span className="font-medium text-stone-700">Lagerung:</span>{" "}
+                  In Seidenpapier einwickeln, mit Zedernholz gegen Motten
+                </p>
+                <p>
+                  <span className="font-medium text-stone-700">Besonderheit:</span>{" "}
+                  Nach dem ersten Tragen 24&nbsp;h ruhen lassen
+                </p>
               </div>
             </div>
           </div>
-
-            {/* Symbols */}
-            <div className="mt-8 bg-stone-100 rounded-2xl p-8">
-              <h3 className="font-medium text-stone-800 mb-4">Pflegesymbole</h3>
-              <div className="grid grid-cols-2 small:grid-cols-4 gap-4 text-center text-sm">
-                <div className="p-3 bg-white rounded-xl">
-                  <div className="text-2xl mb-2">🧼</div>
-                  <p className="text-stone-600">Handwäsche</p>
-                </div>
-                <div className="p-3 bg-white rounded-xl">
-                  <div className="text-2xl mb-2">❄️</div>
-                  <p className="text-stone-600">Kalt waschen</p>
-                </div>
-                <div className="p-3 bg-white rounded-xl">
-                  <div className="text-2xl mb-2">🚫</div>
-                  <p className="text-stone-600">Kein Trockner</p>
-                </div>
-                <div className="p-3 bg-white rounded-xl">
-                  <div className="text-2xl mb-2">↔️</div>
-                  <p className="text-stone-600">Liegend trocknen</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -44,6 +44,9 @@ export default async function OrderCompletedTemplate({
             <p className="text-stone-600">
               Ihre Bestellung wurde erfolgreich aufgegeben.
             </p>
+            <p className="text-stone-500 text-sm mt-3 max-w-md mx-auto">
+              Voraussichtliche Lieferzeit: ca. 2 Wochen ab Versand (Lieferung nur innerhalb Österreichs).
+            </p>
           </div>
           
           <OrderDetails order={order} />

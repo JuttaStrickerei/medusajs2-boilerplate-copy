@@ -42,7 +42,7 @@ const CheckoutSummary = ({ cart }: { cart: any }) => {
         <div className="flex items-center justify-around text-center">
           <TrustBadgeSmall icon={<Shield size={18} />} text="Sicher" />
           <div className="w-px h-8 bg-stone-200" />
-          <TrustBadgeSmall icon={<Truck size={18} />} text="Schnell" />
+          <TrustBadgeSmall icon={<Truck size={18} />} text="ca. 2 Wochen" />
           <div className="w-px h-8 bg-stone-200" />
           <TrustBadgeSmall icon={<RefreshCw size={18} />} text="30 Tage" />
         </div>

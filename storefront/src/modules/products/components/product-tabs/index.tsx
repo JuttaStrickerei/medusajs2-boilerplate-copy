@@ -96,8 +96,8 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
           <div className="space-y-5">
             <ShippingItem
               icon={<FastDelivery />}
-              title="Schnelle Lieferung"
-              description="3–5 Werktage — bequem zu Ihnen nach Hause."
+              title="Lieferung"
+              description="Etwa 2 Wochen — Versand innerhalb Österreichs, bequem zu Ihnen nach Hause."
             />
             <ShippingItem
               icon={<Refresh />}

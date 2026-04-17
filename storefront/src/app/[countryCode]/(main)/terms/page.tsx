@@ -69,9 +69,10 @@ export default function TermsPage() {
                 §4 Lieferung
               </h2>
               <p className="text-stone-600 mb-4">
-                Die Lieferung erfolgt an die von Ihnen angegebene Lieferadresse. 
-                Lieferzeiten werden während des Bestellvorgangs angegeben und sind 
-                unverbindlich, sofern nicht ausdrücklich als verbindlich bezeichnet.
+                Die Lieferung erfolgt ausschließlich an Adressen in Österreich, an die von Ihnen angegebene
+                Lieferadresse. Die übliche Lieferzeit beträgt etwa zwei Wochen ab Versand der Ware. Hinweise im
+                Bestellvorgang und in der Auftragsbestätigung gelten ergänzend; sie sind unverbindlich, sofern nicht
+                ausdrücklich als verbindlich bezeichnet.
               </p>
 
               <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">

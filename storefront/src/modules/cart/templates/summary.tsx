@@ -46,6 +46,10 @@ const Summary = ({ cart, isAuthenticated = false }: SummaryProps) => {
         taxIncluded={cart.region?.automatic_taxes !== false}
       />
 
+      <p className="text-xs text-stone-500 leading-relaxed">
+        Lieferung innerhalb Österreichs: voraussichtlich ca. 2 Wochen ab Versand.
+      </p>
+
       {/* Checkout Button */}
       <CheckoutButton 
         cart={cart}
