@@ -107,7 +107,7 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
             <ShippingItem
               icon={<Back />}
               title="Unkomplizierte Retouren"
-              description="Kostenlose Rücksendung innerhalb von 30 Tagen."
+              description="Rücksendung innerhalb von 30 Tagen möglich."
             />
           </div>
         </div>

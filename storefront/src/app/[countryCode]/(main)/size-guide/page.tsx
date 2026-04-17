@@ -1,11 +1,58 @@
 import { Metadata } from "next"
+import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Ruler } from "@components/icons"
 
 export const metadata: Metadata = {
   title: "Größenberatung",
-  description: "Finden Sie Ihre perfekte Größe mit unserer Größentabelle und Messanleitung.",
+  description: "Finden Sie Ihre perfekte Größe mit unserer Maßtabelle und Messanleitung.",
 }
+
+/** Unter der zweiten Kopfzeile nur XS–XXL; 3XL sitzt im ersten Kopf mit rowSpan. */
+const sizeSubColumns = ["XS", "S", "M", "L", "XL", "XXL"] as const
+
+const measureRows: { label: string; values: string[] }[] = [
+  {
+    label: "A1 – Brustumfang (cm)",
+    values: ["78-82", "83-87", "88-92", "93-97", "98-103", "104-109", "110-115"],
+  },
+  {
+    label: "A2 – Unterbrustumfang (cm)",
+    values: ["63-67", "68-72", "73-77", "78-82", "83-87", "88-92", "93-97"],
+  },
+  {
+    label: "B – Taillenumfang (cm)",
+    values: ["64-68", "69-73", "74-78", "79-83", "84-90", "91-97", "98-104"],
+  },
+  {
+    label: "C – Hüftumfang (cm)",
+    values: ["87-91", "92-96", "97-101", "102-106", "107-111", "112-117", "118-122"],
+  },
+  {
+    label: "D – Armlänge (cm)",
+    values: [
+      "59-60",
+      "59-60",
+      "59-60",
+      "60,5-61,5",
+      "60,5-61,5",
+      "62-63",
+      "62-63",
+    ],
+  },
+  {
+    label: "E – Innere Beinlänge (cm)",
+    values: [
+      "79-80",
+      "79-80",
+      "80,5-81,5",
+      "80,5-81,5",
+      "82-83",
+      "82-83",
+      "82-83",
+    ],
+  },
+]
 
 export default function SizeGuidePage() {
   return (
@@ -35,106 +82,105 @@ export default function SizeGuidePage() {
                 Größenberatung
               </h1>
               <p className="text-stone-600 max-w-xl mx-auto">
-                Finden Sie Ihre perfekte Größe mit unserer Anleitung.
+                Finden Sie Ihre perfekte Größe mit unserer Maßtabelle und Messanleitung.
               </p>
             </div>
 
-          {/* Measuring Guide */}
-          <div className="bg-white rounded-2xl border border-stone-200 p-8 mb-8">
-            <h2 className="font-serif text-xl font-medium text-stone-800 mb-6 flex items-center gap-3">
-              <Ruler size={24} />
-              So messen Sie richtig
-            </h2>
-
-            <div className="grid grid-cols-1 small:grid-cols-3 gap-6">
-              <div className="text-center p-4 bg-stone-50 rounded-xl">
-                <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-3 text-stone-600 font-medium">
-                  1
-                </div>
-                <h3 className="font-medium text-stone-800 mb-2">Brustumfang</h3>
-                <p className="text-sm text-stone-600">
-                  Messen Sie um die stärkste Stelle der Brust, unter den Armen.
-                </p>
-              </div>
-              <div className="text-center p-4 bg-stone-50 rounded-xl">
-                <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-3 text-stone-600 font-medium">
-                  2
-                </div>
-                <h3 className="font-medium text-stone-800 mb-2">Taillenumfang</h3>
-                <p className="text-sm text-stone-600">
-                  Messen Sie um die schmalste Stelle Ihrer Taille.
-                </p>
-              </div>
-              <div className="text-center p-4 bg-stone-50 rounded-xl">
-                <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-3 text-stone-600 font-medium">
-                  3
-                </div>
-                <h3 className="font-medium text-stone-800 mb-2">Hüftumfang</h3>
-                <p className="text-sm text-stone-600">
-                  Messen Sie um die breiteste Stelle der Hüfte.
-                </p>
+            {/* Messanleitung – Bild */}
+            <div className="bg-white rounded-2xl border border-stone-200 p-8 mb-8">
+              <h2 className="font-serif text-xl font-medium text-stone-800 mb-6 flex items-center gap-3">
+                <Ruler size={24} />
+                So messen Sie richtig
+              </h2>
+              <div className="relative w-full max-w-xl mx-auto aspect-[550/780]">
+                <Image
+                  src="/images/size-guide/maßtabelle_damen.webp"
+                  alt="Messanleitung: A1 Brustumfang, A2 Unterbrustumfang, B Taille, C Hüfte, D Armlänge, E innere Beinlänge"
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 100vw, 550px"
+                  priority
+                />
               </div>
             </div>
-          </div>
 
-          {/* Size Table - Damen */}
-          <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-8">
-            <h2 className="font-serif text-lg font-medium text-stone-800 px-6 py-4 bg-stone-50 border-b border-stone-200">
-              Damen Größentabelle
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-stone-50 border-b border-stone-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">Größe</th>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">EU</th>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">Brust (cm)</th>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">Taille (cm)</th>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">Hüfte (cm)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-100">
-                  <tr><td className="px-6 py-3 font-medium">XS</td><td className="px-6 py-3">34</td><td className="px-6 py-3">80-84</td><td className="px-6 py-3">62-66</td><td className="px-6 py-3">88-92</td></tr>
-                  <tr><td className="px-6 py-3 font-medium">S</td><td className="px-6 py-3">36</td><td className="px-6 py-3">84-88</td><td className="px-6 py-3">66-70</td><td className="px-6 py-3">92-96</td></tr>
-                  <tr><td className="px-6 py-3 font-medium">M</td><td className="px-6 py-3">38</td><td className="px-6 py-3">88-92</td><td className="px-6 py-3">70-74</td><td className="px-6 py-3">96-100</td></tr>
-                  <tr><td className="px-6 py-3 font-medium">L</td><td className="px-6 py-3">40</td><td className="px-6 py-3">92-96</td><td className="px-6 py-3">74-78</td><td className="px-6 py-3">100-104</td></tr>
-                  <tr><td className="px-6 py-3 font-medium">XL</td><td className="px-6 py-3">42</td><td className="px-6 py-3">96-102</td><td className="px-6 py-3">78-84</td><td className="px-6 py-3">104-110</td></tr>
-                </tbody>
-              </table>
+            {/* Maßtabelle */}
+            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-8">
+              <h2 className="font-serif text-lg font-medium text-stone-800 px-6 py-4 bg-stone-50 border-b border-stone-200">
+                Maßtabelle
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead className="bg-stone-50">
+                    <tr className="border-b border-stone-200">
+                      <th
+                        rowSpan={2}
+                        className="border border-stone-200 px-4 py-3 text-left font-medium text-stone-800 align-middle bg-stone-50"
+                      >
+                        Größe
+                      </th>
+                      <th
+                        colSpan={2}
+                        className="border border-stone-200 px-3 py-2 text-center font-medium text-stone-700"
+                      >
+                        XS/S
+                      </th>
+                      <th
+                        colSpan={2}
+                        className="border border-stone-200 px-3 py-2 text-center font-medium text-stone-700"
+                      >
+                        M/L
+                      </th>
+                      <th
+                        colSpan={2}
+                        className="border border-stone-200 px-3 py-2 text-center font-medium text-stone-700"
+                      >
+                        XL/XXL
+                      </th>
+                      <th
+                        rowSpan={2}
+                        className="border border-stone-200 px-3 py-2 text-center font-medium text-stone-700 align-middle bg-stone-50"
+                      >
+                        3XL
+                      </th>
+                    </tr>
+                    <tr className="border-b border-stone-200">
+                      {sizeSubColumns.map((s) => (
+                        <th
+                          key={s}
+                          className="border border-stone-200 px-3 py-2 text-center font-medium text-stone-800"
+                        >
+                          {s}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {measureRows.map((row) => (
+                      <tr key={row.label}>
+                        <th className="border border-stone-200 px-4 py-3 text-left font-medium text-stone-800 bg-white">
+                          {row.label}
+                        </th>
+                        {row.values.map((cell, i) => (
+                          <td
+                            key={`${row.label}-${i}`}
+                            className="border border-stone-200 px-3 py-3 text-center text-stone-600 tabular-nums"
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-
-          {/* Size Table - Herren */}
-          <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-8">
-            <h2 className="font-serif text-lg font-medium text-stone-800 px-6 py-4 bg-stone-50 border-b border-stone-200">
-              Herren Größentabelle
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-stone-50 border-b border-stone-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">Größe</th>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">EU</th>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">Brust (cm)</th>
-                    <th className="px-6 py-3 text-left font-medium text-stone-600">Taille (cm)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-100">
-                  <tr><td className="px-6 py-3 font-medium">S</td><td className="px-6 py-3">46</td><td className="px-6 py-3">92-96</td><td className="px-6 py-3">80-84</td></tr>
-                  <tr><td className="px-6 py-3 font-medium">M</td><td className="px-6 py-3">48</td><td className="px-6 py-3">96-100</td><td className="px-6 py-3">84-88</td></tr>
-                  <tr><td className="px-6 py-3 font-medium">L</td><td className="px-6 py-3">50</td><td className="px-6 py-3">100-104</td><td className="px-6 py-3">88-92</td></tr>
-                  <tr><td className="px-6 py-3 font-medium">XL</td><td className="px-6 py-3">52</td><td className="px-6 py-3">104-110</td><td className="px-6 py-3">92-98</td></tr>
-                  <tr><td className="px-6 py-3 font-medium">XXL</td><td className="px-6 py-3">54</td><td className="px-6 py-3">110-116</td><td className="px-6 py-3">98-104</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
 
             {/* Tips */}
             <div className="bg-stone-100 rounded-2xl p-8">
               <h3 className="font-medium text-stone-800 mb-4">Unsere Tipps</h3>
               <ul className="text-stone-600 text-sm space-y-2">
-                <li>• Strickwaren dehnen sich leicht - wählen Sie im Zweifel die kleinere Größe</li>
+                <li>• Strickwaren dehnen sich leicht – wählen Sie im Zweifel die kleinere Größe</li>
                 <li>• Für einen lockeren Sitz wählen Sie eine Größe größer</li>
                 <li>• Bei Fragen kontaktieren Sie unseren Kundenservice für persönliche Beratung</li>
               </ul>
@@ -145,4 +191,3 @@ export default function SizeGuidePage() {
     </div>
   )
 }
-

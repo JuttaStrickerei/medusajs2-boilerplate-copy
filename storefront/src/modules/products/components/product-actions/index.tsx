@@ -11,7 +11,15 @@ import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
-import { ShoppingBag, Heart, Share, Check, Minus, Plus } from "@components/icons"
+import {
+  ShoppingBag,
+  Heart,
+  Share,
+  Check,
+  Minus,
+  Plus,
+  Ruler,
+} from "@components/icons"
 import { triggerCartRefresh } from "@lib/context/cart-context"
 import { useWishlist } from "@lib/context/wishlist-context"
 
@@ -281,19 +289,23 @@ export default function ProductActions({
             {getButtonText()}
           </Button>
 
-          {/* Secondary Actions */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Secondary Actions — drei gleich breite Felder, Gesamtbreite wie „Bitte … wählen“-Button */}
+          <div className="grid grid-cols-3 gap-3">
             <Button
               variant="secondary"
               onClick={handleWishlistToggle}
               leftIcon={<Heart size={18} filled={isWishlisted} className={isWishlisted ? "text-red-500" : ""} />}
-              className={cn(isWishlisted && "border-red-200 bg-red-50")}
+              className={cn(
+                "w-full min-w-0 justify-center px-2 sm:px-3",
+                isWishlisted && "border-red-200 bg-red-50"
+              )}
             >
               {isWishlisted ? "Gemerkt" : "Merken"}
             </Button>
             <Button
               variant="secondary"
               leftIcon={<Share size={18} />}
+              className="w-full min-w-0 justify-center px-2 sm:px-3"
               onClick={() => {
                 if (navigator.share) {
                   navigator.share({
@@ -307,6 +319,27 @@ export default function ProductActions({
             >
               Teilen
             </Button>
+            <a
+              href={`/${countryCode}/size-guide`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "inline-flex items-center justify-center font-medium w-full min-w-0",
+                "transition-all duration-200 ease-out",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2",
+                "active:scale-[0.98]",
+                "bg-transparent text-stone-800 border border-stone-300",
+                "hover:bg-stone-50 hover:border-stone-400",
+                "active:bg-stone-100",
+                "h-10 px-2 sm:px-3 text-xs sm:text-sm rounded-lg gap-2",
+                "text-center"
+              )}
+            >
+              <span className="flex-shrink-0" aria-hidden>
+                <Ruler size={18} />
+              </span>
+              <span className="leading-tight">Größenberatung</span>
+            </a>
           </div>
         </div>
 
