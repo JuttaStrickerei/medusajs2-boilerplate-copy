@@ -4,11 +4,13 @@ import {
   ProviderUploadFileDTO,
   ProviderDeleteFileDTO,
   ProviderFileResultDTO,
-  ProviderGetFileDTO
+  ProviderGetFileDTO,
+  ProviderGetPresignedUploadUrlDTO
 } from '@medusajs/framework/types';
 import { Client } from 'minio';
 import path from 'path';
 import { ulid } from 'ulid';
+import { Readable } from 'stream';
 
 type InjectedDependencies = {
   logger: Logger
@@ -168,7 +170,18 @@ class MinioFileProviderService extends AbstractFileProviderService {
     try {
       const parsedFilename = path.parse(file.filename)
       const fileKey = `${parsedFilename.name}-${ulid()}${parsedFilename.ext}`
-      const content = Buffer.from(file.content, 'base64')
+
+      let content: Buffer
+      try {
+        const decoded = Buffer.from(file.content, 'base64')
+        if (decoded.toString('base64') === file.content) {
+          content = decoded
+        } else {
+          content = Buffer.from(file.content, 'utf8')
+        }
+      } catch {
+        content = Buffer.from(file.content, 'binary')
+      }
 
       // Upload file with public-read access
       await this.client.putObject(
@@ -277,6 +290,96 @@ class MinioFileProviderService extends AbstractFileProviderService {
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         `Failed to generate presigned URL: ${error.message}`
+      )
+    }
+  }
+
+  async getPresignedUploadUrl(
+    fileData: ProviderGetPresignedUploadUrlDTO
+  ): Promise<ProviderFileResultDTO> {
+    if (!fileData?.filename) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        'No filename provided'
+      )
+    }
+
+    try {
+      const parsedFilename = path.parse(fileData.filename)
+      const fileKey = `${parsedFilename.name}-${ulid()}${parsedFilename.ext}`
+      
+      const expiry = fileData.expiresIn || 3600
+      
+      const url = await this.client.presignedPutObject(
+        this.bucket,
+        fileKey,
+        expiry
+      )
+
+      this.logger_.info(`Generated presigned upload URL for file ${fileKey}`)
+
+      return {
+        url,
+        key: fileKey
+      }
+    } catch (error) {
+      this.logger_.error(`Failed to generate presigned upload URL: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Failed to generate presigned upload URL: ${error.message}`
+      )
+    }
+  }
+
+  async getDownloadStream(fileData: ProviderGetFileDTO): Promise<Readable> {
+    if (!fileData?.fileKey) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        'No fileKey provided'
+      )
+    }
+
+    try {
+      const stream = await this.client.getObject(this.bucket, fileData.fileKey)
+      this.logger_.info(`Generated download stream for file ${fileData.fileKey}`)
+      return stream
+    } catch (error) {
+      this.logger_.error(`Failed to get download stream: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Failed to get download stream: ${error.message}`
+      )
+    }
+  }
+
+  async getAsBuffer(fileData: ProviderGetFileDTO): Promise<Buffer> {
+    if (!fileData?.fileKey) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        'No fileKey provided'
+      )
+    }
+
+    try {
+      const stream = await this.client.getObject(this.bucket, fileData.fileKey)
+      const chunks: Buffer[] = []
+      
+      return new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(chunk))
+        stream.on('end', () => resolve(Buffer.concat(chunks)))
+        stream.on('error', (error) => {
+          this.logger_.error(`Failed to get file as buffer: ${error.message}`)
+          reject(new MedusaError(
+            MedusaError.Types.UNEXPECTED_STATE,
+            `Failed to get file as buffer: ${error.message}`
+          ))
+        })
+      })
+    } catch (error) {
+      this.logger_.error(`Failed to get file as buffer: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Failed to get file as buffer: ${error.message}`
       )
     }
   }
