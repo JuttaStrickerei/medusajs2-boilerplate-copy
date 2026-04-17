@@ -9,15 +9,60 @@ interface UploadImageListBody {
   csv: string
 }
 
-function parseCSV(content: string): { headers: string[]; rows: string[][] } {
+function normalizeCsvInput(content: string): string {
+  return content.replace(/^\uFEFF/, "")
+}
+
+function detectDelimiter(line: string): "," | ";" | "\t" {
+  const candidates: Array<"," | ";" | "\t"> = [",", ";", "\t"]
+  let best: "," | ";" | "\t" = ","
+  let bestCount = -1
+
+  for (const delimiter of candidates) {
+    let inQuotes = false
+    let count = 0
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i]
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          i++
+        } else {
+          inQuotes = !inQuotes
+        }
+      } else if (char === delimiter && !inQuotes) {
+        count++
+      }
+    }
+    if (count > bestCount) {
+      best = delimiter
+      bestCount = count
+    }
+  }
+
+  return best
+}
+
+function normalizeHeader(value: string): string {
+  return value
+    .replace(/\u00A0/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+}
+
+function parseCSV(
+  content: string,
+  explicitDelimiter?: "," | ";" | "\t"
+): { headers: string[]; rows: string[][]; delimiter: "," | ";" | "\t" } {
+  const normalized = normalizeCsvInput(content)
   const lines: string[] = []
   let current = ""
   let inQuotes = false
 
-  for (let i = 0; i < content.length; i++) {
-    const char = content[i]
+  for (let i = 0; i < normalized.length; i++) {
+    const char = normalized[i]
     if (char === '"') {
-      if (inQuotes && content[i + 1] === '"') {
+      if (inQuotes && normalized[i + 1] === '"') {
         current += '"'
         i++
       } else {
@@ -26,20 +71,21 @@ function parseCSV(content: string): { headers: string[]; rows: string[][] } {
     } else if ((char === "\n" || char === "\r") && !inQuotes) {
       if (current.trim()) lines.push(current)
       current = ""
-      if (char === "\r" && content[i + 1] === "\n") i++
+      if (char === "\r" && normalized[i + 1] === "\n") i++
     } else {
       current += char
     }
   }
   if (current.trim()) lines.push(current)
-  if (lines.length === 0) return { headers: [], rows: [] }
+  if (lines.length === 0) return { headers: [], rows: [], delimiter: "," }
 
-  const headers = parseLine(lines[0])
-  const rows = lines.slice(1).map((l) => parseLine(l))
-  return { headers, rows }
+  const delimiter = explicitDelimiter || detectDelimiter(lines[0])
+  const headers = parseLine(lines[0], delimiter)
+  const rows = lines.slice(1).map((l) => parseLine(l, delimiter))
+  return { headers, rows, delimiter }
 }
 
-function parseLine(line: string): string[] {
+function parseLine(line: string, delimiter: "," | ";" | "\t"): string[] {
   const result: string[] = []
   let current = ""
   let inQ = false
@@ -52,7 +98,7 @@ function parseLine(line: string): string[] {
       } else {
         inQ = !inQ
       }
-    } else if (c === "," && !inQ) {
+    } else if (c === delimiter && !inQ) {
       result.push(current)
       current = ""
     } else {
@@ -64,7 +110,8 @@ function parseLine(line: string): string[] {
 }
 
 function isGoogleDriveUrl(url: string): boolean {
-  return url.includes("drive.google.com")
+  const lower = url.toLowerCase()
+  return lower.includes("drive.google.com") || lower.includes("drive.usercontent.google.com")
 }
 
 function isValidUrl(value: string): boolean {
@@ -84,15 +131,39 @@ function extractGoogleDriveFileId(url: string): string | null {
 function getDirectDownloadUrl(driveUrl: string): string {
   const fileId = extractGoogleDriveFileId(driveUrl)
   if (!fileId) return driveUrl
-  return `https://drive.google.com/uc?export=download&id=${fileId}`
+  return `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`
 }
 
-function downloadFile(url: string, maxRedirects = 5): Promise<Buffer> {
+function getFallbackDownloadUrls(driveUrl: string): string[] {
+  const fileId = extractGoogleDriveFileId(driveUrl)
+  if (!fileId) return []
+  return [
+    `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`,
+    `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t&authuser=0`,
+  ]
+}
+
+const BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
+function isHtmlContent(buffer: Buffer): boolean {
+  const head = buffer.slice(0, 1500).toString("utf8").toLowerCase()
+  return (
+    head.includes("<!doctype") ||
+    head.includes("<html") ||
+    head.includes("<head") ||
+    head.includes("<script") ||
+    head.includes("virus scan warning") ||
+    head.includes("google-download-warning")
+  )
+}
+
+function downloadFile(url: string, maxRedirects = 10): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith("https") ? https : http
     const req = protocol.get(
       url,
-      { headers: { "User-Agent": "Mozilla/5.0" } },
+      { headers: { "User-Agent": BROWSER_UA } },
       (res) => {
         if (
           res.statusCode &&
@@ -111,19 +182,9 @@ function downloadFile(url: string, maxRedirects = 5): Promise<Buffer> {
         res.on("data", (chunk) => chunks.push(chunk))
         res.on("end", () => {
           const buffer = Buffer.concat(chunks)
-          const start = buffer.slice(0, 500).toString("utf8")
-          if (start.includes("<!DOCTYPE") || start.includes("<html")) {
-            const confirmMatch = start.match(/confirm=([a-zA-Z0-9_-]+)/)
-            if (confirmMatch) {
-              return resolve(
-                downloadFile(
-                  `${url}&confirm=${confirmMatch[1]}`,
-                  maxRedirects - 1
-                )
-              )
-            }
+          if (isHtmlContent(buffer)) {
             return reject(
-              new Error("Got HTML page instead of image - file may not be publicly shared")
+              new Error("Got HTML page instead of image - file may require confirmation or is not publicly shared")
             )
           }
           resolve(buffer)
@@ -132,11 +193,60 @@ function downloadFile(url: string, maxRedirects = 5): Promise<Buffer> {
       }
     )
     req.on("error", reject)
-    req.setTimeout(30000, () => {
+    req.setTimeout(60000, () => {
       req.destroy()
       reject(new Error(`Timeout downloading ${url}`))
     })
   })
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function downloadWithRetry(
+  url: string,
+  retries = 3,
+  delayMs = 2000
+): Promise<Buffer> {
+  let lastError: Error | undefined
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      return await downloadFile(url)
+    } catch (err) {
+      lastError = err as Error
+      const msg = lastError.message || ""
+      const isTransient =
+        msg.includes("ECONNRESET") ||
+        msg.includes("ETIMEDOUT") ||
+        msg.includes("ECONNREFUSED") ||
+        msg.includes("socket hang up") ||
+        msg.includes("Timeout")
+      if (!isTransient || attempt === retries - 1) break
+      await sleep(delayMs * (attempt + 1))
+    }
+  }
+  throw lastError!
+}
+
+async function downloadFromDrive(driveUrl: string): Promise<Buffer> {
+  const urls = [
+    getDirectDownloadUrl(driveUrl),
+    ...getFallbackDownloadUrls(driveUrl),
+  ]
+
+  let lastError: Error | undefined
+  for (const url of urls) {
+    try {
+      return await downloadWithRetry(url)
+    } catch (err) {
+      lastError = err as Error
+    }
+  }
+
+  throw new Error(
+    `All download attempts failed: ${lastError?.message || "unknown error"}`
+  )
 }
 
 function detectMimeType(buffer: Buffer): string {
@@ -179,16 +289,16 @@ export async function POST(
   const productService = req.scope.resolve(Modules.PRODUCT)
 
   try {
-    const { headers, rows } = parseCSV(csv)
+    const { headers, rows, delimiter } = parseCSV(csv)
+    const normalizedHeaders = headers.map(normalizeHeader)
 
-    const imageColumns = headers
+    const imageColumns = normalizedHeaders
       .map((h, idx) => ({ name: h, idx }))
       .filter(({ name }) => {
-        const lower = name.toLowerCase()
         return (
-          lower === "look img" ||
-          lower === "product thumbnail" ||
-          /^product image \d+ url$/.test(lower)
+          name === "look img" ||
+          name === "product thumbnail" ||
+          /^product image \d+ url$/.test(name)
         )
       })
 
@@ -219,8 +329,7 @@ export async function POST(
     for (const driveUrl of driveUrls) {
       const fileId = extractGoogleDriveFileId(driveUrl) || ulid()
       try {
-        const directUrl = getDirectDownloadUrl(driveUrl)
-        const buffer = await downloadFile(directUrl)
+        const buffer = await downloadFromDrive(driveUrl)
 
         if (buffer.length < 500) {
           downloadErrors.push(
@@ -260,14 +369,10 @@ export async function POST(
     }
 
     // Look up missing Product IDs by handle so the CSV can be used for import
-    const productIdIdx = headers.findIndex(
-      (h) => h.toLowerCase() === "product id"
-    )
-    const handleIdx = headers.findIndex(
-      (h) => h.toLowerCase() === "product handle"
-    )
-    const thumbnailIdx = headers.findIndex(
-      (h) => h.toLowerCase() === "product thumbnail"
+    const productIdIdx = normalizedHeaders.findIndex((h) => h === "product id")
+    const handleIdx = normalizedHeaders.findIndex((h) => h === "product handle")
+    const thumbnailIdx = normalizedHeaders.findIndex(
+      (h) => h === "product thumbnail"
     )
 
     // Collect all handles that are missing a Product Id
@@ -315,7 +420,8 @@ export async function POST(
 
       // Replace empty Product Id cells in the CSV for each handle we found
       if (handleToProductId.size > 0 && productIdIdx >= 0) {
-        const { rows: parsedRows } = parseCSV(processedCsv)
+        const { rows: parsedRows } = parseCSV(processedCsv, delimiter)
+        const escapedDelimiter = delimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
         for (const row of parsedRows) {
           const pid = row[productIdIdx]?.trim()
           const handle = row[handleIdx]?.trim()
@@ -326,10 +432,13 @@ export async function POST(
             const escapedHandle = handle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
             // Match: start of line (or after newline) with empty first field, then comma, then the handle
             const pattern = new RegExp(
-              `(^|\\n|\\r\\n)(,${escapedHandle},)`,
+              `(^|\\n|\\r\\n)(${escapedDelimiter}${escapedHandle}${escapedDelimiter})`,
               "g"
             )
-            processedCsv = processedCsv.replace(pattern, `$1${foundId},${handle},`)
+            processedCsv = processedCsv.replace(
+              pattern,
+              `$1${foundId}${delimiter}${handle}${delimiter}`
+            )
             idsFilledIn++
           }
         }
@@ -341,7 +450,7 @@ export async function POST(
     let productsFailed = 0
     const updateErrors: string[] = []
 
-    const { rows: updatedRows } = parseCSV(processedCsv)
+    const { rows: updatedRows } = parseCSV(processedCsv, delimiter)
 
     for (const row of updatedRows) {
       const productId = productIdIdx >= 0 ? row[productIdIdx]?.trim() : ""
@@ -364,7 +473,7 @@ export async function POST(
         thumbnailIdx >= 0 ? row[thumbnailIdx]?.trim() : undefined
       const thumbnail = rawThumbnail && isValidUrl(rawThumbnail) ? rawThumbnail : undefined
       const lookImgCol = imageColumns.find(
-        (c) => c.name.toLowerCase() === "look img"
+        (c) => c.name === "look img"
       )
       const rawLookImg = lookImgCol ? row[lookImgCol.idx]?.trim() : undefined
       const lookImgUrl = rawLookImg && isValidUrl(rawLookImg) ? rawLookImg : undefined
@@ -399,6 +508,7 @@ export async function POST(
       processedCsv,
       summary: {
         totalRows: rows.length,
+        delimiter,
         driveLinksFound: driveUrls.size,
         imagesUploaded: imagesProcessed,
         urlsReplaced: driveUrlToMinioUrl.size,
