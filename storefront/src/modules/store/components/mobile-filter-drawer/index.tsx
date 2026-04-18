@@ -318,22 +318,20 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
                 {/* Material Filter */}
                 {filterOptions.materials.length > 0 && (
                   <FilterSection title="Material" count={filters.materials.length} scrollable>
-                    <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
                       {filterOptions.materials.map((material) => (
-                        <label
+                        <button
                           key={material.value}
-                          className="flex items-center gap-3 cursor-pointer"
+                          onClick={() => toggleMaterial(material.value)}
+                          className={cn(
+                            "px-4 py-2 text-sm font-medium rounded-lg border transition-colors",
+                            filters.materials.includes(material.value)
+                              ? "bg-stone-800 text-white border-stone-800"
+                              : "bg-white text-stone-700 border-stone-300"
+                          )}
                         >
-                          <input
-                            type="checkbox"
-                            checked={filters.materials.includes(material.value)}
-                            onChange={() => toggleMaterial(material.value)}
-                            className="w-5 h-5 rounded border-stone-300 text-stone-800 focus:ring-stone-500"
-                          />
-                          <span className="text-base text-stone-700">
-                            {material.label}
-                          </span>
-                        </label>
+                          {material.label}
+                        </button>
                       ))}
                     </div>
                   </FilterSection>
