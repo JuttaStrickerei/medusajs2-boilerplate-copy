@@ -71,16 +71,20 @@ function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): bo
   return hasMatchingSize || hasSizeInVariant
 }
 
+function stripMaterialPercentage(raw: string): string {
+  return raw.replace(/^\d+\s*%\s*/, "").trim()
+}
+
 function matchesMaterialFilter(product: HttpTypes.StoreProduct, materials: string[]): boolean {
   if (!materials || materials.length === 0) return true
 
   const selectedMaterials = materials.map((m) => m.toLowerCase())
 
-  // Split product.material on comma to get individual materials
+  // Split product.material on comma, strip leading percentages, normalise to lowercase
   const rawMaterial = (product.material as string) || ""
   const productMaterials = rawMaterial
     .split(",")
-    .map((p) => p.trim().toLowerCase())
+    .map((p) => stripMaterialPercentage(p).toLowerCase())
     .filter(Boolean)
 
   // Check if any selected material matches any of the product's individual materials

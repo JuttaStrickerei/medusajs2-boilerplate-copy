@@ -50,8 +50,11 @@ const COLOR_HEX_MAP: Record<string, string> = {
   rot: "#dc2626",
   bordeaux: "#722f37",
   grün: "#16a34a",
+  oliv: "#6b8e23",
+  salbei: "#9caf88",
   gelb: "#eab308",
   rosa: "#f472b6",
+  lila: "#a855f7",
   black: "#1a1a1a",
   white: "#ffffff",
   grey: "#6b7280",
@@ -60,8 +63,12 @@ const COLOR_HEX_MAP: Record<string, string> = {
   blue: "#2563eb",
   red: "#dc2626",
   green: "#16a34a",
+  olive: "#6b8e23",
+  sage: "#9caf88",
   yellow: "#eab308",
   pink: "#f472b6",
+  purple: "#a855f7",
+  lilac: "#c084fc",
   kaschmir: "#e8dcc8",
   cashmere: "#e8dcc8",
   merino: "#f5f5dc",
@@ -150,6 +157,11 @@ function extractSizesFromProducts(products: HttpTypes.StoreProduct[]): SizeOptio
     })
 }
 
+/** Strips leading percentage like "100%", "20% ", "25 %" from a material string. */
+function stripMaterialPercentage(raw: string): string {
+  return raw.replace(/^\d+\s*%\s*/, "").trim()
+}
+
 function extractMaterialsFromProducts(products: HttpTypes.StoreProduct[]): MaterialOption[] {
   const materialSet = new Map<string, string>()
 
@@ -157,8 +169,8 @@ function extractMaterialsFromProducts(products: HttpTypes.StoreProduct[]): Mater
     const materialValue = product.material as string | undefined
     if (!materialValue?.trim()) continue
 
-    // Split comma-separated materials into individual entries
-    const parts = materialValue.split(",").map((p) => p.trim()).filter(Boolean)
+    // Split comma-separated materials and strip leading percentage
+    const parts = materialValue.split(",").map((p) => stripMaterialPercentage(p)).filter(Boolean)
 
     for (const part of parts) {
       const key = part.toLowerCase()

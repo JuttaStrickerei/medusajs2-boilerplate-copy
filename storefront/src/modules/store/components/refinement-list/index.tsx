@@ -269,22 +269,20 @@ const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, h
       {/* Material Filter */}
       {filterOptions.materials.length > 0 && (
         <FilterSection title="Material" count={filters.materials.length} scrollable>
-          <div className="space-y-2">
+          <div className="flex flex-wrap gap-1.5">
             {filterOptions.materials.map((material) => (
-              <label
+              <button
                 key={material.value}
-                className="flex items-center gap-2 cursor-pointer group"
+                onClick={() => toggleMaterial(material.value)}
+                className={cn(
+                  "px-2.5 py-1 text-xs font-medium rounded border transition-colors",
+                  filters.materials.includes(material.value)
+                    ? "bg-stone-800 text-white border-stone-800"
+                    : "bg-white text-stone-600 border-stone-300 hover:border-stone-500"
+                )}
               >
-                <input
-                  type="checkbox"
-                  checked={filters.materials.includes(material.value)}
-                  onChange={() => toggleMaterial(material.value)}
-                  className="w-4 h-4 rounded border-stone-300 text-stone-800 focus:ring-stone-500 focus:ring-offset-0"
-                />
-                <span className="text-sm text-stone-600 group-hover:text-stone-800 transition-colors">
-                  {material.label}
-                </span>
-              </label>
+                {material.label}
+              </button>
             ))}
           </div>
         </FilterSection>
