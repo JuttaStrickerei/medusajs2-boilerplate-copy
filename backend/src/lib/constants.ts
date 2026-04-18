@@ -124,6 +124,10 @@ export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === 'true'
  */
 export const SENDCLOUD_PUBLIC_KEY = process.env.SENDCLOUD_PUBLIC_KEY;
 export const SENDCLOUD_SECRET_KEY = process.env.SENDCLOUD_SECRET_KEY;
+// Webhook secret from Sendcloud Panel -> Settings -> Integrations -> Webhook signature key
+export const SENDCLOUD_WEBHOOK_SECRET = process.env.SENDCLOUD_WEBHOOK_SECRET;
+// Dev/local only: skip HMAC verification. NEVER set to "true" in production.
+export const SENDCLOUD_WEBHOOK_SKIP_VERIFY = process.env.SENDCLOUD_WEBHOOK_SKIP_VERIFY === "true";
 
 
 /**
