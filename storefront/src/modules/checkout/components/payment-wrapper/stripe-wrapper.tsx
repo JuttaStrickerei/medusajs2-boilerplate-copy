@@ -21,6 +21,9 @@ const StripeWrapper: React.FC<StripeWrapperProps> = ({
     clientSecret: paymentSession!.data?.client_secret as string | undefined,
     appearance: {
       theme: "stripe",
+      variables: {
+        colorPlaceholder: "#a8a29e",
+      },
     },
     loader: "auto",
   }
