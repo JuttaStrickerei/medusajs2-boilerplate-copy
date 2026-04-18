@@ -6,6 +6,7 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import { HttpTypes } from "@medusajs/types"
 import { ProductFilters } from "./index"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
+import { getProductMinVariantPriceForFilter } from "@lib/util/variant-price-for-filter"
 
 const PRODUCT_LIMIT = 12
 
@@ -104,23 +105,18 @@ function matchesPriceFilter(
   priceRanges: DynamicFilterOptions["priceRanges"]
 ): boolean {
   if (!priceRange) return true
-  
+
   const range = priceRanges.find((r) => r.value === priceRange)
   if (!range) return true
-  
-  const prices = product.variants?.map((variant) => {
-    const calculatedPrice = variant.calculated_price
-    if (calculatedPrice?.calculated_amount !== undefined) {
-      return calculatedPrice.calculated_amount
-    }
-    return null
-  }).filter((p): p is number => p !== null)
-  
-  if (!prices || prices.length === 0) return true
-  
-  const minPrice = Math.min(...prices)
-  
-  return minPrice >= range.min && (range.max === Infinity ? true : minPrice < range.max)
+
+  const minPrice = getProductMinVariantPriceForFilter(product)
+  if (minPrice === null) return true
+
+  if (range.max === Infinity) {
+    return minPrice >= range.min
+  }
+  // Inclusive upper bound so products at exactly the boundary are included
+  return minPrice >= range.min && minPrice <= range.max
 }
 
 function filterProducts(

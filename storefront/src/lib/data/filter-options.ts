@@ -1,6 +1,7 @@
 "use server"
 
 import { HttpTypes } from "@medusajs/types"
+import { getProductMinVariantPriceForFilter } from "@lib/util/variant-price-for-filter"
 import { listProducts } from "./products"
 import { listCategories } from "./categories"
 import { listCollections } from "./collections"
@@ -175,60 +176,37 @@ function extractMaterialsFromProducts(products: HttpTypes.StoreProduct[]): Mater
     .sort((a, b) => a.label.localeCompare(b.label, "de"))
 }
 
+/** EUR thresholds — calculated_amount is in full euros (e.g. 154 = €154,00). */
+const EUR_100 = 100
+const EUR_150 = 150
+
+const FIXED_PRICE_RANGE_DEFS: PriceRangeOption[] = [
+  { value: "bis-100", label: "Bis 100€", min: 0, max: EUR_100 },
+  { value: "bis-150", label: "Bis 150€", min: 0, max: EUR_150 },
+  { value: "uber-150", label: "Über 150€", min: EUR_150 + 0.01, max: Infinity },
+]
+
+function productMatchesPriceRangeOption(
+  product: HttpTypes.StoreProduct,
+  range: PriceRangeOption
+): boolean {
+  const minPrice = getProductMinVariantPriceForFilter(product)
+  if (minPrice === null) return false
+  if (range.max === Infinity) {
+    return minPrice >= range.min
+  }
+  // Use inclusive upper bound so products at exactly the boundary are included
+  return minPrice >= range.min && minPrice <= range.max
+}
+
 function computePriceRanges(products: HttpTypes.StoreProduct[]): PriceRangeOption[] {
-  const prices: number[] = []
+  const hasAnyPricedProduct = products.some(
+    (p) => getProductMinVariantPriceForFilter(p) !== null
+  )
+  if (!hasAnyPricedProduct) return []
 
-  for (const product of products) {
-    if (!product.variants) continue
-    for (const variant of product.variants) {
-      const amount = variant.calculated_price?.calculated_amount
-      if (amount !== undefined && amount !== null) {
-        prices.push(amount)
-      }
-    }
-  }
-
-  if (prices.length === 0) return []
-
-  const minPrice = Math.min(...prices)
-  const maxPrice = Math.max(...prices)
-
-  // Convert from cents to euros for range boundaries
-  const minEuro = Math.floor(minPrice / 100)
-  const maxEuro = Math.ceil(maxPrice / 100)
-
-  if (maxEuro <= 0) return []
-
-  // Generate sensible ranges based on actual price distribution
-  const ranges: PriceRangeOption[] = []
-  const step = maxEuro <= 100 ? 25 : maxEuro <= 300 ? 50 : 100
-
-  let current = 0
-  while (current < maxEuro) {
-    const rangeEnd = Math.min(current + step, maxEuro + step)
-    const isLast = rangeEnd >= maxEuro
-
-    if (isLast && current > 0) {
-      ranges.push({
-        value: `${current}+`,
-        label: `Über €${current}`,
-        min: current * 100,
-        max: Infinity,
-      })
-    } else {
-      ranges.push({
-        value: `${current}-${rangeEnd}`,
-        label: current === 0 ? `Bis €${rangeEnd}` : `€${current} – €${rangeEnd}`,
-        min: current * 100,
-        max: rangeEnd * 100,
-      })
-    }
-    current = rangeEnd
-  }
-
-  // Filter out ranges that contain no products
-  return ranges.filter((range) =>
-    prices.some((p) => p >= range.min && (range.max === Infinity ? true : p < range.max))
+  return FIXED_PRICE_RANGE_DEFS.filter((range) =>
+    products.some((p) => productMatchesPriceRangeOption(p, range))
   )
 }
 
@@ -241,7 +219,7 @@ export async function getProductFilterOptions(
   countryCode: string,
   scope?: FilterScope
 ): Promise<DynamicFilterOptions> {
-  const productQuery: Record<string, any> = {
+  const productQuery: Record<string, unknown> = {
     limit: 100,
     fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+collection_id",
   }
