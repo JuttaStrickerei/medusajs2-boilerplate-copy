@@ -310,6 +310,8 @@ function getColorHex(colorName: string): string | undefined {
     rot: "#dc2626",
     bordeaux: "#722f37",
     grün: "#16a34a",
+    oliv: "#6b8e23",
+    olive: "#6b8e23",
     gelb: "#eab308",
     rosa: "#f472b6",
     // English color names
