@@ -14,6 +14,20 @@ const MINIO_HOSTNAME = process.env.NEXT_PUBLIC_MINIO_ENDPOINT
  */
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/:countryCode/agb",
+        destination: "/:countryCode/terms",
+        permanent: false,
+      },
+      {
+        source: "/:countryCode/impressum",
+        destination: "/:countryCode/imprint",
+        permanent: false,
+      },
+    ]
+  },
   logging: {
     fetches: {
       fullUrl: true,
