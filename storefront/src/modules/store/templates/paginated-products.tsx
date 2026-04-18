@@ -72,7 +72,7 @@ function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): bo
 }
 
 function stripMaterialPercentage(raw: string): string {
-  return raw.replace(/^\d+\s*%\s*/, "").trim()
+  return raw.trim().replace(/^\d+\s*%\s*/, "").trim()
 }
 
 function matchesMaterialFilter(product: HttpTypes.StoreProduct, materials: string[]): boolean {

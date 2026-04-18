@@ -157,9 +157,13 @@ function extractSizesFromProducts(products: HttpTypes.StoreProduct[]): SizeOptio
     })
 }
 
-/** Strips leading percentage like "100%", "20% ", "25 %" from a material string. */
+/**
+ * Strips a leading percentage from a material string.
+ * Handles: "100%Viskose", "20% Polyester", " 30% Polyester", "5 % Elasthan"
+ * Always trims whitespace first so the regex anchor ^ works correctly.
+ */
 function stripMaterialPercentage(raw: string): string {
-  return raw.replace(/^\d+\s*%\s*/, "").trim()
+  return raw.trim().replace(/^\d+\s*%\s*/, "").trim()
 }
 
 function extractMaterialsFromProducts(products: HttpTypes.StoreProduct[]): MaterialOption[] {
