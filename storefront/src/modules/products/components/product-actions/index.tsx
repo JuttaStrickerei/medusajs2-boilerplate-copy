@@ -52,13 +52,24 @@ export default function ProductActions({
   const { items: wishlistItems, toggleWishlist } = useWishlist()
   const isWishlisted = wishlistItems.some(item => item.id === product.id)
 
-  // If there is only 1 variant, preselect the options
+  // Preselect options: all options if only 1 variant, otherwise any option with only 1 available value
   useEffect(() => {
     if (product.variants?.length === 1) {
       const variantOptions = optionsAsKeymap(product.variants[0].options)
       setOptions(variantOptions ?? {})
+    } else {
+      const preselectMap: Record<string, string> = {}
+      for (const option of product.options ?? []) {
+        const uniqueValues = [...new Set((option.values ?? []).map((v) => v.value))]
+        if (uniqueValues.length === 1) {
+          preselectMap[option.id] = uniqueValues[0]
+        }
+      }
+      if (Object.keys(preselectMap).length > 0) {
+        setOptions(preselectMap)
+      }
     }
-  }, [product.variants])
+  }, [product.variants, product.options])
 
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {

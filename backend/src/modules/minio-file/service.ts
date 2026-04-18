@@ -273,7 +273,7 @@ class MinioFileProviderService extends AbstractFileProviderService {
       
       // Default expiry is 1 hour (3600 seconds)
       const expiry = fileData.expiresIn || 3600
-      
+
       // Generate presigned URL for PUT operation
       const url = await this.client.presignedPutObject(
         this.bucket,

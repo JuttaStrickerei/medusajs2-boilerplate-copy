@@ -44,7 +44,7 @@ export default function ProductPreview({
   const hasSale = cheapestPrice?.price_type === "sale"
   
   // Get secondary image for hover effect
-  const primaryImage = product.thumbnail
+  const primaryImage = product.thumbnail || product.images?.[0]?.url
   const secondaryImage = product.images?.[1]?.url
 
   // Get the first available variant for quick add
