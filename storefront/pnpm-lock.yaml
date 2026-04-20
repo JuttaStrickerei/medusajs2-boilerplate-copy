@@ -15,6 +15,9 @@ importers:
       '@headlessui/react':
         specifier: ^2.2.0
         version: 2.2.9(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)
+      '@medusajs/icons':
+        specifier: ^2.13.6
+        version: 2.13.6(react@19.0.0-rc-66855b96-20241106)
       '@medusajs/js-sdk':
         specifier: latest
         version: 2.12.3
@@ -530,6 +533,11 @@ packages:
 
   '@medusajs/icons@2.12.3':
     resolution: {integrity: sha512-WKaQkpmBkd+BXTLegz3+Bm7RbwCFTTgIP3Vr2gR3CfDeqU+/fqgfiw+a1QhjZT2p35+JpVxsRpRERYeWT7wE4g==}
+    peerDependencies:
+      react: ^18.3.1
+
+  '@medusajs/icons@2.13.6':
+    resolution: {integrity: sha512-QvMZc44xPHCkpY0zjMl6dtJaMRVrJldes45dGzQhKmq8R3WC3Fkayo5HsJeplrTTfamcplqqJiugqayC3gCb4A==}
     peerDependencies:
       react: ^18.3.1
 
@@ -4548,6 +4556,10 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@medusajs/icons@2.12.3(react@19.0.0-rc-66855b96-20241106)':
+    dependencies:
+      react: 19.0.0-rc-66855b96-20241106
+
+  '@medusajs/icons@2.13.6(react@19.0.0-rc-66855b96-20241106)':
     dependencies:
       react: 19.0.0-rc-66855b96-20241106
 
