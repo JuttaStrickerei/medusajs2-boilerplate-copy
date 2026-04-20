@@ -140,9 +140,13 @@ const verifySendcloudSignature = (req: MedusaRequest): SignatureResult => {
   }
 
   if (!SENDCLOUD_WEBHOOK_SECRET) {
-    console.error("[SendcloudWebhook] ❌ SENDCLOUD_WEBHOOK_SECRET not configured");
+    console.error("[SendcloudWebhook] ❌ No webhook signing secret configured (set SENDCLOUD_WEBHOOK_SECRET or SENDCLOUD_SECRET_KEY)");
     return { ok: false, status: 500, message: "Webhook secret not configured" };
   }
+  const secretSource = process.env.SENDCLOUD_WEBHOOK_SECRET
+    ? "SENDCLOUD_WEBHOOK_SECRET"
+    : "SENDCLOUD_SECRET_KEY (fallback)";
+  console.log(`[SendcloudWebhook] 🔑 Signing secret source: ${secretSource}`);
 
   const headers = req.headers as Record<string, string | string[] | undefined>;
   const rawSig = headers["sendcloud-signature"] ?? headers["Sendcloud-Signature"];

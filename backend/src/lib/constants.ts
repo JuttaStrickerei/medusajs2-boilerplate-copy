@@ -124,8 +124,13 @@ export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === 'true'
  */
 export const SENDCLOUD_PUBLIC_KEY = process.env.SENDCLOUD_PUBLIC_KEY;
 export const SENDCLOUD_SECRET_KEY = process.env.SENDCLOUD_SECRET_KEY;
-// Webhook secret from Sendcloud Panel -> Settings -> Integrations -> Webhook signature key
-export const SENDCLOUD_WEBHOOK_SECRET = process.env.SENDCLOUD_WEBHOOK_SECRET;
+// Webhook signing secret. Resolution order:
+//   1. SENDCLOUD_WEBHOOK_SECRET — use when Sendcloud panel shows a separate
+//      "Webhook Signature Key" (newer integration types)
+//   2. SENDCLOUD_SECRET_KEY — v2 API integrations sign webhooks with the
+//      private API key (same value used for Basic auth)
+export const SENDCLOUD_WEBHOOK_SECRET =
+  process.env.SENDCLOUD_WEBHOOK_SECRET || process.env.SENDCLOUD_SECRET_KEY;
 // Dev/local only: skip HMAC verification. NEVER set to "true" in production.
 export const SENDCLOUD_WEBHOOK_SKIP_VERIFY = process.env.SENDCLOUD_WEBHOOK_SKIP_VERIFY === "true";
 
