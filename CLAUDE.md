@@ -78,8 +78,7 @@ Provider modules load conditionally based on env vars (see `medusa-config.js`). 
 ## Backend env vars worth knowing
 
 - `SENDCLOUD_PUBLIC_KEY` / `SENDCLOUD_SECRET_KEY` — API Basic auth (panel → Integrations)
-- `SENDCLOUD_SECRET_KEY` is **also** the webhook HMAC signing key — the `/webhooks/sendcloud` route uses it to verify `Sendcloud-Signature` (HMAC-SHA256, hex) and returns 401 on mismatch. No separate webhook secret env var needed.
-- `SENDCLOUD_WEBHOOK_SKIP_VERIFY` — set to `"true"` to bypass HMAC verification for local/dev (e.g. curl emulation). **Never set in production.** When skipped, a loud WARN is logged for every request.
+- `SENDCLOUD_SECRET_KEY` is **also** the webhook HMAC signing key — the `/webhooks/sendcloud` route uses it to verify `Sendcloud-Signature` (HMAC-SHA256, hex) and returns 401 on mismatch. No separate webhook secret env var needed. Verification is always on; there is no skip toggle.
 
 ## Conventions for this project
 

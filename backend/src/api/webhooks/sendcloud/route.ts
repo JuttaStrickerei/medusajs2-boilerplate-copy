@@ -7,10 +7,7 @@ import {
   updateFulfillmentWorkflow
 } from "@medusajs/medusa/core-flows";
 import { SENDCLOUD_SHIPMENT_MODULE } from "../../../modules/sendcloud-shipment";
-import {
-  SENDCLOUD_SECRET_KEY,
-  SENDCLOUD_WEBHOOK_SKIP_VERIFY,
-} from "../../../lib/constants";
+import { SENDCLOUD_SECRET_KEY } from "../../../lib/constants";
 
 /**
  * Sendcloud Webhook Handler
@@ -128,17 +125,11 @@ const toIsoTimestamp = (raw: unknown): string => {
 };
 
 // Verify Sendcloud-Signature header against the raw request body using HMAC-SHA256.
-// Returns a tuple: [ok, statusCode, errorMessage]. Honors SENDCLOUD_WEBHOOK_SKIP_VERIFY for dev.
 type SignatureResult =
   | { ok: true; status?: undefined; message?: undefined }
   | { ok: false; status: number; message: string };
 
 const verifySendcloudSignature = (req: MedusaRequest): SignatureResult => {
-  if (SENDCLOUD_WEBHOOK_SKIP_VERIFY) {
-    console.warn("[SendcloudWebhook] ⚠️ Signature verification SKIPPED (SENDCLOUD_WEBHOOK_SKIP_VERIFY=true)");
-    return { ok: true };
-  }
-
   if (!SENDCLOUD_SECRET_KEY) {
     console.error("[SendcloudWebhook] ❌ SENDCLOUD_SECRET_KEY not configured");
     return { ok: false, status: 500, message: "Webhook secret not configured" };
