@@ -8,7 +8,7 @@ import {
 } from "@medusajs/medusa/core-flows";
 import { SENDCLOUD_SHIPMENT_MODULE } from "../../../modules/sendcloud-shipment";
 import {
-  SENDCLOUD_WEBHOOK_SECRET,
+  SENDCLOUD_SECRET_KEY,
   SENDCLOUD_WEBHOOK_SKIP_VERIFY,
 } from "../../../lib/constants";
 
@@ -139,14 +139,10 @@ const verifySendcloudSignature = (req: MedusaRequest): SignatureResult => {
     return { ok: true };
   }
 
-  if (!SENDCLOUD_WEBHOOK_SECRET) {
-    console.error("[SendcloudWebhook] ❌ No webhook signing secret configured (set SENDCLOUD_WEBHOOK_SECRET or SENDCLOUD_SECRET_KEY)");
+  if (!SENDCLOUD_SECRET_KEY) {
+    console.error("[SendcloudWebhook] ❌ SENDCLOUD_SECRET_KEY not configured");
     return { ok: false, status: 500, message: "Webhook secret not configured" };
   }
-  const secretSource = process.env.SENDCLOUD_WEBHOOK_SECRET
-    ? "SENDCLOUD_WEBHOOK_SECRET"
-    : "SENDCLOUD_SECRET_KEY (fallback)";
-  console.log(`[SendcloudWebhook] 🔑 Signing secret source: ${secretSource}`);
 
   const headers = req.headers as Record<string, string | string[] | undefined>;
   const rawSig = headers["sendcloud-signature"] ?? headers["Sendcloud-Signature"];
@@ -164,7 +160,7 @@ const verifySendcloudSignature = (req: MedusaRequest): SignatureResult => {
   }
 
   const expected = crypto
-    .createHmac("sha256", SENDCLOUD_WEBHOOK_SECRET)
+    .createHmac("sha256", SENDCLOUD_SECRET_KEY)
     .update(raw)
     .digest("hex");
   const provided = providedSignature.trim().toLowerCase();
