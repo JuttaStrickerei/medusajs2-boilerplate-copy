@@ -1,11 +1,14 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
+import { wishlistMiddlewares } from "./store/wishlist/middlewares"
 
-// Medusa scans for the file name `middlewares.ts` (plural) at the top of
-// src/api/. The existing `middleware.ts` (singular) in this repo is a
-// pre-existing no-op that Medusa never loads; do not merge it here.
+// Medusa scans `src/api/middlewares.ts` (plural) and ONLY this file — see
+// https://docs.medusajs.com/learn/fundamentals/api-routes/middlewares.
+// Route-level middleware arrays defined next to their route files must be
+// spread into the `routes` array below to be registered.
 //
-// This file exists solely to register the raw-body bodyParser for the
-// Sendcloud webhook so `req.rawBody` is populated for HMAC verification.
+// NOTE: `src/api/middleware.ts` (singular) is NOT loaded by the framework
+// despite its `defineMiddlewares(...)` call — any registrations there are
+// dead code until moved here.
 export default defineMiddlewares({
   routes: [
     {
@@ -13,5 +16,6 @@ export default defineMiddlewares({
       method: ["POST"],
       bodyParser: { preserveRawBody: true },
     },
+    ...wishlistMiddlewares,
   ],
 })

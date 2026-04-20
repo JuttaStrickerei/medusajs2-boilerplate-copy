@@ -18,6 +18,20 @@ export const RemoveWishlistItemSchema = z.object({
 
 export type RemoveWishlistItemSchema = z.infer<typeof RemoveWishlistItemSchema>
 
+export const MergeWishlistSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        product_id: z.string(),
+        variant_id: z.string().optional(),
+      })
+    )
+    .min(1)
+    .max(100),
+})
+
+export type MergeWishlistSchema = z.infer<typeof MergeWishlistSchema>
+
 export const wishlistMiddlewares: MiddlewareRoute[] = [
   {
     matcher: "/store/wishlist",
@@ -38,6 +52,14 @@ export const wishlistMiddlewares: MiddlewareRoute[] = [
     middlewares: [
       authenticate("customer", ["session", "bearer"]),
       validateAndTransformBody(RemoveWishlistItemSchema),
+    ],
+  },
+  {
+    matcher: "/store/wishlist/merge",
+    method: "POST",
+    middlewares: [
+      authenticate("customer", ["session", "bearer"]),
+      validateAndTransformBody(MergeWishlistSchema),
     ],
   },
 ]
