@@ -6,7 +6,7 @@ import { Button } from "@components/ui"
 export const metadata: Metadata = {
   title: "Über uns",
   description:
-    "Unsere Geschichte: Von der ersten Nähmaschine zur digitalen Boutique – Strickerei Jutta aus Draßburg.",
+    "Unsere Geschichte: Von der ersten Strickmaschine zur digitalen Boutique – Strickerei Jutta aus Draßburg.",
 }
 
 const storySections: {
@@ -17,13 +17,13 @@ const storySections: {
 }[] = [
   {
     title: "Der Grundstein in Draßburg",
-    body: "Alles begann in der herausfordernden Zeit nach dem Zweiten Weltkrieg mit einer einzigen Nähmaschine. Die Urgroßmutter der heutigen Inhaberin, Jutta Strobl, erwarb diese Maschine, um die Bewohner der burgenländischen Ortschaft Draßburg mit neuer Kleidung zu versorgen und bestehende Stücke sorgfältig zu reparieren. Was damals aus einer alltäglichen Notwendigkeit und dem Wunsch zu helfen entstand, legte das unerschütterliche Fundament für unsere familiäre Handwerkskunst.",
+    body: "Alles begann in der herausfordernden Zeit nach dem Zweiten Weltkrieg mit einer einzigen Strickmaschine. Die Urgroßmutter der heutigen Inhaberin, Jutta Strobl, erwarb diese Maschine, um die Bewohner der burgenländischen Ortschaft Draßburg mit neuer Kleidung zu versorgen und bestehende Stücke sorgfältig zu reparieren. Was damals aus einer alltäglichen Notwendigkeit und dem Wunsch zu helfen entstand, legte das unerschütterliche Fundament für unsere familiäre Handwerkskunst.",
     image: "/images/about/bild1.png",
     imageAlt: "Historische Ansicht von Draßburg",
   },
   {
     title: "Von der Leidenschaft zum österreichweiten Großhandel",
-    body: "Die Liebe zu Textilien und solider Handarbeit wurde in der Familie weitergegeben. Nach ihrer Schulzeit entdeckte die ehemalige Geschäftsführerin Maria Barilits ihre eigene Leidenschaft für das Nähen. Sie übernahm die traditionsreiche Nähmaschine ihrer Großmutter und wagte entschlossen den Schritt in die Selbstständigkeit. Durch ihr Engagement und ein untrügliches Gespür für Qualität wuchs das Geschäft stetig. Es folgten Investitionen in neue Maschinen und zusätzliche Mitarbeiter. Aus dem kleinen Handwerksbetrieb wurde ein erfolgreiches Großhandelsunternehmen, das Boutiquen in ganz Österreich belieferte – mit Kleidungsstücken, die durch diese Partner schließlich weit über die Landesgrenzen hinaus ihre Träger fanden.",
+    body: "Die Liebe zu Textilien und solider Handarbeit wurde in der Familie weitergegeben. Nach ihrer Schulzeit entdeckte die ehemalige Geschäftsführerin Maria Barilits ihre eigene Leidenschaft für das Nähen. Sie übernahm die traditionsreiche Strickmaschine ihrer Großmutter und wagte entschlossen den Schritt in die Selbstständigkeit. Durch ihr Engagement und ein untrügliches Gespür für Qualität wuchs das Geschäft stetig. Es folgten Investitionen in neue Maschinen und zusätzliche Mitarbeiter. Aus dem kleinen Handwerksbetrieb wurde ein erfolgreiches Großhandelsunternehmen, das Boutiquen in ganz Österreich belieferte – mit Kleidungsstücken, die durch diese Partner schließlich weit über die Landesgrenzen hinaus ihre Träger fanden.",
     image: "/images/about/bild2.png",
     imageAlt: "Das Team der Strickerei Jutta",
   },
@@ -71,7 +71,7 @@ export default function AboutPage() {
             <h1 className="font-serif text-3xl small:text-4xl medium:text-5xl font-medium leading-tight">
               <span className="block">Unsere Geschichte:</span>
               <span className="block mt-3 small:mt-4">
-                Von der ersten Nähmaschine zur digitalen Boutique
+                Von der ersten Strickmaschine zur digitalen Boutique
               </span>
             </h1>
           </div>

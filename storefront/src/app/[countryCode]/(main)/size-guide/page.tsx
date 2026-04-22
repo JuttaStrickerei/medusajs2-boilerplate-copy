@@ -13,44 +13,20 @@ const sizeSubColumns = ["XS", "S", "M", "L", "XL", "XXL"] as const
 
 const measureRows: { label: string; values: string[] }[] = [
   {
-    label: "A1 – Brustumfang (cm)",
-    values: ["78-82", "83-87", "88-92", "93-97", "98-103", "104-109", "110-115"],
+    label: "A – Brustumfang (cm)",
+    values: ["100", "106", "110", "116", "122", "128", "132"],
   },
   {
-    label: "A2 – Unterbrustumfang (cm)",
-    values: ["63-67", "68-72", "73-77", "78-82", "83-87", "88-92", "93-97"],
+    label: "B – Hüftumfang (cm)",
+    values: ["106", "112", "116", "122", "128", "132", "136"],
   },
   {
-    label: "B – Taillenumfang (cm)",
-    values: ["64-68", "69-73", "74-78", "79-83", "84-90", "91-97", "98-104"],
+    label: "C – Armlänge (cm)",
+    values: ["58", "58", "58", "58", "58", "58", "58"],
   },
   {
-    label: "C – Hüftumfang (cm)",
-    values: ["87-91", "92-96", "97-101", "102-106", "107-111", "112-117", "118-122"],
-  },
-  {
-    label: "D – Armlänge (cm)",
-    values: [
-      "59-60",
-      "59-60",
-      "59-60",
-      "60,5-61,5",
-      "60,5-61,5",
-      "62-63",
-      "62-63",
-    ],
-  },
-  {
-    label: "E – Innere Beinlänge (cm)",
-    values: [
-      "79-80",
-      "79-80",
-      "80,5-81,5",
-      "80,5-81,5",
-      "82-83",
-      "82-83",
-      "82-83",
-    ],
+    label: "D – Innere Beinlänge (cm)",
+    values: ["68", "68", "70", "72", "72", "72", "72"],
   },
 ]
 

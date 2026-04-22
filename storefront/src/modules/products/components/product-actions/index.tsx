@@ -47,10 +47,10 @@ export default function ProductActions({
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
   const countryCode = useParams().countryCode as string
-  
+
   // Wishlist hook - consume items directly for reliable reactivity
   const { items: wishlistItems, toggleWishlist } = useWishlist()
-  const isWishlisted = wishlistItems.some(item => item.id === product.id)
+  const isWishlisted = wishlistItems.some((item) => item.id === product.id)
 
   // Preselect options: all options if only 1 variant, otherwise any option with only 1 available value
   useEffect(() => {
@@ -60,7 +60,9 @@ export default function ProductActions({
     } else {
       const preselectMap: Record<string, string> = {}
       for (const option of product.options ?? []) {
-        const uniqueValues = [...new Set((option.values ?? []).map((v) => v.value))]
+        const uniqueValues = [
+          ...new Set((option.values ?? []).map((v) => v.value)),
+        ]
         if (uniqueValues.length === 1) {
           preselectMap[option.id] = uniqueValues[0]
         }
@@ -142,7 +144,7 @@ export default function ProductActions({
 
     setIsAdding(false)
     setAddedToCart(true)
-    
+
     // Reset the "added" state after 2 seconds
     setTimeout(() => setAddedToCart(false), 2000)
   }
@@ -163,9 +165,7 @@ export default function ProductActions({
 
   const missingOptions = useMemo(() => {
     if (!product.options || product.options.length === 0) return []
-    return product.options.filter(
-      (opt) => !options[opt.id]
-    )
+    return product.options.filter((opt) => !options[opt.id])
   }, [product.options, options])
 
   const allOptionsSelected = missingOptions.length === 0
@@ -259,14 +259,16 @@ export default function ProductActions({
 
             {/* Stock Status */}
             {selectedVariant && (
-              <span className={cn(
-                "text-sm flex items-center gap-1.5",
-                inStock ? "text-green-600" : "text-red-600"
-              )}>
+              <span
+                className={cn(
+                  "text-sm flex items-center gap-1.5",
+                  inStock ? "text-green-600" : "text-red-600"
+                )}
+              >
                 {inStock ? (
                   <>
                     <Check size={16} />
-                    Auf Lager
+                    Verfügbar
                   </>
                 ) : (
                   "Ausverkauft"
@@ -291,10 +293,10 @@ export default function ProductActions({
             loading={isAdding}
             fullWidth
             size="lg"
-            className={cn(
-              addedToCart && "bg-green-600 hover:bg-green-600"
-            )}
-            leftIcon={addedToCart ? <Check size={20} /> : <ShoppingBag size={20} />}
+            className={cn(addedToCart && "bg-green-600 hover:bg-green-600")}
+            leftIcon={
+              addedToCart ? <Check size={20} /> : <ShoppingBag size={20} />
+            }
             data-testid="add-product-button"
           >
             {getButtonText()}
@@ -305,7 +307,13 @@ export default function ProductActions({
             <Button
               variant="secondary"
               onClick={handleWishlistToggle}
-              leftIcon={<Heart size={18} filled={isWishlisted} className={isWishlisted ? "text-red-500" : ""} />}
+              leftIcon={
+                <Heart
+                  size={18}
+                  filled={isWishlisted}
+                  className={isWishlisted ? "text-red-500" : ""}
+                />
+              }
               className={cn(
                 "w-full min-w-0 justify-center px-2 sm:px-3",
                 isWishlisted && "border-red-200 bg-red-50"
