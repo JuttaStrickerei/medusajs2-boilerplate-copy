@@ -1,12 +1,20 @@
 "use client"
 
 import { Fragment, useState } from "react"
+import useToggleState from "@lib/hooks/use-toggle-state"
 import { useRouter, useParams } from "next/navigation"
 import { Dialog, Transition } from "@headlessui/react"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "@modules/layout/components/country-select"
-import { Menu, Close, ChevronRight, Search, User, Heart } from "@components/icons"
+import {
+  Menu,
+  Close,
+  ChevronRight,
+  Search,
+  User,
+  Heart,
+} from "@components/icons"
 
 interface SideMenuProps {
   regions: HttpTypes.StoreRegion[] | null
@@ -16,6 +24,7 @@ interface SideMenuProps {
 export default function SideMenu({ regions, collections }: SideMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const countryToggle = useToggleState()
   const router = useRouter()
   const { countryCode } = useParams()
 
@@ -88,8 +97,8 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                     <div className="flex h-full flex-col bg-white shadow-xl">
                       {/* Header */}
                       <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200">
-                        <LocalizedClientLink 
-                          href="/" 
+                        <LocalizedClientLink
+                          href="/"
                           onClick={closeMenu}
                           className="text-center"
                         >
@@ -110,9 +119,15 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                       </div>
 
                       {/* Search */}
-                      <form onSubmit={handleSearch} className="px-6 py-4 border-b border-stone-200">
+                      <form
+                        onSubmit={handleSearch}
+                        className="px-6 py-4 border-b border-stone-200"
+                      >
                         <div className="relative">
-                          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                          <Search
+                            size={18}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                          />
                           <input
                             type="search"
                             value={searchQuery}
@@ -138,15 +153,17 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                                   onClick={closeMenu}
                                   className="flex items-center justify-between py-3 text-stone-700 hover:text-stone-900 transition-colors group"
                                 >
-                                  <span className="font-medium">{link.label}</span>
-                                  <ChevronRight 
-                                    size={18} 
-                                    className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all" 
+                                  <span className="font-medium">
+                                    {link.label}
+                                  </span>
+                                  <ChevronRight
+                                    size={18}
+                                    className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all"
                                   />
                                 </LocalizedClientLink>
                               </li>
                             ))}
-                            
+
                             {/* Collections Section */}
                             {collections && collections.length > 0 && (
                               <>
@@ -156,10 +173,12 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                                     onClick={closeMenu}
                                     className="flex items-center justify-between py-3 text-stone-700 hover:text-stone-900 transition-colors group"
                                   >
-                                    <span className="font-medium">Kollektionen</span>
-                                    <ChevronRight 
-                                      size={18} 
-                                      className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all" 
+                                    <span className="font-medium">
+                                      Kollektionen
+                                    </span>
+                                    <ChevronRight
+                                      size={18}
+                                      className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all"
                                     />
                                   </LocalizedClientLink>
                                 </li>
@@ -173,9 +192,9 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                                           className="flex items-center justify-between py-2 text-sm text-stone-600 hover:text-stone-900 transition-colors group"
                                         >
                                           <span>{collection.title}</span>
-                                          <ChevronRight 
-                                            size={16} 
-                                            className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all" 
+                                          <ChevronRight
+                                            size={16}
+                                            className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all"
                                           />
                                         </LocalizedClientLink>
                                       </li>
@@ -204,9 +223,13 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                                   className="flex items-center gap-3 py-3 text-stone-700 hover:text-stone-900 transition-colors"
                                 >
                                   {link.icon && (
-                                    <span className="text-stone-500">{link.icon}</span>
+                                    <span className="text-stone-500">
+                                      {link.icon}
+                                    </span>
                                   )}
-                                  <span className="font-medium">{link.label}</span>
+                                  <span className="font-medium">
+                                    {link.label}
+                                  </span>
                                 </LocalizedClientLink>
                               </li>
                             ))}
@@ -218,32 +241,29 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                       <div className="border-t border-stone-200 px-6 py-4">
                         {regions && regions.length > 0 && (
                           <div className="mb-4">
-                            <p className="text-xs text-stone-400 uppercase tracking-wider mb-2">
-                              Land / Region
-                            </p>
-                            <CountrySelect 
-                              regions={regions} 
-                              toggleState={{ state: isOpen, close: closeMenu }}
+                            <CountrySelect
+                              regions={regions}
+                              toggleState={countryToggle}
                             />
                           </div>
                         )}
                         <div className="flex items-center justify-center gap-6 text-sm text-stone-500">
-                          <LocalizedClientLink 
-                            href="/help" 
+                          <LocalizedClientLink
+                            href="/help"
                             onClick={closeMenu}
                             className="hover:text-stone-800 transition-colors"
                           >
                             Hilfe
                           </LocalizedClientLink>
-                          <LocalizedClientLink 
-                            href="/faq" 
+                          <LocalizedClientLink
+                            href="/faq"
                             onClick={closeMenu}
                             className="hover:text-stone-800 transition-colors"
                           >
                             FAQ
                           </LocalizedClientLink>
-                          <LocalizedClientLink 
-                            href="/shipping" 
+                          <LocalizedClientLink
+                            href="/shipping"
                             onClick={closeMenu}
                             className="hover:text-stone-800 transition-colors"
                           >
