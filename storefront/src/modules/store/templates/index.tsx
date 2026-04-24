@@ -42,7 +42,7 @@ export default function StoreTemplate({
 }: StoreTemplateProps) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
-  
+
   const filters: ProductFilters = {
     colors: colors ? colors.split(",") : undefined,
     sizes: sizes ? sizes.split(",") : undefined,
@@ -52,10 +52,10 @@ export default function StoreTemplate({
     collection: collection || undefined,
   }
 
-  const activeFilterCount = 
-    (filters.colors?.length || 0) + 
-    (filters.sizes?.length || 0) + 
-    (filters.materials?.length || 0) + 
+  const activeFilterCount =
+    (filters.colors?.length || 0) +
+    (filters.sizes?.length || 0) +
+    (filters.materials?.length || 0) +
     (filters.priceRange ? 1 : 0) +
     (filters.category ? 1 : 0) +
     (filters.collection ? 1 : 0)
@@ -73,8 +73,8 @@ export default function StoreTemplate({
               Unsere Kollektionen
             </h1>
             <p className="text-sm small:text-base text-stone-600 leading-relaxed hidden small:block">
-              Handgefertigte Strickwaren aus feinsten Naturfasern. 
-              Jedes Stück ein Unikat, gefertigt mit 60 Jahren Erfahrung.
+              Handgefertigte Strickwaren aus feinsten Naturfasern. Jedes Stück
+              ein Unikat, gefertigt mit 60 Jahren Erfahrung.
             </p>
           </div>
         </div>
@@ -83,7 +83,9 @@ export default function StoreTemplate({
       {/* Breadcrumb */}
       <div className="content-container py-3 small:py-4">
         <nav className="flex items-center gap-2 text-xs small:text-sm text-stone-500">
-          <a href="/" className="hover:text-stone-800 transition-colors">Home</a>
+          <a href="/" className="hover:text-stone-800 transition-colors">
+            Home
+          </a>
           <span>/</span>
           <span className="text-stone-800">Alle Produkte</span>
         </nav>
@@ -91,9 +93,9 @@ export default function StoreTemplate({
 
       {/* Main Content */}
       <div className="content-container pb-12 small:pb-16">
-        <div className="flex flex-col small:flex-row gap-6 small:gap-8">
+        <div className="flex flex-col tablet:flex-row gap-6 tablet:gap-8">
           {/* Filters Sidebar - Desktop/Tablet */}
-          <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
+          <aside className="hidden tablet:block w-56 medium:w-64 flex-shrink-0">
             <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5 max-h-[calc(100vh-7rem)] overflow-y-auto">
               <RefinementList
                 sortBy={sort}
@@ -105,8 +107,8 @@ export default function StoreTemplate({
 
           {/* Products Grid */}
           <main className="flex-1">
-            {/* Mobile/Tablet Filter Bar */}
-            <div className="small:hidden mb-4">
+            {/* Mobile Filter Bar */}
+            <div className="tablet:hidden mb-4">
               <div className="flex items-center gap-3">
                 <MobileFilterDrawer
                   sortBy={sort}
@@ -114,10 +116,11 @@ export default function StoreTemplate({
                   filterOptions={filterOptions}
                 />
               </div>
-              
+
               {activeFilterCount > 0 && (
                 <p className="mt-3 text-sm text-stone-600">
-                  {activeFilterCount} {activeFilterCount === 1 ? "Filter" : "Filter"} aktiv
+                  {activeFilterCount}{" "}
+                  {activeFilterCount === 1 ? "Filter" : "Filter"} aktiv
                 </p>
               )}
             </div>
