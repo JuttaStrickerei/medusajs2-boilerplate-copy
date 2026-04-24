@@ -19,7 +19,8 @@ const PaymentButton: React.FC<{
   cart: HttpTypes.StoreCart
   "data-testid": string
   onPlacingOrder?: () => void
-}> = ({ cart, "data-testid": dataTestId, onPlacingOrder }) => {
+  onPaymentError?: () => void
+}> = ({ cart, "data-testid": dataTestId, onPlacingOrder, onPaymentError }) => {
   // Determine if the checkout is ready for payment submission.
   const notReady =
     !cart ||
@@ -37,6 +38,7 @@ const PaymentButton: React.FC<{
         notReady={notReady}
         cart={cart}
         onPlacingOrder={onPlacingOrder}
+        onPaymentError={onPaymentError}
         data-testid={dataTestId}
       />
     )
@@ -48,6 +50,7 @@ const PaymentButton: React.FC<{
       <ManualTestPaymentButton
         notReady={notReady}
         onPlacingOrder={onPlacingOrder}
+        onPaymentError={onPaymentError}
         data-testid={dataTestId}
       />
     )
@@ -72,11 +75,13 @@ const StripePaymentButton = ({
   cart,
   notReady,
   onPlacingOrder,
+  onPaymentError,
   "data-testid": dataTestId,
 }: {
   cart: HttpTypes.StoreCart
   notReady: boolean
   onPlacingOrder?: () => void
+  onPaymentError?: () => void
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
@@ -93,13 +98,21 @@ const StripePaymentButton = ({
       await placeOrder()
     } catch (err: unknown) {
       // NEXT_REDIRECT: keep loading until redirect completes
-      if (err && typeof err === "object" && (err as { digest?: string }).digest === "NEXT_REDIRECT") {
+      if (
+        err &&
+        typeof err === "object" &&
+        (err as { digest?: string }).digest === "NEXT_REDIRECT"
+      ) {
         return
       }
-      setErrorMessage(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten")
+      setErrorMessage(
+        err instanceof Error ? err.message : "Ein Fehler ist aufgetreten"
+      )
       setSubmitting(false)
+      // Reset the parent's full-page overlay so the user sees the error and can retry.
+      onPaymentError?.()
     }
-  }, [])
+  }, [onPaymentError])
 
   /**
    * @description Handles the payment submission process. This function is triggered
@@ -113,8 +126,6 @@ const StripePaymentButton = ({
     }
 
     setSubmitting(true)
-    // Notify parent immediately so it can lock the UI against stale re-renders.
-    onPlacingOrder?.()
 
     const clientSecret = paymentSession.data.client_secret as string
 
@@ -123,18 +134,12 @@ const StripePaymentButton = ({
     // completes the cart client-side and shows a graceful loading state.
     const returnUrl = `${window.location.origin}/${countryCode}/complete-payment?cart_id=${cart.id}&country_code=${countryCode}`
 
-    // Validierung: Prüfe ob PaymentElement gemountet ist
-    if (!elements) {
-      console.error("Stripe Elements not initialized")
-      setErrorMessage("Zahlungselemente sind nicht initialisiert. Bitte Seite neu laden.")
-      setSubmitting(false)
-      return
-    }
-
     const paymentElement = elements.getElement("payment")
     if (!paymentElement) {
       console.error("PaymentElement not mounted")
-      setErrorMessage("Zahlungselement ist nicht verfügbar. Bitte zurück zur Zahlungsseite.")
+      setErrorMessage(
+        "Zahlungselement ist nicht verfügbar. Bitte zurück zur Zahlungsseite."
+      )
       setSubmitting(false)
       return
     }
@@ -151,14 +156,17 @@ const StripePaymentButton = ({
     })
 
     if (error) {
+      // Card declined, validation failed, or any other Stripe-side error.
+      // Do NOT show the parent's full-page overlay – the button is still mounted
+      // so the user sees the error inline and can retry with a different card.
       setSubmitting(false)
-      // Display any errors that occurred during the payment confirmation process.
       setErrorMessage(error.message ?? "An unknown error occurred")
       return
     }
 
-    // If no error and no redirect, the on-site payment was successful.
-    // We can now finalize the order on the client side.
+    // Payment succeeded on-site (no redirect). Now show the parent's full-page
+    // overlay while we finalize the order on the server.
+    onPlacingOrder?.()
     // Do NOT reset submitting here – keep loading until redirect completes.
     await onPaymentCompleted()
   }
@@ -198,10 +206,12 @@ const StripePaymentButton = ({
 const ManualTestPaymentButton = ({
   notReady,
   onPlacingOrder,
+  onPaymentError,
   "data-testid": dataTestId,
 }: {
   notReady: boolean
   onPlacingOrder?: () => void
+  onPaymentError?: () => void
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
@@ -211,11 +221,19 @@ const ManualTestPaymentButton = ({
     try {
       await placeOrder()
     } catch (err: unknown) {
-      if (err && typeof err === "object" && (err as { digest?: string }).digest === "NEXT_REDIRECT") {
+      if (
+        err &&
+        typeof err === "object" &&
+        (err as { digest?: string }).digest === "NEXT_REDIRECT"
+      ) {
         return
       }
-      setErrorMessage(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten")
+      setErrorMessage(
+        err instanceof Error ? err.message : "Ein Fehler ist aufgetreten"
+      )
       setSubmitting(false)
+      // Reset the parent's full-page overlay so the user sees the error and can retry.
+      onPaymentError?.()
     }
   }
 

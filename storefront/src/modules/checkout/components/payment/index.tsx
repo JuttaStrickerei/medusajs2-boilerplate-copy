@@ -7,11 +7,7 @@ import { Button } from "@components/ui"
 import { clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
-import {
-  PaymentElement,
-  useElements,
-  useStripe,
-} from "@stripe/react-stripe-js"
+import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { StripePaymentElementChangeEvent } from "@stripe/stripe-js"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext, useEffect, useState } from "react"
@@ -87,11 +83,13 @@ const Payment = ({
         return
       }
 
-      await elements.submit().catch((err) => {
-        console.error(err)
-        setError(err.message || "Zahlungsfehler")
+      // Stripe's elements.submit() resolves with { error } on validation
+      // failure — it does not reject — so a .catch() would silently miss it.
+      const { error: submitError } = await elements.submit()
+      if (submitError) {
+        setError(submitError.message || "Zahlungsfehler")
         return
-      })
+      }
 
       router.push(pathname + "?" + createQueryString("step", "review"), {
         scroll: false,
@@ -129,27 +127,24 @@ const Payment = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className={clx(
-            "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
-            {
-              "bg-green-100 text-green-600": !isOpen && paymentReady,
-              "bg-stone-800 text-white": isOpen,
-              "bg-stone-200 text-stone-400": !isOpen && !paymentReady,
-            }
-          )}>
-            {!isOpen && paymentReady ? (
-              <CheckCircle size={18} />
-            ) : (
-              "3"
+          <div
+            className={clx(
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
+              {
+                "bg-green-100 text-green-600": !isOpen && paymentReady,
+                "bg-stone-800 text-white": isOpen,
+                "bg-stone-200 text-stone-400": !isOpen && !paymentReady,
+              }
             )}
+          >
+            {!isOpen && paymentReady ? <CheckCircle size={18} /> : "3"}
           </div>
-          <h3 className={clx(
-            "font-serif text-lg font-medium",
-            {
+          <h3
+            className={clx("font-serif text-lg font-medium", {
               "text-stone-800": isOpen || paymentReady,
               "text-stone-400": !isOpen && !paymentReady,
-            }
-          )}>
+            })}
+          >
             Zahlung
           </h3>
         </div>
@@ -165,42 +160,36 @@ const Payment = ({
       </div>
 
       {/* PaymentElement muss immer gemountet bleiben, auch wenn nicht sichtbar */}
-      {!paidByGiftcard &&
-        availablePaymentMethods?.length &&
-        stripeReady && (
-          <div
-            style={
-              isOpen
-                ? {}
-                : {
-                    position: "absolute",
-                    left: "-9999px",
-                    width: "1px",
-                    height: "1px",
-                    overflow: "hidden",
-                    pointerEvents: "none",
-                  }
-            }
-          >
-            <PaymentElement
-              onChange={handlePaymentElementChange}
-              options={{
-                layout: "accordion",
-              }}
-            />
-          </div>
-        )}
+      {!paidByGiftcard && availablePaymentMethods?.length && stripeReady && (
+        <div
+          style={
+            isOpen
+              ? {}
+              : {
+                  position: "absolute",
+                  left: "-9999px",
+                  width: "1px",
+                  height: "1px",
+                  overflow: "hidden",
+                  pointerEvents: "none",
+                }
+          }
+        >
+          <PaymentElement
+            onChange={handlePaymentElementChange}
+            options={{
+              layout: "accordion",
+            }}
+          />
+        </div>
+      )}
 
       {isOpen ? (
         <div className="space-y-6">
           {paidByGiftcard && (
             <div className="text-sm text-stone-600">
-              <p className="font-medium text-stone-800 mb-1">
-                Zahlungsmethode
-              </p>
-              <p data-testid="payment-method-summary">
-                Geschenkgutschein
-              </p>
+              <p className="font-medium text-stone-800 mb-1">Zahlungsmethode</p>
+              <p data-testid="payment-method-summary">Geschenkgutschein</p>
             </div>
           )}
 
@@ -232,7 +221,9 @@ const Payment = ({
               <div>
                 <p className="text-sm font-medium text-stone-800">
                   {paymentInfoMap[selectedPaymentMethod]?.title ||
-                    (selectedPaymentMethod === "card" ? "Kartenzahlung" : selectedPaymentMethod)}
+                    (selectedPaymentMethod === "card"
+                      ? "Kartenzahlung"
+                      : selectedPaymentMethod)}
                 </p>
               </div>
             </div>

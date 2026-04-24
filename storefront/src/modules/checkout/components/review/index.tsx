@@ -21,9 +21,15 @@ const Review = ({ cart }: { cart: any }) => {
       <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
         <div className="relative">
           {/* Animated outer ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-stone-200 border-t-stone-800 animate-spin" style={{ width: 80, height: 80 }} />
+          <div
+            className="absolute inset-0 rounded-full border-4 border-stone-200 border-t-stone-800 animate-spin"
+            style={{ width: 80, height: 80 }}
+          />
           {/* Inner checkmark */}
-          <div className="relative flex items-center justify-center" style={{ width: 80, height: 80 }}>
+          <div
+            className="relative flex items-center justify-center"
+            style={{ width: 80, height: 80 }}
+          >
             <CheckCircle size={40} className="text-stone-800" />
           </div>
         </div>
@@ -31,7 +37,8 @@ const Review = ({ cart }: { cart: any }) => {
           Ihre Bestellung wird bearbeitet…
         </h2>
         <p className="text-stone-500 mt-3 text-center max-w-md px-4">
-          Bitte haben Sie einen Moment Geduld. Wir bestätigen Ihre Zahlung und erstellen Ihre Bestellung.
+          Bitte haben Sie einen Moment Geduld. Wir bestätigen Ihre Zahlung und
+          erstellen Ihre Bestellung.
         </p>
         <div className="mt-8 flex items-center gap-2 text-sm text-stone-400">
           <Spinner size={16} />
@@ -53,22 +60,23 @@ const Review = ({ cart }: { cart: any }) => {
     <div className="p-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className={clx(
-          "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
-          {
-            "bg-stone-800 text-white": isOpen,
-            "bg-stone-200 text-stone-400": !isOpen,
-          }
-        )}>
+        <div
+          className={clx(
+            "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
+            {
+              "bg-stone-800 text-white": isOpen,
+              "bg-stone-200 text-stone-400": !isOpen,
+            }
+          )}
+        >
           4
         </div>
-        <h3 className={clx(
-          "font-serif text-lg font-medium",
-          {
+        <h3
+          className={clx("font-serif text-lg font-medium", {
             "text-stone-800": isOpen,
             "text-stone-400": !isOpen,
-          }
-        )}>
+          })}
+        >
           Bestellung abschließen
         </h3>
       </div>
@@ -78,19 +86,35 @@ const Review = ({ cart }: { cart: any }) => {
           {/* Terms Notice */}
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200">
             <div className="flex items-start gap-3">
-              <FileText size={20} className="text-stone-400 flex-shrink-0 mt-0.5" />
+              <FileText
+                size={20}
+                className="text-stone-400 flex-shrink-0 mt-0.5"
+              />
               <div className="text-sm text-stone-600">
                 <p>
-                  Mit dem Klick auf &quot;Bestellung aufgeben&quot; bestätigen Sie, dass Sie unsere{" "}
-                  <LocalizedClientLink href="/terms" className="text-stone-800 underline underline-offset-2 hover:text-stone-600" prefetch={false}>
+                  Mit dem Klick auf &quot;Bestellung aufgeben&quot; bestätigen
+                  Sie, dass Sie unsere{" "}
+                  <LocalizedClientLink
+                    href="/terms"
+                    className="text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                    prefetch={false}
+                  >
                     AGB
                   </LocalizedClientLink>
                   ,{" "}
-                  <LocalizedClientLink href="/shipping" className="text-stone-800 underline underline-offset-2 hover:text-stone-600" prefetch={false}>
+                  <LocalizedClientLink
+                    href="/shipping"
+                    className="text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                    prefetch={false}
+                  >
                     Widerrufsbelehrung
                   </LocalizedClientLink>{" "}
                   und{" "}
-                  <LocalizedClientLink href="/privacy" className="text-stone-800 underline underline-offset-2 hover:text-stone-600" prefetch={false}>
+                  <LocalizedClientLink
+                    href="/privacy"
+                    className="text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                    prefetch={false}
+                  >
                     Datenschutzerklärung
                   </LocalizedClientLink>{" "}
                   gelesen und akzeptiert haben.
@@ -110,6 +134,7 @@ const Review = ({ cart }: { cart: any }) => {
             cart={cart}
             data-testid="submit-order-button"
             onPlacingOrder={() => setIsPlacingOrder(true)}
+            onPaymentError={() => setIsPlacingOrder(false)}
           />
         </div>
       )}
