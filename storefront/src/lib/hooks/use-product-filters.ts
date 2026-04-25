@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useState, useCallback, useRef, useEffect, useTransition } from "react"
+import { useCallback, useMemo, useTransition } from "react"
 
 export interface FilterState {
   colors: string[]
@@ -26,166 +26,134 @@ export interface UseProductFiltersReturn {
   clearAllFilters: () => void
 }
 
-const DEBOUNCE_MS = 250
-
-function filtersFromProps(props?: Partial<FilterState>): FilterState {
-  return {
-    colors: props?.colors || [],
-    sizes: props?.sizes || [],
-    materials: props?.materials || [],
-    priceRange: props?.priceRange || "",
-    category: props?.category || "",
-    collection: props?.collection || "",
-  }
+function parseCsv(value: string | null): string[] {
+  if (!value) return []
+  return value.split(",").filter(Boolean)
 }
 
-function serializeFilters(f: FilterState): string {
-  return [
-    f.colors.join(","),
-    f.sizes.join(","),
-    f.materials.join(","),
-    f.priceRange,
-    f.category,
-    f.collection,
-  ].join("|")
-}
-
+// URL is the single source of truth. Both filter UIs (sidebar + drawer) read
+// the same URL, so chips and products can never disagree.
 export function useProductFilters(
-  initialFilters?: Partial<FilterState>
+  _initialFilters?: Partial<FilterState>
 ): UseProductFiltersReturn {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
 
-  const [filters, setFilters] = useState<FilterState>(() => filtersFromProps(initialFilters))
+  const filters = useMemo<FilterState>(
+    () => ({
+      colors: parseCsv(searchParams.get("colors")),
+      sizes: parseCsv(searchParams.get("sizes")),
+      materials: parseCsv(searchParams.get("materials")),
+      priceRange: searchParams.get("priceRange") ?? "",
+      category: searchParams.get("category") ?? "",
+      collection: searchParams.get("collection") ?? "",
+    }),
+    [searchParams]
+  )
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
-  const isPushingRef = useRef(false)
-  const searchParamsRef = useRef(searchParams)
-
-  useEffect(() => {
-    searchParamsRef.current = searchParams
-  }, [searchParams])
-
-  // Sync FROM URL when it changes externally (back/forward, other component cleared filters)
-  const prevPropsKeyRef = useRef(serializeFilters(filtersFromProps(initialFilters)))
-  useEffect(() => {
-    const newKey = serializeFilters(filtersFromProps(initialFilters))
-    if (newKey !== prevPropsKeyRef.current) {
-      prevPropsKeyRef.current = newKey
-      if (!isPushingRef.current) {
-        setFilters(filtersFromProps(initialFilters))
-      }
-      isPushingRef.current = false
-    }
-  }, [initialFilters?.colors?.join(","), initialFilters?.sizes?.join(","), initialFilters?.materials?.join(","), initialFilters?.priceRange, initialFilters?.category, initialFilters?.collection])
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [])
-
-  const pushToUrl = useCallback((newFilters: FilterState) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-
-    debounceRef.current = setTimeout(() => {
+  const pushFilters = useCallback(
+    (next: FilterState) => {
       const params = new URLSearchParams()
-
-      // Preserve non-filter params (sortBy, etc.)
-      const current = searchParamsRef.current
-      const sortBy = current.get("sortBy")
+      const sortBy = searchParams.get("sortBy")
       if (sortBy) params.set("sortBy", sortBy)
 
-      if (newFilters.colors.length > 0) params.set("colors", newFilters.colors.join(","))
-      if (newFilters.sizes.length > 0) params.set("sizes", newFilters.sizes.join(","))
-      if (newFilters.materials.length > 0) params.set("materials", newFilters.materials.join(","))
-      if (newFilters.priceRange) params.set("priceRange", newFilters.priceRange)
-      if (newFilters.category) params.set("category", newFilters.category)
-      if (newFilters.collection) params.set("collection", newFilters.collection)
+      if (next.colors.length > 0) params.set("colors", next.colors.join(","))
+      if (next.sizes.length > 0) params.set("sizes", next.sizes.join(","))
+      if (next.materials.length > 0)
+        params.set("materials", next.materials.join(","))
+      if (next.priceRange) params.set("priceRange", next.priceRange)
+      if (next.category) params.set("category", next.category)
+      if (next.collection) params.set("collection", next.collection)
 
-      isPushingRef.current = true
+      const query = params.toString()
+      const href = query ? `${pathname}?${query}` : pathname
+
       startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+        // replace() avoids polluting browser history with every filter click.
+        router.replace(href, { scroll: false })
       })
-    }, DEBOUNCE_MS)
-  }, [pathname, router])
+    },
+    [pathname, router, searchParams]
+  )
 
-  const update = useCallback((updater: (prev: FilterState) => FilterState) => {
-    setFilters((prev) => {
-      const next = updater(prev)
-      pushToUrl(next)
-      return next
-    })
-  }, [pushToUrl])
+  const toggleColor = useCallback(
+    (color: string) => {
+      pushFilters({
+        ...filters,
+        colors: filters.colors.includes(color)
+          ? filters.colors.filter((c) => c !== color)
+          : [...filters.colors, color],
+      })
+    },
+    [filters, pushFilters]
+  )
 
-  const toggleColor = useCallback((color: string) => {
-    update((prev) => ({
-      ...prev,
-      colors: prev.colors.includes(color)
-        ? prev.colors.filter((c) => c !== color)
-        : [...prev.colors, color],
-    }))
-  }, [update])
+  const toggleSize = useCallback(
+    (size: string) => {
+      pushFilters({
+        ...filters,
+        sizes: filters.sizes.includes(size)
+          ? filters.sizes.filter((s) => s !== size)
+          : [...filters.sizes, size],
+      })
+    },
+    [filters, pushFilters]
+  )
 
-  const toggleSize = useCallback((size: string) => {
-    update((prev) => ({
-      ...prev,
-      sizes: prev.sizes.includes(size)
-        ? prev.sizes.filter((s) => s !== size)
-        : [...prev.sizes, size],
-    }))
-  }, [update])
+  const toggleMaterial = useCallback(
+    (material: string) => {
+      pushFilters({
+        ...filters,
+        materials: filters.materials.includes(material)
+          ? filters.materials.filter((m) => m !== material)
+          : [...filters.materials, material],
+      })
+    },
+    [filters, pushFilters]
+  )
 
-  const toggleMaterial = useCallback((material: string) => {
-    update((prev) => ({
-      ...prev,
-      materials: prev.materials.includes(material)
-        ? prev.materials.filter((m) => m !== material)
-        : [...prev.materials, material],
-    }))
-  }, [update])
+  const setPriceRange = useCallback(
+    (range: string) => {
+      pushFilters({
+        ...filters,
+        priceRange: filters.priceRange === range ? "" : range,
+      })
+    },
+    [filters, pushFilters]
+  )
 
-  const setPriceRange = useCallback((range: string) => {
-    update((prev) => ({
-      ...prev,
-      priceRange: prev.priceRange === range ? "" : range,
-    }))
-  }, [update])
+  const setCategory = useCallback(
+    (categoryId: string) => {
+      pushFilters({
+        ...filters,
+        category: filters.category === categoryId ? "" : categoryId,
+      })
+    },
+    [filters, pushFilters]
+  )
 
-  const setCategory = useCallback((categoryId: string) => {
-    update((prev) => ({
-      ...prev,
-      category: prev.category === categoryId ? "" : categoryId,
-    }))
-  }, [update])
-
-  const setCollection = useCallback((collectionId: string) => {
-    update((prev) => ({
-      ...prev,
-      collection: prev.collection === collectionId ? "" : collectionId,
-    }))
-  }, [update])
+  const setCollection = useCallback(
+    (collectionId: string) => {
+      pushFilters({
+        ...filters,
+        collection: filters.collection === collectionId ? "" : collectionId,
+      })
+    },
+    [filters, pushFilters]
+  )
 
   const clearAllFilters = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-
-    const cleared: FilterState = {
-      colors: [], sizes: [], materials: [],
-      priceRange: "", category: "", collection: "",
-    }
-    setFilters(cleared)
-
-    const params = new URLSearchParams()
-    const sortBy = searchParamsRef.current.get("sortBy")
-    if (sortBy) params.set("sortBy", sortBy)
-
-    isPushingRef.current = true
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    pushFilters({
+      colors: [],
+      sizes: [],
+      materials: [],
+      priceRange: "",
+      category: "",
+      collection: "",
     })
-  }, [pathname, router])
+  }, [pushFilters])
 
   const activeFilterCount =
     filters.colors.length +
