@@ -41,7 +41,7 @@ export default function StoreTemplate({
   filterOptions,
 }: StoreTemplateProps) {
   const pageNumber = page ? parseInt(page) : 1
-  const sort = sortBy || "created_at"
+  const sort = sortBy || "color_spectrum"
 
   const filters: ProductFilters = {
     colors: colors ? colors.split(",") : undefined,

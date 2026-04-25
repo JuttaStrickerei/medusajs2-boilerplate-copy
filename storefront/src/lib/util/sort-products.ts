@@ -1,5 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { compareBySpectrum } from "./color-spectrum"
 
 interface MinPricedProduct extends HttpTypes.StoreProduct {
   _minPrice?: number
@@ -44,6 +45,10 @@ export function sortProducts(
         new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime()
       )
     })
+  }
+
+  if (sortBy === "color_spectrum") {
+    sortedProducts.sort(compareBySpectrum)
   }
 
   return sortedProducts

@@ -3,7 +3,11 @@
 import { cn } from "@lib/utils"
 import { ChevronDown } from "@components/icons"
 
-export type SortOptions = "price_asc" | "price_desc" | "created_at"
+export type SortOptions =
+  | "price_asc"
+  | "price_desc"
+  | "created_at"
+  | "color_spectrum"
 
 type SortProductsProps = {
   sortBy: SortOptions
@@ -12,6 +16,10 @@ type SortProductsProps = {
 }
 
 const sortOptions = [
+  {
+    value: "color_spectrum",
+    label: "Farbspektrum",
+  },
   {
     value: "created_at",
     label: "Neueste",
@@ -35,7 +43,8 @@ const SortProducts = ({
     setQueryParams("sortBy", e.target.value as SortOptions)
   }
 
-  const currentLabel = sortOptions.find((o) => o.value === sortBy)?.label || "Sortieren"
+  const currentLabel =
+    sortOptions.find((o) => o.value === sortBy)?.label || "Sortieren"
 
   return (
     <div className="relative" data-testid={dataTestId}>
