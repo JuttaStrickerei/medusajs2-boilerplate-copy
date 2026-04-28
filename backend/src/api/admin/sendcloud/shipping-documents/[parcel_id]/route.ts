@@ -238,7 +238,7 @@ async function fetchOrderData(query: any, orderId: string): Promise<SlipData> {
       "id", "display_id", "created_at", "currency_code",
       "shipping_address.*",
       "items.title", "items.variant_title", "items.variant_sku",
-      "items.quantity", "items.unit_price",
+      "items.detail.quantity", "items.unit_price",
     ],
     filters: { id: orderId },
   })
@@ -263,7 +263,7 @@ async function fetchOrderData(query: any, orderId: string): Promise<SlipData> {
       title: i.title || "Artikel",
       variant_title: i.variant_title || null,
       sku: i.variant_sku || null,
-      quantity: Number(i.quantity) || 0,
+      quantity: Number(i.detail?.quantity ?? i.quantity) || 0,
       unit_price: Number(i.unit_price) || 0,
     })),
     currency: order.currency_code || "eur",

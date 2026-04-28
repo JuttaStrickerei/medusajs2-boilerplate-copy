@@ -358,10 +358,12 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                 body: [
                   [
                     { text: "Artikel", style: "totalLabel" },
-                    { 
+                    {
                       text: await this.formatAmount(
-                        Number(params.order.subtotal), 
-                        params.order.currency_code), 
+                        Number(params.order.total)
+                          - Number(params.order.shipping_methods?.[0]?.total || 0)
+                          + Number(params.order.discount_total || 0),
+                        params.order.currency_code),
                       style: "totalValue",
                       alignment: "right",
                     },
