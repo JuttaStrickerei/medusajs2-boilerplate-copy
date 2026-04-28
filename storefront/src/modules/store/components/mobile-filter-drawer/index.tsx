@@ -70,7 +70,12 @@ function FilterSection({
   )
 }
 
-export default function MobileFilterDrawer({ filters: filtersProp, filterOptions, hideCategories, hideCollections }: MobileFilterDrawerProps) {
+export default function MobileFilterDrawer({
+  filters: filtersProp,
+  filterOptions,
+  hideCategories,
+  hideCollections,
+}: MobileFilterDrawerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const {
@@ -79,7 +84,6 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
     hasActiveFilters,
     toggleColor,
     toggleSize,
-    toggleMaterial,
     setPriceRange,
     setCategory,
     setCollection,
@@ -189,7 +193,8 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
                           onClick={() => toggleColor(color)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
                         >
-                          {filterOptions.colors.find((c) => c.value === color)?.label || color}
+                          {filterOptions.colors.find((c) => c.value === color)
+                            ?.label || color}
                           <X size={14} />
                         </button>
                       ))}
@@ -199,17 +204,8 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
                           onClick={() => toggleSize(size)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
                         >
-                          {filterOptions.sizes.find((s) => s.value === size)?.label || size.toUpperCase()}
-                          <X size={14} />
-                        </button>
-                      ))}
-                      {filters.materials.map((material) => (
-                        <button
-                          key={material}
-                          onClick={() => toggleMaterial(material)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
-                        >
-                          {filterOptions.materials.find((m) => m.value === material)?.label || material}
+                          {filterOptions.sizes.find((s) => s.value === size)
+                            ?.label || size.toUpperCase()}
                           <X size={14} />
                         </button>
                       ))}
@@ -218,7 +214,11 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
                           onClick={() => setPriceRange(filters.priceRange)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
                         >
-                          {filterOptions.priceRanges.find((r) => r.value === filters.priceRange)?.label}
+                          {
+                            filterOptions.priceRanges.find(
+                              (r) => r.value === filters.priceRange
+                            )?.label
+                          }
                           <X size={14} />
                         </button>
                       )}
@@ -228,7 +228,11 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
 
                 {/* Category Filter */}
                 {!hideCategories && filterOptions.categories.length > 0 && (
-                  <FilterSection title="Kategorie" count={filters.category ? 1 : 0} scrollable>
+                  <FilterSection
+                    title="Kategorie"
+                    count={filters.category ? 1 : 0}
+                    scrollable
+                  >
                     <div className="space-y-1">
                       {filterOptions.categories.map((cat) => (
                         <button
@@ -250,7 +254,11 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
 
                 {/* Collection Filter */}
                 {!hideCollections && filterOptions.collections.length > 0 && (
-                  <FilterSection title="Kollektion" count={filters.collection ? 1 : 0} scrollable>
+                  <FilterSection
+                    title="Kollektion"
+                    count={filters.collection ? 1 : 0}
+                    scrollable
+                  >
                     <div className="space-y-1">
                       {filterOptions.collections.map((col) => (
                         <button
@@ -315,31 +323,12 @@ export default function MobileFilterDrawer({ filters: filtersProp, filterOptions
                   </FilterSection>
                 )}
 
-                {/* Material Filter */}
-                {filterOptions.materials.length > 0 && (
-                  <FilterSection title="Material" count={filters.materials.length} scrollable>
-                    <div className="flex flex-wrap gap-2">
-                      {filterOptions.materials.map((material) => (
-                        <button
-                          key={material.value}
-                          onClick={() => toggleMaterial(material.value)}
-                          className={cn(
-                            "px-4 py-2 text-sm font-medium rounded-lg border transition-colors",
-                            filters.materials.includes(material.value)
-                              ? "bg-stone-800 text-white border-stone-800"
-                              : "bg-white text-stone-700 border-stone-300"
-                          )}
-                        >
-                          {material.label}
-                        </button>
-                      ))}
-                    </div>
-                  </FilterSection>
-                )}
-
                 {/* Price Range Filter */}
                 {filterOptions.priceRanges.length > 0 && (
-                  <FilterSection title="Preis" count={filters.priceRange ? 1 : 0}>
+                  <FilterSection
+                    title="Preis"
+                    count={filters.priceRange ? 1 : 0}
+                  >
                     <div className="space-y-3">
                       {filterOptions.priceRanges.map((range) => (
                         <label
