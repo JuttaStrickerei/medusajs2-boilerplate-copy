@@ -17,7 +17,7 @@ type RefinementListProps = {
   hideCategories?: boolean
   hideCollections?: boolean
   search?: boolean
-  'data-testid'?: string
+  "data-testid"?: string
 }
 
 interface FilterSectionProps {
@@ -28,7 +28,13 @@ interface FilterSectionProps {
   scrollable?: boolean
 }
 
-function FilterSection({ title, children, defaultOpen = true, count, scrollable }: FilterSectionProps) {
+function FilterSection({
+  title,
+  children,
+  defaultOpen = true,
+  count,
+  scrollable,
+}: FilterSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
@@ -60,10 +66,12 @@ function FilterSection({ title, children, defaultOpen = true, count, scrollable 
           isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
         )}
       >
-        <div className={cn(
-          "pt-2 pb-1",
-          scrollable && "max-h-52 overflow-y-auto pr-1"
-        )}>
+        <div
+          className={cn(
+            "pt-2 pb-1",
+            scrollable && "max-h-52 overflow-y-auto pr-1"
+          )}
+        >
           {children}
         </div>
       </div>
@@ -71,14 +79,19 @@ function FilterSection({ title, children, defaultOpen = true, count, scrollable 
   )
 }
 
-const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, hideCollections, 'data-testid': dataTestId }: RefinementListProps) => {
+const RefinementList = ({
+  filters: filtersProp,
+  filterOptions,
+  hideCategories,
+  hideCollections,
+  "data-testid": dataTestId,
+}: RefinementListProps) => {
   const {
     filters,
     activeFilterCount,
     hasActiveFilters,
     toggleColor,
     toggleSize,
-    toggleMaterial,
     setPriceRange,
     setCategory,
     setCollection,
@@ -140,7 +153,8 @@ const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, h
               onClick={() => toggleColor(color)}
               className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
             >
-              {filterOptions.colors.find((c) => c.value === color)?.label || color}
+              {filterOptions.colors.find((c) => c.value === color)?.label ||
+                color}
               <X size={10} />
             </button>
           ))}
@@ -150,17 +164,8 @@ const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, h
               onClick={() => toggleSize(size)}
               className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
             >
-              {filterOptions.sizes.find((s) => s.value === size)?.label || size.toUpperCase()}
-              <X size={10} />
-            </button>
-          ))}
-          {filters.materials.map((material) => (
-            <button
-              key={material}
-              onClick={() => toggleMaterial(material)}
-              className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
-            >
-              {filterOptions.materials.find((m) => m.value === material)?.label || material}
+              {filterOptions.sizes.find((s) => s.value === size)?.label ||
+                size.toUpperCase()}
               <X size={10} />
             </button>
           ))}
@@ -169,7 +174,9 @@ const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, h
               onClick={() => setPriceRange(filters.priceRange)}
               className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
             >
-              {filterOptions.priceRanges.find((r) => r.value === filters.priceRange)?.label || filters.priceRange}
+              {filterOptions.priceRanges.find(
+                (r) => r.value === filters.priceRange
+              )?.label || filters.priceRange}
               <X size={10} />
             </button>
           )}
@@ -178,7 +185,11 @@ const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, h
 
       {/* Category Filter */}
       {!hideCategories && filterOptions.categories.length > 0 && (
-        <FilterSection title="Kategorie" count={filters.category ? 1 : 0} scrollable>
+        <FilterSection
+          title="Kategorie"
+          count={filters.category ? 1 : 0}
+          scrollable
+        >
           <div className="space-y-1.5">
             {filterOptions.categories.map((cat) => (
               <button
@@ -200,7 +211,11 @@ const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, h
 
       {/* Collection Filter */}
       {!hideCollections && filterOptions.collections.length > 0 && (
-        <FilterSection title="Kollektion" count={filters.collection ? 1 : 0} scrollable>
+        <FilterSection
+          title="Kollektion"
+          count={filters.collection ? 1 : 0}
+          scrollable
+        >
           <div className="space-y-1.5">
             {filterOptions.collections.map((col) => (
               <button
@@ -260,28 +275,6 @@ const RefinementList = ({ filters: filtersProp, filterOptions, hideCategories, h
                 )}
               >
                 {size.label}
-              </button>
-            ))}
-          </div>
-        </FilterSection>
-      )}
-
-      {/* Material Filter */}
-      {filterOptions.materials.length > 0 && (
-        <FilterSection title="Material" count={filters.materials.length} scrollable>
-          <div className="flex flex-wrap gap-1.5">
-            {filterOptions.materials.map((material) => (
-              <button
-                key={material.value}
-                onClick={() => toggleMaterial(material.value)}
-                className={cn(
-                  "px-2.5 py-1 text-xs font-medium rounded border transition-colors",
-                  filters.materials.includes(material.value)
-                    ? "bg-stone-800 text-white border-stone-800"
-                    : "bg-white text-stone-600 border-stone-300 hover:border-stone-500"
-                )}
-              >
-                {material.label}
               </button>
             ))}
           </div>
