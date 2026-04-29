@@ -3,6 +3,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
 import {
   cancelOrderFulfillmentWorkflow,
+  createOrderShipmentWorkflow,
   markFulfillmentAsDeliveredWorkflow,
   updateFulfillmentWorkflow
 } from "@medusajs/medusa/core-flows";
@@ -279,7 +280,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       // First try to find by parcel_id in data (most reliable)
       const allFulfillments = await fulfillmentModuleService.listFulfillments(
         { provider_id: [providerId] },
-        { relations: ["labels", "delivery_address"] }
+        { relations: ["labels", "delivery_address", "items"] }
       );
 
       console.log(`[SendcloudWebhook] 🔍 Searching ${allFulfillments.length} Sendcloud fulfillments...`);
@@ -341,41 +342,81 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
       switch (medusaStatus) {
         case "shipped": {
-          // Check if this is the first "shipped" status (set shipped_at)
-          if (!foundFulfillment.shipped_at && isFirstShippedStatus(currentMetadata)) {
-            console.log(`[SendcloudWebhook] 🚚 Setting shipped_at for ${medusaFulfillmentId}`);
-            
-            await updateFulfillmentWorkflow(req.scope).run({
-              input: {
-                id: medusaFulfillmentId,
-                shipped_at: new Date(),
-                metadata: {
-                  ...currentMetadata,
-                  sendcloud_status: statusMessage,
-                  sendcloud_status_id: parcel.status.id,
-                  sendcloud_shipped_at: timestamp,
-                  sendcloud_last_update: timestamp,
-                  sendcloud_tracking_url: parcel.tracking_url,
-                  sendcloud_carrier: parcel.carrier?.code,
-                }
-              }
+          // Resolve order_id for this fulfillment (same pattern as the canceled branch).
+          let orderId: string | null = null;
+          try {
+            const queryService = req.scope.resolve("query") as any;
+            const { data: orderFulfillments } = await queryService.graph({
+              entity: "order_fulfillment",
+              fields: ["order_id"],
+              filters: { fulfillment_id: medusaFulfillmentId },
             });
-            console.log(`[SendcloudWebhook] ✅ Fulfillment marked as shipped`);
-          } else {
-            // Just update metadata for transit updates
-            console.log(`[SendcloudWebhook] 📍 Updating transit status for ${medusaFulfillmentId}`);
-            await updateFulfillmentWorkflow(req.scope).run({
-              input: {
-                id: medusaFulfillmentId,
-                metadata: {
-                  ...currentMetadata,
-                  sendcloud_status: statusMessage,
-                  sendcloud_status_id: parcel.status.id,
-                  sendcloud_last_update: timestamp,
-                }
-              }
-            });
+            orderId = orderFulfillments?.[0]?.order_id || null;
+          } catch (e) {
+            console.warn(`[SendcloudWebhook] Could not resolve order_id: ${(e as Error).message}`);
           }
+
+          // Build workflow inputs from the eager-loaded fulfillment.
+          const fulfillmentItems = Array.isArray(foundFulfillment.items)
+            ? foundFulfillment.items
+                .filter((it: any) => it?.line_item_id)
+                .map((it: any) => ({
+                  id: it.line_item_id as string,
+                  quantity: Number(it.quantity ?? 0),
+                }))
+            : [];
+
+          const fulfillmentLabels = Array.isArray(foundFulfillment.labels)
+            ? foundFulfillment.labels.map((l: any) => ({
+                tracking_number: l.tracking_number,
+                tracking_url: l.tracking_url,
+                label_url: l.label_url,
+              }))
+            : [];
+
+          if (orderId && fulfillmentItems.length > 0) {
+            console.log(`[SendcloudWebhook] 🚚 Registering shipment for ${medusaFulfillmentId} (order ${orderId})`);
+            try {
+              await createOrderShipmentWorkflow(req.scope).run({
+                input: {
+                  order_id: orderId,
+                  fulfillment_id: medusaFulfillmentId,
+                  items: fulfillmentItems,
+                  labels: fulfillmentLabels,
+                },
+              });
+              console.log(`[SendcloudWebhook] ✅ Order shipment registered — order.shipping_status flipped`);
+            } catch (shipmentError: any) {
+              // Sendcloud sends multiple in-transit ticks per shipment. Once items are
+              // already shipped, createShipmentValidateOrder throws — that's expected
+              // and means the desired state is already in place.
+              console.warn(
+                `[SendcloudWebhook] ⚠️ createOrderShipmentWorkflow failed (likely already shipped): ${shipmentError.message}`
+              );
+            }
+          } else {
+            console.warn(
+              `[SendcloudWebhook] ⚠️ Skipping createOrderShipmentWorkflow — orderId=${orderId}, items=${fulfillmentItems.length}`
+            );
+          }
+
+          // ALWAYS patch metadata so sendcloud_status / status_id / last_update / tracking_url / carrier
+          // reflect the latest tick (mirrors the delivered branch).
+          const isFirstShipped = !foundFulfillment.shipped_at && isFirstShippedStatus(currentMetadata);
+          await updateFulfillmentWorkflow(req.scope).run({
+            input: {
+              id: medusaFulfillmentId,
+              metadata: {
+                ...currentMetadata,
+                sendcloud_status: statusMessage,
+                sendcloud_status_id: parcel.status.id,
+                sendcloud_last_update: timestamp,
+                sendcloud_tracking_url: parcel.tracking_url,
+                sendcloud_carrier: parcel.carrier?.code,
+                ...(isFirstShipped ? { sendcloud_shipped_at: timestamp } : {}),
+              },
+            },
+          });
           break;
         }
 
