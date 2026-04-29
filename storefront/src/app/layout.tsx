@@ -44,6 +44,13 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Strickerei Jutta" }],
   creator: "Strickerei Jutta",
+  icons: {
+    icon: [
+      { url: "/images/logo/logo-jutta.webp", type: "image/webp" },
+      { url: "/favicon.ico", sizes: "48x48" },
+    ],
+    apple: "/images/logo/logo-jutta.webp",
+  },
   openGraph: {
     type: "website",
     locale: "de_AT",
