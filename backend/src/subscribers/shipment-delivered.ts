@@ -5,6 +5,7 @@ import { EmailTemplates } from '../modules/email-notifications/templates'
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { INVOICE_MODULE } from "../modules/invoice_generator"
 import InvoiceGeneratorService from "../modules/invoice_generator/service"
+import { isPickupFulfillment } from '../lib/is-pickup'
 
 export default async function deliveryCreatedHandler({
   event: { data },
@@ -13,7 +14,6 @@ export default async function deliveryCreatedHandler({
   const logger = container.resolve("logger") as Logger
   const notificationModuleService = container.resolve(Modules.NOTIFICATION)
   const orderModuleService = container.resolve(Modules.ORDER)
-  const fulfillmentModuleService = container.resolve(Modules.FULFILLMENT) as any
 
   logger.info(`[ShipmentDelivered] Processing delivery: ${data.id}`)
 
@@ -42,10 +42,10 @@ export default async function deliveryCreatedHandler({
     const orderId = order_fulfillment[0].order_id
     logger.info(`[ShipmentDelivered] Delivery ${data.id} is for order ${orderId}`)
 
-    // Discriminate pickup vs. shipping by inspecting the fulfillment.
-    // Pickup fulfillments have requires_shipping === false; shipping fulfillments have it true.
-    const fulfillment = await fulfillmentModuleService.retrieveFulfillment(data.id)
-    const isPickup = fulfillment?.requires_shipping === false
+    // Discriminate via shipping_option's fulfillment_set type, not via
+    // fulfillment.requires_shipping (the latter is empirically unreliable
+    // in this codebase — same root cause as the admin UI fix in 313e0e9).
+    const isPickup = await isPickupFulfillment(container, data.id)
 
     const order = await orderModuleService.retrieveOrder(orderId, {
       relations: ['items', 'summary', 'shipping_address'],

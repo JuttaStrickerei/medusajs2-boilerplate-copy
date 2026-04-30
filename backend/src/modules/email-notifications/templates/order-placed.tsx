@@ -5,23 +5,42 @@ import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
 
 export const ORDER_PLACED = 'order-placed'
 
+type FulfillmentType = "pickup" | "delivery"
+
 interface OrderPlacedPreviewProps {
   order: OrderDTO & { display_id: string; summary: { raw_current_order_total: { value: number } } }
-  shippingAddress: OrderAddressDTO
+  shippingAddress: OrderAddressDTO | null
+  fulfillmentType?: FulfillmentType
+  pickupLocation?: string
 }
 
 export interface OrderPlacedTemplateProps {
   order: OrderDTO & { display_id: string; summary: { raw_current_order_total: { value: number } } }
-  shippingAddress: OrderAddressDTO
+  // Pickup orders may not have a shipping address — accept null.
+  shippingAddress: OrderAddressDTO | null
+  // Defaults to "delivery" if omitted (back-compat with any caller still on the old shape).
+  fulfillmentType?: FulfillmentType
+  // Multi-line address string. Required when fulfillmentType is "pickup".
+  pickupLocation?: string
   preview?: string
 }
 
+// Widened guard: pickup orders are valid even without a shippingAddress object.
 export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplateProps =>
-  typeof data.order === 'object' && typeof data.shippingAddress === 'object'
+  typeof data?.order === 'object' &&
+  (data?.fulfillmentType === 'pickup' || typeof data?.shippingAddress === 'object')
 
 export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   PreviewProps: OrderPlacedPreviewProps
-} = ({ order, shippingAddress, preview = 'Ihre Bestellung wurde aufgenommen!' }) => {
+} = ({
+  order,
+  shippingAddress,
+  fulfillmentType = 'delivery',
+  pickupLocation,
+  preview = 'Ihre Bestellung wurde aufgenommen!',
+}) => {
+  const isPickup = fulfillmentType === 'pickup'
+  const versandartLabel = isPickup ? 'Abholung im Shop' : 'Lieferung per DPD'
   // Helper function to format currency
   // Note: Medusa returns prices already in the main currency unit (Euro), not in cents
   const formatCurrency = (amount: number, currencyCode: string) => {
@@ -92,7 +111,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               margin: '0',
               lineHeight: '22px'
             }}>
-              Hallo {shippingAddress.first_name} {shippingAddress.last_name},
+              Hallo {shippingAddress?.first_name || ''} {shippingAddress?.last_name || ''},
             </Text>
             <Text style={{ 
               fontSize: '14px',
@@ -100,8 +119,10 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               margin: '8px 0 0 0',
               lineHeight: '22px'
             }}>
-              wir haben Ihre Bestellung erhalten und werden diese schnellstmöglich bearbeiten. 
-              Unten finden Sie alle wichtigen Details zu Ihrer Bestellung.
+              wir haben Ihre Bestellung erhalten und werden diese schnellstmöglich bearbeiten.
+              {isPickup
+                ? ' Wir benachrichtigen Sie, sobald Ihre Bestellung im Shop zur Abholung bereit ist.'
+                : ' Unten finden Sie alle wichtigen Details zu Ihrer Bestellung.'}
             </Text>
           </td>
         </tr>
@@ -137,6 +158,18 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                 <td align="right" style={{ paddingBottom: '4px' }}>
                   <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1c1917', margin: '0' }}>
                     #{order.display_id}
+                  </Text>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '4px' }}>
+                  <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
+                    Versandart:
+                  </Text>
+                </td>
+                <td align="right" style={{ paddingBottom: '4px' }}>
+                  <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1c1917', margin: '0' }}>
+                    {versandartLabel}
                   </Text>
                 </td>
               </tr>
@@ -395,59 +428,86 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </tr>
       </table>
 
-      {/* Lieferadresse */}
-      <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px', paddingTop: '24px', borderTop: '1px solid #e7e5e4' }}>
-        <tr>
-          <td>
-            <table width="100%" cellPadding="0" cellSpacing="0">
-              <tr>
-                <td>
-                  <Text style={{ 
-                    fontSize: '14px', 
-                    fontWeight: '500', 
-                    color: '#1c1917', 
-                    margin: '0 0 8px 0' 
-                  }}>
-                    Lieferadresse
-                  </Text>
-                  <Text style={{ 
-                    fontSize: '14px', 
-                    color: '#57534e', 
-                    margin: '0 0 2px 0',
-                    lineHeight: '20px'
-                  }}>
-                    {shippingAddress.first_name} {shippingAddress.last_name}
-                  </Text>
-                  <Text style={{ 
-                    fontSize: '14px', 
-                    color: '#57534e', 
-                    margin: '0 0 2px 0',
-                    lineHeight: '20px'
-                  }}>
-                    {shippingAddress.address_1}
-                  </Text>
-                  <Text style={{ 
-                    fontSize: '14px', 
-                    color: '#57534e', 
-                    margin: '0 0 2px 0',
-                    lineHeight: '20px'
-                  }}>
-                    {shippingAddress.postal_code} {shippingAddress.city}
-                  </Text>
-                  <Text style={{ 
-                    fontSize: '14px', 
-                    color: '#57534e', 
-                    margin: '0',
-                    lineHeight: '20px'
-                  }}>
-                    {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{shippingAddress.country_code}
-                  </Text>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
+      {/* Address block — branched: Abholort for pickup, Lieferadresse for delivery */}
+      {isPickup && pickupLocation ? (
+        <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px', paddingTop: '24px', borderTop: '1px solid #e7e5e4' }}>
+          <tr>
+            <td>
+              <Text style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#1c1917',
+                margin: '0 0 8px 0'
+              }}>
+                Abholort
+              </Text>
+              {pickupLocation.split('\n').map((line, idx) => (
+                <Text key={idx} style={{
+                  fontSize: '14px',
+                  color: '#57534e',
+                  margin: '0 0 2px 0',
+                  lineHeight: '20px'
+                }}>
+                  {line}
+                </Text>
+              ))}
+            </td>
+          </tr>
+        </table>
+      ) : shippingAddress ? (
+        <table width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '24px', paddingTop: '24px', borderTop: '1px solid #e7e5e4' }}>
+          <tr>
+            <td>
+              <table width="100%" cellPadding="0" cellSpacing="0">
+                <tr>
+                  <td>
+                    <Text style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#1c1917',
+                      margin: '0 0 8px 0'
+                    }}>
+                      Lieferadresse
+                    </Text>
+                    <Text style={{
+                      fontSize: '14px',
+                      color: '#57534e',
+                      margin: '0 0 2px 0',
+                      lineHeight: '20px'
+                    }}>
+                      {shippingAddress.first_name} {shippingAddress.last_name}
+                    </Text>
+                    <Text style={{
+                      fontSize: '14px',
+                      color: '#57534e',
+                      margin: '0 0 2px 0',
+                      lineHeight: '20px'
+                    }}>
+                      {shippingAddress.address_1}
+                    </Text>
+                    <Text style={{
+                      fontSize: '14px',
+                      color: '#57534e',
+                      margin: '0 0 2px 0',
+                      lineHeight: '20px'
+                    }}>
+                      {shippingAddress.postal_code} {shippingAddress.city}
+                    </Text>
+                    <Text style={{
+                      fontSize: '14px',
+                      color: '#57534e',
+                      margin: '0',
+                      lineHeight: '20px'
+                    }}>
+                      {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{shippingAddress.country_code}
+                    </Text>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      ) : null}
 
       {/* Footer */}
       <Hr style={{ 
@@ -515,7 +575,8 @@ OrderPlacedTemplate.PreviewProps = {
     province: 'CA',
     postal_code: '12345',
     country_code: 'US'
-  }
+  },
+  fulfillmentType: 'delivery',
 } as OrderPlacedPreviewProps
 
 export default OrderPlacedTemplate

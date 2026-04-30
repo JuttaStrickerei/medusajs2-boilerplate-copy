@@ -111,6 +111,18 @@ export const PickupReadyTemplate: React.FC<PickupReadyTemplateProps> & {
                       </Text>
                     </td>
                   </tr>
+                  <tr>
+                    <td style={{ paddingBottom: '4px' }}>
+                      <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
+                        Versandart:
+                      </Text>
+                    </td>
+                    <td align="right" style={{ paddingBottom: '4px' }}>
+                      <Text style={{ fontSize: '14px', fontWeight: '500', color: '#1c1917', margin: '0' }}>
+                        Abholung im Shop
+                      </Text>
+                    </td>
+                  </tr>
                 </table>
               </td>
             </tr>

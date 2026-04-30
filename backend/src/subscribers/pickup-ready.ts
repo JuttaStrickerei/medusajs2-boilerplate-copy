@@ -5,15 +5,14 @@ import { EmailTemplates } from '../modules/email-notifications/templates'
 import { generateInvoicePdfWorkflow } from '../workflows/generate-invoice-pdf'
 import { INVOICE_MODULE } from '../modules/invoice_generator'
 import InvoiceGeneratorService from '../modules/invoice_generator/service'
+import { isPickupFulfillment } from '../lib/is-pickup'
+import { PICKUP_LOCATION } from '../lib/pickup-info'
 
 type FulfillmentCreatedPayload = {
   order_id: string
   fulfillment_id: string
   no_notification?: boolean
 }
-
-const PICKUP_LOCATION_FALLBACK =
-  "Strickerei Jutta\nWr. Neustädterstraße 47\n7021 Gemeinde Draßburg\nÖsterreich"
 
 export default async function pickupReadyHandler({
   event: { data },
@@ -30,19 +29,19 @@ export default async function pickupReadyHandler({
   }
 
   try {
-    const fulfillmentService = container.resolve(Modules.FULFILLMENT) as any
-    const orderModuleService = container.resolve(Modules.ORDER)
-    const notificationModuleService = container.resolve(Modules.NOTIFICATION)
-
-    const fulfillment = await fulfillmentService.retrieveFulfillment(
-      data.fulfillment_id
-    )
-    if (fulfillment?.requires_shipping !== false) {
+    // Discriminate via shipping_option's fulfillment_set type, not via
+    // fulfillment.requires_shipping (the latter is empirically unreliable
+    // in this codebase — same root cause as the admin UI fix in 313e0e9).
+    const isPickup = await isPickupFulfillment(container, data.fulfillment_id)
+    if (!isPickup) {
       logger.info(
-        `[PickupReady] Not a pickup fulfillment (requires_shipping=${fulfillment?.requires_shipping}), skipping`
+        `[PickupReady] Not a pickup fulfillment (id=${data.fulfillment_id}), skipping`
       )
       return
     }
+
+    const orderModuleService = container.resolve(Modules.ORDER)
+    const notificationModuleService = container.resolve(Modules.NOTIFICATION)
 
     const order = await orderModuleService.retrieveOrder(data.order_id, {
       relations: ['items', 'summary'],
@@ -53,7 +52,6 @@ export default async function pickupReadyHandler({
     ) as InvoiceGeneratorService
     const invoiceConfigs = await invoiceGeneratorService.listInvoiceConfigs()
     const companyLogo = invoiceConfigs[0]?.company_logo || null
-    const pickupLocation = PICKUP_LOCATION_FALLBACK
 
     // Invoice PDF — RESILIENT: if generation fails, send the email anyway.
     // Customer must always get the "ready for pickup" message.
@@ -102,7 +100,7 @@ export default async function pickupReadyHandler({
         },
         order,
         companyLogo,
-        pickupLocation,
+        pickupLocation: PICKUP_LOCATION,
         preview: 'Ihre Bestellung wartet im Shop auf Sie.',
       },
       ...(attachments ? { attachments } : {}),
