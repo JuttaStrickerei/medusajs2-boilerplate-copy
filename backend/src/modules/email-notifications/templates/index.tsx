@@ -8,6 +8,8 @@ import { ContactFormTemplate, CONTACT_FORM, isContactFormTemplateData } from './
 import { ContactFormConfirmationTemplate, CONTACT_FORM_CONFIRMATION, isContactFormConfirmationTemplateData } from './contact-form-confirmation'
 import { NewsletterConfirmationTemplate, NEWSLETTER_CONFIRMATION, isNewsletterConfirmationTemplateData } from './newsletter-confirmation'
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationTemplateData } from "./admin-order-notification"
+import { PickupReadyTemplate, PICKUP_READY, isPickupReadyTemplateData } from './pickup-ready'
+import { PickupCompletedTemplate, PICKUP_COMPLETED, isPickupCompletedTemplateData } from './pickup-completed'
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -17,7 +19,9 @@ export const EmailTemplates = {
   CONTACT_FORM,
   CONTACT_FORM_CONFIRMATION,
   NEWSLETTER_CONFIRMATION,
-  ADMIN_ORDER_NOTIFICATION
+  ADMIN_ORDER_NOTIFICATION,
+  PICKUP_READY,
+  PICKUP_COMPLETED,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -96,6 +100,24 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <AdminOrderNotificationTemplate {...data} />
 
+    case EmailTemplates.PICKUP_READY:
+      if (!isPickupReadyTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.PICKUP_READY}"`
+        )
+      }
+      return <PickupReadyTemplate {...data} />
+
+    case EmailTemplates.PICKUP_COMPLETED:
+      if (!isPickupCompletedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.PICKUP_COMPLETED}"`
+        )
+      }
+      return <PickupCompletedTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -104,13 +126,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
   }
 }
 
-export { 
-  InviteUserEmail, 
-  OrderPlacedTemplate, 
-  ShipmentSentTemplate, 
+export {
+  InviteUserEmail,
+  OrderPlacedTemplate,
+  ShipmentSentTemplate,
   ShipmentDeliveredTemplate,
   ContactFormTemplate,
   ContactFormConfirmationTemplate,
   NewsletterConfirmationTemplate,
-  AdminOrderNotificationTemplate
+  AdminOrderNotificationTemplate,
+  PickupReadyTemplate,
+  PickupCompletedTemplate,
 }
