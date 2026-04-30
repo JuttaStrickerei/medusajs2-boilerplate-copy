@@ -188,7 +188,24 @@ export function PickupOrdersSection({
         const activeFf = getActiveFulfillment(order)
         const unfulfilled = getUnfulfilledItems(order)
         const isReady = !!activeFf
-        const itemSummary = unfulfilled.slice(0, 3)
+        // Render all items, not a sliced summary — operators need every line
+        // to physically pick the order. Source of truth for "what to show":
+        // when an active fulfillment exists, render the items in that
+        // fulfillment; otherwise render the still-unfulfilled items.
+        const itemsToRender: (OrderItem & { unfulfilled_quantity: number })[] =
+          isReady && activeFf
+            ? activeFf.items
+                .map((fi) => {
+                  const orderItem = order.items.find(
+                    (i) => i.id === fi.line_item_id
+                  )
+                  if (!orderItem) return null
+                  return { ...orderItem, unfulfilled_quantity: fi.quantity }
+                })
+                .filter(
+                  (i): i is OrderItem & { unfulfilled_quantity: number } => !!i
+                )
+            : unfulfilled
         const isPending =
           (markReadyMutation.isPending &&
             markReadyMutation.variables === order.id) ||
@@ -220,43 +237,57 @@ export function PickupOrdersSection({
               </Text>
             </div>
 
-            {/* Items list */}
+            {/* Items list — vertical, full per-item info for picking */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-x-2">
-                {itemSummary.map((item) => {
+              <div className="flex flex-col gap-y-1.5">
+                {itemsToRender.map((item) => {
                   const thumb = getItemThumbnail(item)
+                  const sku = item.variant_sku || item.variant?.sku
                   return (
                     <div
                       key={item.id}
-                      className="flex items-center gap-x-1.5 max-w-[180px]"
+                      className="flex items-start gap-x-2"
                     >
                       {thumb ? (
                         <img
                           src={thumb}
                           alt=""
-                          className="h-6 w-6 rounded object-cover shrink-0"
+                          className="h-8 w-8 rounded object-cover shrink-0 mt-0.5"
                         />
                       ) : (
-                        <div className="h-6 w-6 rounded bg-ui-bg-subtle shrink-0" />
+                        <div className="h-8 w-8 rounded bg-ui-bg-subtle shrink-0 mt-0.5" />
                       )}
-                      <Text
-                        size="xsmall"
-                        className="truncate text-ui-fg-subtle"
-                      >
-                        {item.unfulfilled_quantity}×{" "}
-                        {(item.title || item.product_title || "").substring(
-                          0,
-                          25
+                      <div className="min-w-0 flex-1">
+                        <Text size="small" className="truncate">
+                          <span className="font-medium">
+                            {item.unfulfilled_quantity}×
+                          </span>{" "}
+                          {item.product_title || item.title}
+                        </Text>
+                        {(item.variant_title || sku) && (
+                          <div className="flex items-center gap-x-2">
+                            {item.variant_title && (
+                              <Text
+                                size="xsmall"
+                                className="text-ui-fg-subtle truncate"
+                              >
+                                {item.variant_title}
+                              </Text>
+                            )}
+                            {sku && (
+                              <Text
+                                size="xsmall"
+                                className="text-ui-fg-muted font-mono shrink-0"
+                              >
+                                {sku}
+                              </Text>
+                            )}
+                          </div>
                         )}
-                      </Text>
+                      </div>
                     </div>
                   )
                 })}
-                {unfulfilled.length > 3 && (
-                  <Text size="xsmall" className="text-ui-fg-muted shrink-0">
-                    +{unfulfilled.length - 3}
-                  </Text>
-                )}
               </div>
             </div>
 

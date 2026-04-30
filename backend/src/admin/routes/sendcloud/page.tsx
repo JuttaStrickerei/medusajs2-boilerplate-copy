@@ -17,25 +17,48 @@ function isPickupOrder(
   order: OpenOrder,
   pickupOptionIds: Set<string>
 ): boolean {
-  // 1. If any non-canceled fulfillment exists, trust requires_shipping (most authoritative).
+  // PRIMARY: customer's checkout choice is the source of truth — immutable
+  // for the lifetime of the order, does NOT change when a fulfillment is
+  // created later. Cross-reference against the pre-fetched set of pickup
+  // option IDs (sourced from /admin/shipping-options).
+  const methodIds = (order.shipping_methods || [])
+    .map((sm) => sm.shipping_option_id)
+    .filter((id): id is string => !!id)
+  if (methodIds.length > 0) {
+    return methodIds.every((id) => pickupOptionIds.has(id))
+  }
+  // FALLBACK: rare legacy orders without shipping methods on file —
+  // inspect any active fulfillment's requires_shipping flag.
   const ffs = (order.fulfillments || []).filter((f) => !f.canceled_at)
   if (ffs.length > 0) {
     return ffs.every((f) => f.requires_shipping === false)
   }
-  // 2. Otherwise cross-reference each shipping method's shipping_option_id
-  // against the pre-fetched set of pickup option IDs (sourced from
-  // /admin/shipping-options, which can resolve fulfillment_set.type
-  // without crossing a read-only module link).
-  const ids = (order.shipping_methods || [])
-    .map((sm) => sm.shipping_option_id)
-    .filter((id): id is string => !!id)
-  if (ids.length === 0) return false
-  return ids.every((id) => pickupOptionIds.has(id))
+  return false
 }
 
 const REFETCH_INTERVAL = 60_000
 const SHIPPING_OPTIONS_STALE_MS = 5 * 60_000
 const SHIPMENT_PAGE_SIZE = 20
+
+// Statuses returned by the shared /admin/orders fetch. "fulfilled" is included
+// so pickup orders stay visible in the Abholungen tab as "Bereit zur Abholung".
+// Delivery's "fulfilled" orders are dropped per-tab below — they surface in
+// "Aktive Sendungen" via the sync-sendcloud-shipment subscriber.
+const FETCH_STATUSES = new Set([
+  "not_fulfilled",
+  "partially_fulfilled",
+  "fulfilled",
+  "canceled",
+])
+
+// Statuses kept in the Offene Bestellungen (delivery) tab. Excludes "fulfilled"
+// so existing UX is preserved: once a delivery fulfillment is created, the row
+// flows into "Aktive Sendungen" rather than double-displaying here.
+const DELIVERY_TAB_STATUSES = new Set([
+  "not_fulfilled",
+  "partially_fulfilled",
+  "canceled",
+])
 
 const SendcloudDashboardPage = () => {
   const [activeTab, setActiveTab] = useState<TabId>("open")
@@ -59,12 +82,7 @@ const SendcloudDashboardPage = () => {
       })
       const data = response as any
       const orders = (data.orders || []) as OpenOrder[]
-      const OPEN_STATUSES = new Set([
-        "not_fulfilled",
-        "partially_fulfilled",
-        "canceled",
-      ])
-      return orders.filter((o) => OPEN_STATUSES.has(o.fulfillment_status))
+      return orders.filter((o) => FETCH_STATUSES.has(o.fulfillment_status))
     },
     refetchInterval: REFETCH_INTERVAL,
   })
@@ -150,8 +168,15 @@ const SendcloudDashboardPage = () => {
     const delivery: OpenOrder[] = []
     const pickup: OpenOrder[] = []
     for (const order of openOrders) {
-      if (isPickupOrder(order, pickupOptionIds)) pickup.push(order)
-      else delivery.push(order)
+      if (isPickupOrder(order, pickupOptionIds)) {
+        // Pickup tab keeps the wider set including "fulfilled" so operators
+        // can mark orders "Als abgeholt markieren" after preparing them.
+        pickup.push(order)
+      } else if (DELIVERY_TAB_STATUSES.has(order.fulfillment_status)) {
+        // Delivery "fulfilled" orders are intentionally dropped here —
+        // they surface in "Aktive Sendungen" via sync-sendcloud-shipment.
+        delivery.push(order)
+      }
     }
     return { deliveryOrders: delivery, pickupOrders: pickup }
   }, [openOrders, pickupOptionIds])
