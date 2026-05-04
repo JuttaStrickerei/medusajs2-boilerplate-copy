@@ -72,9 +72,10 @@ export const PickupReadyTemplate: React.FC<PickupReadyTemplateProps> & {
                   Hallo,
                 </Text>
                 <Text style={{ fontSize: '14px', color: '#57534e', margin: '8px 0 0 0', lineHeight: '22px' }}>
-                  Gute Nachrichten! Ihre Bestellung wartet im Shop auf Sie. Sie können diese
-                  während unserer Öffnungszeiten abholen. Im Anhang dieser E-Mail finden Sie
-                  Ihre Rechnung für Ihre Unterlagen.
+                  vielen Dank für Ihre Geduld — Ihre Bestellung wurde fertiggestellt
+                  und wartet nun im Shop auf Sie. Sie können diese während unserer
+                  Öffnungszeiten abholen. Im Anhang dieser E-Mail finden Sie Ihre
+                  Rechnung für Ihre Unterlagen.
                 </Text>
               </td>
             </tr>

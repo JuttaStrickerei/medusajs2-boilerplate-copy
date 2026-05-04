@@ -119,10 +119,13 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               margin: '8px 0 0 0',
               lineHeight: '22px'
             }}>
-              wir haben Ihre Bestellung erhalten und werden diese schnellstmöglich bearbeiten.
+              vielen Dank für Ihre Bestellung! Wir bereiten diese gerade für Sie vor
               {isPickup
-                ? ' Wir benachrichtigen Sie, sobald Ihre Bestellung im Shop zur Abholung bereit ist.'
-                : ' Unten finden Sie alle wichtigen Details zu Ihrer Bestellung.'}
+                ? ' und benachrichtigen Sie, sobald sie zur Abholung im Shop bereitsteht.'
+                : ' und versenden sie, sobald sie fertig ist.'}{' '}
+              Da wir unsere Strickwaren oft eigens für Sie neu anfertigen, kann
+              die {isPickup ? 'Vorbereitung' : 'Vorbereitung und der Versand'}{' '}
+              1–2 Wochen dauern.
             </Text>
           </td>
         </tr>
