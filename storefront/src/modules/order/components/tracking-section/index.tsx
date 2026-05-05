@@ -2,16 +2,16 @@
 
 import { HttpTypes } from "@medusajs/types"
 import { useState } from "react"
-import { 
-  Truck, 
-  Package, 
-  CheckCircle, 
-  ExternalLink, 
-  RotateCcw, 
+import {
+  Truck,
+  Package,
+  CheckCircle,
+  ExternalLink,
+  RotateCcw,
   Copy,
   Clock,
   FileText,
-  ChevronRight
+  ChevronRight,
 } from "@components/icons"
 import { Button } from "@components/ui"
 import { cn } from "@lib/utils"
@@ -42,38 +42,43 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const fulfillments = (order.fulfillments || []) as FulfillmentWithData[]
-  
+
   // Separate regular fulfillments from return fulfillments
   // WICHTIG: Gecancelte Fulfillments ausfiltern!
-  const regularFulfillments = fulfillments.filter(f => {
+  const regularFulfillments = fulfillments.filter((f) => {
     const data = f.data as SendcloudFulfillmentData | null
     const isCanceled = !!f.canceled_at
     return !data?.is_return && !isCanceled
   })
-  
-  const returnFulfillments = fulfillments.filter(f => {
+
+  const returnFulfillments = fulfillments.filter((f) => {
     const data = f.data as SendcloudFulfillmentData | null
     const isCanceled = !!f.canceled_at
     return data?.is_return === true && !isCanceled
   })
 
   // Check if order is fully delivered (nur aktive Fulfillments berücksichtigen)
-  const isOrderDelivered = order.fulfillment_status === "delivered" || 
-    (regularFulfillments.length > 0 && regularFulfillments.every(f => {
-      const status = getFulfillmentStatus(f)
-      return status === "delivered"
-    }))
-  
+  const isOrderDelivered =
+    order.fulfillment_status === "delivered" ||
+    (regularFulfillments.length > 0 &&
+      regularFulfillments.every((f) => {
+        const status = getFulfillmentStatus(f)
+        return status === "delivered"
+      }))
+
   // Check if there's an active return
   const hasActiveReturn = returnFulfillments.length > 0
 
   // Check if order is delivered (via fulfillment_status or individual fulfillments)
   const orderIsDelivered = order.fulfillment_status === "delivered"
-  
+
   // Check if order has returnable items
   const canRequestReturn = orderHasReturnableItems(order)
 
-  const handleCopyTracking = async (trackingNumber: string, fulfillmentId: string) => {
+  const handleCopyTracking = async (
+    trackingNumber: string,
+    fulfillmentId: string
+  ) => {
     try {
       await navigator.clipboard.writeText(trackingNumber)
       setCopiedId(fulfillmentId)
@@ -103,9 +108,12 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
         </h2>
         <div className="bg-stone-50 rounded-xl p-6 text-center">
           <Package size={32} className="mx-auto mb-3 text-stone-400" />
-          <p className="text-stone-600 mb-1">Ihre Bestellung wird vorbereitet</p>
+          <p className="text-stone-600 mb-1">
+            Ihre Bestellung wird vorbereitet
+          </p>
           <p className="text-sm text-stone-500">
-            Sobald Ihre Bestellung versendet wurde, erhalten Sie eine Benachrichtigung.
+            Sobald Ihre Bestellung versendet wurde, erhalten Sie eine
+            Benachrichtigung.
           </p>
         </div>
       </div>
@@ -119,7 +127,7 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
         <h2 className="font-serif text-xl font-medium text-stone-800 mb-4">
           Bestellung & Service
         </h2>
-        
+
         {/* Delivered Status Banner */}
         <div className="bg-green-50 rounded-xl p-5 mb-4 flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -137,10 +145,10 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
 
         {/* Action Cards */}
         <div className="grid grid-cols-1 small:grid-cols-2 gap-4">
-          {/* Returns Request - Internal page */}
+          {/* Returns Request - Links to shipping/returns info page (manual process for now) */}
           {canRequestReturn && (
             <LocalizedClientLink
-              href={`/account/orders/details/${order.id}/return`}
+              href="/shipping"
               className="flex items-center gap-4 p-4 bg-white rounded-xl border border-amber-200 hover:border-amber-300 hover:shadow-sm transition-all group"
             >
               <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
@@ -148,7 +156,9 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
               </div>
               <div className="flex-1">
                 <p className="font-medium text-stone-800">Retoure anmelden</p>
-                <p className="text-sm text-stone-500">Artikel zurücksenden</p>
+                <p className="text-sm text-stone-500">
+                  So funktioniert die Rücksendung
+                </p>
               </div>
               <ChevronRight size={16} className="text-amber-500" />
             </LocalizedClientLink>
@@ -181,15 +191,20 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
         </h2>
 
         {returnFulfillments.map((fulfillment, index) => {
-          const fulfillmentData = fulfillment.data as SendcloudFulfillmentData | null
+          const fulfillmentData =
+            fulfillment.data as SendcloudFulfillmentData | null
           const status = getFulfillmentStatus(fulfillment)
-          const trackingUrl = fulfillment.labels?.[0]?.tracking_url || getTrackingUrl(fulfillmentData)
-          const trackingNumber = fulfillment.labels?.[0]?.tracking_number || getTrackingNumber(fulfillmentData)
+          const trackingUrl =
+            fulfillment.labels?.[0]?.tracking_url ||
+            getTrackingUrl(fulfillmentData)
+          const trackingNumber =
+            fulfillment.labels?.[0]?.tracking_number ||
+            getTrackingNumber(fulfillmentData)
           const carrier = getCarrierName(fulfillmentData)
 
           return (
-            <div 
-              key={fulfillment.id} 
+            <div
+              key={fulfillment.id}
               className="bg-white rounded-xl border border-amber-200 overflow-hidden"
             >
               {/* Status Header */}
@@ -200,7 +215,8 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                   </div>
                   <div>
                     <p className="font-medium text-amber-800">
-                      Retoure {status === "delivered" ? "angekommen" : "unterwegs"}
+                      Retoure{" "}
+                      {status === "delivered" ? "angekommen" : "unterwegs"}
                     </p>
                     {carrier && (
                       <p className="text-sm text-amber-600">via {carrier}</p>
@@ -214,11 +230,17 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                 {trackingNumber && (
                   <div className="flex items-center gap-3 bg-stone-50 rounded-lg px-4 py-3">
                     <div className="flex-1">
-                      <p className="text-xs text-stone-500 mb-0.5">Retouren-Sendungsnummer</p>
-                      <p className="font-mono text-stone-800 font-medium">{trackingNumber}</p>
+                      <p className="text-xs text-stone-500 mb-0.5">
+                        Retouren-Sendungsnummer
+                      </p>
+                      <p className="font-mono text-stone-800 font-medium">
+                        {trackingNumber}
+                      </p>
                     </div>
                     <button
-                      onClick={() => handleCopyTracking(trackingNumber, fulfillment.id)}
+                      onClick={() =>
+                        handleCopyTracking(trackingNumber, fulfillment.id)
+                      }
                       className="p-2 text-stone-500 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
                       title="Kopieren"
                     >
@@ -262,16 +284,24 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
 
       <div className="space-y-4">
         {regularFulfillments.map((fulfillment, index) => {
-          const fulfillmentData = fulfillment.data as SendcloudFulfillmentData | null
+          const fulfillmentData =
+            fulfillment.data as SendcloudFulfillmentData | null
           const status = getFulfillmentStatus(fulfillment)
-          const trackingUrl = fulfillment.labels?.[0]?.tracking_url || getTrackingUrl(fulfillmentData)
-          const trackingNumber = fulfillment.labels?.[0]?.tracking_number || getTrackingNumber(fulfillmentData)
+          const trackingUrl =
+            fulfillment.labels?.[0]?.tracking_url ||
+            getTrackingUrl(fulfillmentData)
+          const trackingNumber =
+            fulfillment.labels?.[0]?.tracking_number ||
+            getTrackingNumber(fulfillmentData)
           const carrier = getCarrierName(fulfillmentData)
 
           // Pending status - no fulfillment data yet
           if (status === "pending") {
             return (
-              <div key={fulfillment.id} className="bg-stone-50 rounded-xl p-5 flex items-center gap-4">
+              <div
+                key={fulfillment.id}
+                className="bg-stone-50 rounded-xl p-5 flex items-center gap-4"
+              >
                 <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center">
                   <Clock size={20} className="text-stone-500" />
                 </div>
@@ -289,7 +319,10 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
           // NO tracking link shown in this state!
           if (status === "preparing") {
             return (
-              <div key={fulfillment.id} className="bg-white rounded-xl border border-amber-200 overflow-hidden">
+              <div
+                key={fulfillment.id}
+                className="bg-white rounded-xl border border-amber-200 overflow-hidden"
+              >
                 {/* Status Header - Preparing */}
                 <div className="px-5 py-4 flex items-center justify-between bg-amber-50 border-b border-amber-100">
                   <div className="flex items-center gap-3">
@@ -297,13 +330,15 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                       <Package size={20} className="text-amber-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-amber-800">Wird für den Versand vorbereitet</p>
+                      <p className="font-medium text-amber-800">
+                        Wird für den Versand vorbereitet
+                      </p>
                       {carrier && (
                         <p className="text-sm text-amber-600">via {carrier}</p>
                       )}
                     </div>
                   </div>
-                  
+
                   {regularFulfillments.length > 1 && (
                     <span className="text-sm text-amber-600">
                       Sendung {index + 1} von {regularFulfillments.length}
@@ -314,8 +349,9 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                 {/* Info - NO tracking link yet */}
                 <div className="p-5">
                   <p className="text-sm text-stone-600">
-                    Ihr Paket wurde für den Versand vorbereitet und wird in Kürze vom Paketdienst abgeholt. 
-                    Sobald es unterwegs ist, erhalten Sie hier Ihren Tracking-Link.
+                    Ihr Paket wurde für den Versand vorbereitet und wird in
+                    Kürze vom Paketdienst abgeholt. Sobald es unterwegs ist,
+                    erhalten Sie hier Ihren Tracking-Link.
                   </p>
                 </div>
               </div>
@@ -325,8 +361,8 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
           // Delivered fulfillment - show green success state
           if (status === "delivered") {
             return (
-              <div 
-                key={fulfillment.id} 
+              <div
+                key={fulfillment.id}
                 className="bg-white rounded-xl border border-green-200 overflow-hidden"
               >
                 {/* Status Header - Delivered */}
@@ -336,13 +372,15 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                       <CheckCircle size={20} className="text-green-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-green-800">Erfolgreich zugestellt</p>
+                      <p className="font-medium text-green-800">
+                        Erfolgreich zugestellt
+                      </p>
                       {carrier && (
                         <p className="text-sm text-green-600">via {carrier}</p>
                       )}
                     </div>
                   </div>
-                  
+
                   {regularFulfillments.length > 1 && (
                     <span className="text-sm text-green-600">
                       Sendung {index + 1} von {regularFulfillments.length}
@@ -366,11 +404,17 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                   {trackingNumber && (
                     <div className="flex items-center gap-3 bg-stone-50 rounded-lg px-4 py-3">
                       <div className="flex-1">
-                        <p className="text-xs text-stone-500 mb-0.5">Sendungsnummer</p>
-                        <p className="font-mono text-stone-800 font-medium">{trackingNumber}</p>
+                        <p className="text-xs text-stone-500 mb-0.5">
+                          Sendungsnummer
+                        </p>
+                        <p className="font-mono text-stone-800 font-medium">
+                          {trackingNumber}
+                        </p>
                       </div>
                       <button
-                        onClick={() => handleCopyTracking(trackingNumber, fulfillment.id)}
+                        onClick={() =>
+                          handleCopyTracking(trackingNumber, fulfillment.id)
+                        }
                         className="p-2 text-stone-500 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
                         title="Kopieren"
                       >
@@ -405,8 +449,8 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
 
           // In transit fulfillment - show blue state
           return (
-            <div 
-              key={fulfillment.id} 
+            <div
+              key={fulfillment.id}
               className="bg-white rounded-xl border border-blue-200 overflow-hidden"
             >
               {/* Status Header */}
@@ -416,13 +460,15 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                     <Truck size={20} className="text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-blue-800">Unterwegs zu Ihnen</p>
+                    <p className="font-medium text-blue-800">
+                      Unterwegs zu Ihnen
+                    </p>
                     {carrier && (
                       <p className="text-sm text-blue-600">via {carrier}</p>
                     )}
                   </div>
                 </div>
-                
+
                 {regularFulfillments.length > 1 && (
                   <span className="text-sm text-blue-600">
                     Sendung {index + 1} von {regularFulfillments.length}
@@ -446,11 +492,17 @@ const TrackingSection = ({ order }: TrackingSectionProps) => {
                 {trackingNumber && (
                   <div className="flex items-center gap-3 bg-stone-50 rounded-lg px-4 py-3">
                     <div className="flex-1">
-                      <p className="text-xs text-stone-500 mb-0.5">Sendungsnummer</p>
-                      <p className="font-mono text-stone-800 font-medium">{trackingNumber}</p>
+                      <p className="text-xs text-stone-500 mb-0.5">
+                        Sendungsnummer
+                      </p>
+                      <p className="font-mono text-stone-800 font-medium">
+                        {trackingNumber}
+                      </p>
                     </div>
                     <button
-                      onClick={() => handleCopyTracking(trackingNumber, fulfillment.id)}
+                      onClick={() =>
+                        handleCopyTracking(trackingNumber, fulfillment.id)
+                      }
                       className="p-2 text-stone-500 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
                       title="Kopieren"
                     >

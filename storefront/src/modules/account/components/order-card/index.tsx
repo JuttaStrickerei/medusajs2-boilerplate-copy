@@ -4,7 +4,15 @@ import { useMemo } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
-import { ChevronRight, Truck, RotateCcw, CheckCircle, Package, Clock, ExternalLink } from "@components/icons"
+import {
+  ChevronRight,
+  Truck,
+  RotateCcw,
+  CheckCircle,
+  Package,
+  Clock,
+  ExternalLink,
+} from "@components/icons"
 import { cn } from "@lib/utils"
 import {
   getFulfillmentStatus,
@@ -42,24 +50,28 @@ const OrderCard = ({ order }: OrderCardProps) => {
     return new Date(dateStr).toLocaleDateString("de-AT", {
       day: "2-digit",
       month: "short",
-      year: "numeric"
+      year: "numeric",
     })
   }
 
   // Get fulfillment info - WICHTIG: Gecancelte Fulfillments ausfiltern!
   const fulfillments = (order.fulfillments || []) as FulfillmentWithData[]
-  const activeFulfillments = fulfillments.filter(f => !f.canceled_at)
-  
+  const activeFulfillments = fulfillments.filter((f) => !f.canceled_at)
+
   // Nehme das neueste aktive Fulfillment (letztes im Array, da sortiert nach created_at)
-  const latestFulfillment = activeFulfillments.length > 0 
-    ? activeFulfillments[activeFulfillments.length - 1] 
-    : null
-  const fulfillmentStatus = latestFulfillment ? getFulfillmentStatus(latestFulfillment) : "pending"
-  
+  const latestFulfillment =
+    activeFulfillments.length > 0
+      ? activeFulfillments[activeFulfillments.length - 1]
+      : null
+  const fulfillmentStatus = latestFulfillment
+    ? getFulfillmentStatus(latestFulfillment)
+    : "pending"
+
   // Get tracking URL from labels or data
-  const trackingUrl = latestFulfillment?.labels?.[0]?.tracking_url || 
-                     (latestFulfillment?.data as SendcloudFulfillmentData)?.tracking_url
-  
+  const trackingUrl =
+    latestFulfillment?.labels?.[0]?.tracking_url ||
+    (latestFulfillment?.data as SendcloudFulfillmentData)?.tracking_url
+
   // Check if order can request returns
   const canRequestReturn = orderHasReturnableItems(order)
 
@@ -70,31 +82,31 @@ const OrderCard = ({ order }: OrderCardProps) => {
         return {
           icon: <CheckCircle size={14} />,
           label: "Zugestellt",
-          className: "bg-green-100 text-green-700"
+          className: "bg-green-100 text-green-700",
         }
       case "shipped":
         return {
           icon: <Truck size={14} />,
           label: "Versendet",
-          className: "bg-blue-100 text-blue-700"
+          className: "bg-blue-100 text-blue-700",
         }
       case "preparing":
         return {
           icon: <Package size={14} />,
           label: "Wird vorbereitet",
-          className: "bg-amber-100 text-amber-700"
+          className: "bg-amber-100 text-amber-700",
         }
       case "canceled":
         return {
           icon: <Package size={14} />,
           label: "Storniert",
-          className: "bg-red-100 text-red-700"
+          className: "bg-red-100 text-red-700",
         }
       default:
         return {
           icon: <Clock size={14} />,
           label: "In Bearbeitung",
-          className: "bg-stone-100 text-stone-600"
+          className: "bg-stone-100 text-stone-600",
         }
     }
   }
@@ -102,18 +114,24 @@ const OrderCard = ({ order }: OrderCardProps) => {
   const statusBadge = getStatusBadge()
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5" data-testid="order-card">
+    <div
+      className="bg-white rounded-xl border border-stone-200 p-5"
+      data-testid="order-card"
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <p className="font-medium text-stone-800">
-              Bestellung #<span data-testid="order-display-id">{order.display_id}</span>
+              Bestellung #
+              <span data-testid="order-display-id">{order.display_id}</span>
             </p>
-            <span className={cn(
-              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
-              statusBadge.className
-            )}>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
+                statusBadge.className
+              )}
+            >
               {statusBadge.icon}
               {statusBadge.label}
             </span>
@@ -123,7 +141,10 @@ const OrderCard = ({ order }: OrderCardProps) => {
           </p>
         </div>
         <div className="text-right">
-          <p className="font-semibold text-stone-800" data-testid="order-amount">
+          <p
+            className="font-semibold text-stone-800"
+            data-testid="order-amount"
+          >
             {convertToLocale({
               amount: order.total,
               currency_code: order.currency_code,
@@ -146,8 +167,8 @@ const OrderCard = ({ order }: OrderCardProps) => {
             >
               <div className="aspect-square rounded-lg overflow-hidden bg-stone-100 p-2 flex items-center justify-center">
                 {i.thumbnail ? (
-                  <img 
-                    src={i.thumbnail} 
+                  <img
+                    src={i.thumbnail}
                     alt={i.title}
                     className="max-w-full max-h-full object-contain"
                   />
@@ -193,32 +214,37 @@ const OrderCard = ({ order }: OrderCardProps) => {
         )}
 
         {/* Returns Button - Show when delivered and has returnable items */}
-        {canRequestReturn && (fulfillmentStatus === "delivered" || order.fulfillment_status === "delivered") && (
-          <LocalizedClientLink
-            href={`/account/orders/details/${order.id}/return`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors"
-          >
-            <RotateCcw size={14} />
-            Retoure anmelden
-          </LocalizedClientLink>
-        )}
+        {canRequestReturn &&
+          (fulfillmentStatus === "delivered" ||
+            order.fulfillment_status === "delivered") && (
+            <LocalizedClientLink
+              href="/shipping"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors"
+            >
+              <RotateCcw size={14} />
+              Retoure anmelden
+            </LocalizedClientLink>
+          )}
 
         {/* Spacer */}
         <div className="flex-1" />
 
         {/* Details Link */}
-        <LocalizedClientLink 
+        <LocalizedClientLink
           href={`/account/orders/details/${order.id}`}
           className="group"
         >
-          <Button 
-            data-testid="order-details-link" 
+          <Button
+            data-testid="order-details-link"
             variant="secondary"
             size="sm"
             className="group"
           >
             Details anzeigen
-            <ChevronRight size={16} className="ml-1 group-hover:translate-x-0.5 transition-transform" />
+            <ChevronRight
+              size={16}
+              className="ml-1 group-hover:translate-x-0.5 transition-transform"
+            />
           </Button>
         </LocalizedClientLink>
       </div>
