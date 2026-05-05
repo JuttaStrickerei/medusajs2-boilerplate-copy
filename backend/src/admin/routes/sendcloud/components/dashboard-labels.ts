@@ -30,6 +30,15 @@ export const LABELS = {
     toastPickedUpSuccess: "Abholung bestätigt. Kunde wurde benachrichtigt.",
     toastPickedUpError: "Abholung konnte nicht bestätigt werden.",
     noItemsToPrepare: "Keine Artikel zur Vorbereitung verfügbar.",
+    detailsButton: "Details",
+    drawerTitle: "Abholung",
+    drawerCustomer: "Kunde",
+    drawerItems: "Artikel zur Abholung",
+    drawerStatus: "Status",
+    drawerOrderDate: "Bestelldatum",
+    drawerClose: "Schließen",
+    itemsCountSingular: "Artikel",
+    itemsCountPlural: "Artikel",
   },
 
   openOrders: {
