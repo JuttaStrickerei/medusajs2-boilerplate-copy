@@ -1,41 +1,111 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { HttpTypes } from "@medusajs/types"
 import { useWishlist } from "@lib/context/wishlist-context"
+import { listProducts } from "@lib/data/products"
+import ProductPreview from "@modules/products/components/product-preview"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { Button } from "@components/ui"
-import { Heart, Trash, ShoppingBag, ArrowRight } from "@components/icons"
+import { Button, SkeletonProductCard } from "@components/ui"
+import { ArrowRight, Heart, Trash } from "@components/icons"
 
-export default function WishlistTemplate() {
-  const { items, removeFromWishlist, clearWishlist } = useWishlist()
+type WishlistTemplateProps = {
+  region: HttpTypes.StoreRegion
+  countryCode: string
+}
+
+export default function WishlistTemplate({
+  region,
+  countryCode,
+}: WishlistTemplateProps) {
+  const { items, clearWishlist } = useWishlist()
+  const [products, setProducts] = useState<HttpTypes.StoreProduct[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const itemIds = items.map((i) => i.id)
+  const itemIdsKey = itemIds.join(",")
+
+  useEffect(() => {
+    if (itemIds.length === 0) {
+      setProducts([])
+      return
+    }
+
+    // If all wishlisted IDs are already fetched, just prune.
+    const haveIds = new Set(products.map((p) => p.id))
+    const missingIds = itemIds.filter((id) => !haveIds.has(id))
+
+    if (missingIds.length === 0) {
+      setProducts((prev) => prev.filter((p) => itemIds.includes(p.id)))
+      return
+    }
+
+    let cancelled = false
+    setIsLoading(true)
+
+    listProducts({
+      countryCode,
+      queryParams: {
+        id: itemIds,
+        limit: itemIds.length,
+      },
+    })
+      .then(({ response }) => {
+        if (cancelled) return
+        setProducts(response.products)
+      })
+      .catch(() => {
+        if (cancelled) return
+        // Keep whatever we had; avoid destroying the visible grid on a transient failure.
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemIdsKey, countryCode])
+
   const isEmpty = items.length === 0
+  const itemCount = items.length
+
+  // Preserve wishlist order (addedAt DESC): the server returns rows sorted,
+  // but `listProducts` may return products in a different order.
+  const orderedProducts = itemIds
+    .map((id) => products.find((p) => p.id === id))
+    .filter((p): p is HttpTypes.StoreProduct => p !== undefined)
 
   return (
     <div className="py-12">
       <div className="content-container">
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="font-serif text-3xl small:text-4xl font-medium text-stone-800 mb-2">
+        <header className="mb-8 pb-6 border-b border-stone-200">
+          <h1 className="font-serif text-3xl small:text-4xl font-medium text-stone-800 tracking-tight">
             Wunschliste
           </h1>
-          <p className="text-stone-600">
-            {isEmpty 
+          <p className="mt-2 text-stone-500">
+            {isEmpty
               ? "Speichern Sie Ihre Lieblingsprodukte für später"
-              : `${items.length} ${items.length === 1 ? 'Artikel' : 'Artikel'} gespeichert`
-            }
+              : `${itemCount} ${
+                  itemCount === 1 ? "Artikel" : "Artikel"
+                } gespeichert`}
           </p>
-        </div>
+        </header>
 
         {isEmpty ? (
           /* Empty State */
-          <div className="bg-white rounded-2xl border border-stone-200 p-12 text-center">
-            <div className="w-20 h-20 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-6">
-              <Heart size={36} className="text-stone-400" />
+          <div className="bg-white rounded-2xl border border-stone-200/70 p-12 text-center">
+            <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-6">
+              <Heart size={28} className="text-stone-400" />
             </div>
             <h2 className="font-serif text-xl font-medium text-stone-800 mb-2">
               Ihre Wunschliste ist leer
             </h2>
             <p className="text-stone-500 mb-8 max-w-sm mx-auto">
-              Entdecken Sie unsere Kollektionen und speichern Sie Ihre Favoriten mit dem Herz-Symbol.
+              Entdecken Sie unsere Kollektionen und speichern Sie Ihre Favoriten
+              mit dem Herz-Symbol.
             </p>
             <LocalizedClientLink href="/store">
               <Button>
@@ -46,7 +116,7 @@ export default function WishlistTemplate() {
           </div>
         ) : (
           <>
-            {/* Clear All Button */}
+            {/* Clear-all row */}
             <div className="flex justify-end mb-6">
               <button
                 onClick={clearWishlist}
@@ -57,71 +127,25 @@ export default function WishlistTemplate() {
               </button>
             </div>
 
-            {/* Wishlist Grid */}
+            {/* Grid — matches shop layout exactly */}
             <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-4 small:gap-6">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-2xl border border-stone-200 overflow-hidden group hover:shadow-lg transition-shadow"
-                >
-                  {/* Image */}
-                  <LocalizedClientLink
-                    href={`/products/${item.handle}`}
-                    className="block relative aspect-[4/5] bg-stone-100 overflow-hidden"
-                  >
-                    {item.thumbnail ? (
-                      <img
-                        src={item.thumbnail}
-                        alt={item.title}
-                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ShoppingBag size={40} className="text-stone-300" />
-                      </div>
-                    )}
-                    
-                    {/* Remove Button */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault()
-                        removeFromWishlist(item.id)
-                      }}
-                      className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-white transition-all"
-                      aria-label="Von Wunschliste entfernen"
-                    >
-                      <Heart size={18} filled />
-                    </button>
-                  </LocalizedClientLink>
-
-                  {/* Info */}
-                  <div className="p-4">
-                    <LocalizedClientLink href={`/products/${item.handle}`}>
-                      <h3 className="font-medium text-stone-800 line-clamp-2 group-hover:text-stone-600 transition-colors">
-                        {item.title}
-                      </h3>
-                    </LocalizedClientLink>
-                    
-                    <div className="mt-3">
-                      <LocalizedClientLink 
-                        href={`/products/${item.handle}`}
-                        className="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors flex items-center gap-1"
-                      >
-                        Zum Produkt
-                        <ArrowRight size={14} />
-                      </LocalizedClientLink>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {orderedProducts.length === 0 && isLoading
+                ? Array.from({ length: itemCount }).map((_, i) => (
+                    <SkeletonProductCard key={i} />
+                  ))
+                : orderedProducts.map((product) => (
+                    <ProductPreview
+                      key={product.id}
+                      product={product}
+                      region={region}
+                    />
+                  ))}
             </div>
 
             {/* Continue Shopping */}
             <div className="mt-12 text-center">
               <LocalizedClientLink href="/store">
-                <Button variant="secondary">
-                  Weiter shoppen
-                </Button>
+                <Button variant="secondary">Weiter shoppen</Button>
               </LocalizedClientLink>
             </div>
           </>
@@ -130,4 +154,3 @@ export default function WishlistTemplate() {
     </div>
   )
 }
-

@@ -26,7 +26,7 @@ export default function CollectionTemplate({
   filterOptions: DynamicFilterOptions
 }) {
   const pageNumber = page ? parseInt(page) : 1
-  const sort = sortBy || "created_at"
+  const sort = sortBy || "color_spectrum"
 
   return (
     <div className="bg-stone-50 min-h-screen">
@@ -34,11 +34,17 @@ export default function CollectionTemplate({
       <div className="bg-white border-b border-stone-200">
         <div className="content-container py-3 small:py-4">
           <nav className="flex items-center gap-2 text-xs small:text-sm text-stone-500">
-            <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
+            <LocalizedClientLink
+              href="/"
+              className="hover:text-stone-800 transition-colors"
+            >
               Home
             </LocalizedClientLink>
             <span>/</span>
-            <LocalizedClientLink href="/collections" className="hover:text-stone-800 transition-colors">
+            <LocalizedClientLink
+              href="/collections"
+              className="hover:text-stone-800 transition-colors"
+            >
               Kollektionen
             </LocalizedClientLink>
             <span>/</span>
@@ -53,7 +59,12 @@ export default function CollectionTemplate({
           {/* Filters Sidebar - Desktop/Tablet */}
           <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
             <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5">
-              <RefinementList sortBy={sort} filters={filters} filterOptions={filterOptions} hideCollections />
+              <RefinementList
+                sortBy={sort}
+                filters={filters}
+                filterOptions={filterOptions}
+                hideCollections
+              />
             </div>
           </aside>
 
@@ -74,7 +85,12 @@ export default function CollectionTemplate({
             {/* Mobile/Tablet Filter Bar */}
             <div className="small:hidden mb-4">
               <div className="flex items-center gap-3">
-                <MobileFilterDrawer sortBy={sort} filters={filters} filterOptions={filterOptions} hideCollections />
+                <MobileFilterDrawer
+                  sortBy={sort}
+                  filters={filters}
+                  filterOptions={filterOptions}
+                  hideCollections
+                />
               </div>
             </div>
 

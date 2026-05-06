@@ -1057,6 +1057,8 @@ async createReturnFulfillment(
         "already cancelled",
         "already canceled",
         "cannot be cancelled",
+        "no longer be cancelled", // Sendcloud: "shipped parcels, or parcels being shipped, can no longer be cancelled."
+        "can no longer be cancelled",
         "status does not allow",
         "cancellation not possible",
         "parcel was cancelled",

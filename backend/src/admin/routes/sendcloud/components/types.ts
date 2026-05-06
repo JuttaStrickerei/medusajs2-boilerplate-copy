@@ -85,9 +85,11 @@ export type OrderFulfillment = {
   id: string
   provider_id: string
   data: Record<string, unknown> | null
+  created_at?: string
   shipped_at: string | null
   delivered_at: string | null
   canceled_at: string | null
+  requires_shipping?: boolean
   labels: Array<{
     tracking_number: string | null
     tracking_url: string | null

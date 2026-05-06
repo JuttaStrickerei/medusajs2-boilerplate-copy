@@ -7,6 +7,8 @@ import { ToastProvider } from "@components/ui"
 import { WishlistProvider } from "@lib/context/wishlist-context"
 import { CartProvider } from "@lib/context/cart-context"
 import CookieConsent from "@components/cookie-consent"
+import WishlistMergePrompt from "@modules/wishlist/components/wishlist-merge-prompt"
+import { isAuthenticated } from "@lib/data/cookies"
 
 const GA_ID = "G-VQG5PFKSXB"
 
@@ -65,7 +67,9 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export default async function RootLayout(props: { children: React.ReactNode }) {
+  const authed = await isAuthenticated()
+
   return (
     <html
       lang="de"
@@ -97,9 +101,10 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           strategy="afterInteractive"
         />
         <CartProvider>
-          <WishlistProvider>
+          <WishlistProvider initialAuthenticated={authed}>
             <ToastProvider>
               <main className="relative min-h-screen">{props.children}</main>
+              <WishlistMergePrompt />
             </ToastProvider>
           </WishlistProvider>
         </CartProvider>

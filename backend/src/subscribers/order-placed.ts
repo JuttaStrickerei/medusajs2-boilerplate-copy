@@ -3,6 +3,8 @@ import { INotificationModuleService, IOrderModuleService, Logger } from '@medusa
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
 import { BACKEND_URL } from '../lib/constants'
+import { isPickupOrder } from '../lib/is-pickup'
+import { PICKUP_LOCATION, type FulfillmentType } from '../lib/pickup-info'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -29,10 +31,19 @@ export default async function orderPlacedHandler({
       logger.warn(`[OrderPlaced] No shipping address for order ${data.id}, using billing address or skipping`)
     }
     
-    const shippingAddress = order.shipping_address?.id 
+    const shippingAddress = order.shipping_address?.id
       ? await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
       : order.shipping_address || null
     logger.debug(`[OrderPlaced] Shipping address loaded`)
+
+    // Detect pickup vs delivery via the order's shipping methods (same
+    // discriminator approach as the admin UI in 313e0e9).
+    const isPickup = await isPickupOrder(container, data.id)
+    const fulfillmentType: FulfillmentType = isPickup ? "pickup" : "delivery"
+    const pickupLocation = isPickup ? PICKUP_LOCATION : undefined
+    logger.info(
+      `[OrderPlaced] Order ${data.id} classified as ${fulfillmentType}`
+    )
 
     await notificationModuleService.createNotifications({
       to: order.email,
@@ -45,6 +56,8 @@ export default async function orderPlacedHandler({
         },
         order,
         shippingAddress,
+        fulfillmentType,
+        pickupLocation,
         preview: 'Vielen Dank für die Bestellung!'
       }
     })
@@ -63,6 +76,7 @@ export default async function orderPlacedHandler({
         },
         order,
         shippingAddress,
+        fulfillmentType,
         adminOrderUrl: `${adminBaseUrl}/orders/${order.id}`,
         preview: `Neue Bestellung #${order.display_id}`,
       },

@@ -1,11 +1,14 @@
+import crypto from "node:crypto";
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
-import { 
+import {
   cancelOrderFulfillmentWorkflow,
+  createOrderShipmentWorkflow,
   markFulfillmentAsDeliveredWorkflow,
-  updateFulfillmentWorkflow 
+  updateFulfillmentWorkflow
 } from "@medusajs/medusa/core-flows";
 import { SENDCLOUD_SHIPMENT_MODULE } from "../../../modules/sendcloud-shipment";
+import { SENDCLOUD_SECRET_KEY } from "../../../lib/constants";
 
 /**
  * Sendcloud Webhook Handler
@@ -107,6 +110,67 @@ const SENDCLOUD_STATUS_MAP: Record<string, MedusaFulfillmentStatus> = {
   "returned to sender": "returned",
 };
 
+// Normalize a webhook timestamp to an ISO 8601 string.
+// Sendcloud sends epoch milliseconds; our own emulation may send ISO strings.
+const toIsoTimestamp = (raw: unknown): string => {
+  if (raw == null) return new Date().toISOString();
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) return d.toISOString();
+  }
+  if (typeof raw === "string") {
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) return d.toISOString();
+  }
+  return new Date().toISOString();
+};
+
+// Verify Sendcloud-Signature header against the raw request body using HMAC-SHA256.
+type SignatureResult =
+  | { ok: true; status?: undefined; message?: undefined }
+  | { ok: false; status: number; message: string };
+
+const verifySendcloudSignature = (req: MedusaRequest): SignatureResult => {
+  if (!SENDCLOUD_SECRET_KEY) {
+    console.error("[SendcloudWebhook] ❌ SENDCLOUD_SECRET_KEY not configured");
+    return { ok: false, status: 500, message: "Webhook secret not configured" };
+  }
+
+  const headers = req.headers as Record<string, string | string[] | undefined>;
+  const rawSig = headers["sendcloud-signature"] ?? headers["Sendcloud-Signature"];
+  const providedSignature = Array.isArray(rawSig) ? rawSig[0] : rawSig;
+
+  if (!providedSignature) {
+    console.warn("[SendcloudWebhook] ❌ Missing Sendcloud-Signature header");
+    return { ok: false, status: 401, message: "Missing signature" };
+  }
+
+  const raw = (req as MedusaRequest & { rawBody?: Buffer }).rawBody;
+  if (!raw || raw.length === 0) {
+    console.warn("[SendcloudWebhook] ❌ Missing raw body — cannot verify signature");
+    return { ok: false, status: 401, message: "Missing body" };
+  }
+
+  const expected = crypto
+    .createHmac("sha256", SENDCLOUD_SECRET_KEY)
+    .update(raw)
+    .digest("hex");
+  const provided = providedSignature.trim().toLowerCase();
+  const expectedBuf = Buffer.from(expected, "utf8");
+  const providedBuf = Buffer.from(provided, "utf8");
+
+  if (
+    expectedBuf.length !== providedBuf.length ||
+    !crypto.timingSafeEqual(expectedBuf, providedBuf)
+  ) {
+    console.warn("[SendcloudWebhook] ❌ Invalid signature");
+    return { ok: false, status: 401, message: "Invalid signature" };
+  }
+
+  console.log("[SendcloudWebhook] ✅ Signature verified");
+  return { ok: true };
+};
+
 // Helper to safely get nested properties
 const get = (obj: any, path: string, defaultValue: any = undefined) => {
   const keys = path.split('.');
@@ -142,27 +206,58 @@ const isFirstShippedStatus = (currentMetadata: any): boolean => {
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const startTime = Date.now();
-  
+
   console.log("[SendcloudWebhook] ════════════════════════════════════════════");
   console.log("[SendcloudWebhook] Received webhook at:", new Date().toISOString());
+
+  // 1. Verify signature BEFORE any parsing of the body as trusted data.
+  const sigResult = verifySendcloudSignature(req);
+  if (!sigResult.ok) {
+    return res.status(sigResult.status).json({
+      success: false,
+      message: sigResult.message,
+    });
+  }
+
   console.log("[SendcloudWebhook] Payload:", JSON.stringify(req.body, null, 2));
 
   try {
     const fulfillmentModuleService = req.scope.resolve(Modules.FULFILLMENT);
-    
-    // 1. Parse and validate payload
+
+    // 2. Parse payload and check action FIRST — before demanding parcel fields.
+    //    Sendcloud sends handshake webhooks (integration_connected,
+    //    integration_credentials, integration_deleted, integration_modified)
+    //    which have no parcel payload. Acknowledge them with 200.
     const payload = req.body as SendcloudWebhookPayload;
     const action = get(payload, 'action');
+
+    if (!action) {
+      console.error("[SendcloudWebhook] ❌ Missing 'action' field in payload");
+      return res.status(200).json({
+        success: false,
+        message: "Invalid payload - missing 'action' field",
+      });
+    }
+
+    if (action !== "parcel_status_changed") {
+      console.log(`[SendcloudWebhook] ⏭️ Acknowledging non-status action: ${action}`);
+      return res.status(200).json({
+        success: true,
+        message: `Action '${action}' acknowledged`,
+      });
+    }
+
+    // 3. Validate parcel_status_changed payload.
     const parcel = get(payload, 'parcel') as SendcloudParcel;
     const trackingNumber = get(parcel, 'tracking_number');
     const statusMessage = get(parcel, 'status.message');
     const parcelId = get(parcel, 'id');
 
-    if (!action || !parcel || !trackingNumber || !statusMessage) {
-      console.error("[SendcloudWebhook] ❌ Invalid payload - missing required fields");
-      return res.status(200).json({ 
-        success: false, 
-        message: "Invalid payload structure - missing action, parcel, tracking_number, or status.message" 
+    if (!parcel || !trackingNumber || !statusMessage) {
+      console.error("[SendcloudWebhook] ❌ Invalid parcel_status_changed payload - missing required fields");
+      return res.status(200).json({
+        success: false,
+        message: "Invalid payload structure - missing parcel, tracking_number, or status.message"
       });
     }
 
@@ -170,15 +265,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     console.log(`[SendcloudWebhook] 📦 Parcel ID: ${parcelId}`);
     console.log(`[SendcloudWebhook] 📦 Tracking: ${trackingNumber}`);
     console.log(`[SendcloudWebhook] 📦 Status: ${statusMessage}`);
-
-    // Only process parcel_status_changed actions
-    if (action !== "parcel_status_changed") {
-      console.log(`[SendcloudWebhook] ⏭️ Skipping non-status action: ${action}`);
-      return res.status(200).json({ 
-        success: true, 
-        message: `Action '${action}' acknowledged but not processed` 
-      });
-    }
 
     // 2. Map Sendcloud status to Medusa status
     const medusaStatus = mapSendcloudStatus(statusMessage);
@@ -194,7 +280,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       // First try to find by parcel_id in data (most reliable)
       const allFulfillments = await fulfillmentModuleService.listFulfillments(
         { provider_id: [providerId] },
-        { relations: ["labels", "delivery_address"] }
+        { relations: ["labels", "delivery_address", "items"] }
       );
 
       console.log(`[SendcloudWebhook] 🔍 Searching ${allFulfillments.length} Sendcloud fulfillments...`);
@@ -251,73 +337,118 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     // 4. Update fulfillment based on status
     const currentMetadata = foundFulfillment.metadata || {};
-    const timestamp = payload.timestamp || new Date().toISOString();
+    const timestamp = toIsoTimestamp(payload.timestamp);
 
     try {
       switch (medusaStatus) {
         case "shipped": {
-          // Check if this is the first "shipped" status (set shipped_at)
-          if (!foundFulfillment.shipped_at && isFirstShippedStatus(currentMetadata)) {
-            console.log(`[SendcloudWebhook] 🚚 Setting shipped_at for ${medusaFulfillmentId}`);
-            
-            await updateFulfillmentWorkflow(req.scope).run({
-              input: {
-                id: medusaFulfillmentId,
-                shipped_at: new Date(),
-                metadata: {
-                  ...currentMetadata,
-                  sendcloud_status: statusMessage,
-                  sendcloud_status_id: parcel.status.id,
-                  sendcloud_shipped_at: timestamp,
-                  sendcloud_last_update: timestamp,
-                  sendcloud_tracking_url: parcel.tracking_url,
-                  sendcloud_carrier: parcel.carrier?.code,
-                }
-              }
+          // Resolve order_id for this fulfillment (same pattern as the canceled branch).
+          let orderId: string | null = null;
+          try {
+            const queryService = req.scope.resolve("query") as any;
+            const { data: orderFulfillments } = await queryService.graph({
+              entity: "order_fulfillment",
+              fields: ["order_id"],
+              filters: { fulfillment_id: medusaFulfillmentId },
             });
-            console.log(`[SendcloudWebhook] ✅ Fulfillment marked as shipped`);
-          } else {
-            // Just update metadata for transit updates
-            console.log(`[SendcloudWebhook] 📍 Updating transit status for ${medusaFulfillmentId}`);
-            await updateFulfillmentWorkflow(req.scope).run({
-              input: {
-                id: medusaFulfillmentId,
-                metadata: {
-                  ...currentMetadata,
-                  sendcloud_status: statusMessage,
-                  sendcloud_status_id: parcel.status.id,
-                  sendcloud_last_update: timestamp,
-                }
-              }
-            });
+            orderId = orderFulfillments?.[0]?.order_id || null;
+          } catch (e) {
+            console.warn(`[SendcloudWebhook] Could not resolve order_id: ${(e as Error).message}`);
           }
+
+          // Build workflow inputs from the eager-loaded fulfillment.
+          const fulfillmentItems = Array.isArray(foundFulfillment.items)
+            ? foundFulfillment.items
+                .filter((it: any) => it?.line_item_id)
+                .map((it: any) => ({
+                  id: it.line_item_id as string,
+                  quantity: Number(it.quantity ?? 0),
+                }))
+            : [];
+
+          const fulfillmentLabels = Array.isArray(foundFulfillment.labels)
+            ? foundFulfillment.labels.map((l: any) => ({
+                tracking_number: l.tracking_number,
+                tracking_url: l.tracking_url,
+                label_url: l.label_url,
+              }))
+            : [];
+
+          if (orderId && fulfillmentItems.length > 0) {
+            console.log(`[SendcloudWebhook] 🚚 Registering shipment for ${medusaFulfillmentId} (order ${orderId})`);
+            try {
+              await createOrderShipmentWorkflow(req.scope).run({
+                input: {
+                  order_id: orderId,
+                  fulfillment_id: medusaFulfillmentId,
+                  items: fulfillmentItems,
+                  labels: fulfillmentLabels,
+                },
+              });
+              console.log(`[SendcloudWebhook] ✅ Order shipment registered — order.shipping_status flipped`);
+            } catch (shipmentError: any) {
+              // Sendcloud sends multiple in-transit ticks per shipment. Once items are
+              // already shipped, createShipmentValidateOrder throws — that's expected
+              // and means the desired state is already in place.
+              console.warn(
+                `[SendcloudWebhook] ⚠️ createOrderShipmentWorkflow failed (likely already shipped): ${shipmentError.message}`
+              );
+            }
+          } else {
+            console.warn(
+              `[SendcloudWebhook] ⚠️ Skipping createOrderShipmentWorkflow — orderId=${orderId}, items=${fulfillmentItems.length}`
+            );
+          }
+
+          // ALWAYS patch metadata so sendcloud_status / status_id / last_update / tracking_url / carrier
+          // reflect the latest tick (mirrors the delivered branch).
+          const isFirstShipped = !foundFulfillment.shipped_at && isFirstShippedStatus(currentMetadata);
+          await updateFulfillmentWorkflow(req.scope).run({
+            input: {
+              id: medusaFulfillmentId,
+              metadata: {
+                ...currentMetadata,
+                sendcloud_status: statusMessage,
+                sendcloud_status_id: parcel.status.id,
+                sendcloud_last_update: timestamp,
+                sendcloud_tracking_url: parcel.tracking_url,
+                sendcloud_carrier: parcel.carrier?.code,
+                ...(isFirstShipped ? { sendcloud_shipped_at: timestamp } : {}),
+              },
+            },
+          });
           break;
         }
 
         case "delivered": {
           console.log(`[SendcloudWebhook] 📬 Marking as delivered: ${medusaFulfillmentId}`);
-          
+
           try {
             await markFulfillmentAsDeliveredWorkflow(req.scope).run({
               input: { id: medusaFulfillmentId }
             });
             console.log(`[SendcloudWebhook] ✅ Fulfillment marked as delivered`);
           } catch (deliveryError: any) {
-            // If workflow fails (e.g., already delivered), just update metadata
+            // If workflow fails (e.g., already delivered), log and continue.
+            // Metadata patch below still runs so sendcloud_status reflects reality.
             console.warn(`[SendcloudWebhook] ⚠️ Delivery workflow failed (may already be delivered): ${deliveryError.message}`);
-            await updateFulfillmentWorkflow(req.scope).run({
-              input: {
-                id: medusaFulfillmentId,
-                metadata: {
-                  ...currentMetadata,
-                  sendcloud_status: statusMessage,
-                  sendcloud_status_id: parcel.status.id,
-                  sendcloud_delivered_at: timestamp,
-                  sendcloud_last_update: timestamp,
-                }
-              }
-            });
           }
+
+          // ALWAYS patch metadata so sendcloud_status reflects "Delivered".
+          // Without this, a happy-path delivery leaves metadata frozen at the
+          // previous in-transit status.
+          await updateFulfillmentWorkflow(req.scope).run({
+            input: {
+              id: medusaFulfillmentId,
+              metadata: {
+                ...currentMetadata,
+                sendcloud_status: statusMessage,
+                sendcloud_status_id: parcel.status.id,
+                sendcloud_delivered_at: timestamp,
+                sendcloud_last_update: timestamp,
+              }
+            }
+          });
           break;
         }
 

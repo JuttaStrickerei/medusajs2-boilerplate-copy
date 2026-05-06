@@ -22,6 +22,8 @@ type OrderWithSummary = OrderDTO & {
 export interface AdminOrderNotificationTemplateProps {
   order: OrderWithSummary
   shippingAddress?: OrderAddressDTO | null
+  // Defaults to "delivery" if omitted (back-compat).
+  fulfillmentType?: "pickup" | "delivery"
   adminOrderUrl: string
   preview?: string
 }
@@ -75,7 +77,13 @@ const getPaymentMethod = (order: OrderWithSummary) => {
 
 export const AdminOrderNotificationTemplate: React.FC<
   AdminOrderNotificationTemplateProps
-> = ({ order, shippingAddress, adminOrderUrl, preview = "Neue Bestellung eingegangen" }) => {
+> = ({
+  order,
+  shippingAddress,
+  fulfillmentType = "delivery",
+  adminOrderUrl,
+  preview = "Neue Bestellung eingegangen",
+}) => {
   const displayId = order.display_id ?? order.id
   const createdAt = new Date(order.created_at).toLocaleString("de-AT")
   const customerAddress = shippingAddress || order.billing_address || null
@@ -85,6 +93,8 @@ export const AdminOrderNotificationTemplate: React.FC<
   const grandTotal =
     Number(order.summary?.raw_current_order_total?.value ?? order.total ?? 0)
   const currencyCode = order.currency_code || "EUR"
+  const versandartLabel =
+    fulfillmentType === "pickup" ? "Abholung im Shop" : "Lieferung per DPD"
 
   return (
     <Base preview={preview}>
@@ -102,9 +112,14 @@ export const AdminOrderNotificationTemplate: React.FC<
       <Section>
         <Text><strong>Bestellnummer:</strong> #{displayId}</Text>
         <Text><strong>Datum:</strong> {createdAt}</Text>
+        <Text><strong>Versandart:</strong> {versandartLabel}</Text>
         <Text><strong>Kunde:</strong> {`${customerAddress?.first_name || ""} ${customerAddress?.last_name || ""}`.trim() || "Unbekannt"}</Text>
         <Text><strong>E-Mail:</strong> {order.email || "Keine E-Mail"}</Text>
-        <Text><strong>Lieferadresse:</strong> {formatAddress(customerAddress)}</Text>
+        {fulfillmentType === "pickup" ? (
+          <Text><strong>Abholung:</strong> Kunde holt im Shop ab — keine Lieferadresse.</Text>
+        ) : (
+          <Text><strong>Lieferadresse:</strong> {formatAddress(customerAddress)}</Text>
+        )}
       </Section>
 
       <Hr />

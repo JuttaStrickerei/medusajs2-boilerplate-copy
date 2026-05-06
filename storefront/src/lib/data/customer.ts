@@ -3,9 +3,10 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
-import { revalidateTag } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
+  clearWishlistMergePending,
   getAuthHeaders,
   getCacheOptions,
   getCacheTag,
@@ -13,6 +14,7 @@ import {
   removeAuthToken,
   removeCartId,
   setAuthToken,
+  setWishlistMergePending,
 } from "./cookies"
 
 export const retrieveCustomer =
@@ -95,8 +97,14 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
+    revalidatePath("/", "layout")
 
     await transferCart()
+
+    // Flag guest-wishlist auto-merge for the client-side prompt component.
+    // Brand-new account created from this browser = high confidence same user,
+    // so no banner — prompt runs the merge silently.
+    await setWishlistMergePending("auto")
 
     return createdCustomer
   } catch (error: any) {
@@ -116,6 +124,7 @@ export async function login(_currentState: unknown, formData: FormData) {
         await setAuthToken(token as string)
         const customerCacheTag = await getCacheTag("customers")
         revalidateTag(customerCacheTag)
+        revalidatePath("/", "layout")
       })
   } catch (error: any) {
     return error.toString()
@@ -127,9 +136,18 @@ export async function login(_currentState: unknown, formData: FormData) {
     return error.toString()
   }
 
+  // Flag guest-wishlist merge prompt for the client. Login may happen on a
+  // shared device, so the prompt asks the user before mixing items in.
+  // Must be set BEFORE the redirect() call (which throws).
+  await setWishlistMergePending("prompt")
+
   // Smart redirect: If redirect_url is provided, redirect there instead of account page
   // Security: Only allow internal redirects (paths starting with / but not //)
-  if (redirectUrl && redirectUrl.startsWith("/") && !redirectUrl.startsWith("//")) {
+  if (
+    redirectUrl &&
+    redirectUrl.startsWith("/") &&
+    !redirectUrl.startsWith("//")
+  ) {
     redirect(redirectUrl)
   }
 }
@@ -146,6 +164,13 @@ export async function signout(countryCode: string) {
 
   const cartCacheTag = await getCacheTag("cart")
   revalidateTag(cartCacheTag)
+
+  // Clear any pending wishlist merge flag — the client-side provider
+  // also wipes the localStorage wishlist key on the auth→guest transition.
+  await clearWishlistMergePending()
+
+  // Force the root layout to re-read cookies so WishlistProvider flips to guest mode.
+  revalidatePath("/", "layout")
 
   redirect(`/${countryCode}/account`)
 }
