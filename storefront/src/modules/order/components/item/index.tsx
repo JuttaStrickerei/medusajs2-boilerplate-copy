@@ -1,8 +1,8 @@
+import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { Table } from "@medusajs/ui"
 
 import LineItemOptions from "@modules/common/components/line-item-options"
-import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import Thumbnail from "@modules/products/components/thumbnail"
 
@@ -16,7 +16,11 @@ const Item = ({ item, currencyCode }: ItemProps) => {
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-20">
         <div className="w-16 h-16 bg-stone-100 rounded-lg overflow-hidden border border-stone-200">
-          <Thumbnail thumbnail={item.thumbnail} size="square" className="w-full h-full object-contain" />
+          <Thumbnail
+            thumbnail={item.thumbnail}
+            size="square"
+            className="w-full h-full object-contain"
+          />
         </div>
       </Table.Cell>
 
@@ -40,12 +44,14 @@ const Item = ({ item, currencyCode }: ItemProps) => {
               currencyCode={currencyCode}
             />
           </div>
-          <div className="text-sm font-medium text-stone-800">
-            <LineItemPrice
-              item={item}
-              style="tight"
-              currencyCode={currencyCode}
-            />
+          <div
+            className="text-sm font-medium text-stone-800"
+            data-testid="product-price"
+          >
+            {convertToLocale({
+              amount: item.total,
+              currency_code: currencyCode,
+            })}
           </div>
         </div>
       </Table.Cell>
