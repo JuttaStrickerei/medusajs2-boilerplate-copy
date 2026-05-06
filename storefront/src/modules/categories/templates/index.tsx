@@ -27,7 +27,7 @@ export default function CategoryTemplate({
   filterOptions: DynamicFilterOptions
 }) {
   const pageNumber = page ? parseInt(page) : 1
-  const sort = sortBy || "created_at"
+  const sort = sortBy || "color_spectrum"
 
   if (!category || !countryCode) notFound()
 
@@ -60,11 +60,17 @@ export default function CategoryTemplate({
       <div className="bg-white border-b border-stone-200">
         <div className="content-container py-3 small:py-4">
           <nav className="flex items-center gap-2 text-xs small:text-sm text-stone-500">
-            <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
+            <LocalizedClientLink
+              href="/"
+              className="hover:text-stone-800 transition-colors"
+            >
               Home
             </LocalizedClientLink>
             <span>/</span>
-            <LocalizedClientLink href="/categories" className="hover:text-stone-800 transition-colors">
+            <LocalizedClientLink
+              href="/categories"
+              className="hover:text-stone-800 transition-colors"
+            >
               Kategorien
             </LocalizedClientLink>
             {parents.map((parent) => (
@@ -90,7 +96,13 @@ export default function CategoryTemplate({
           {/* Filters Sidebar - Desktop/Tablet */}
           <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
             <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5">
-              <RefinementList sortBy={sort} filters={filters} filterOptions={filterOptions} hideCategories data-testid="sort-by-container" />
+              <RefinementList
+                sortBy={sort}
+                filters={filters}
+                filterOptions={filterOptions}
+                hideCategories
+                data-testid="sort-by-container"
+              />
             </div>
           </aside>
 
@@ -98,7 +110,10 @@ export default function CategoryTemplate({
           <main className="flex-1">
             {/* Page Header */}
             <div className="mb-6 small:mb-8">
-              <h1 className="font-serif text-2xl small:text-3xl medium:text-4xl font-medium text-stone-800" data-testid="category-page-title">
+              <h1
+                className="font-serif text-2xl small:text-3xl medium:text-4xl font-medium text-stone-800"
+                data-testid="category-page-title"
+              >
                 {category.name}
               </h1>
               {category.description && (
@@ -109,28 +124,36 @@ export default function CategoryTemplate({
             </div>
 
             {/* Subcategories */}
-            {category.category_children && category.category_children.length > 0 && (
-              <div className="mb-6 small:mb-8">
-                <h2 className="text-sm font-medium text-stone-800 mb-3">Unterkategorien</h2>
-                <ul className="flex flex-wrap gap-2">
-                  {category.category_children.map((c) => (
-                    <li key={c.id}>
-                      <LocalizedClientLink
-                        href={`/categories/${buildCategoryPath(c)}`}
-                        className="inline-block px-4 py-2 text-sm text-stone-600 bg-stone-100 rounded-full hover:bg-stone-800 hover:text-white transition-colors"
-                      >
-                        {c.name}
-                      </LocalizedClientLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {category.category_children &&
+              category.category_children.length > 0 && (
+                <div className="mb-6 small:mb-8">
+                  <h2 className="text-sm font-medium text-stone-800 mb-3">
+                    Unterkategorien
+                  </h2>
+                  <ul className="flex flex-wrap gap-2">
+                    {category.category_children.map((c) => (
+                      <li key={c.id}>
+                        <LocalizedClientLink
+                          href={`/categories/${buildCategoryPath(c)}`}
+                          className="inline-block px-4 py-2 text-sm text-stone-600 bg-stone-100 rounded-full hover:bg-stone-800 hover:text-white transition-colors"
+                        >
+                          {c.name}
+                        </LocalizedClientLink>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             {/* Mobile/Tablet Filter Bar */}
             <div className="small:hidden mb-4">
               <div className="flex items-center gap-3">
-                <MobileFilterDrawer sortBy={sort} filters={filters} filterOptions={filterOptions} hideCategories />
+                <MobileFilterDrawer
+                  sortBy={sort}
+                  filters={filters}
+                  filterOptions={filterOptions}
+                  hideCategories
+                />
               </div>
             </div>
 
