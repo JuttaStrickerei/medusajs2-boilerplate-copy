@@ -1,5 +1,6 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
 import { wishlistMiddlewares } from "./store/wishlist/middlewares"
+import { cleanupProductImagesMiddleware } from "./admin/products/cleanup-images-middleware"
 
 // Medusa scans `src/api/middlewares.ts` (plural) and ONLY this file — see
 // https://docs.medusajs.com/learn/fundamentals/api-routes/middlewares.
@@ -17,5 +18,10 @@ export default defineMiddlewares({
       bodyParser: { preserveRawBody: true },
     },
     ...wishlistMiddlewares,
+    {
+      matcher: "/admin/products/:id",
+      methods: ["DELETE"],
+      middlewares: [cleanupProductImagesMiddleware],
+    },
   ],
 })

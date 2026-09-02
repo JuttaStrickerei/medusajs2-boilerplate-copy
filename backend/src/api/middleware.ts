@@ -10,15 +10,9 @@ import { defineMiddlewares, validateAndTransformBody } from "@medusajs/framework
 import { PostInvoiceConfigSchema } from "./admin/invoice-config/route"
 import { newsletterSignupSchema } from "./store/newsletter/route"
 import { adminSendcloudShipmentMiddlewares } from "./admin/sendcloud-shipments/middlewares"
-import { cleanupProductImagesMiddleware } from "./admin/products/cleanup-images-middleware"
 
 export default defineMiddlewares({
   routes: [
-    {
-      matcher: "/admin/products/:id",
-      methods: ["DELETE"],
-      middlewares: [cleanupProductImagesMiddleware],
-    },
     {
       matcher: "/admin/invoice-config",
       methods: ["POST"],
