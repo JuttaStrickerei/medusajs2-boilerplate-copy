@@ -5,10 +5,12 @@ import { Instagram, Mail, Phone, MapPin } from "@components/icons"
 import { CookieSettingsButton } from "@components/cookie-consent/CookieSettingsButton"
 
 export default async function Footer() {
-  const { collections } = await listCollections({
-    fields: "*products",
+  const { collections } = await listCollections()
+  const productCategories = await listCategories({
+    // Navigation only needs names/handles; the default field set pulls every
+    // product of every category into each page.
+    fields: "id,name,handle,metadata,*parent_category",
   })
-  const productCategories = await listCategories()
 
   const currentYear = new Date().getFullYear()
 
