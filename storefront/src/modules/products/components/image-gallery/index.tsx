@@ -8,9 +8,14 @@ import { cn } from "@lib/utils"
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
   thumbnail?: string | null
+  title?: string
 }
 
-const ImageGallery = ({ images: rawImages, thumbnail }: ImageGalleryProps) => {
+const ImageGallery = ({
+  images: rawImages,
+  thumbnail,
+  title = "Produkt",
+}: ImageGalleryProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
@@ -56,7 +61,7 @@ const ImageGallery = ({ images: rawImages, thumbnail }: ImageGalleryProps) => {
         {selectedImage?.url && (
           <Image
             src={selectedImage.url}
-            alt={`Produktbild ${selectedIndex + 1}`}
+            alt={`${title} – Bild ${selectedIndex + 1}`}
             fill
             priority={selectedIndex === 0}
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -143,7 +148,7 @@ const ImageGallery = ({ images: rawImages, thumbnail }: ImageGalleryProps) => {
               {image.url && (
                 <Image
                   src={image.url}
-                  alt={`Vorschau ${index + 1}`}
+                  alt={`${title} – Vorschau ${index + 1}`}
                   fill
                   sizes="72px"
                   className="object-cover"

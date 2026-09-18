@@ -19,12 +19,12 @@ const nextConfig = {
       {
         source: "/:countryCode/agb",
         destination: "/:countryCode/terms",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/:countryCode/impressum",
         destination: "/:countryCode/imprint",
-        permanent: false,
+        permanent: true,
       },
     ]
   },

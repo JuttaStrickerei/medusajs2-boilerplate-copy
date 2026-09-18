@@ -8,8 +8,9 @@ import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
-  title: "Checkout | Strickerei Jutta",
+  title: "Kasse",
   description: "Sicher und einfach bestellen",
+  robots: { index: false, follow: false },
 }
 
 export default async function Checkout({

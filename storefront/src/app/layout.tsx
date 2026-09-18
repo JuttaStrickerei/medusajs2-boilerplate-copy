@@ -9,6 +9,7 @@ import { CartProvider } from "@lib/context/cart-context"
 import CookieConsent from "@components/cookie-consent"
 import WishlistMergePrompt from "@modules/wishlist/components/wishlist-merge-prompt"
 import { isAuthenticated } from "@lib/data/cookies"
+import JsonLd from "@modules/common/components/json-ld"
 
 const GA_ID = "G-VQG5PFKSXB"
 
@@ -34,16 +35,6 @@ export const metadata: Metadata = {
   },
   description:
     "Entdecken Sie handgefertigte Strickwaren aus feinsten Naturfasern. 60 Jahre Tradition, Qualität und österreichische Handwerkskunst.",
-  keywords: [
-    "Strickwaren",
-    "Kaschmir",
-    "Merinowolle",
-    "Alpaka",
-    "Handarbeit",
-    "Österreich",
-    "Premium Knitwear",
-    "Luxury Fashion",
-  ],
   authors: [{ name: "Strickerei Jutta" }],
   creator: "Strickerei Jutta",
   icons: {
@@ -61,10 +52,30 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
   },
-  robots: {
-    index: true,
-    follow: true,
+}
+
+// Business entity for search engines (address is the one from the Impressum).
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: "Strickerei Jutta",
+  url: getBaseURL(),
+  logo: `${getBaseURL()}/images/logo/logo-jutta-og.webp`,
+  telephone: "+43 2686 2259",
+  email: "office@strickerei-jutta.at",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Wiener Neustädterstraße 47",
+    postalCode: "7021",
+    addressLocality: "Draßburg",
+    addressCountry: "AT",
   },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 47.7497514,
+    longitude: 16.482084,
+  },
+  sameAs: ["https://www.instagram.com/strickereijutta/"],
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
@@ -109,6 +120,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           </WishlistProvider>
         </CartProvider>
         <CookieConsent />
+        <JsonLd data={localBusinessSchema} />
       </body>
     </html>
   )

@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import RefinementList from "@modules/store/components/refinement-list"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import PaginatedProducts from "./paginated-products"
 import { SkeletonProductGrid } from "@components/ui"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
@@ -83,9 +84,9 @@ export default function StoreTemplate({
       {/* Breadcrumb */}
       <div className="content-container py-3 small:py-4">
         <nav className="flex items-center gap-2 text-xs small:text-sm text-stone-500">
-          <a href="/" className="hover:text-stone-800 transition-colors">
+          <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
             Home
-          </a>
+          </LocalizedClientLink>
           <span>/</span>
           <span className="text-stone-800">Alle Produkte</span>
         </nav>

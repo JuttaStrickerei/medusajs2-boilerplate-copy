@@ -1,6 +1,12 @@
 import { retrieveCustomer } from "@lib/data/customer"
 import { Toaster } from "@medusajs/ui"
 import AccountLayout from "@modules/account/templates/account-layout"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Konto",
+  robots: { index: false, follow: false },
+}
 
 export default async function AccountPageLayout({
   dashboard,
