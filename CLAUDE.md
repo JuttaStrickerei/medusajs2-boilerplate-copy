@@ -115,6 +115,36 @@ railway variables --service Bucket --json | jq 'keys'   # variable NAMES only
 - Take credentials from `railway variables --service Bucket --json` and export them as env vars for the session only (e.g. `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` for `aws s3 --endpoint-url …` or `mc alias set`). Never write them into repo files, scripts or command history.
 - **Destructive bucket operations** (delete, overwrite, bulk conversion) require explicit approval **per batch** and must always start with a dry run listing exactly what would be affected.
 
+### Starting and stopping the dev environment (do this every session)
+
+The dev environment costs RAM-minutes while its containers run, so it is normally **shut down** (all services show `REMOVED`). Nothing in dev works while Postgres is down: the local backend (`DATABASE_URL` points at the dev Postgres TCP proxy) and the Railway dev Backend both fail with `ECONNRESET` / `Connection terminated unexpectedly`.
+
+Run from `backend/` (linked). `DEV` is the dev environment ID (its name has a trailing space, so `-e dev` does not work), `P` the project ID.
+
+```bash
+DEV=1d2ce3bd-a769-4de5-813a-ea2a1072ce0d; P=164701c8-68c1-49f6-bce4-fe718dfad057
+
+# status of every dev service (SUCCESS = running, REMOVED = stopped)
+for s in Postgres Redis MeiliSearch Bucket Backend Storefront Console; do
+  printf '%-12s ' $s; railway deployment list --service $s -e $DEV -p $P | sed -n 2p
+done
+
+# START (order matters: data services first). `--from-source` is required once a
+# deployment is REMOVED; plain `railway redeploy` then says "No deployment found".
+for s in Postgres Redis MeiliSearch Bucket Backend Storefront; do
+  railway redeploy --service $s -e $DEV -p $P -y --from-source
+done
+# Only local testing? Postgres alone is enough for `cd backend && pnpm dev`
+# (Redis/MeiliSearch fall back locally, Bucket only matters for uploads).
+
+# STOP when you are done testing (removes the latest deployment; volumes/data stay)
+for s in Storefront Backend Bucket MeiliSearch Redis Postgres; do
+  railway down --service $s -e $DEV -p $P -y
+done
+```
+
+Rules: start only what the current task needs, and stop dev again at the end of a testing session unless the user says to leave it running. The `Console` service is a helper shell and is never needed for testing. Never run any of this against `prod`.
+
 ### Cost optimization context
 
 - Main cost driver is **service memory (RAM-minutes)**, not storage. Priority order: **dev environment uptime** (don't leave it running constantly) → per-service memory limits → MeiliSearch footprint → only then image storage.
