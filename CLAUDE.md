@@ -80,6 +80,51 @@ Provider modules load conditionally based on env vars (see `medusa-config.js`). 
 - `SENDCLOUD_PUBLIC_KEY` / `SENDCLOUD_SECRET_KEY` — API Basic auth (panel → Integrations)
 - `SENDCLOUD_SECRET_KEY` is **also** the webhook HMAC signing key — the `/webhooks/sendcloud` route uses it to verify `Sendcloud-Signature` (HMAC-SHA256, hex) and returns 401 on mismatch. No separate webhook secret env var needed. Verification is always on; there is no skip toggle.
 
+## Railway (infra, logs, MCP)
+
+All services live in **one** Railway project: **Backend**, **Storefront**, **Postgres**, **Redis**, **MeiliSearch**, **Bucket** (S3-compatible object storage, volume-backed) and **Console**. Environments: **dev** and **prod**.
+
+### Access
+
+- Railway CLI is installed at `~/.railway/bin/railway` via the official install script (**not** via pnpm — pnpm blocks its postinstall). `.bashrc` sources `~/.railway/env`, so fresh shells have `railway` on PATH.
+- Login is interactive: `railway login` (browser flow). Agents cannot do this — on `Unauthorized`, ask the user to type `! railway login`.
+- Project: **MedusaJS Eigen** (`164701c8-68c1-49f6-bce4-fe718dfad057`) in workspace "juttastrickerei's Projects". The dev environment is literally named `"dev "` **with a trailing space**, so `-e dev` fails — use its ID `1d2ce3bd-a769-4de5-813a-ea2a1072ce0d`. prod is `9a0b5e98-e2dd-40d0-b890-1b3126218719`.
+- `backend/` and `storefront/` are linked to their services with `railway link -p "MedusaJS Eigen" -e 1d2ce3bd-a769-4de5-813a-ea2a1072ce0d -s Backend|Storefront` (the link lives in `~/.railway/config.json`, not in the repo). Everything else is reachable with `--service <name>`.
+- MCP tools carry `readOnlyHint`/`destructiveHint` annotations. Read-only ones (`environment-status`, `get-service-metrics`, `get-logs`, `list-variables`, `get-service-config`, `http-*`) are fine to call; anything else falls under the safety rules below. Note `list-variables` returns rendered secret values — same rule as the CLI.
+- The Railway MCP server is configured project-wide in `.mcp.json` (`railway mcp` = stdio proxy to mcp.railway.com, authenticated through the CLI session). Use it for structured project/service queries; keep using the CLI for logs and variables.
+
+```bash
+cd backend && railway logs                 # runtime logs, Backend
+cd storefront && railway logs              # runtime logs, Storefront
+railway logs --service MeiliSearch --lines 200
+railway logs --build | --deployment        # build / deploy logs
+railway status --json                      # project, environment, services
+railway variables --service Bucket --json | jq 'keys'   # variable NAMES only
+```
+
+### Safety rules (this is a live production shop)
+
+- **Default environment is `dev`.** Never switch to `prod` (`railway environment prod`) unless the user explicitly asks for it in this session.
+- Railway is **read-only by default**: logs, `status` and variable names may be read freely.
+- **Never without an explicit yes for that specific action:** `railway up` / `redeploy` / `accept-deploy`, restarting services, `railway variables set|delete|edit`, changing service or environment settings, creating or deleting services/projects. Applies to CLI **and** MCP tools alike.
+- **Never print secret values** from `railway variables` into replies, summaries or files. The default output, `--kv` and `--json` all print raw values — always filter through `| jq 'keys'` or reference variable names only.
+
+### Bucket / object storage
+
+- Analysis is always allowed: object listings, size breakdowns, duplicate and orphan detection (cross-check against product images in Postgres).
+- Take credentials from `railway variables --service Bucket --json` and export them as env vars for the session only (e.g. `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` for `aws s3 --endpoint-url …` or `mc alias set`). Never write them into repo files, scripts or command history.
+- **Destructive bucket operations** (delete, overwrite, bulk conversion) require explicit approval **per batch** and must always start with a dry run listing exactly what would be affected.
+
+### Cost optimization context
+
+- Main cost driver is **service memory (RAM-minutes)**, not storage. Priority order: **dev environment uptime** (don't leave it running constantly) → per-service memory limits → MeiliSearch footprint → only then image storage.
+- Image optimization (size, WebP/AVIF) is welcome, but its goal is page speed and SEO, not the Railway bill.
+
+### Workflow for incidents
+
+- When the user reports a problem ("checkout fails", "site is down"): pull the relevant service's recent logs first, form a hypothesis and explain it, then propose code changes.
+- Fixes happen locally in this repo; the user deploys manually unless they say otherwise.
+
 ## Conventions for this project
 
 - Don't add tests unless I ask — this repo has none and no CI runs them.
