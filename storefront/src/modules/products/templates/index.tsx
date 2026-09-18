@@ -14,6 +14,8 @@ import { Badge } from "@components/ui"
 import { Sparkles, RefreshCw, Shield } from "@components/icons"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { getBaseURL } from "@lib/util/env"
+import { ViewItem } from "@modules/common/components/analytics"
+import { gaCurrency, productToItem } from "@lib/util/analytics"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -142,6 +144,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     <div className="bg-stone-50 min-h-screen">
       <JsonLd data={productSchema} />
       <JsonLd data={breadcrumbSchema} />
+      <ViewItem
+        item={productToItem(product)}
+        currency={gaCurrency(region.currency_code)}
+      />
       {/* Breadcrumb */}
       <div className="bg-white border-b border-stone-200">
         <div className="content-container py-3">
