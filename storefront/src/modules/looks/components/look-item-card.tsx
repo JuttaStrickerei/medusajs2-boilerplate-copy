@@ -7,7 +7,8 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import { cn, formatPrice } from "@lib/utils"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@components/ui"
-import { Check, ShoppingBag } from "@components/icons"
+import { Check, Heart, ShoppingBag } from "@components/icons"
+import { useWishlist } from "@lib/context/wishlist-context"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import {
@@ -63,6 +64,10 @@ export default function LookItemCard({
   } = useVariantSelection(product)
 
   const [lightboxOpen, setLightboxOpen] = useState(false)
+
+  // Wie auf der Produktseite: einzelnes Teil merken
+  const { items: wishlistItems, toggleWishlist } = useWishlist()
+  const isWishlisted = wishlistItems.some((item) => item.id === product.id)
 
   // Alle Bilder des Produkts für die Vorschau (Produktbilder, sonst Varianten-/Vorschaubild)
   const galleryImages = useMemo(() => {
@@ -233,28 +238,50 @@ export default function LookItemCard({
               />
             ))}
 
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleAddToCart}
-            disabled={
-              !inStock ||
-              !selectedVariant ||
-              !isValidVariant ||
-              !!disabled ||
-              isAdding
-            }
-            loading={isAdding}
-            className={cn(
-              "self-start",
-              addedToCart && "border-green-600 text-green-700"
-            )}
-            leftIcon={
-              addedToCart ? <Check size={16} /> : <ShoppingBag size={16} />
-            }
-          >
-            {getButtonText()}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleAddToCart}
+              disabled={
+                !inStock ||
+                !selectedVariant ||
+                !isValidVariant ||
+                !!disabled ||
+                isAdding
+              }
+              loading={isAdding}
+              className={cn(addedToCart && "border-green-600 text-green-700")}
+              leftIcon={
+                addedToCart ? <Check size={16} /> : <ShoppingBag size={16} />
+              }
+            >
+              {getButtonText()}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                toggleWishlist({
+                  id: product.id,
+                  handle: product.handle || "",
+                  title: product.title || "",
+                  thumbnail: product.thumbnail || null,
+                })
+              }
+              leftIcon={
+                <Heart
+                  size={16}
+                  filled={isWishlisted}
+                  className={isWishlisted ? "text-red-500" : ""}
+                />
+              }
+              className={cn(isWishlisted && "border-red-200 bg-red-50")}
+              aria-pressed={isWishlisted}
+            >
+              {isWishlisted ? "Gemerkt" : "Merken"}
+            </Button>
+          </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
