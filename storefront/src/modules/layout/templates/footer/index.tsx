@@ -75,6 +75,14 @@ export default async function Footer() {
                   Alle Produkte
                 </LocalizedClientLink>
               </li>
+              <li>
+                <LocalizedClientLink
+                  href="/looks"
+                  className="text-sm text-stone-400 hover:text-white transition-colors"
+                >
+                  Shop the Look
+                </LocalizedClientLink>
+              </li>
               {collections?.slice(0, 5).map((collection) => (
                 <li key={collection.id}>
                   <LocalizedClientLink
