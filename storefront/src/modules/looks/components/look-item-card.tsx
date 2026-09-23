@@ -16,7 +16,9 @@ import {
 } from "@modules/products/hooks/use-variant-selection"
 import Image from "next/image"
 import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { getProductDetails } from "@modules/products/components/product-tabs"
+import ImageLightbox from "./image-lightbox"
 
 export type LookItemSelection = {
   // gewählte, lieferbare Variante (sonst undefined)
@@ -59,6 +61,23 @@ export default function LookItemCard({
     isPurchasable,
     previewImage,
   } = useVariantSelection(product)
+
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+
+  // Alle Bilder des Produkts für die Vorschau (Produktbilder, sonst Varianten-/Vorschaubild)
+  const galleryImages = useMemo(() => {
+    const urls = [
+      ...(product.images ?? []).map((img) => img.url),
+      ...(product.variants ?? []).flatMap((v) => [
+        v.thumbnail,
+        ...(v.images ?? []).map((img) => img.url),
+      ]),
+      product.thumbnail,
+    ].filter((url): url is string => !!url)
+    return Array.from(new Set(urls))
+  }, [product])
+
+  const details = getProductDetails(product)
 
   const missingLabel = missingOptions[0]
     ? translateOptionTitle(missingOptions[0].title ?? "Option")
@@ -140,95 +159,137 @@ export default function LookItemCard({
 
   return (
     <article
-      className="flex gap-4 small:gap-5 rounded-xl border border-stone-200/70 bg-white p-3 small:p-4"
+      className="flex flex-col gap-3 rounded-xl border border-stone-200/70 bg-white p-3 small:p-4"
       data-testid="look-item"
     >
-      <LocalizedClientLink
-        href={`/products/${product.handle}`}
-        className="relative block w-24 small:w-32 flex-shrink-0 self-start overflow-hidden rounded-lg bg-stone-100 aspect-[3/4]"
-      >
-        {previewImage ? (
-          <Image
-            src={previewImage}
-            alt={product.title}
-            fill
-            sizes="(max-width: 640px) 96px, 128px"
-            className="object-cover"
-          />
-        ) : null}
-      </LocalizedClientLink>
-
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <div>
-          <LocalizedClientLink
-            href={`/products/${product.handle}`}
-            className="text-sm small:text-base font-medium text-stone-800 hover:underline"
-          >
-            {product.title}
-          </LocalizedClientLink>
-          {price && (
-            <p className="mt-1 flex items-baseline gap-2 text-sm">
-              <span
-                className={cn(
-                  "font-medium",
-                  isOnSale ? "text-red-600" : "text-stone-800"
-                )}
-              >
-                {hasPriceRange ? "ab " : ""}
-                {formatPrice(price.calculated_price_number, price.currency_code)}
-              </span>
-              {isOnSale && (
-                <span className="text-stone-400 line-through">
-                  {formatPrice(price.original_price_number, price.currency_code)}
-                </span>
-              )}
-            </p>
-          )}
-          {!isPurchasable && (
-            <p className="mt-1 text-sm text-red-600">
-              Derzeit ausverkauft
-            </p>
-          )}
-        </div>
-
-        {(product.variants?.length ?? 0) > 1 &&
-          orderedOptions.map((option) => (
-            <OptionSelect
-              key={option.id}
-              option={option}
-              current={options[option.id]}
-              updateOption={setOptionValue}
-              title={translateOptionTitle(option.title ?? "")}
-              availability={availability[option.id]}
-              disabled={!!disabled || isAdding}
-            />
-          ))}
-
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleAddToCart}
-          disabled={
-            !inStock ||
-            !selectedVariant ||
-            !isValidVariant ||
-            !!disabled ||
-            isAdding
-          }
-          loading={isAdding}
-          className={cn(
-            "self-start",
-            addedToCart && "border-green-600 text-green-700"
-          )}
-          leftIcon={
-            addedToCart ? <Check size={16} /> : <ShoppingBag size={16} />
-          }
+      <div className="flex gap-4 small:gap-5">
+        {/* Klick aufs Bild öffnet die Bildvorschau, der Name führt zum Produkt */}
+        <button
+          type="button"
+          onClick={() => galleryImages.length && setLightboxOpen(true)}
+          disabled={!galleryImages.length}
+          className="relative block w-24 small:w-32 flex-shrink-0 self-start overflow-hidden rounded-lg bg-stone-100 aspect-[3/4] enabled:cursor-zoom-in"
+          aria-label={`Bilder von ${product.title} ansehen`}
         >
-          {getButtonText()}
-        </Button>
+          {previewImage ? (
+            <Image
+              src={previewImage}
+              alt={product.title}
+              fill
+              sizes="(max-width: 640px) 96px, 128px"
+              className="object-cover"
+            />
+          ) : null}
+          {galleryImages.length > 1 && (
+            <span className="absolute bottom-1 right-1 rounded bg-white/85 px-1.5 py-0.5 text-[10px] text-stone-700">
+              {galleryImages.length} Bilder
+            </span>
+          )}
+        </button>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div>
+            <LocalizedClientLink
+              href={`/products/${product.handle}`}
+              className="text-sm small:text-base font-medium text-stone-800 hover:underline"
+            >
+              {product.title}
+            </LocalizedClientLink>
+            {price && (
+              <p className="mt-1 flex items-baseline gap-2 text-sm">
+                <span
+                  className={cn(
+                    "font-medium",
+                    isOnSale ? "text-red-600" : "text-stone-800"
+                  )}
+                >
+                  {hasPriceRange ? "ab " : ""}
+                  {formatPrice(price.calculated_price_number, price.currency_code)}
+                </span>
+                {isOnSale && (
+                  <span className="text-stone-400 line-through">
+                    {formatPrice(price.original_price_number, price.currency_code)}
+                  </span>
+                )}
+              </p>
+            )}
+            {!isPurchasable && (
+              <p className="mt-1 text-sm text-red-600">
+                Derzeit ausverkauft
+              </p>
+            )}
+          </div>
+
+          {(product.variants?.length ?? 0) > 1 &&
+            orderedOptions.map((option) => (
+              <OptionSelect
+                key={option.id}
+                option={option}
+                current={options[option.id]}
+                updateOption={setOptionValue}
+                title={translateOptionTitle(option.title ?? "")}
+                availability={availability[option.id]}
+                disabled={!!disabled || isAdding}
+              />
+            ))}
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleAddToCart}
+            disabled={
+              !inStock ||
+              !selectedVariant ||
+              !isValidVariant ||
+              !!disabled ||
+              isAdding
+            }
+            loading={isAdding}
+            className={cn(
+              "self-start",
+              addedToCart && "border-green-600 text-green-700"
+            )}
+            leftIcon={
+              addedToCart ? <Check size={16} /> : <ShoppingBag size={16} />
+            }
+          >
+            {getButtonText()}
+          </Button>
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
+        </div>
       </div>
+
+      {details.length > 0 && (
+        <details className="group border-t border-stone-100 pt-3">
+          <summary className="flex cursor-pointer list-none items-center justify-between text-xs font-semibold uppercase tracking-wide text-stone-700">
+            Produktdetails
+            <span className="text-stone-400 transition-transform group-open:rotate-45">
+              +
+            </span>
+          </summary>
+          <div className="mt-2 divide-y divide-stone-100">
+            {details.map((detail) => (
+              <div
+                key={detail.label}
+                className="flex items-center justify-between py-2 text-sm"
+              >
+                <span className="text-stone-500">{detail.label}</span>
+                <span className="font-medium text-stone-800">{detail.value}</span>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+
+      {lightboxOpen && (
+        <ImageLightbox
+          images={galleryImages}
+          title={product.title}
+          initialIndex={Math.max(0, galleryImages.indexOf(previewImage ?? ""))}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </article>
   )
 }

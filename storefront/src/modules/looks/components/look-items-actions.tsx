@@ -7,7 +7,8 @@ import { getPricesForVariant } from "@lib/util/get-product-price"
 import { cn, formatPrice } from "@lib/utils"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@components/ui"
-import { Check, ShoppingBag } from "@components/icons"
+import { Check, Heart, Ruler, Share, ShoppingBag } from "@components/icons"
+import { useWishlist } from "@lib/context/wishlist-context"
 import { useParams } from "next/navigation"
 import { useCallback, useState } from "react"
 import LookItemCard, { LookItemSelection } from "./look-item-card"
@@ -30,6 +31,36 @@ export default function LookItemsActions({
   const [isAdding, setIsAdding] = useState(false)
   const [added, setAdded] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // „Alle merken“: alle Teile des Looks auf die Wunschliste (erneut klicken entfernt sie)
+  const { items: wishlistItems, addToWishlist, removeFromWishlist } =
+    useWishlist()
+  const allWishlisted =
+    products.length > 0 &&
+    products.every((p) => wishlistItems.some((item) => item.id === p.id))
+
+  const handleWishlistAll = () => {
+    if (allWishlisted) {
+      products.forEach((p) => removeFromWishlist(p.id))
+      return
+    }
+    products.forEach((p) =>
+      addToWishlist({
+        id: p.id,
+        handle: p.handle || "",
+        title: p.title || "",
+        thumbnail: p.thumbnail || null,
+      })
+    )
+  }
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({ title: lookTitle, url: window.location.href })
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+    }
+  }
 
   const handleSelectionChange = useCallback(
     (productId: string, selection: LookItemSelection) => {
@@ -173,6 +204,57 @@ export default function LookItemsActions({
         >
           {buttonText()}
         </Button>
+
+        {/* Wie auf der Produktseite: drei gleich breite Felder unter dem Button */}
+        <div className="mt-3 grid grid-cols-3 gap-3">
+          <Button
+            variant="secondary"
+            onClick={handleWishlistAll}
+            leftIcon={
+              <Heart
+                size={18}
+                filled={allWishlisted}
+                className={allWishlisted ? "text-red-500" : ""}
+              />
+            }
+            className={cn(
+              "w-full min-w-0 justify-center px-2 sm:px-3",
+              allWishlisted && "border-red-200 bg-red-50"
+            )}
+          >
+            {allWishlisted ? "Gemerkt" : "Alle merken"}
+          </Button>
+          <Button
+            variant="secondary"
+            leftIcon={<Share size={18} />}
+            className="w-full min-w-0 justify-center px-2 sm:px-3"
+            onClick={handleShare}
+          >
+            Teilen
+          </Button>
+          <a
+            href={`/${countryCode}/size-guide`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "inline-flex items-center justify-center font-medium w-full min-w-0",
+              "transition-all duration-200 ease-out",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2",
+              "active:scale-[0.98]",
+              "bg-transparent text-stone-800 border border-stone-300",
+              "hover:bg-stone-50 hover:border-stone-400",
+              "active:bg-stone-100",
+              "h-10 px-2 sm:px-3 text-xs sm:text-sm rounded-lg gap-2",
+              "text-center"
+            )}
+          >
+            <span className="flex-shrink-0" aria-hidden>
+              <Ruler size={18} />
+            </span>
+            <span className="leading-tight">Größenberatung</span>
+          </a>
+        </div>
+
         <p className="mt-2 text-center text-xs text-stone-500">
           inkl. MwSt., zzgl.{" "}
           <a href={`/${countryCode}/shipping`} className="underline hover:text-stone-700">

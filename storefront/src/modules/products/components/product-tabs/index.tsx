@@ -7,6 +7,8 @@ import { HttpTypes } from "@medusajs/types"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
+  // false = nur die „Versand & Retouren“-Karte (z. B. auf der Look-Seite)
+  showDetails?: boolean
 }
 
 type ProductDetail = {
@@ -14,7 +16,7 @@ type ProductDetail = {
   value: string
 }
 
-function getProductDetails(product: HttpTypes.StoreProduct): ProductDetail[] {
+export function getProductDetails(product: HttpTypes.StoreProduct): ProductDetail[] {
   const details: ProductDetail[] = []
 
   if (product.material) {
@@ -39,9 +41,9 @@ function getProductDetails(product: HttpTypes.StoreProduct): ProductDetail[] {
   return details
 }
 
-const ProductTabs = ({ product }: ProductTabsProps) => {
+const ProductTabs = ({ product, showDetails = true }: ProductTabsProps) => {
   const details = getProductDetails(product)
-  const hasDetails = details.length > 0
+  const hasDetails = showDetails && details.length > 0
 
   return (
     <div className="grid grid-cols-1 medium:grid-cols-2 gap-6 max-w-5xl mx-auto">
@@ -79,7 +81,7 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
       )}
 
       {/* Versand & Retouren Card */}
-      <div className={`bg-white rounded-2xl border border-stone-200 overflow-hidden ${!hasDetails ? "medium:col-span-2 max-w-lg mx-auto w-full" : ""}`}>
+      <div className={`bg-white rounded-2xl border border-stone-200 overflow-hidden ${!hasDetails ? (showDetails ? "medium:col-span-2 max-w-lg mx-auto w-full" : "medium:col-span-2 w-full") : ""}`}>
         <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center">

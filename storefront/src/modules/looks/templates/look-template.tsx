@@ -8,6 +8,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { ViewItemList } from "@modules/common/components/analytics"
 import { ChevronRight } from "@components/icons"
 import LookItemsActions from "../components/look-items-actions"
+import ProductTabs from "@modules/products/components/product-tabs"
 
 type LookTemplateProps = {
   look: StoreLook
@@ -133,11 +134,18 @@ export default function LookTemplate({
             </header>
 
             {products.length > 0 ? (
-              <LookItemsActions
-                lookId={look.id}
-                lookTitle={look.title}
-                products={products}
-              />
+              <>
+                <LookItemsActions
+                  lookId={look.id}
+                  lookTitle={look.title}
+                  products={products}
+                />
+                {/* Dieselbe „Versand & Retouren“-Karte wie auf der Produktseite
+                    (Wrapper nötig: im Flex-Container würde mx-auto sie schrumpfen) */}
+                <div>
+                  <ProductTabs product={products[0]} showDetails={false} />
+                </div>
+              </>
             ) : (
               <p className="text-stone-600">
                 Die Teile dieses Looks sind derzeit nicht verfügbar.
