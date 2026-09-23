@@ -1,11 +1,12 @@
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Truck, RefreshCw, Package, Clock, Shield } from "@components/icons"
+import RevocationButton from "@modules/revocation/components/revocation-button"
 
 export const metadata: Metadata = {
   title: "Versand & Rückgabe",
   description:
-    "Versand und Lieferzeit (ca. 2 Wochen innerhalb Österreichs) sowie Rückgabe bei Strickerei Jutta.",
+    "Versand und Lieferzeit (ca. 2 Wochen innerhalb Österreichs) sowie Widerruf und Rückgabe bei Strickerei Jutta.",
 }
 
 export default function ShippingPage() {
@@ -76,13 +77,15 @@ export default function ShippingPage() {
           <div className="bg-white rounded-2xl border border-stone-200 p-8 mb-8">
             <h2 className="font-serif text-xl font-medium text-stone-800 mb-6 flex items-center gap-3">
               <RefreshCw size={24} />
-              Rückgabe & Umtausch
+              Widerruf & Rückgabe
             </h2>
 
             <div className="space-y-6">
               <p className="text-stone-600">
-                Sie haben 30 Tage Zeit, Ihre Bestellung zurückzusenden oder umzutauschen. 
-                Die Artikel müssen ungetragen, ungewaschen und mit allen Etiketten versehen sein.
+                Sie können Ihren Vertrag binnen 14 Tagen ab Erhalt der Ware ohne Angabe von
+                Gründen widerrufen (gesetzliches Widerrufsrecht). Bitte gehen Sie mit der Ware
+                bis dahin sorgfältig um – für einen Wertverlust durch einen zur Prüfung nicht
+                notwendigen Umgang müssen Sie aufkommen.
               </p>
 
               <div className="grid grid-cols-1 small:grid-cols-2 gap-6">
@@ -91,10 +94,10 @@ export default function ShippingPage() {
                   <div>
                     <h3 className="font-medium text-stone-800 mb-1">So funktioniert's</h3>
                     <ol className="text-stone-600 text-sm space-y-1 list-decimal list-inside">
-                      <li>Kontaktieren Sie unseren Kundenservice</li>
-                      <li>Sie erhalten ein Rücksendeetikett</li>
+                      <li>Widerruf online über „Vertrag widerrufen“ oder per E-Mail erklären</li>
+                      <li>Sie erhalten sofort eine Eingangsbestätigung per E-Mail</li>
                       <li>Verpacken Sie die Ware sicher</li>
-                      <li>Geben Sie das Paket bei der Post ab</li>
+                      <li>Senden Sie das Paket binnen 14 Tagen an uns zurück</li>
                     </ol>
                   </div>
                 </div>
@@ -103,11 +106,24 @@ export default function ShippingPage() {
                   <div>
                     <h3 className="font-medium text-stone-800 mb-1">Rückerstattung</h3>
                     <p className="text-stone-600 text-sm">
-                      Nach Erhalt und Prüfung der Ware erstatten wir den Kaufpreis 
-                      innerhalb von 5-7 Werktagen auf Ihr ursprüngliches Zahlungsmittel.
+                      Wir erstatten alle Zahlungen inklusive Standard-Versandkosten spätestens
+                      14 Tage nach Eingang Ihres Widerrufs auf Ihr ursprüngliches
+                      Zahlungsmittel. Wir können die Rückzahlung verweigern, bis wir die Ware
+                      zurückerhalten haben oder Sie die Rücksendung nachgewiesen haben. Die
+                      Kosten der Rücksendung tragen Sie.
                     </p>
                   </div>
                 </div>
+              </div>
+
+              <div className="flex flex-col small:flex-row small:items-center gap-4">
+                <RevocationButton />
+                <LocalizedClientLink
+                  href="/terms#widerrufsrecht"
+                  className="text-sm text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                >
+                  Zur vollständigen Widerrufsbelehrung
+                </LocalizedClientLink>
               </div>
             </div>
           </div>

@@ -44,7 +44,7 @@ const CheckoutSummary = ({ cart }: { cart: any }) => {
           <div className="w-px h-8 bg-stone-200" />
           <TrustBadgeSmall icon={<Truck size={18} />} text="ca. 2 Wochen" />
           <div className="w-px h-8 bg-stone-200" />
-          <TrustBadgeSmall icon={<RefreshCw size={18} />} text="30 Tage" />
+          <TrustBadgeSmall icon={<RefreshCw size={18} />} text="14 Tage Widerruf" />
         </div>
       </div>
 

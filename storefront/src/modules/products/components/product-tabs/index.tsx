@@ -107,7 +107,7 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
             <ShippingItem
               icon={<Back />}
               title="Unkomplizierte Retouren"
-              description="Rücksendung innerhalb von 30 Tagen möglich."
+              description="14 Tage Widerrufsrecht ab Erhalt der Ware."
             />
           </div>
         </div>

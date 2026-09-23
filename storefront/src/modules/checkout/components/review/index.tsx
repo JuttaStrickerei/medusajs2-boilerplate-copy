@@ -103,7 +103,7 @@ const Review = ({ cart }: { cart: any }) => {
                   </LocalizedClientLink>
                   ,{" "}
                   <LocalizedClientLink
-                    href="/shipping"
+                    href="/terms#widerrufsrecht"
                     className="text-stone-800 underline underline-offset-2 hover:text-stone-600"
                     prefetch={false}
                   >

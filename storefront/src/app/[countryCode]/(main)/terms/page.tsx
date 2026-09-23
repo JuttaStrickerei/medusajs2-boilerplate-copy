@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import RevocationButton from "@modules/revocation/components/revocation-button"
 
 export const metadata: Metadata = {
   title: "Allgemeine Geschäftsbedingungen",
@@ -124,7 +125,7 @@ export default function TermsPage() {
                   Bestellprozess angegeben.
                 </p>
 
-                <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
+                <h2 id="widerrufsrecht" className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4 scroll-mt-24">
                   7. Widerrufsrecht (Rücktrittsrecht)
                 </h2>
                 <p className="text-stone-600 mb-4">
@@ -149,11 +150,35 @@ export default function TermsPage() {
                     office@strickerei-jutta.at
                   </a>
                   ) mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter
-                  Brief oder E-Mail) über Ihren Entschluss, diesen Vertrag zu widerrufen,
-                  informieren. Zur Wahrung der Widerrufsfrist reicht es aus, dass Sie die
-                  Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der
-                  Widerrufsfrist absenden.
+                  Brief, E-Mail oder über unsere Online-Widerrufsfunktion) über Ihren
+                  Entschluss, diesen Vertrag zu widerrufen, informieren. Sie können dafür das{" "}
+                  <a
+                    href="/muster-widerrufsformular.pdf"
+                    download
+                    className="text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                  >
+                    Muster-Widerrufsformular (PDF)
+                  </a>{" "}
+                  verwenden, das jedoch nicht vorgeschrieben ist. Zur Wahrung der
+                  Widerrufsfrist reicht es aus, dass Sie die Mitteilung über die Ausübung des
+                  Widerrufsrechts vor Ablauf der Widerrufsfrist absenden.
                 </p>
+                <p className="text-stone-600 mb-4">
+                  Sie können Ihr Widerrufsrecht auch online über unseren Widerrufsbutton unter{" "}
+                  <LocalizedClientLink
+                    href="/vertrag-widerrufen"
+                    className="text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                  >
+                    shop.strickerei-jutta.at/at/vertrag-widerrufen
+                  </LocalizedClientLink>{" "}
+                  ausüben. Wenn Sie diese Online-Funktion nutzen, übermitteln wir Ihnen auf einem
+                  dauerhaften Datenträger (z. B. per E-Mail) unverzüglich eine Eingangsbestätigung
+                  mit Informationen zum Inhalt der Widerrufserklärung sowie Datum und Uhrzeit
+                  ihres Eingangs.
+                </p>
+                <div className="mb-4">
+                  <RevocationButton />
+                </div>
 
                 <h3 className="font-medium text-stone-800 mt-6 mb-2 text-base">
                   Folgen des Widerrufs
