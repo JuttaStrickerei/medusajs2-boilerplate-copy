@@ -80,15 +80,26 @@ export default function RevocationForm() {
   const headingRef = useRef<HTMLHeadingElement>(null)
   const errorSummaryRef = useRef<HTMLDivElement>(null)
   const isFirstRender = useRef(true)
+  // Incremented on every failed "Weiter" so the summary gets focus after render
+  const [failedAttempts, setFailedAttempts] = useState(0)
 
-  // Move focus to the new step's heading so screen readers announce it
+  // Move focus to the new step's heading so screen readers announce it, and
+  // scroll it into view (the new step is shorter than the previous one)
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
       return
     }
-    headingRef.current?.focus()
+    headingRef.current?.focus({ preventScroll: true })
+    headingRef.current?.scrollIntoView({ block: "center" })
   }, [step])
+
+  useEffect(() => {
+    if (failedAttempts > 0) {
+      errorSummaryRef.current?.focus({ preventScroll: true })
+      errorSummaryRef.current?.scrollIntoView({ block: "center" })
+    }
+  }, [failedAttempts])
 
   const update = (field: keyof Values, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }))
@@ -102,8 +113,7 @@ export default function RevocationForm() {
     const found = validate(values)
     setErrors(found)
     if (Object.keys(found).length > 0) {
-      // Wait for the summary to render, then focus it
-      requestAnimationFrame(() => errorSummaryRef.current?.focus())
+      setFailedAttempts((n) => n + 1)
       return
     }
     honeypotValue.current = honeypotRef.current?.value || ""
