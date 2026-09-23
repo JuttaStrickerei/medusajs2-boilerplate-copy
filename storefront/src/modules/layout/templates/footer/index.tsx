@@ -203,8 +203,6 @@ export default async function Footer() {
 
             {/* Legal Links */}
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-stone-500">
-              {/* Online withdrawal (§ 13a FAGG) – must stay permanently visible and highlighted */}
-              <RevocationButton variant="light" />
               <CookieSettingsButton />
               <LocalizedClientLink
                 href="/privacy"
@@ -224,6 +222,8 @@ export default async function Footer() {
               >
                 Impressum
               </LocalizedClientLink>
+              {/* Online withdrawal (§ 13a FAGG) – must stay permanently visible and highlighted */}
+              <RevocationButton variant="subtle" />
             </div>
           </div>
         </div>
