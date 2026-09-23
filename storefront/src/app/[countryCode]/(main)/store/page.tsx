@@ -5,8 +5,9 @@ import StoreTemplate from "@modules/store/templates"
 import { getProductFilterOptions } from "@lib/data/filter-options"
 
 export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
+  title: "Alle Produkte",
+  description:
+    "Entdecken Sie alle handgefertigten Strickwaren der Strickerei Jutta – aus feinsten Naturfasern, hergestellt in Österreich.",
 }
 
 type Params = {
@@ -26,9 +27,18 @@ type Params = {
 }
 
 export default async function StorePage(props: Params) {
-  const params = await props.params;
-  const searchParams = await props.searchParams;
-  const { sortBy, page, colors, sizes, materials, priceRange, category, collection } = searchParams
+  const params = await props.params
+  const searchParams = await props.searchParams
+  const {
+    sortBy,
+    page,
+    colors,
+    sizes,
+    materials,
+    priceRange,
+    category,
+    collection,
+  } = searchParams
 
   const filterOptions = await getProductFilterOptions(params.countryCode)
 

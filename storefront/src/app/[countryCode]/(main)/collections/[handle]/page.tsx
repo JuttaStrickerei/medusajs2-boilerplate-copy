@@ -7,8 +7,9 @@ import { getProductFilterOptions } from "@lib/data/filter-options"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
 import CollectionTemplate from "@modules/collections/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { seoOverride } from "@lib/util/seo"
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
 type Props = {
   params: Promise<{ handle: string; countryCode: string }>
@@ -75,9 +76,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  const override = seoOverride(collection.metadata)
   const metadata = {
-    title: `${collection.title} | Medusa Store`,
-    description: `${collection.title} collection`,
+    title: override.title ?? collection.title,
+    description:
+      override.description ??
+      `Kollektion ${collection.title} – handgefertigte Strickwaren aus feinsten Naturfasern von der Strickerei Jutta.`,
+    alternates: {
+      canonical: `/${params.countryCode}/collections/${collection.handle}`,
+    },
   } as Metadata
 
   return metadata
@@ -86,7 +93,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function CollectionPage(props: Props) {
   const searchParams = await props.searchParams
   const params = await props.params
-  const { sortBy, page, colors, sizes, materials, priceRange, category } = searchParams
+  const { sortBy, page, colors, sizes, materials, priceRange, category } =
+    searchParams
 
   const collection = await getCollectionByHandle(params.handle).then(
     (collection: StoreCollection) => collection

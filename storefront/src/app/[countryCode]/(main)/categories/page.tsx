@@ -19,7 +19,11 @@ export default async function CategoriesOverviewPage(props: Params) {
   const params = await props.params
 
   // Load all categories
-  const categories = await listCategories()
+  const categories = await listCategories({
+    // Navigation only needs names/handles; the default field set pulls every
+    // product of every category into each page.
+    fields: "id,name,handle,metadata,*parent_category",
+  })
 
   // Nur Hauptkategorien anzeigen (ohne Parent)
   const rootCategories = categories.filter((category) => !category.parent_category)

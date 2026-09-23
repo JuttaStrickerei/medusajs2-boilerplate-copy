@@ -10,6 +10,7 @@ import { isEqual } from "lodash"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
+import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import MobileActions from "./mobile-actions"
 import {
   ShoppingBag,
@@ -141,6 +142,13 @@ export default function ProductActions({
 
     // Trigger instant cart update
     triggerCartRefresh()
+
+    const item = productToItem(product, selectedVariant, quantity)
+    trackEvent("add_to_cart", {
+      currency: gaCurrency(selectedVariant.calculated_price?.currency_code),
+      value: (item.price ?? 0) * quantity,
+      items: [item],
+    })
 
     setIsAdding(false)
     setAddedToCart(true)

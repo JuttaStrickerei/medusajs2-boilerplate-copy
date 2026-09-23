@@ -12,7 +12,11 @@ import { Search, User, Heart, ShoppingBag } from "@components/icons"
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
-  const categories = await listCategories()
+  const categories = await listCategories({
+    // Navigation only needs names/handles; the default field set pulls every
+    // product of every category into each page.
+    fields: "id,name,handle,metadata,*parent_category",
+  })
   const { collections } = await listCollections()
 
   return (

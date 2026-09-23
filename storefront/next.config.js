@@ -19,12 +19,17 @@ const nextConfig = {
       {
         source: "/:countryCode/agb",
         destination: "/:countryCode/terms",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/:countryCode/impressum",
         destination: "/:countryCode/imprint",
-        permanent: false,
+        permanent: true,
+      },
+      {
+        source: "/:countryCode/datenschutz",
+        destination: "/:countryCode/privacy",
+        permanent: true,
       },
     ]
   },
@@ -40,6 +45,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    // AVIF first (smaller), WebP fallback; cache optimised images for 30 days
+    // instead of the 60 s default so they are not re-encoded on every visit.
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: "http",

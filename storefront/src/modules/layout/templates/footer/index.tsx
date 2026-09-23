@@ -1,14 +1,16 @@
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { Instagram, Facebook, Mail, Phone, MapPin } from "@components/icons"
+import { Instagram, Mail, Phone, MapPin } from "@components/icons"
 import { CookieSettingsButton } from "@components/cookie-consent/CookieSettingsButton"
 
 export default async function Footer() {
-  const { collections } = await listCollections({
-    fields: "*products",
+  const { collections } = await listCollections()
+  const productCategories = await listCategories({
+    // Navigation only needs names/handles; the default field set pulls every
+    // product of every category into each page.
+    fields: "id,name,handle,metadata,*parent_category",
   })
-  const productCategories = await listCategories()
 
   const currentYear = new Date().getFullYear()
 
@@ -54,7 +56,7 @@ export default async function Footer() {
               </a>
               <div className="flex items-start gap-3 text-sm text-stone-400">
                 <MapPin size={16} className="flex-shrink-0 mt-0.5" />
-                <span>Draßburg, Österreich</span>
+                <span>Wiener Neustädterstraße 47<br />7021 Draßburg, Österreich</span>
               </div>
             </div>
           </div>
@@ -181,22 +183,13 @@ export default async function Footer() {
             {/* Social Links */}
             <div className="flex items-center gap-4">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/strickereijutta/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-stone-500 hover:text-white transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram size={20} />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-stone-500 hover:text-white transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook size={20} />
               </a>
             </div>
 

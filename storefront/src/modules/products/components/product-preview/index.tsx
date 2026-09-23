@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { addToCart } from "@lib/data/cart"
+import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import { cn, isProductNew } from "@lib/utils"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Badge, Button } from "@components/ui"
@@ -93,6 +94,13 @@ export default function ProductPreview({
         
         // Trigger cart update immediately
         triggerCartRefresh()
+
+        const item = productToItem(product, firstVariant, 1)
+        trackEvent("add_to_cart", {
+          currency: gaCurrency(region.currency_code),
+          value: item.price ?? 0,
+          items: [item],
+        })
         
         // Reset after 2 seconds
         setTimeout(() => setIsAdded(false), 2000)

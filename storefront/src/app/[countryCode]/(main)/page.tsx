@@ -10,7 +10,9 @@ import { Button } from "@components/ui"
 import { IMAGES } from "@lib/constants/images"
 
 export const metadata: Metadata = {
-  title: "Strickerei Jutta | Österreichische Handwerkskunst in 3. Generation",
+  title: {
+    absolute: "Strickerei Jutta | Österreichische Handwerkskunst in 3. Generation",
+  },
   description:
     "Entdecken Sie handgefertigte Strickwaren aus feinsten Naturfasern. Kaschmir, Merinowolle und Alpaka - 60 Jahre Tradition und Qualität aus Österreich.",
 }

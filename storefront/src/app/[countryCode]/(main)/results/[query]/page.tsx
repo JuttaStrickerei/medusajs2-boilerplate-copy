@@ -16,6 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Suchergebnisse für "${decodedQuery}"`,
     description: `Finden Sie Produkte für "${decodedQuery}" bei Strickerei Jutta`,
+    robots: { index: false, follow: false },
   }
 }
 

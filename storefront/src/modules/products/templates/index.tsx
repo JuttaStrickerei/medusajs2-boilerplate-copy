@@ -9,8 +9,13 @@ import RelatedProducts from "@modules/products/components/related-products"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import JsonLd from "@modules/common/components/json-ld"
 import { Badge } from "@components/ui"
 import { Sparkles, RefreshCw, Shield } from "@components/icons"
+import { getProductPrice } from "@lib/util/get-product-price"
+import { getBaseURL } from "@lib/util/env"
+import { ViewItem } from "@modules/common/components/analytics"
+import { gaCurrency, productToItem } from "@lib/util/analytics"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -27,17 +32,137 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     return notFound()
   }
 
+  // --- Structured data (JSON-LD) for search engines ---
+  const baseUrl = getBaseURL()
+  const productUrl = `${baseUrl}/${countryCode}/products/${product.handle}`
+  const { cheapestPrice } = getProductPrice({ product })
+
+  const images = [
+    product.thumbnail,
+    ...(product.images?.map((img) => img.url) ?? []),
+  ].filter((url): url is string => Boolean(url))
+
+  // Mirror the add-to-cart availability logic: purchasable if any variant is
+  // unmanaged, backorderable, or has stock.
+  const isPurchasable = (product.variants ?? []).some(
+    (v) =>
+      !v.manage_inventory ||
+      v.allow_backorder ||
+      (v.inventory_quantity ?? 0) > 0
+  )
+
+  // One Offer when every variant costs the same, otherwise an AggregateOffer
+  // with the live price range (amounts already include tax, like the UI).
+  const variantPrices = (product.variants ?? [])
+    .map(
+      (v) =>
+        v.calculated_price?.calculated_amount_with_tax ??
+        v.calculated_price?.calculated_amount
+    )
+    .filter((n): n is number => typeof n === "number")
+  const lowPrice = variantPrices.length ? Math.min(...variantPrices) : null
+  const highPrice = variantPrices.length ? Math.max(...variantPrices) : null
+  const singleSku =
+    product.variants?.length === 1 ? product.variants[0].sku ?? null : null
+  const availability = isPurchasable
+    ? "https://schema.org/InStock"
+    : "https://schema.org/OutOfStock"
+
+  const productSchema: Record<string, any> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    brand: { "@type": "Brand", name: "Strickerei Jutta" },
+    ...(product.description || product.subtitle
+      ? { description: product.description || product.subtitle }
+      : {}),
+    ...(singleSku ? { sku: singleSku } : {}),
+    ...(images.length ? { image: images } : {}),
+    ...(product.material ? { material: product.material } : {}),
+    ...(cheapestPrice && lowPrice !== null && highPrice !== null
+      ? {
+          offers:
+            lowPrice === highPrice
+              ? {
+                  "@type": "Offer",
+                  url: productUrl,
+                  priceCurrency: cheapestPrice.currency_code.toUpperCase(),
+                  price: lowPrice,
+                  availability,
+                  itemCondition: "https://schema.org/NewCondition",
+                }
+              : {
+                  "@type": "AggregateOffer",
+                  url: productUrl,
+                  priceCurrency: cheapestPrice.currency_code.toUpperCase(),
+                  lowPrice,
+                  highPrice,
+                  offerCount: variantPrices.length,
+                  availability,
+                  itemCondition: "https://schema.org/NewCondition",
+                },
+        }
+      : {}),
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Startseite",
+        item: `${baseUrl}/${countryCode}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Alle Produkte",
+        item: `${baseUrl}/${countryCode}/store`,
+      },
+      ...(product.collection
+        ? [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: product.collection.title,
+              item: `${baseUrl}/${countryCode}/collections/${product.collection.handle}`,
+            },
+          ]
+        : []),
+      {
+        "@type": "ListItem",
+        position: product.collection ? 4 : 3,
+        name: product.title,
+        item: productUrl,
+      },
+    ],
+  }
+
   return (
     <div className="bg-stone-50 min-h-screen">
+      <JsonLd data={productSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <ViewItem
+        item={productToItem(product)}
+        currency={gaCurrency(region.currency_code)}
+      />
       {/* Breadcrumb */}
       <div className="bg-white border-b border-stone-200">
         <div className="content-container py-3">
           <nav className="flex items-center gap-2 text-xs text-stone-400 flex-wrap">
-            <LocalizedClientLink href="/" className="hover:text-stone-700 transition-colors">
+            <LocalizedClientLink
+              href="/"
+              className="hover:text-stone-700 transition-colors"
+            >
               Startseite
             </LocalizedClientLink>
             <span className="text-stone-300">/</span>
-            <LocalizedClientLink href="/store" className="hover:text-stone-700 transition-colors">
+            <LocalizedClientLink
+              href="/store"
+              className="hover:text-stone-700 transition-colors"
+            >
               Alle Produkte
             </LocalizedClientLink>
             {product.collection && (
@@ -66,27 +191,43 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <div className="grid grid-cols-1 medium:grid-cols-[1fr_1fr] gap-6 medium:gap-10 large:gap-14 items-start">
             {/* Image Gallery */}
             <div className="medium:sticky medium:top-20 medium:self-start">
-              <ImageGallery images={product?.images || []} thumbnail={product?.thumbnail} />
+              <ImageGallery
+                images={product?.images || []}
+                thumbnail={product?.thumbnail}
+                title={product.title}
+              />
             </div>
 
             {/* Product Info */}
             <div className="flex flex-col gap-6">
               {/* Header */}
               <div className="space-y-3">
-                {(product.collection || (product.tags && product.tags.length > 0)) && (
+                {(product.collection ||
+                  (product.tags && product.tags.length > 0)) && (
                   <div className="flex items-center gap-2 flex-wrap">
                     {product.collection && (
-                      <LocalizedClientLink href={`/collections/${product.collection.handle}`}>
-                        <Badge variant="secondary" className="hover:bg-stone-200 transition-colors text-xs">
+                      <LocalizedClientLink
+                        href={`/collections/${product.collection.handle}`}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="hover:bg-stone-200 transition-colors text-xs"
+                        >
                           {product.collection.title}
                         </Badge>
                       </LocalizedClientLink>
                     )}
-                    {product.tags && product.tags.length > 0 && product.tags.map((tag) => (
-                      <Badge key={tag.id} variant="secondary" className="bg-stone-100 text-stone-600 text-xs">
-                        {tag.value}
-                      </Badge>
-                    ))}
+                    {product.tags &&
+                      product.tags.length > 0 &&
+                      product.tags.map((tag) => (
+                        <Badge
+                          key={tag.id}
+                          variant="secondary"
+                          className="bg-stone-100 text-stone-600 text-xs"
+                        >
+                          {tag.value}
+                        </Badge>
+                      ))}
                   </div>
                 )}
 
@@ -172,7 +313,13 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   )
 }
 
-function TrustBadgeSmall({ icon, text }: { icon: React.ReactNode; text: string }) {
+function TrustBadgeSmall({
+  icon,
+  text,
+}: {
+  icon: React.ReactNode
+  text: string
+}) {
   return (
     <div className="flex items-center gap-2.5 text-stone-500">
       <span className="text-stone-400">{icon}</span>

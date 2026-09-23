@@ -6,6 +6,7 @@ import { getRegion } from "@lib/data/regions"
 export const metadata: Metadata = {
   title: "Wunschliste",
   description: "Ihre gespeicherten Lieblingsprodukte",
+  robots: { index: false, follow: false },
 }
 
 type Props = { params: Promise<{ countryCode: string }> }

@@ -134,7 +134,7 @@ export default function ContactPage() {
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Standort Strickerei Strobl - Draßburg"
+                  title="Standort Strickerei Jutta – Draßburg"
                   className="w-full h-full"
                 />
               </div>
