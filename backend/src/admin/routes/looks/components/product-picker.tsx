@@ -132,7 +132,7 @@ export const ProductPicker = ({ value, onChange }: ProductPickerProps) => {
                 <button
                   type="button"
                   className="flex w-full items-center gap-3 p-2 text-left hover:bg-ui-bg-base-hover"
-                  onClick={() =>
+                  onClick={() => {
                     onChange([
                       ...value,
                       {
@@ -143,7 +143,9 @@ export const ProductPicker = ({ value, onChange }: ProductPickerProps) => {
                         status: product.status,
                       },
                     ])
-                  }
+                    // Suche leeren, damit das nächste Teil direkt gesucht werden kann
+                    setSearch("")
+                  }}
                 >
                   <Thumb src={product.thumbnail} />
                   <Text size="small">{product.title}</Text>
