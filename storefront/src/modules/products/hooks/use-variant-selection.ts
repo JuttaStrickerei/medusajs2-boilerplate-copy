@@ -75,7 +75,9 @@ const variantAvailability = (
 export function useVariantSelection(product: HttpTypes.StoreProduct) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
 
-  // Preselect options: all options if only 1 variant, otherwise any option with only 1 available value
+  // Preselect options: all options if only 1 variant, otherwise any option with only 1 available value.
+  // Nur beim Produktwechsel ausführen: Nach „In den Warenkorb“ lädt die Seite
+  // dasselbe Produkt als neues Objekt nach – das darf die Auswahl nicht zurücksetzen.
   useEffect(() => {
     if (product.variants?.length === 1) {
       const variantOptions = optionsAsKeymap(product.variants[0].options)
@@ -94,7 +96,8 @@ export function useVariantSelection(product: HttpTypes.StoreProduct) {
         setOptions(preselectMap)
       }
     }
-  }, [product.variants, product.options])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id])
 
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {
