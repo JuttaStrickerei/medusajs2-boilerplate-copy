@@ -138,11 +138,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     declarationText,
   }
 
-  const notificationService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
-
   // Acknowledgement to the customer (legally required, § 13a Abs 4 FAGG)
   let confirmationSent = false
   try {
+    // Resolved inside try: the notification module only loads when an email
+    // provider is configured (medusa-config.js)
+    const notificationService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
     await notificationService.createNotifications({
       channel: "email",
       to: body.email,
@@ -169,6 +170,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   // Notice to the shop; includes a warning if the confirmation failed
   try {
+    const notificationService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
     await notificationService.createNotifications({
       channel: "email",
       to: process.env.ADMIN_NOTIFICATION_EMAIL?.trim() || "office@strickerei-jutta.at",
