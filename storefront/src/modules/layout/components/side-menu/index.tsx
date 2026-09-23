@@ -43,6 +43,7 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
   const navigationLinks = [
     { href: "/store", label: "Alle Produkte" },
     { href: "/categories", label: "Kategorien" },
+    { href: "/looks", label: "Looks" },
     { href: "/about", label: "Über uns" },
     { href: "/contact", label: "Kontakt" },
   ]

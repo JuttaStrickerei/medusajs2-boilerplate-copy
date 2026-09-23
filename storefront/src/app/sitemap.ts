@@ -3,6 +3,7 @@ import { getBaseURL } from "@lib/util/env"
 import { listProducts } from "@lib/data/products"
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
+import { listLooks } from "@lib/data/looks"
 
 // Single-market for now (Austria). When DACH regions (/de, /ch) go live,
 // loop over their country codes here and add hreflang alternates.
@@ -19,6 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/store",
     "/collections",
     "/categories",
+    "/looks",
     "/about",
     "/contact",
     "/faq",
@@ -36,16 +38,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "" ? 1 : 0.5,
   }))
 
-  const [productEntries, categoryEntries, collectionEntries] =
+  const [productEntries, categoryEntries, collectionEntries, lookEntries] =
     await Promise.all([
       getProductEntries(prefix),
       getCategoryEntries(prefix),
       getCollectionEntries(prefix),
+      getLookEntries(prefix),
     ])
 
   return [
     ...staticEntries,
     ...collectionEntries,
+    ...lookEntries,
     ...categoryEntries,
     ...productEntries,
   ]
@@ -116,4 +120,15 @@ async function getCollectionEntries(
     console.error("sitemap: failed to load collections", error)
     return []
   }
+}
+
+async function getLookEntries(prefix: string): Promise<MetadataRoute.Sitemap> {
+  // listLooks fängt Fehler selbst ab und liefert dann []
+  const looks = await listLooks()
+  return looks.map((look) => ({
+    url: `${prefix}/looks/${look.handle}`,
+    lastModified: look.updated_at,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }))
 }

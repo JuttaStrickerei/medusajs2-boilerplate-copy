@@ -100,6 +100,14 @@ export default async function Nav() {
               )}
               
               <LocalizedClientLink
+                href="/looks"
+                className="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors relative group"
+              >
+                Looks
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-stone-800 transition-all duration-300 group-hover:w-full" />
+              </LocalizedClientLink>
+
+              <LocalizedClientLink
                 href="/about"
                 className="text-sm font-medium text-stone-600 hover:text-stone-800 transition-colors relative group"
               >
