@@ -152,10 +152,16 @@ export const RevocationConfirmationTemplate: React.FC<RevocationConfirmationTemp
           <Text style={textStyle}>
             Bitte senden Sie die betroffenen Waren unverzüglich, spätestens jedoch binnen
             vierzehn Tagen ab heute, an folgende Adresse zurück: Ing. Jutta Strobl,
-            Wiener Neustädterstraße 47, 7021 Draßburg, Österreich. Die unmittelbaren Kosten
-            der Rücksendung tragen Sie. Die Rückzahlung erfolgt gemäß unserer
-            Widerrufsbelehrung über dasselbe Zahlungsmittel, das Sie bei der Bestellung
-            verwendet haben.
+            Wiener Neustädterstraße 47, 7021 Draßburg, Österreich. Die Kosten der
+            Rücksendung tragen Sie.
+          </Text>
+          <Text style={textStyle}>
+            Sobald die Ware bei uns eingetroffen ist, erstatten wir Ihnen den Kaufpreis der
+            widerrufenen Artikel über dasselbe Zahlungsmittel, das Sie bei der Bestellung
+            verwendet haben. Die Kosten der ursprünglichen Standardlieferung erstatten wir
+            nur, wenn Sie die gesamte Bestellung widerrufen. Ist die Ware getragen, gewaschen
+            oder beschädigt, ziehen wir den dadurch entstandenen Wertverlust vom
+            Erstattungsbetrag ab.
           </Text>
           <Text style={textStyle}>
             Bei Fragen antworten Sie einfach auf diese E-Mail oder schreiben Sie an

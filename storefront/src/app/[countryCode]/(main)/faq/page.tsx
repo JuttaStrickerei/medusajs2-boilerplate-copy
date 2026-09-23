@@ -85,7 +85,11 @@ const faqs = [
       },
       {
         q: "Wie erhalte ich mein Geld zurück?",
-        a: "Wir erstatten alle Zahlungen inklusive Standard-Versandkosten spätestens 14 Tage nach Eingang Ihres Widerrufs auf Ihr ursprüngliches Zahlungsmittel. Wir können die Rückzahlung verweigern, bis wir die Ware zurückerhalten haben oder Sie die Rücksendung nachgewiesen haben.",
+        a: "Sobald Ihr Widerruf bei uns eingegangen ist, erstatten wir den Kaufpreis der widerrufenen Artikel spätestens binnen 14 Tagen auf Ihr ursprüngliches Zahlungsmittel. Wir können die Erstattung zurückhalten, bis die Ware bei uns eingetroffen ist oder Sie die Rücksendung nachgewiesen haben. Die Kosten der ursprünglichen Standardlieferung erstatten wir nur, wenn Sie die gesamte Bestellung widerrufen.",
+      },
+      {
+        q: "Was passiert, wenn die Ware getragen oder beschädigt ist?",
+        a: "Sie dürfen die Ware so prüfen, wie Sie es auch im Geschäft tun würden – etwa anprobieren. Ist sie darüber hinaus getragen, gewaschen oder beschädigt, ziehen wir den dadurch entstandenen Wertverlust vom Erstattungsbetrag ab.",
       },
       {
         q: "Gibt es Ausnahmen vom Widerrufsrecht?",

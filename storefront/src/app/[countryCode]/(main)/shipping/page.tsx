@@ -1,7 +1,6 @@
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Truck, RefreshCw, Package, Clock, Shield } from "@components/icons"
-import RevocationButton from "@modules/revocation/components/revocation-button"
 
 export const metadata: Metadata = {
   title: "Versand & Rückgabe",
@@ -106,18 +105,26 @@ export default function ShippingPage() {
                   <div>
                     <h3 className="font-medium text-stone-800 mb-1">Rückerstattung</h3>
                     <p className="text-stone-600 text-sm">
-                      Wir erstatten alle Zahlungen inklusive Standard-Versandkosten spätestens
-                      14 Tage nach Eingang Ihres Widerrufs auf Ihr ursprüngliches
-                      Zahlungsmittel. Wir können die Rückzahlung verweigern, bis wir die Ware
-                      zurückerhalten haben oder Sie die Rücksendung nachgewiesen haben. Die
-                      Kosten der Rücksendung tragen Sie.
+                      Sobald Ihr Widerruf bei uns eingegangen ist, erstatten wir den Kaufpreis
+                      der widerrufenen Artikel spätestens binnen 14 Tagen auf Ihr ursprüngliches
+                      Zahlungsmittel – wir können die Erstattung zurückhalten, bis die Ware bei
+                      uns eingetroffen ist oder Sie die Rücksendung nachgewiesen haben. Die
+                      Kosten der Rücksendung tragen Sie. Die Kosten der ursprünglichen
+                      Standardlieferung erstatten wir nur, wenn Sie die gesamte Bestellung
+                      widerrufen. Ist die Ware getragen, gewaschen oder beschädigt, ziehen wir
+                      den dadurch entstandenen Wertverlust vom Erstattungsbetrag ab.
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col small:flex-row small:items-center gap-4">
-                <RevocationButton />
+                <LocalizedClientLink
+                  href="/vertrag-widerrufen"
+                  className="text-sm text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                >
+                  Zum Online-Widerruf
+                </LocalizedClientLink>
                 <LocalizedClientLink
                   href="/terms#widerrufsrecht"
                   className="text-sm text-stone-800 underline underline-offset-2 hover:text-stone-600"

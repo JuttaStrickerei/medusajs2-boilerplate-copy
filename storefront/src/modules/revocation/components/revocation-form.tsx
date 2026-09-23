@@ -188,8 +188,9 @@ export default function RevocationForm() {
           </p>
         )}
         <p className="text-stone-700">
-          Bitte senden Sie die betroffenen Waren binnen 14 Tagen an: Ing. Jutta Strobl,
-          Wiener Neustädterstraße 47, 7021 Draßburg, Österreich.
+          Bitte senden Sie die betroffenen Waren binnen 14 Tagen auf Ihre Kosten an: Ing.
+          Jutta Strobl, Wiener Neustädterstraße 47, 7021 Draßburg, Österreich. Den Kaufpreis
+          erstatten wir, sobald die Ware bei uns eingetroffen ist.
         </p>
       </div>
     )

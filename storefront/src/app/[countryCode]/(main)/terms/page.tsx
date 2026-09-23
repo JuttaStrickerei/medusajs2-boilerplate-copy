@@ -1,6 +1,5 @@
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import RevocationButton from "@modules/revocation/components/revocation-button"
 
 export const metadata: Metadata = {
   title: "Allgemeine Geschäftsbedingungen",
@@ -176,9 +175,6 @@ export default function TermsPage() {
                   mit Informationen zum Inhalt der Widerrufserklärung sowie Datum und Uhrzeit
                   ihres Eingangs.
                 </p>
-                <div className="mb-4">
-                  <RevocationButton />
-                </div>
 
                 <h3 className="font-medium text-stone-800 mt-6 mb-2 text-base">
                   Folgen des Widerrufs
@@ -210,6 +206,17 @@ export default function TermsPage() {
                   nach Kundenspezifikation angefertigt werden oder eindeutig auf die
                   persönlichen Bedürfnisse zugeschnitten sind (z. B. individualisierte oder
                   personalisierte Maßanfertigungen).
+                </p>
+
+                <h3 className="font-medium text-stone-800 mt-6 mb-2 text-base">
+                  Hinweise zu Rücksendung und Erstattung
+                </h3>
+                <p className="text-stone-600 mb-4">
+                  Die Kosten der Rücksendung tragen Sie. Widerrufen Sie nur einen Teil Ihrer
+                  Bestellung, erstatten wir die Kosten der ursprünglichen Lieferung nicht, da
+                  diese für die übrigen Artikel ohnehin angefallen wären. Ist die Ware über die
+                  Prüfung hinaus getragen, gewaschen oder beschädigt, ziehen wir den dadurch
+                  entstandenen Wertverlust vom Erstattungsbetrag ab.
                 </p>
 
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">

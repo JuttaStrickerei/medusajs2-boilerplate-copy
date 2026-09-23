@@ -58,9 +58,6 @@ export default async function Footer() {
                 <span>Draßburg, Österreich</span>
               </div>
             </div>
-
-            {/* Online withdrawal (§ 13a FAGG) – must stay permanently visible */}
-            <RevocationButton variant="light" className="mt-8" />
           </div>
 
           {/* Shop Links */}
@@ -205,7 +202,9 @@ export default async function Footer() {
             </div>
 
             {/* Legal Links */}
-            <div className="flex items-center gap-6 text-sm text-stone-500">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-stone-500">
+              {/* Online withdrawal (§ 13a FAGG) – must stay permanently visible and highlighted */}
+              <RevocationButton variant="light" />
               <CookieSettingsButton />
               <LocalizedClientLink
                 href="/privacy"

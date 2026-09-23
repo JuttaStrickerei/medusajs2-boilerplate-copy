@@ -6,7 +6,6 @@ import { useRouter, useParams } from "next/navigation"
 import { Dialog, Transition } from "@headlessui/react"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import RevocationButton from "@modules/revocation/components/revocation-button"
 import CountrySelect from "@modules/layout/components/country-select"
 import {
   Menu,
@@ -248,10 +247,6 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                             />
                           </div>
                         )}
-                        <RevocationButton
-                          onClick={closeMenu}
-                          className="w-full mb-4"
-                        />
                         <div className="flex items-center justify-center gap-6 text-sm text-stone-500">
                           <LocalizedClientLink
                             href="/help"
