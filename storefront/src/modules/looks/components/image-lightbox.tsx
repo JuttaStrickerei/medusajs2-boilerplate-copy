@@ -129,7 +129,13 @@ export default function ImageLightbox({
               )}
               aria-label={`Bild ${i + 1} anzeigen`}
             >
-              <Image src={url} alt="" fill sizes="48px" className="object-cover" />
+              <Image
+                src={url}
+                alt=""
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>
