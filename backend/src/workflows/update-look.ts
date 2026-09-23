@@ -7,16 +7,14 @@ import {
 import { Modules } from "@medusajs/framework/utils"
 import {
   createRemoteLinkStep,
-  removeRemoteLinkStep,
+  dismissRemoteLinkStep,
   useQueryGraphStep,
 } from "@medusajs/medusa/core-flows"
 import { LOOK_MODULE } from "../modules/look"
 import { updateLookStep, UpdateLookStepInput } from "./steps/update-look"
 import { createLookItemsStep } from "./steps/create-look-items"
 import { deleteLookItemsStep } from "./steps/delete-look-items"
-
-// { [modul]: { [linkable-feld]: ids } } – Eingabeformat von removeRemoteLinkStep
-type LinksToRemove = Record<string, Record<string, string[]>>
+import { toLinks } from "./utils/look-links"
 
 export type UpdateLookWorkflowInput = UpdateLookStepInput & {
   // Wenn gesetzt, ersetzt diese Liste alle Teile des Looks (in dieser Reihenfolge)
@@ -37,20 +35,21 @@ export const updateLookWorkflow = createWorkflow(
       () => {
         const { data: existing } = useQueryGraphStep({
           entity: "look",
-          fields: ["id", "items.id"],
+          fields: ["id", "items.id", "items.product_link.product_id"],
           filters: { id: input.id },
         })
 
-        const oldItemIds = transform({ existing }, ({ existing }) =>
-          (existing[0]?.items ?? [])
-            .filter(Boolean)
-            .map((item: { id: string }) => item.id)
+        const oldItems = transform({ existing }, ({ existing }) =>
+          (existing[0]?.items ?? []).filter(Boolean)
         )
 
-        removeRemoteLinkStep(
-          transform({ oldItemIds }, ({ oldItemIds }): LinksToRemove => ({
-            [LOOK_MODULE]: { look_item_id: oldItemIds },
-          }))
+        // Nur die Link-Zeilen entfernen – niemals die Produkte selbst
+        dismissRemoteLinkStep(
+          transform({ oldItems }, ({ oldItems }) => toLinks(oldItems))
+        )
+
+        const oldItemIds = transform({ oldItems }, ({ oldItems }) =>
+          oldItems.map((item: { id: string }) => item.id)
         )
 
         deleteLookItemsStep(oldItemIds)

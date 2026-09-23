@@ -24,15 +24,19 @@ export const ADMIN_LOOK_FIELDS = [
   "items.product.status",
 ]
 
-type LookItemRow = { rank?: number | null } & Record<string, unknown>
+type LookItemRow = { rank?: number | null; product?: unknown } & Record<
+  string,
+  unknown
+>
 
-// query.graph sortiert verschachtelte Relationen nicht – Teile nach rank ordnen
+// query.graph sortiert verschachtelte Relationen nicht – Teile nach rank ordnen.
+// Teile, deren Produkt gelöscht wurde, werden ausgeblendet.
 export const sortLookItems = <T extends { items?: (LookItemRow | null)[] }>(
   look: T
 ): T => ({
   ...look,
   items: (look.items ?? [])
-    .filter((item): item is LookItemRow => !!item)
+    .filter((item): item is LookItemRow => !!item?.product)
     .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)),
 })
 
