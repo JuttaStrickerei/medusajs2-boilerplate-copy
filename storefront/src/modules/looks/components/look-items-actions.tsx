@@ -131,7 +131,7 @@ export default function LookItemsActions({
         const label = selections[notReady[0].id]?.missingLabel ?? "Variante"
         return `Bitte ${label} für „${notReady[0].title}“ wählen`
       }
-      return `Bitte noch ${notReady.length} Teile auswählen`
+      return "Bitte Ware auswählen"
     }
     // „Ganzen“ nur, wenn wirklich alle Teile des Looks hinzugefügt werden
     const label =
