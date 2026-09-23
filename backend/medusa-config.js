@@ -91,6 +91,8 @@ const medusaConfig = {
     },
     {resolve: './src/modules/wishlist',
     },
+    {resolve: './src/modules/look',
+    },
     ...(SENDCLOUD_PUBLIC_KEY && SENDCLOUD_SECRET_KEY ? [{
       resolve: './src/modules/sendcloud-shipment',
     }] : []),
