@@ -23,6 +23,11 @@ export type LookItemSelection = {
   variant?: HttpTypes.StoreProductVariant
   // ist irgendeine Variante des Produkts kaufbar?
   purchasable: boolean
+  // ready = lieferbare Variante gewählt, incomplete = Option fehlt noch,
+  // unavailable = gewählte Kombination gibt es nicht / ausverkauft
+  status: "ready" | "incomplete" | "unavailable"
+  // Bezeichnung der nächsten fehlenden Option (z. B. „Größe“)
+  missingLabel?: string
 }
 
 type LookItemCardProps = {
@@ -42,24 +47,38 @@ export default function LookItemCard({
   const [error, setError] = useState<string | null>(null)
 
   const {
+    orderedOptions,
+    selectionStatus,
     options,
     setOptionValue,
     selectedVariant,
     isValidVariant,
     inStock,
     missingOptions,
-    allOptionsSelected,
     availability,
     isPurchasable,
     previewImage,
   } = useVariantSelection(product)
 
+  const missingLabel = missingOptions[0]
+    ? translateOptionTitle(missingOptions[0].title ?? "Option")
+    : undefined
+
   useEffect(() => {
     onSelectionChange(product.id, {
-      variant: selectedVariant && inStock ? selectedVariant : undefined,
+      variant: selectionStatus === "ready" ? selectedVariant : undefined,
       purchasable: isPurchasable,
+      status: selectionStatus,
+      missingLabel,
     })
-  }, [product.id, selectedVariant, inStock, isPurchasable, onSelectionChange])
+  }, [
+    product.id,
+    selectedVariant,
+    selectionStatus,
+    isPurchasable,
+    missingLabel,
+    onSelectionChange,
+  ])
 
   const { cheapestPrice, variantPrice } = getProductPrice({
     product,
@@ -113,12 +132,9 @@ export default function LookItemCard({
   const getButtonText = () => {
     if (addedToCart) return "Hinzugefügt!"
     if (!isPurchasable) return "Ausverkauft"
-    if (!allOptionsSelected) {
-      const label = translateOptionTitle(missingOptions[0].title ?? "Option")
-      return `Bitte ${label} wählen`
-    }
+    if (selectionStatus === "incomplete") return `Bitte ${missingLabel} wählen`
     if (!isValidVariant) return "Kombination nicht verfügbar"
-    if (!inStock) return "Ausverkauft"
+    if (!inStock) return "Variante ausverkauft"
     return "In den Warenkorb"
   }
 
@@ -176,7 +192,7 @@ export default function LookItemCard({
         </div>
 
         {(product.variants?.length ?? 0) > 1 &&
-          (product.options || []).map((option) => (
+          orderedOptions.map((option) => (
             <OptionSelect
               key={option.id}
               option={option}

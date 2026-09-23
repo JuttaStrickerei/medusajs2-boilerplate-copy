@@ -37,7 +37,9 @@ export default function LookItemsActions({
         const current = prev[productId]
         if (
           current?.variant?.id === selection.variant?.id &&
-          current?.purchasable === selection.purchasable
+          current?.purchasable === selection.purchasable &&
+          current?.status === selection.status &&
+          current?.missingLabel === selection.missingLabel
         ) {
           return prev
         }
@@ -54,8 +56,11 @@ export default function LookItemsActions({
   const soldOut = products.filter(
     (p) => selections[p.id] && !selections[p.id].purchasable
   )
-  const openCount = purchasable.filter((p) => !selections[p.id]?.variant).length
-  const ready = purchasable.length > 0 && openCount === 0
+  // Kaufbare Teile, die noch nicht bereit sind (in Anzeige-Reihenfolge)
+  const notReady = purchasable.filter(
+    (p) => selections[p.id]?.status !== "ready"
+  )
+  const ready = purchasable.length > 0 && notReady.length === 0
 
   const total = (() => {
     let sum = 0
@@ -115,13 +120,23 @@ export default function LookItemsActions({
     if (added) return "Look hinzugefügt!"
     if (!purchasable.length) return "Look derzeit ausverkauft"
     if (!ready) {
-      return openCount === 1
-        ? "Bitte noch 1 Teil auswählen"
-        : `Bitte noch ${openCount} Teile auswählen`
+      // Eine nicht verfügbare Auswahl zuerst melden – sie blockiert sonst still
+      const unavailable = notReady.find(
+        (p) => selections[p.id]?.status === "unavailable"
+      )
+      if (unavailable) {
+        return `Bitte verfügbare Variante für „${unavailable.title}“ wählen`
+      }
+      if (notReady.length === 1) {
+        const label = selections[notReady[0].id]?.missingLabel ?? "Variante"
+        return `Bitte ${label} für „${notReady[0].title}“ wählen`
+      }
+      return `Bitte noch ${notReady.length} Teile auswählen`
     }
-    return total
-      ? `Ganzen Look in den Warenkorb – ${formatPrice(total.sum, total.currency)}`
-      : "Ganzen Look in den Warenkorb"
+    // „Ganzen“ nur, wenn wirklich alle Teile des Looks hinzugefügt werden
+    const label =
+      soldOut.length > 0 ? "Look in den Warenkorb" : "Ganzen Look in den Warenkorb"
+    return total ? `${label} – ${formatPrice(total.sum, total.currency)}` : label
   }
 
   return (

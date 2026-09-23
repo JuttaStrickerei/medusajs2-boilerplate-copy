@@ -47,6 +47,7 @@ export default function ProductActions({
   const isWishlisted = wishlistItems.some((item) => item.id === product.id)
 
   const {
+    orderedOptions,
     options,
     setOptionValue,
     selectedVariant,
@@ -127,7 +128,7 @@ export default function ProductActions({
         {/* Options */}
         {(product.variants?.length ?? 0) > 1 && (
           <div className="space-y-6">
-            {(product.options || []).map((option) => (
+            {orderedOptions.map((option) => (
               <div key={option.id}>
                 <OptionSelect
                   option={option}

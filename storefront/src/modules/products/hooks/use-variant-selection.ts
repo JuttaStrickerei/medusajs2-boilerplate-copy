@@ -52,6 +52,28 @@ export const translateOptionTitle = (title: string): string => {
   return map[title.trim().toLowerCase()] ?? title
 }
 
+// Feste Reihenfolge der Optionen: Farbe, dann Größe, dann der Rest.
+// Medusa liefert product.options ohne garantierte Reihenfolge (z. B. ändert
+// sie sich, wenn eine Farbe ergänzt wird) – so bleibt die Anzeige stabil.
+const optionRank = (title?: string | null) => {
+  const t = (title ?? "").trim().toLowerCase()
+  if (["farbe", "color", "colour"].includes(t)) return 0
+  if (["größe", "groesse", "size"].includes(t)) return 1
+  return 2
+}
+
+export const sortProductOptions = <T extends { title?: string | null }>(
+  options: T[] | null | undefined
+): T[] =>
+  (options ?? [])
+    .map((option, index) => ({ option, index }))
+    .sort(
+      (a, b) =>
+        optionRank(a.option.title) - optionRank(b.option.title) ||
+        a.index - b.index
+    )
+    .map(({ option }) => option)
+
 const variantAvailability = (
   variants: HttpTypes.StoreProductVariant[]
 ): OptionValueAvailability => {
@@ -131,36 +153,42 @@ export function useVariantSelection(product: HttpTypes.StoreProduct) {
     [selectedVariant]
   )
 
+  const orderedOptions = useMemo(
+    () => sortProductOptions(product.options),
+    [product.options]
+  )
+
   const missingOptions = useMemo(() => {
-    if (!product.options || product.options.length === 0) return []
-    return product.options.filter((opt) => !options[opt.id])
-  }, [product.options, options])
+    if (orderedOptions.length === 0) return []
+    return orderedOptions.filter((opt) => !options[opt.id])
+  }, [orderedOptions, options])
 
   const allOptionsSelected = missingOptions.length === 0
 
-  // Verfügbarkeit je Optionswert – berücksichtigt die bereits gewählten
-  // anderen Optionen (z. B. Größen einer gewählten Farbe)
+  // Verfügbarkeit je Optionswert. Berücksichtigt nur die Auswahl der Optionen
+  // DAVOR (Farbe vor Größe): Größen zeigen den Bestand der gewählten Farbe,
+  // Farben werden von einer gewählten Größe nicht beeinflusst.
   const availability = useMemo<OptionsAvailability>(() => {
     const variants = product.variants ?? []
     const result: OptionsAvailability = {}
 
-    for (const option of product.options ?? []) {
+    orderedOptions.forEach((option, index) => {
+      const previous = orderedOptions.slice(0, index)
       result[option.id] = {}
       for (const { value } of option.values ?? []) {
         const matching = variants.filter((v) => {
           const keymap = optionsAsKeymap(v.options) ?? {}
           if (keymap[option.id] !== value) return false
-          return Object.entries(options).every(
-            ([optionId, selected]) =>
-              optionId === option.id || !selected || keymap[optionId] === selected
+          return previous.every(
+            (prev) => !options[prev.id] || keymap[prev.id] === options[prev.id]
           )
         })
         result[option.id][value] = variantAvailability(matching)
       }
-    }
+    })
 
     return result
-  }, [product.variants, product.options, options])
+  }, [product.variants, orderedOptions, options])
 
   // Ist irgendeine Variante des Produkts kaufbar?
   const isPurchasable = useMemo(
@@ -189,7 +217,19 @@ export function useVariantSelection(product: HttpTypes.StoreProduct) {
     )
   }, [options, selectedVariant, product])
 
+  // Zustand der Auswahl für Button-Texte:
+  // incomplete = noch nicht alles gewählt, unavailable = Kombination gibt es
+  // nicht oder ausverkauft, ready = lieferbare Variante gewählt
+  const selectionStatus: "ready" | "incomplete" | "unavailable" =
+    !allOptionsSelected
+      ? "incomplete"
+      : !isValidVariant || !inStock
+      ? "unavailable"
+      : "ready"
+
   return {
+    orderedOptions,
+    selectionStatus,
     options,
     setOptionValue,
     selectedVariant,
