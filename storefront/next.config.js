@@ -26,6 +26,11 @@ const nextConfig = {
         destination: "/:countryCode/imprint",
         permanent: true,
       },
+      {
+        source: "/:countryCode/datenschutz",
+        destination: "/:countryCode/privacy",
+        permanent: true,
+      },
     ]
   },
   logging: {
