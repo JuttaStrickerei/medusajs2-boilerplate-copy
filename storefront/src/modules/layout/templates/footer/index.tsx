@@ -3,6 +3,7 @@ import { listCollections } from "@lib/data/collections"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Instagram, Facebook, Mail, Phone, MapPin } from "@components/icons"
 import { CookieSettingsButton } from "@components/cookie-consent/CookieSettingsButton"
+import RevocationButton from "@modules/revocation/components/revocation-button"
 
 export default async function Footer() {
   const { collections } = await listCollections({
@@ -57,6 +58,9 @@ export default async function Footer() {
                 <span>Draßburg, Österreich</span>
               </div>
             </div>
+
+            {/* Online withdrawal (§ 13a FAGG) – must stay permanently visible */}
+            <RevocationButton variant="light" className="mt-8" />
           </div>
 
           {/* Shop Links */}

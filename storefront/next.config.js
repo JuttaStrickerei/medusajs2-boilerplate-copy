@@ -26,6 +26,11 @@ const nextConfig = {
         destination: "/:countryCode/imprint",
         permanent: false,
       },
+      {
+        source: "/:countryCode/widerruf",
+        destination: "/:countryCode/vertrag-widerrufen",
+        permanent: false,
+      },
     ]
   },
   logging: {
