@@ -33,6 +33,9 @@ export type LookItemSelection = {
   missingLabel?: string
 }
 
+// Optionsnamen, unter denen die Farbe gepflegt wird
+const COLOR_OPTION_TITLES = ["farbe", "farben", "color", "colour"]
+
 type LookItemCardProps = {
   product: HttpTypes.StoreProduct
   disabled?: boolean
@@ -69,7 +72,15 @@ export default function LookItemCard({
   const { items: wishlistItems, toggleWishlist } = useWishlist()
   const isWishlisted = wishlistItems.some((item) => item.id === product.id)
 
-  // Alle Bilder des Produkts für die Vorschau (Produktbilder, sonst Varianten-/Vorschaubild)
+  const colorOptionId = product.options?.find((o) =>
+    COLOR_OPTION_TITLES.includes((o.title ?? "").trim().toLowerCase())
+  )?.id
+  const selectedColor = colorOptionId ? options[colorOptionId] : undefined
+
+  // Bilder für die Vorschau. Bei gewählter Farbe die Bilder einer Variante
+  // dieser Farbe: Medusa liefert dort die ihr zugeordneten Bilder plus alle
+  // Bilder ohne Zuordnung (bzw. alle, solange nichts zugeordnet ist).
+  // Reihenfolge wie bei den Produktbildern.
   const galleryImages = useMemo(() => {
     const urls = [
       ...(product.images ?? []).map((img) => img.url),
@@ -79,8 +90,20 @@ export default function LookItemCard({
       ]),
       product.thumbnail,
     ].filter((url): url is string => !!url)
-    return Array.from(new Set(urls))
-  }, [product])
+    const allImages = Array.from(new Set(urls))
+
+    if (!colorOptionId || !selectedColor) return allImages
+
+    const colorVariant = product.variants?.find(
+      (v) =>
+        v.options?.find((o) => o.option_id === colorOptionId)?.value ===
+        selectedColor
+    )
+    const colorUrls = new Set((colorVariant?.images ?? []).map((img) => img.url))
+    if (!colorUrls.size) return allImages
+
+    return allImages.filter((url) => colorUrls.has(url))
+  }, [product, colorOptionId, selectedColor])
 
   const details = getProductDetails(product)
 
