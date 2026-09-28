@@ -5,7 +5,7 @@ import { Truck, RefreshCw, Package, Clock, Shield } from "@components/icons"
 export const metadata: Metadata = {
   title: "Versand & Rückgabe",
   description:
-    "Versand und Lieferzeit (ca. 2 Wochen innerhalb Österreichs) sowie Rückgabe bei Strickerei Jutta.",
+    "Versand und Lieferzeit (ca. 2 Wochen innerhalb Österreichs) sowie Widerruf und Rückgabe bei Strickerei Jutta.",
 }
 
 export default function ShippingPage() {
@@ -76,13 +76,15 @@ export default function ShippingPage() {
           <div className="bg-white rounded-2xl border border-stone-200 p-8 mb-8">
             <h2 className="font-serif text-xl font-medium text-stone-800 mb-6 flex items-center gap-3">
               <RefreshCw size={24} />
-              Rückgabe & Umtausch
+              Widerruf & Rückgabe
             </h2>
 
             <div className="space-y-6">
               <p className="text-stone-600">
-                Sie haben 30 Tage Zeit, Ihre Bestellung zurückzusenden oder umzutauschen. 
-                Die Artikel müssen ungetragen, ungewaschen und mit allen Etiketten versehen sein.
+                Sie können Ihren Vertrag binnen 14 Tagen ab Erhalt der Ware ohne Angabe von
+                Gründen widerrufen (gesetzliches Widerrufsrecht). Bitte gehen Sie mit der Ware
+                bis dahin sorgfältig um – für einen Wertverlust durch einen zur Prüfung nicht
+                notwendigen Umgang müssen Sie aufkommen.
               </p>
 
               <div className="grid grid-cols-1 small:grid-cols-2 gap-6">
@@ -91,10 +93,10 @@ export default function ShippingPage() {
                   <div>
                     <h3 className="font-medium text-stone-800 mb-1">So funktioniert's</h3>
                     <ol className="text-stone-600 text-sm space-y-1 list-decimal list-inside">
-                      <li>Kontaktieren Sie unseren Kundenservice</li>
-                      <li>Sie erhalten ein Rücksendeetikett</li>
+                      <li>Widerruf online über „Vertrag widerrufen“ oder per E-Mail erklären</li>
+                      <li>Sie erhalten sofort eine Eingangsbestätigung per E-Mail</li>
                       <li>Verpacken Sie die Ware sicher</li>
-                      <li>Geben Sie das Paket bei der Post ab</li>
+                      <li>Senden Sie das Paket binnen 14 Tagen an uns zurück</li>
                     </ol>
                   </div>
                 </div>
@@ -103,11 +105,32 @@ export default function ShippingPage() {
                   <div>
                     <h3 className="font-medium text-stone-800 mb-1">Rückerstattung</h3>
                     <p className="text-stone-600 text-sm">
-                      Nach Erhalt und Prüfung der Ware erstatten wir den Kaufpreis 
-                      innerhalb von 5-7 Werktagen auf Ihr ursprüngliches Zahlungsmittel.
+                      Sobald Ihr Widerruf bei uns eingegangen ist, erstatten wir den Kaufpreis
+                      der widerrufenen Artikel spätestens binnen 14 Tagen auf Ihr ursprüngliches
+                      Zahlungsmittel – wir können die Erstattung zurückhalten, bis die Ware bei
+                      uns eingetroffen ist oder Sie die Rücksendung nachgewiesen haben. Die
+                      Kosten der Rücksendung tragen Sie. Die Kosten der ursprünglichen
+                      Standardlieferung erstatten wir nur, wenn Sie die gesamte Bestellung
+                      widerrufen. Ist die Ware getragen, gewaschen oder beschädigt, ziehen wir
+                      den dadurch entstandenen Wertverlust vom Erstattungsbetrag ab.
                     </p>
                   </div>
                 </div>
+              </div>
+
+              <div className="flex flex-col small:flex-row small:items-center gap-4">
+                <LocalizedClientLink
+                  href="/vertrag-widerrufen"
+                  className="text-sm text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                >
+                  Zum Online-Widerruf
+                </LocalizedClientLink>
+                <LocalizedClientLink
+                  href="/terms#widerrufsrecht"
+                  className="text-sm text-stone-800 underline underline-offset-2 hover:text-stone-600"
+                >
+                  Zur vollständigen Widerrufsbelehrung
+                </LocalizedClientLink>
               </div>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { listCollections } from "@lib/data/collections"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Instagram, Mail, Phone, MapPin } from "@components/icons"
 import { CookieSettingsButton } from "@components/cookie-consent/CookieSettingsButton"
+import RevocationButton from "@modules/revocation/components/revocation-button"
 
 export default async function Footer() {
   const { collections } = await listCollections()
@@ -202,7 +203,7 @@ export default async function Footer() {
             </div>
 
             {/* Legal Links */}
-            <div className="flex items-center gap-6 text-sm text-stone-500">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-stone-500">
               <CookieSettingsButton />
               <LocalizedClientLink
                 href="/privacy"
@@ -222,6 +223,8 @@ export default async function Footer() {
               >
                 Impressum
               </LocalizedClientLink>
+              {/* Online withdrawal (§ 13a FAGG) – must stay permanently visible and highlighted */}
+              <RevocationButton variant="subtle" />
             </div>
           </div>
         </div>

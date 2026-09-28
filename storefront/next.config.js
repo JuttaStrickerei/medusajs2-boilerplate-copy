@@ -31,6 +31,11 @@ const nextConfig = {
         destination: "/:countryCode/privacy",
         permanent: true,
       },
+      {
+        source: "/:countryCode/widerruf",
+        destination: "/:countryCode/vertrag-widerrufen",
+        permanent: false,
+      },
     ]
   },
   logging: {

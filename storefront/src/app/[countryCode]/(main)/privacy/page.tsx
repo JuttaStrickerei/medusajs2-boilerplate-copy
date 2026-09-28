@@ -157,6 +157,27 @@ export default function PrivacyPage() {
                   Jahren gemäß § 13 Produkthaftungsgesetz (PHG) sicher aufbewahrt.
                 </p>
 
+                <h3 className="font-medium text-stone-800 mt-6 mb-2 text-base">
+                  Online-Widerruf
+                </h3>
+                <p className="text-stone-600 mb-4">
+                  Wenn Sie über unsere Funktion „Vertrag widerrufen“ einen Widerruf erklären,
+                  verarbeiten wir Ihren Namen, die von Ihnen angegebene Bestell- oder
+                  Rechnungsnummer, Ihre E-Mail-Adresse, den Umfang des Widerrufs (gesamter Vertrag
+                  oder betroffene Artikel), den Wortlaut Ihrer Erklärung sowie Datum und Uhrzeit des
+                  Eingangs. IP-Adressen werden dabei nicht gespeichert. Zweck und Rechtsgrundlage:
+                  Wir sind gesetzlich verpflichtet, Ihnen den Eingang Ihres Widerrufs unverzüglich
+                  zu bestätigen (§ 13a FAGG, Art. 6 Abs. 1 lit. c DSGVO); die weitere Abwicklung
+                  (Rücknahme und Rückerstattung) erfolgt zur Vertragserfüllung (Art. 6 Abs. 1 lit. b
+                  DSGVO). Empfänger: Die Eingangsbestätigung wird über unseren technischen
+                  E-Mail-Versanddienstleister als Auftragsverarbeiter zugestellt. Speicherdauer: Wir
+                  speichern die Widerrufserklärung als Nachweis über ihren Inhalt und den Zeitpunkt
+                  des Eingangs für die Dauer der allgemeinen Verjährungsfrist von 3 Jahren
+                  (§ 1486 ABGB) ab Eingang und löschen sie anschließend. Soweit Angaben aus dem
+                  Widerruf Teil der Buchhaltung werden (z. B. bei einer Rückerstattung), gelten die
+                  oben genannten steuerrechtlichen Aufbewahrungsfristen.
+                </p>
+
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
                   5. Newsletter-Marketing und elektronische Direktwerbung (Mailchimp)
                 </h2>

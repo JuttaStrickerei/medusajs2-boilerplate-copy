@@ -275,7 +275,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                 />
                 <TrustBadgeSmall
                   icon={<RefreshCw size={16} />}
-                  text="30 Tage Rückgaberecht"
+                  text="14 Tage Widerrufsrecht"
                 />
               </div>
             </div>
