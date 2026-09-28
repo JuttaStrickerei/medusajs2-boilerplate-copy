@@ -79,6 +79,9 @@ export const getLookWithProducts = async (
     queryParams: {
       id: look.product_ids,
       limit: look.product_ids.length,
+      // + Variantenbilder, damit die Vorschau die Bilder der gewählten Farbe zeigt
+      fields:
+        "*variants.calculated_price,+variants.inventory_quantity,+variants.thumbnail,*variants.images,+metadata,+tags,+images",
     },
   })
 
