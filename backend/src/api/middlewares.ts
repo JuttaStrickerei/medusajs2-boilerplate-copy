@@ -17,6 +17,12 @@ export default defineMiddlewares({
       method: ["POST"],
       bodyParser: { preserveRawBody: true },
     },
+    // Bulk Image Upload sends one base64 image per request (9 MB PNG ≈ 12 MB)
+    {
+      matcher: "/admin/bulk-images/upload",
+      methods: ["POST"],
+      bodyParser: { sizeLimit: "25mb" },
+    },
     ...wishlistMiddlewares,
     {
       matcher: "/admin/products/:id",

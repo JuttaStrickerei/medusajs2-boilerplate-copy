@@ -1,12 +1,11 @@
 import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { Modules } from "@medusajs/framework/utils"
-import { Client } from "minio"
-import { ulid } from "ulid"
-import * as https from "https"
-import * as http from "http"
 
 interface UploadImageListBody {
   csv: string
+  // Local image filename -> URL, for files the admin widget already uploaded
+  // via /admin/bulk-images/upload. CSV cells may contain the plain filename instead of a URL.
+  localImageUrls?: Record<string, string>
 }
 
 function normalizeCsvInput(content: string): string {
@@ -61,11 +60,13 @@ function parseCSV(
 
   for (let i = 0; i < normalized.length; i++) {
     const char = normalized[i]
+    // Keep quotes in the line so parseLine can still tell quoted delimiters apart
     if (char === '"') {
       if (inQuotes && normalized[i + 1] === '"') {
-        current += '"'
+        current += '""'
         i++
       } else {
+        current += '"'
         inQuotes = !inQuotes
       }
     } else if ((char === "\n" || char === "\r") && !inQuotes) {
@@ -109,182 +110,44 @@ function parseLine(line: string, delimiter: "," | ";" | "\t"): string[] {
   return result
 }
 
-function isGoogleDriveUrl(url: string): boolean {
-  const lower = url.toLowerCase()
-  return lower.includes("drive.google.com") || lower.includes("drive.usercontent.google.com")
+function serializeCSV(
+  headers: string[],
+  rows: string[][],
+  delimiter: "," | ";" | "\t",
+  lineEnding: string
+): string {
+  const escapeField = (value: string) =>
+    value.includes(delimiter) ||
+    value.includes('"') ||
+    value.includes("\n") ||
+    value.includes("\r")
+      ? `"${value.replace(/"/g, '""')}"`
+      : value
+  return [headers, ...rows]
+    .map((fields) => fields.map((f) => escapeField(f ?? "")).join(delimiter))
+    .join(lineEnding)
+}
+
+// "fotos/Jacke-Rot-1.JPG" -> "jacke-rot-1.jpg"
+function normalizeLocalFilename(value: string): string {
+  return value.trim().split(/[\\/]/).pop()!.toLowerCase()
 }
 
 function isValidUrl(value: string): boolean {
   return /^https?:\/\/.+/.test(value)
 }
 
-function extractGoogleDriveFileId(url: string): string | null {
-  // Handle /file/d/ID format
-  const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
-  if (fileMatch) return fileMatch[1]
-  // Handle uc?export=download&id=ID format
-  const ucMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/)
-  if (ucMatch) return ucMatch[1]
-  return null
-}
-
-function getDirectDownloadUrl(driveUrl: string): string {
-  const fileId = extractGoogleDriveFileId(driveUrl)
-  if (!fileId) return driveUrl
-  return `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`
-}
-
-function getFallbackDownloadUrls(driveUrl: string): string[] {
-  const fileId = extractGoogleDriveFileId(driveUrl)
-  if (!fileId) return []
-  return [
-    `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`,
-    `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t&authuser=0`,
-  ]
-}
-
-const BROWSER_UA =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-
-function isHtmlContent(buffer: Buffer): boolean {
-  const head = buffer.slice(0, 1500).toString("utf8").toLowerCase()
-  return (
-    head.includes("<!doctype") ||
-    head.includes("<html") ||
-    head.includes("<head") ||
-    head.includes("<script") ||
-    head.includes("virus scan warning") ||
-    head.includes("google-download-warning")
-  )
-}
-
-function downloadFile(url: string, maxRedirects = 10): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const protocol = url.startsWith("https") ? https : http
-    const req = protocol.get(
-      url,
-      { headers: { "User-Agent": BROWSER_UA } },
-      (res) => {
-        if (
-          res.statusCode &&
-          res.statusCode >= 300 &&
-          res.statusCode < 400 &&
-          res.headers.location
-        ) {
-          if (maxRedirects <= 0)
-            return reject(new Error("Too many redirects"))
-          return resolve(downloadFile(res.headers.location, maxRedirects - 1))
-        }
-        if (res.statusCode !== 200) {
-          return reject(new Error(`HTTP ${res.statusCode} for ${url}`))
-        }
-        const chunks: Buffer[] = []
-        res.on("data", (chunk) => chunks.push(chunk))
-        res.on("end", () => {
-          const buffer = Buffer.concat(chunks)
-          if (isHtmlContent(buffer)) {
-            return reject(
-              new Error("Got HTML page instead of image - file may require confirmation or is not publicly shared")
-            )
-          }
-          resolve(buffer)
-        })
-        res.on("error", reject)
-      }
-    )
-    req.on("error", reject)
-    req.setTimeout(60000, () => {
-      req.destroy()
-      reject(new Error(`Timeout downloading ${url}`))
-    })
-  })
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-async function downloadWithRetry(
-  url: string,
-  retries = 3,
-  delayMs = 2000
-): Promise<Buffer> {
-  let lastError: Error | undefined
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      return await downloadFile(url)
-    } catch (err) {
-      lastError = err as Error
-      const msg = lastError.message || ""
-      const isTransient =
-        msg.includes("ECONNRESET") ||
-        msg.includes("ETIMEDOUT") ||
-        msg.includes("ECONNREFUSED") ||
-        msg.includes("socket hang up") ||
-        msg.includes("Timeout")
-      if (!isTransient || attempt === retries - 1) break
-      await sleep(delayMs * (attempt + 1))
-    }
-  }
-  throw lastError!
-}
-
-async function downloadFromDrive(driveUrl: string): Promise<Buffer> {
-  const urls = [
-    getDirectDownloadUrl(driveUrl),
-    ...getFallbackDownloadUrls(driveUrl),
-  ]
-
-  let lastError: Error | undefined
-  for (const url of urls) {
-    try {
-      return await downloadWithRetry(url)
-    } catch (err) {
-      lastError = err as Error
-    }
-  }
-
-  throw new Error(
-    `All download attempts failed: ${lastError?.message || "unknown error"}`
-  )
-}
-
-function detectMimeType(buffer: Buffer): string {
-  if (buffer[0] === 0x89 && buffer[1] === 0x50) return "image/png"
-  if (buffer[0] === 0xff && buffer[1] === 0xd8) return "image/jpeg"
-  if (buffer[0] === 0x47 && buffer[1] === 0x49) return "image/gif"
-  if (buffer[0] === 0x52 && buffer[1] === 0x49) return "image/webp"
-  return "image/jpeg"
-}
-
 export async function POST(
   req: AuthenticatedMedusaRequest<UploadImageListBody>,
   res: MedusaResponse
 ) {
-  const { csv } = req.body
+  const { csv: rawCsv, localImageUrls } = req.body
+  let csv = rawCsv
 
   if (!csv) {
     res.status(400).json({ message: "CSV content is required" })
     return
   }
-
-  const minioEndpoint = process.env.MINIO_ENDPOINT
-  const minioAccessKey = process.env.MINIO_ACCESS_KEY
-  const minioSecretKey = process.env.MINIO_SECRET_KEY
-  const minioBucket = process.env.MINIO_BUCKET || "medusa-media"
-
-  if (!minioEndpoint || !minioAccessKey || !minioSecretKey) {
-    res.status(500).json({ message: "MinIO is not configured on the server" })
-    return
-  }
-
-  const minioClient = new Client({
-    endPoint: minioEndpoint,
-    port: 443,
-    useSSL: true,
-    accessKey: minioAccessKey,
-    secretKey: minioSecretKey,
-  })
 
   const productService = req.scope.resolve(Modules.PRODUCT)
 
@@ -310,63 +173,41 @@ export async function POST(
       return
     }
 
-    // Collect all unique Drive URLs from the CSV
-    const driveUrls = new Set<string>()
+    // Replace local filenames in image cells with the URLs of the files the
+    // widget uploaded. Cell-level (not text replace) so a short name like
+    // "1.jpg" can't hit other columns.
+    const localUrlByName = new Map<string, string>(
+      Object.entries(localImageUrls ?? {}).map(([name, url]) => [
+        normalizeLocalFilename(name),
+        url,
+      ])
+    )
+    const missingLocalFiles = new Set<string>()
+    let localImagesLinked = 0
     for (const row of rows) {
       for (const col of imageColumns) {
         const val = row[col.idx]?.trim()
-        if (val && isValidUrl(val) && isGoogleDriveUrl(val)) {
-          driveUrls.add(val)
+        if (!val || isValidUrl(val)) continue
+        const url = localUrlByName.get(normalizeLocalFilename(val))
+        if (url) {
+          row[col.idx] = url
+          localImagesLinked++
+        } else {
+          missingLocalFiles.add(val)
         }
       }
     }
-
-    // Download each image from Drive, upload to MinIO
-    const driveUrlToMinioUrl = new Map<string, string>()
-    const downloadErrors: string[] = []
-    let imagesProcessed = 0
-
-    for (const driveUrl of driveUrls) {
-      const fileId = extractGoogleDriveFileId(driveUrl) || ulid()
-      try {
-        const buffer = await downloadFromDrive(driveUrl)
-
-        if (buffer.length < 500) {
-          downloadErrors.push(
-            `${fileId}: File too small (${buffer.length} bytes), likely not an image`
-          )
-          continue
-        }
-
-        const mimeType = detectMimeType(buffer)
-        const ext =
-          mimeType === "image/png"
-            ? ".png"
-            : mimeType === "image/webp"
-              ? ".webp"
-              : mimeType === "image/gif"
-                ? ".gif"
-                : ".jpg"
-        const fileKey = `products/${fileId}-${ulid()}${ext}`
-
-        await minioClient.putObject(minioBucket, fileKey, buffer, buffer.length, {
-          "Content-Type": mimeType,
-          "x-amz-acl": "public-read",
-        })
-
-        const minioUrl = `https://${minioEndpoint}/${minioBucket}/${fileKey}`
-        driveUrlToMinioUrl.set(driveUrl, minioUrl)
-        imagesProcessed++
-      } catch (err) {
-        downloadErrors.push(`${fileId}: ${(err as Error).message}`)
-      }
+    if (localImagesLinked > 0) {
+      csv = serializeCSV(
+        headers,
+        rows,
+        delimiter,
+        csv.includes("\r\n") ? "\r\n" : "\n"
+      )
     }
 
-    // Replace Drive URLs in the original CSV text (preserves formatting)
     let processedCsv = csv
-    for (const [driveUrl, minioUrl] of driveUrlToMinioUrl) {
-      processedCsv = processedCsv.split(driveUrl).join(minioUrl)
-    }
+    const fileErrors: string[] = []
 
     // Look up missing Product IDs by handle so the CSV can be used for import
     const productIdIdx = normalizedHeaders.findIndex((h) => h === "product id")
@@ -462,7 +303,6 @@ export async function POST(
         if (
           val &&
           isValidUrl(val) &&
-          !isGoogleDriveUrl(val) &&
           col.name.toLowerCase() !== "product thumbnail"
         ) {
           imageUrls.push({ url: val })
@@ -478,13 +318,9 @@ export async function POST(
       const rawLookImg = lookImgCol ? row[lookImgCol.idx]?.trim() : undefined
       const lookImgUrl = rawLookImg && isValidUrl(rawLookImg) ? rawLookImg : undefined
 
-      const candidateThumbnail = thumbnail || lookImgUrl || imageUrls[0]?.url
-      const finalThumbnail =
-        candidateThumbnail && !isGoogleDriveUrl(candidateThumbnail)
-          ? candidateThumbnail
-          : undefined
+      const finalThumbnail = thumbnail || lookImgUrl || imageUrls[0]?.url
 
-      if (lookImgUrl && !isGoogleDriveUrl(lookImgUrl) && !imageUrls.some((img) => img.url === lookImgUrl)) {
+      if (lookImgUrl && !imageUrls.some((img) => img.url === lookImgUrl)) {
         imageUrls.unshift({ url: lookImgUrl })
       }
 
@@ -504,21 +340,29 @@ export async function POST(
       }
     }
 
+    for (const name of missingLocalFiles) {
+      fileErrors.push(`${name}: no matching local image file selected`)
+    }
+
+    const handles =
+      handleIdx >= 0
+        ? Array.from(new Set(rows.map((r) => r[handleIdx]?.trim()).filter(Boolean)))
+        : []
+
     res.json({
       processedCsv,
+      handles,
       summary: {
         totalRows: rows.length,
         delimiter,
-        driveLinksFound: driveUrls.size,
-        imagesUploaded: imagesProcessed,
-        urlsReplaced: driveUrlToMinioUrl.size,
         idsFilledIn,
         productsUpdated,
         productsFailed,
+        localImagesLinked,
       },
       errors:
-        downloadErrors.length > 0 || updateErrors.length > 0
-          ? { downloads: downloadErrors, updates: updateErrors }
+        fileErrors.length > 0 || updateErrors.length > 0
+          ? { files: fileErrors, updates: updateErrors }
           : undefined,
     })
   } catch (err) {
