@@ -38,11 +38,16 @@ export const metadata: Metadata = {
   authors: [{ name: "Strickerei Jutta" }],
   creator: "Strickerei Jutta",
   icons: {
+    // "J" emblem, same as strickerei-jutta.at
     icon: [
-      { url: "/images/logo/logo-jutta.webp", type: "image/webp" },
       { url: "/favicon.ico", sizes: "48x48" },
+      {
+        url: "/images/logo/favicon-192.png",
+        type: "image/png",
+        sizes: "192x192",
+      },
     ],
-    apple: "/images/logo/logo-jutta.webp",
+    apple: "/images/logo/apple-touch-icon.png",
   },
   openGraph: {
     type: "website",
