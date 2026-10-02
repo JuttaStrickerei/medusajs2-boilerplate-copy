@@ -1,17 +1,18 @@
-import { defineMiddlewares } from "@medusajs/framework/http"
+import { defineMiddlewares, validateAndTransformBody } from "@medusajs/framework/http"
 import { wishlistMiddlewares } from "./store/wishlist/middlewares"
 import { storeLookMiddlewares } from "./store/looks/middlewares"
 import { adminLookMiddlewares } from "./admin/looks/middlewares"
 import { cleanupProductImagesMiddleware } from "./admin/products/cleanup-images-middleware"
+import { PostInvoiceConfigSchema } from "./admin/invoice-config/route"
+import { adminSendcloudShipmentMiddlewares } from "./admin/sendcloud-shipments/middlewares"
 
 // Medusa scans `src/api/middlewares.ts` (plural) and ONLY this file — see
 // https://docs.medusajs.com/learn/fundamentals/api-routes/middlewares.
 // Route-level middleware arrays defined next to their route files must be
 // spread into the `routes` array below to be registered.
 //
-// NOTE: `src/api/middleware.ts` (singular) is NOT loaded by the framework
-// despite its `defineMiddlewares(...)` call — any registrations there are
-// dead code until moved here.
+// NOTE: a `src/api/middleware.ts` (singular) is NOT loaded by the framework
+// — always register here.
 export default defineMiddlewares({
   routes: [
     {
@@ -33,5 +34,12 @@ export default defineMiddlewares({
       methods: ["DELETE"],
       middlewares: [cleanupProductImagesMiddleware],
     },
+    // Route handler reads req.validatedBody
+    {
+      matcher: "/admin/invoice-config",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(PostInvoiceConfigSchema)],
+    },
+    ...adminSendcloudShipmentMiddlewares,
   ],
 })
