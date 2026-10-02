@@ -92,6 +92,9 @@ export default function LookItemsActions({
     seq: number
     target: "size-all" | "rows"
   } | null>(null)
+  // einmalige Ansage nach dem Klick; spätere Änderungen der Hilfszeile
+  // werden nur höflich angesagt
+  const [alertText, setAlertText] = useState<string | null>(null)
   const [shareCopied, setShareCopied] = useState(false)
   // Link zum Selbstkopieren, wenn weder Teilen noch Zwischenablage gehen
   const [shareFallbackUrl, setShareFallbackUrl] = useState<string | null>(null)
@@ -241,7 +244,7 @@ export default function LookItemsActions({
       const s = sel(p)
       const label =
         s.status === "unavailable"
-          ? "verfügbare Variante"
+          ? "andere Auswahl"
           : s.missingLabel ?? "Auswahl"
       groups.set(label, [...(groups.get(label) ?? []), p.title ?? ""])
     })
@@ -270,6 +273,7 @@ export default function LookItemsActions({
     const target: "size-all" | "rows" =
       showSizeAll && allSizesMissing ? "size-all" : "rows"
     setAttention((a) => ({ seq: (a?.seq ?? 0) + 1, target }))
+    setAlertText(missingText)
 
     const el =
       target === "size-all"
@@ -426,7 +430,7 @@ export default function LookItemsActions({
   const pieceLabel = `${products.length} ${
     products.length === 1 ? "Teil" : "Teile"
   }`
-  const helperIsAlert = !!attention && !!missingText
+  const helperAttention = !!attention && !!missingText
 
   return (
     <div>
@@ -545,17 +549,18 @@ export default function LookItemsActions({
           </div>
 
           <p
-            key={helperIsAlert ? attention?.seq : "helper"}
-            role={helperIsAlert ? "alert" : undefined}
-            aria-live={helperIsAlert ? undefined : "polite"}
+            aria-live="polite"
             className={cn(
               // ab 768px klebt die Zusammenfassung: höchstens eine Zeile
               "text-xs tablet:line-clamp-1 small:order-1 small:w-full",
               missingText && "mt-1 small:mb-0.5 small:mt-0",
-              helperIsAlert ? "text-red-700" : "text-stone-600"
+              helperAttention ? "text-red-700" : "text-stone-600"
             )}
           >
             {missingText}
+          </p>
+          <p key={attention?.seq ?? 0} role="alert" className="sr-only">
+            {alertText}
           </p>
 
           <Button
@@ -587,7 +592,7 @@ export default function LookItemsActions({
                 href="/cart"
                 className="font-medium underline underline-offset-4 hover:text-stone-900"
               >
-                Zum Warenkorb →
+                Zum Warenkorb <span aria-hidden>→</span>
               </LocalizedClientLink>
             </>
           )}

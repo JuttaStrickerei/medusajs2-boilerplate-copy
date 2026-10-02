@@ -154,7 +154,13 @@ export default function LookItemCard({
     ? translateOptionTitle(nextMissing.title ?? "Option")
     : undefined
 
+  // Bei nur einer Variante wählt der Hook im selben Durchlauf alles vor –
+  // den Zwischenstand „unvollständig“ nicht melden, sonst blitzt in der
+  // Zusammenfassung kurz „Noch offen“ auf
+  const singleVariant = product.variants?.length === 1
+
   useEffect(() => {
+    if (singleVariant && selectionStatus === "incomplete") return
     onSelectionChange(product.id, {
       variant: selectionStatus === "ready" ? selectedVariant : undefined,
       purchasable: isPurchasable,
@@ -164,6 +170,7 @@ export default function LookItemCard({
     })
   }, [
     product.id,
+    singleVariant,
     selectedVariant,
     selectionStatus,
     isPurchasable,
@@ -185,7 +192,7 @@ export default function LookItemCard({
       setSizeNote(null)
     } else {
       setSizeNote(
-        `Größe ${bulkSize.value} gibt es bei diesem Teil nicht – bitte wählen`
+        `Größe ${bulkSize.value} gibt es bei diesem Teil nicht – bitte andere Größe wählen`
       )
     }
     // nur auf neue Auswahl reagieren, nicht auf jede Änderung der Verfügbarkeit
@@ -276,10 +283,9 @@ export default function LookItemCard({
       ? selectedVariant.inventory_quantity
       : undefined
 
-  let status: { text: string; tone: "red" | "amber"; alert?: boolean } | null =
-    null
+  let status: { text: string; tone: "red" | "amber" } | null = null
   if (error) {
-    status = { text: error, tone: "red", alert: true }
+    status = { text: error, tone: "red" }
   } else if (sizeNote && !isReady) {
     status = { text: sizeNote, tone: "amber" }
   } else if (showAttention && selectionStatus === "unavailable") {
@@ -507,12 +513,7 @@ export default function LookItemCard({
           status?.tone === "red" ? "text-red-700" : "text-amber-800"
         )}
       >
-        {status &&
-          (status.alert ? (
-            <p role="alert">{status.text}</p>
-          ) : (
-            <p>{status.text}</p>
-          ))}
+        {status && <p>{status.text}</p>}
       </div>
 
       {detailsOpen && (
