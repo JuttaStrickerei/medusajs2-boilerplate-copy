@@ -12,13 +12,13 @@ export default function LookCard({ look }: { look: StoreLook }) {
       className="group block h-full"
     >
       <article className="flex h-full flex-col overflow-hidden rounded-xl border border-stone-200/60 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-stone-200 hover:shadow-lg">
-        <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200">
+        <div className="relative aspect-[2/3] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200">
           {hero && (
             <Image
               src={hero}
               alt={look.title}
               fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              sizes="(max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           )}

@@ -100,20 +100,20 @@ export default function LookTemplate({
               images.map((url, index) => (
                 <div
                   key={url}
-                  className="relative aspect-[3/4] overflow-hidden rounded-xl bg-stone-100"
+                  className="relative aspect-[2/3] overflow-hidden rounded-xl bg-stone-100"
                 >
                   <Image
                     src={url}
                     alt={index === 0 ? look.title : `${look.title} – Bild ${index + 1}`}
                     fill
                     priority={index === 0}
-                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    sizes="(max-width: 1279px) 100vw, 50vw"
                     className="object-cover"
                   />
                 </div>
               ))
             ) : (
-              <div className="aspect-[3/4] rounded-xl bg-gradient-to-br from-stone-100 to-stone-200" />
+              <div className="aspect-[2/3] rounded-xl bg-gradient-to-br from-stone-100 to-stone-200" />
             )}
           </div>
 
