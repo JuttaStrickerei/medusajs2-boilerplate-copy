@@ -485,7 +485,8 @@
   }
 
   /* Look-Seite: Foto-Slider. Fotos immer 2:3; Breite so, dass ein Foto
-     (ab 1280px zwei nebeneinander) samt Steuerleiste in den Bildschirm passt.
+     (ab 1280px zwei nebeneinander) samt Steuerleiste in den Bildschirm passt
+     (14.75rem = Header, Abstand oben, reservierte Bildunterschrift, Leiste).
      Mobil bleibt rechts ein Stück des nächsten Fotos sichtbar. */
   .look-gallery {
     --pv: 1;
@@ -504,7 +505,7 @@
       margin-inline: auto;
       max-width: max(
         16rem,
-        calc((100vh - 14.5rem) * 2 / 3 * var(--pv) + (var(--pv) - 1) * 0.5rem)
+        calc((100vh - 14.75rem) * 2 / 3 * var(--pv) + (var(--pv) - 1) * 0.5rem)
       );
     }
     @supports (height: 100svh) {
@@ -512,7 +513,7 @@
         max-width: max(
           16rem,
           calc(
-            (100svh - 14.5rem) * 2 / 3 * var(--pv) + (var(--pv) - 1) * 0.5rem
+            (100svh - 14.75rem) * 2 / 3 * var(--pv) + (var(--pv) - 1) * 0.5rem
           )
         );
       }
