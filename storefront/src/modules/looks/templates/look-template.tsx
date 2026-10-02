@@ -143,7 +143,7 @@ export default function LookTemplate({
           )}
         </div>
 
-        <div className="mt-6 min-w-0 self-start tablet:col-start-2 tablet:row-start-2">
+        <div className="mt-3 min-w-0 self-start tablet:col-start-2 tablet:row-start-2 tablet:mt-6">
           {look.description && (
             <p className="mb-4 max-w-[46ch] whitespace-pre-line text-sm text-stone-600">
               {look.description}

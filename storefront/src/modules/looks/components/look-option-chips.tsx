@@ -62,13 +62,15 @@ export default function LookOptionChips({
         className
       )}
     >
+      {/* Sichtbare Legende (Farbe, Länge …) links in der Zeile der Buttons:
+          spart eine eigene Zeile über ihnen */}
       <legend
         className={cn(
           !legendVisible
             ? "sr-only"
             : aside
             ? "float-left text-sm font-medium text-stone-800"
-            : "mb-1.5 text-xs text-stone-600"
+            : "float-left mr-3 text-xs leading-9 text-stone-600"
         )}
       >
         {legend}
