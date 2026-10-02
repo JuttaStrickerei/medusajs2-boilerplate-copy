@@ -361,47 +361,8 @@ export default function LookItemsActions({
 
   return (
     <div>
-      {showSizeAll && (
-        <div
-          ref={sizeAllRef}
-          data-testid="look-size-all"
-          className="relative mb-4"
-        >
-          <LookOptionChips
-            name="look-size-all"
-            legend="Ihre Größe für alle Teile"
-            kind="size"
-            values={sharedSizes}
-            current={bulkCurrent}
-            onChange={(value) =>
-              setBulkSize((b) => ({ value, seq: (b?.seq ?? 0) + 1 }))
-            }
-            disabled={isAdding}
-            missing={allSizesMissing}
-            attention={attention?.target === "size-all" && allSizesMissing}
-            aside={
-              <a
-                href={`/${countryCode}/size-guide`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
-              >
-                <Ruler size={14} aria-hidden />
-                Größenberatung
-                <span className="sr-only">(öffnet in neuem Tab)</span>
-              </a>
-            }
-          />
-          {/* steht im Abstand unter den Buttons, damit die Teile darunter
-              nicht springen, wenn der Hinweis erscheint */}
-          {sizesDiffer && (
-            <p className="absolute left-0 top-full text-[11px] leading-4 text-stone-500">
-              Individuell gewählt
-            </p>
-          )}
-        </div>
-      )}
-
+      {/* Anker für „3 Teile“ in der Kopfzeile: schließt die Größe für alle
+          Teile ein, damit sie nach dem Sprung nicht unter dem Header liegt */}
       <section
         id="look-teile"
         aria-labelledby="look-teile-h"
@@ -410,6 +371,47 @@ export default function LookItemsActions({
         <h2 id="look-teile-h" className="sr-only">
           Teile im Look
         </h2>
+        {showSizeAll && (
+          <div
+            ref={sizeAllRef}
+            data-testid="look-size-all"
+            className="relative mb-4"
+          >
+            <LookOptionChips
+              name="look-size-all"
+              legend="Ihre Größe für alle Teile"
+              kind="size"
+              values={sharedSizes}
+              current={bulkCurrent}
+              onChange={(value) =>
+                setBulkSize((b) => ({ value, seq: (b?.seq ?? 0) + 1 }))
+              }
+              disabled={isAdding}
+              missing={allSizesMissing}
+              attention={attention?.target === "size-all" && allSizesMissing}
+              aside={
+                <a
+                  href={`/${countryCode}/size-guide`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
+                >
+                  <Ruler size={14} aria-hidden />
+                  Größenberatung
+                  <span className="sr-only">(öffnet in neuem Tab)</span>
+                </a>
+              }
+            />
+            {/* steht im Abstand unter den Buttons, damit die Teile darunter
+                nicht springen, wenn der Hinweis erscheint */}
+            {sizesDiffer && (
+              <p className="absolute left-0 top-full text-[11px] leading-4 text-stone-500">
+                Individuell gewählt
+              </p>
+            )}
+          </div>
+        )}
+
         <ul className="divide-y divide-stone-200 border-t border-stone-200">
           {products.map((product) => (
             <li key={product.id}>
