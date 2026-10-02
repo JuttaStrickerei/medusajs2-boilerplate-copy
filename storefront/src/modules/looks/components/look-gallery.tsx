@@ -38,6 +38,10 @@ export default function LookGallery({
 }: LookGalleryProps) {
   const count = images.length
   const trackRef = useRef<HTMLUListElement>(null)
+  const prevRef = useRef<HTMLButtonElement>(null)
+  const nextRef = useRef<HTMLButtonElement>(null)
+  // Pfeil, der den Fokus übernimmt, wenn der fokussierte am Ende deaktiviert wird
+  const refocus = useRef<"prev" | "next" | null>(null)
   const interacted = useRef(false)
   const [active, setActive] = useState(0)
   const [perView, setPerView] = useState(1)
@@ -80,7 +84,16 @@ export default function LookGallery({
           frame = 0
           const step = stepOf(track)
           if (step > 0) {
-            setActive(clamp(Math.round(track.scrollLeft / step), 0, maxIndex))
+            const i = clamp(Math.round(track.scrollLeft / step), 0, maxIndex)
+            // Ein deaktivierter Button verliert den Fokus (er fiele auf den
+            // Body zurück) – dann übernimmt der Pfeil in Gegenrichtung
+            const focused = document.activeElement
+            if (i >= maxIndex && focused === nextRef.current) {
+              refocus.current = "prev"
+            } else if (i <= 0 && focused === prevRef.current) {
+              refocus.current = "next"
+            }
+            setActive(i)
           }
         })
       }
@@ -118,6 +131,17 @@ export default function LookGallery({
     }
   }, [count, maxIndex, perView, images, notes])
 
+  useEffect(() => {
+    const target =
+      refocus.current === "prev"
+        ? prevRef.current
+        : refocus.current === "next"
+        ? nextRef.current
+        : null
+    refocus.current = null
+    if (target && !target.disabled) target.focus({ preventScroll: true })
+  }, [active])
+
   // Beim Wechsel auf zwei Fotos je Ansicht den Index begrenzen
   useEffect(() => {
     setActive((a) => clamp(a, 0, maxIndex))
@@ -149,15 +173,18 @@ export default function LookGallery({
         initialIndex={lightboxIndex}
         captions={notes}
         onClose={(last) => {
+          const opened = lightboxIndex
           setLightboxIndex(null)
+          if (typeof last !== "number" || count < 2 || last === opened) return
           // Zuletzt angesehenes Foto in den Slider holen, falls nicht sichtbar
-          if (
-            typeof last === "number" &&
-            count > 1 &&
-            (last < active || last > active + perView - 1)
-          ) {
-            go(last)
-          }
+          if (last < active || last > active + perView - 1) go(last)
+          // Fokus auf dieses Foto statt auf das (jetzt verdeckte) Startfoto –
+          // nach dem Zurücksetzen des Fokus durch die Lightbox
+          requestAnimationFrame(() => {
+            slidesOf(trackRef.current)
+              [last]?.querySelector<HTMLElement>("[data-testid=look-photo]")
+              ?.focus({ preventScroll: true })
+          })
         }}
       />
     ) : null
@@ -274,6 +301,7 @@ export default function LookGallery({
           {counterLabel}
         </span>
         <button
+          ref={prevRef}
           type="button"
           data-testid="look-gallery-prev"
           aria-label="Vorheriges Bild"
@@ -285,6 +313,7 @@ export default function LookGallery({
           <ChevronRight size={18} className="rotate-180" />
         </button>
         <button
+          ref={nextRef}
           type="button"
           data-testid="look-gallery-next"
           aria-label="Nächstes Bild"
