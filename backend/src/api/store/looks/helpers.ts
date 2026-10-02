@@ -26,6 +26,24 @@ type StoreLookRow = {
   } | null)[]
 } & Record<string, unknown>
 
+// Nur diese metadata-Schlüssel liest der Storefront (SEO-Overrides und
+// Foto-Hinweise). Alles andere, z. B. die Quell-Buchhaltung des
+// HW26-Importskripts, bleibt aus der öffentlichen API draußen.
+const PUBLIC_METADATA_KEYS = ["seo_title", "seo_description", "photo_notes"]
+
+const toPublicMetadata = (metadata: unknown): Record<string, unknown> | null => {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return null
+  }
+  const picked: Record<string, unknown> = {}
+  for (const key of PUBLIC_METADATA_KEYS) {
+    if (key in metadata) {
+      picked[key] = (metadata as Record<string, unknown>)[key]
+    }
+  }
+  return Object.keys(picked).length > 0 ? picked : null
+}
+
 // Teile nach rank sortieren und nur veröffentlichte Produkte ausliefern
 export const toStoreLook = ({ items, ...look }: StoreLookRow) => {
   const products = (items ?? [])
@@ -41,6 +59,7 @@ export const toStoreLook = ({ items, ...look }: StoreLookRow) => {
 
   return {
     ...look,
+    metadata: toPublicMetadata(look.metadata),
     product_ids: products.map((p) => p.id),
     product_thumbnails: products.map((p) => p.thumbnail).filter(Boolean),
   }
