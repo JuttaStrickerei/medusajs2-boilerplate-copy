@@ -80,7 +80,10 @@ export default function ImageLightbox({
     const first = focusable[0]
     const last = focusable[focusable.length - 1]
     const active = document.activeElement
-    if (e.shiftKey && (active === first || !dialogRef.current.contains(active))) {
+    if (
+      e.shiftKey &&
+      (active === first || !dialogRef.current.contains(active))
+    ) {
       e.preventDefault()
       last.focus()
     } else if (!e.shiftKey && active === last) {

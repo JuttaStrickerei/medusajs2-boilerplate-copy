@@ -167,15 +167,27 @@ export default function LookTemplate({
               als Text statt Import) */}
           <ul className="mt-6 space-y-1.5 border-t border-stone-200 pt-4 text-xs leading-5 text-stone-600">
             <li className="flex gap-2">
-              <Truck size={14} aria-hidden className="mt-[3px] shrink-0 text-stone-400" />
+              <Truck
+                size={14}
+                aria-hidden
+                className="mt-[3px] shrink-0 text-stone-400"
+              />
               Lieferung in etwa 2 Wochen – Versand innerhalb Österreichs
             </li>
             <li className="flex gap-2">
-              <RefreshCw size={14} aria-hidden className="mt-[3px] shrink-0 text-stone-400" />
+              <RefreshCw
+                size={14}
+                aria-hidden
+                className="mt-[3px] shrink-0 text-stone-400"
+              />
               Passt nicht? Wir tauschen unkompliziert.
             </li>
             <li className="flex gap-2">
-              <RotateCcw size={14} aria-hidden className="mt-[3px] shrink-0 text-stone-400" />
+              <RotateCcw
+                size={14}
+                aria-hidden
+                className="mt-[3px] shrink-0 text-stone-400"
+              />
               14 Tage Widerrufsrecht ab Erhalt der Ware
             </li>
           </ul>

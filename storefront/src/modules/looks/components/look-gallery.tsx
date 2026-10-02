@@ -16,13 +16,26 @@ type LookGalleryProps = {
 const clamp = (n: number, min: number, max: number) =>
   Math.min(Math.max(n, min), max)
 
+const slidesOf = (track: HTMLElement | null) =>
+  Array.from(track?.children ?? []) as HTMLElement[]
+
+// Abstand zwischen zwei Fotos (Breite + Lücke)
+const stepOf = (track: HTMLElement | null) => {
+  const all = slidesOf(track)
+  return all.length > 1 ? all[1].offsetLeft - all[0].offsetLeft : 0
+}
+
 const altText = (title: string, index: number) =>
   index === 0 ? title : `${title} – Bild ${index + 1}`
 
 // Look-Fotos als Slider: mobil ein Foto plus Anschnitt des nächsten (wischen),
 // ab 768px Pfeile + Fortschrittslinie, ab 1280px zwei Fotos nebeneinander.
 // Breiten kommen aus globals.css (.look-gallery*).
-export default function LookGallery({ images, title, notes }: LookGalleryProps) {
+export default function LookGallery({
+  images,
+  title,
+  notes,
+}: LookGalleryProps) {
   const count = images.length
   const trackRef = useRef<HTMLUListElement>(null)
   const interacted = useRef(false)
@@ -41,23 +54,17 @@ export default function LookGallery({ images, title, notes }: LookGalleryProps) 
     return () => mq.removeEventListener("change", update)
   }, [])
 
-  const slides = () =>
-    Array.from(trackRef.current?.children ?? []) as HTMLElement[]
-
-  const goTo = useCallback(
-    (index: number) => {
-      const track = trackRef.current
-      const all = Array.from(track?.children ?? []) as HTMLElement[]
-      if (!track || !all.length) return
-      const target = all[clamp(index, 0, all.length - 1)]
-      // Nur horizontal scrollen – scrollIntoView würde auch die Seite bewegen
-      track.scrollTo({
-        left: target.offsetLeft - all[0].offsetLeft,
-        behavior: shouldReduceMotion() ? "auto" : "smooth",
-      })
-    },
-    []
-  )
+  const goTo = useCallback((index: number) => {
+    const track = trackRef.current
+    const all = slidesOf(track)
+    if (!track || !all.length) return
+    const target = all[clamp(index, 0, all.length - 1)]
+    // Nur horizontal scrollen – scrollIntoView würde auch die Seite bewegen
+    track.scrollTo({
+      left: target.offsetLeft - all[0].offsetLeft,
+      behavior: shouldReduceMotion() ? "auto" : "smooth",
+    })
+  }, [])
 
   // Aktives Bild aus der Scrollposition; Ansage erst nach Nutzeraktion
   useEffect(() => {
@@ -71,9 +78,7 @@ export default function LookGallery({ images, title, notes }: LookGalleryProps) 
       if (!frame) {
         frame = requestAnimationFrame(() => {
           frame = 0
-          const all = slides()
-          const step =
-            all.length > 1 ? all[1].offsetLeft - all[0].offsetLeft : 0
+          const step = stepOf(track)
           if (step > 0) {
             setActive(clamp(Math.round(track.scrollLeft / step), 0, maxIndex))
           }
@@ -82,9 +87,7 @@ export default function LookGallery({ images, title, notes }: LookGalleryProps) 
       if (settle) clearTimeout(settle)
       settle = setTimeout(() => {
         if (!interacted.current) return
-        const all = slides()
-        const step =
-          all.length > 1 ? all[1].offsetLeft - all[0].offsetLeft : 0
+        const step = stepOf(track)
         if (step <= 0) return
         const i = clamp(Math.round(track.scrollLeft / step), 0, maxIndex)
         const visible = perView === 2 ? [i, i + 1] : [i]

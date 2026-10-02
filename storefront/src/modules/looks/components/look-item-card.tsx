@@ -135,7 +135,9 @@ export default function LookItemCard({
         v.options?.find((o) => o.option_id === colorOptionId)?.value ===
         selectedColor
     )
-    const colorUrls = new Set((colorVariant?.images ?? []).map((img) => img.url))
+    const colorUrls = new Set(
+      (colorVariant?.images ?? []).map((img) => img.url)
+    )
     if (!colorUrls.size) return allImages
 
     return allImages.filter((url) => colorUrls.has(url))
@@ -199,7 +201,8 @@ export default function LookItemCard({
   const isOnSale = price?.price_type === "sale"
 
   const isReady = selectionStatus === "ready"
-  const showAttention = (!!attention || ownAttention) && !isReady && isPurchasable
+  const showAttention =
+    (!!attention || ownAttention) && !isReady && isPurchasable
 
   const focusMissing = () => {
     const row = rowRef.current
@@ -259,7 +262,9 @@ export default function LookItemCard({
   const singleColor = colorValues.length === 1 ? colorValues[0] : undefined
   const singleSize =
     sizeOption && sizeValues.length === 1 ? sizeValues[0] : undefined
-  const subline = [singleColor, singleSize, material].filter(Boolean).join(" · ")
+  const subline = [singleColor, singleSize, material]
+    .filter(Boolean)
+    .join(" · ")
 
   const lowStockQty =
     selectedVariant?.manage_inventory &&
@@ -335,11 +340,17 @@ export default function LookItemCard({
             <p className="ml-auto shrink-0 text-right text-[15px] tabular-nums">
               <span className={isOnSale ? "text-red-700" : "text-stone-900"}>
                 {hasPriceRange ? "ab " : ""}
-                {formatPrice(price.calculated_price_number, price.currency_code)}
+                {formatPrice(
+                  price.calculated_price_number,
+                  price.currency_code
+                )}
               </span>
               {isOnSale && (
                 <span className="block text-xs text-stone-400 line-through">
-                  {formatPrice(price.original_price_number, price.currency_code)}
+                  {formatPrice(
+                    price.original_price_number,
+                    price.currency_code
+                  )}
                 </span>
               )}
             </p>
@@ -376,9 +387,7 @@ export default function LookItemCard({
         {!isPurchasable ? (
           <p className="mt-0.5 text-xs text-red-700">Derzeit ausverkauft</p>
         ) : (
-          subline && (
-            <p className="mt-0.5 text-xs text-stone-500">{subline}</p>
-          )
+          subline && <p className="mt-0.5 text-xs text-stone-500">{subline}</p>
         )}
 
         {hasChoice && colorOption && colorValues.length > 1 && (
@@ -443,7 +452,9 @@ export default function LookItemCard({
         <LookOptionChips
           className="col-span-2 mt-3 small:col-span-1 small:col-start-2"
           name={`${product.id}-${sizeOption.id}`}
-          legend={`${translateOptionTitle(sizeOption.title ?? "Größe")} – ${product.title}`}
+          legend={`${translateOptionTitle(sizeOption.title ?? "Größe")} – ${
+            product.title
+          }`}
           legendVisible={false}
           kind="size"
           values={sizeValues}

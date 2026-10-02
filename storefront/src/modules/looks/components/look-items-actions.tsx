@@ -67,7 +67,9 @@ const initialSelection = (
   return {
     purchasable,
     status: "incomplete",
-    missingLabel: next ? translateOptionTitle(next.title ?? "Option") : undefined,
+    missingLabel: next
+      ? translateOptionTitle(next.title ?? "Option")
+      : undefined,
   }
 }
 
@@ -104,8 +106,11 @@ export default function LookItemsActions({
   }, [])
 
   // „Alle merken“: alle Teile des Looks auf die Wunschliste (erneut klicken entfernt sie)
-  const { items: wishlistItems, addToWishlist, removeFromWishlist } =
-    useWishlist()
+  const {
+    items: wishlistItems,
+    addToWishlist,
+    removeFromWishlist,
+  } = useWishlist()
   const allWishlisted =
     products.length > 0 &&
     products.every((p) => wishlistItems.some((item) => item.id === p.id))
@@ -286,7 +291,9 @@ export default function LookItemsActions({
         item_list_name: `Look: ${lookTitle}`,
       }))
       trackEvent("add_to_cart", {
-        currency: gaCurrency(chosen[0]?.variant.calculated_price?.currency_code),
+        currency: gaCurrency(
+          chosen[0]?.variant.calculated_price?.currency_code
+        ),
         value: items.reduce((acc, i) => acc + (i.price ?? 0), 0),
         items,
       })
@@ -347,7 +354,9 @@ export default function LookItemsActions({
       <ShoppingBag size={size} />
     )
 
-  const pieceLabel = `${products.length} ${products.length === 1 ? "Teil" : "Teile"}`
+  const pieceLabel = `${products.length} ${
+    products.length === 1 ? "Teil" : "Teile"
+  }`
   const helperIsAlert = !!attention && !!missingText
 
   return (
@@ -490,7 +499,10 @@ export default function LookItemsActions({
           </Button>
         </div>
 
-        <p role="status" className={cn("text-xs text-stone-700", addedNotice && "mt-2")}>
+        <p
+          role="status"
+          className={cn("text-xs text-stone-700", addedNotice && "mt-2")}
+        >
           {addedNotice && (
             <>
               {lookTitle} liegt im Warenkorb ·{" "}

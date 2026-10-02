@@ -74,12 +74,7 @@ export default function LookOptionChips({
         {legend}
       </legend>
       {aside && <div className="float-right">{aside}</div>}
-      <div
-        className={cn(
-          "flex flex-wrap gap-1",
-          aside && "clear-both pt-2"
-        )}
-      >
+      <div className={cn("flex flex-wrap gap-1", aside && "clear-both pt-2")}>
         {values.map((value) => {
           const status = availability?.[value]?.status ?? "available"
           const isOut = status === "soldout" || status === "unavailable"
