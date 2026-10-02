@@ -487,16 +487,17 @@
   /* Look-Seite: Foto-Slider. Fotos immer 2:3; Breite so, dass ein Foto
      (ab 1280px zwei nebeneinander) samt Steuerleiste in den Bildschirm passt
      (14.75rem = Header, Abstand oben, reservierte Bildunterschrift, Leiste).
-     Mobil bleibt rechts ein Stück des nächsten Fotos sichtbar. */
+     Mobil bleibt rechts ein Stück des nächsten Fotos sichtbar; 19rem lässt
+     auf kurzen Handys den Hinweis unter dem Foto über der Kaufleiste. */
   .look-gallery {
     --pv: 1;
   }
   .look-gallery__slide {
-    width: min(82vw, max(12rem, calc((100vh - 17rem) * 2 / 3)));
+    width: min(82vw, max(12rem, calc((100vh - 19rem) * 2 / 3)));
   }
   @supports (height: 100svh) {
     .look-gallery__slide {
-      width: min(82vw, max(12rem, calc((100svh - 17rem) * 2 / 3)));
+      width: min(82vw, max(12rem, calc((100svh - 19rem) * 2 / 3)));
     }
   }
   @media (min-width: 768px) {
@@ -525,6 +526,10 @@
   @media (min-width: 1280px) {
     .look-gallery {
       --pv: 2;
+    }
+    /* Ein einzelnes Foto bleibt in voller Breite */
+    .look-gallery--n1 {
+      --pv: 1;
     }
     /* Zwei Fotos passen ganz nebeneinander: keine Steuerleiste nötig */
     .look-gallery--n2 .look-gallery__controls {

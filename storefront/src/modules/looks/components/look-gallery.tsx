@@ -25,8 +25,29 @@ const stepOf = (track: HTMLElement | null) => {
   return all.length > 1 ? all[1].offsetLeft - all[0].offsetLeft : 0
 }
 
+// Aktives Foto aus der Scrollposition. Am Ende des Sliders immer das letzte:
+// Passen mehrere Fotos ins Bild (Handy quer), erreicht die Position sonst nie
+// den letzten Index.
+const indexOf = (track: HTMLElement, step: number, maxIndex: number) =>
+  track.scrollLeft >= track.scrollWidth - track.clientWidth - 1
+    ? maxIndex
+    : clamp(Math.round(track.scrollLeft / step), 0, maxIndex)
+
+// Fotos, die ganz im Slider zu sehen sind
+const fullyVisible = (track: HTMLElement) => {
+  const t = track.getBoundingClientRect()
+  return slidesOf(track).flatMap((slide, i) => {
+    const s = slide.getBoundingClientRect()
+    return s.left >= t.left - 1 && s.right <= t.right + 1 ? [i] : []
+  })
+}
+
 const altText = (title: string, index: number) =>
   index === 0 ? title : `${title} – Bild ${index + 1}`
+
+// Fokusrahmen innen: der Slider schneidet alles ab, was über das Foto ragt
+const PHOTO_BUTTON =
+  "relative block aspect-[2/3] w-full overflow-hidden rounded-xl bg-stone-100 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-stone-800"
 
 // Look-Fotos als Slider: mobil ein Foto plus Anschnitt des nächsten (wischen),
 // ab 768px Pfeile + Fortschrittslinie, ab 1280px zwei Fotos nebeneinander.
@@ -37,13 +58,15 @@ export default function LookGallery({
   notes,
 }: LookGalleryProps) {
   const count = images.length
-  const trackRef = useRef<HTMLUListElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
   const prevRef = useRef<HTMLButtonElement>(null)
   const nextRef = useRef<HTMLButtonElement>(null)
   // Pfeil, der den Fokus übernimmt, wenn der fokussierte am Ende deaktiviert wird
   const refocus = useRef<"prev" | "next" | null>(null)
   const interacted = useRef(false)
   const [active, setActive] = useState(0)
+  // ganz sichtbare Fotos – deren Hinweis und Zähler bleiben eingeblendet
+  const [shown, setShown] = useState<number[]>([0])
   const [perView, setPerView] = useState(1)
   const [announcement, setAnnouncement] = useState("")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -78,13 +101,21 @@ export default function LookGallery({
     let frame = 0
     let settle: ReturnType<typeof setTimeout> | undefined
 
+    const updateShown = () => {
+      const visible = fullyVisible(track)
+      setShown((prev) => (prev.join() === visible.join() ? prev : visible))
+    }
+    // Handy quer: schon zu Beginn passen mehrere Fotos ganz ins Bild
+    updateShown()
+
     const onScroll = () => {
       if (!frame) {
         frame = requestAnimationFrame(() => {
           frame = 0
           const step = stepOf(track)
           if (step > 0) {
-            const i = clamp(Math.round(track.scrollLeft / step), 0, maxIndex)
+            const i = indexOf(track, step, maxIndex)
+            updateShown()
             // Ein deaktivierter Button verliert den Fokus (er fiele auf den
             // Body zurück) – dann übernimmt der Pfeil in Gegenrichtung
             const focused = document.activeElement
@@ -102,7 +133,7 @@ export default function LookGallery({
         if (!interacted.current) return
         const step = stepOf(track)
         if (step <= 0) return
-        const i = clamp(Math.round(track.scrollLeft / step), 0, maxIndex)
+        const i = indexOf(track, step, maxIndex)
         const visible = perView === 2 ? [i, i + 1] : [i]
         const note = visible.map((v) => notes[images[v]]).find(Boolean)
         const label =
@@ -167,7 +198,7 @@ export default function LookGallery({
     go(index)
   }
 
-  const onTrackKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
+  const onTrackKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.target !== e.currentTarget) return
     const map: Record<string, number> = {
       ArrowLeft: active - 1,
@@ -206,18 +237,19 @@ export default function LookGallery({
 
   if (count === 0) return null
 
-  // Ein einzelnes Foto (Produktbild als Ersatz): kein Karussell
+  // Ein einzelnes Foto (Produktbild als Ersatz): kein Karussell. --n1 hält
+  // es ab 1280px in voller Breite (sonst halbe Breite wie bei zwei Fotos).
   if (count === 1) {
     const note = notes[images[0]]
     return (
-      <figure className="look-gallery px-6 tablet:px-0">
-        <div className="look-gallery__slide">
+      <div className="look-gallery look-gallery--n1 px-6 tablet:px-0">
+        <figure className="look-gallery__slide">
           <button
             type="button"
             data-testid="look-photo"
             aria-label="Bild 1 vergrößern"
             onClick={() => setLightboxIndex(0)}
-            className="relative block aspect-[2/3] w-full overflow-hidden rounded-xl bg-stone-100 cursor-zoom-in"
+            className={PHOTO_BUTTON}
           >
             <Image
               src={images[0]}
@@ -229,9 +261,9 @@ export default function LookGallery({
             />
           </button>
           {note && <Caption note={note} />}
-        </div>
+        </figure>
         {lightbox}
-      </figure>
+      </div>
     )
   }
 
@@ -250,7 +282,7 @@ export default function LookGallery({
       aria-roledescription="Karussell"
       aria-label={`Fotos: ${title}`}
     >
-      <ul
+      <div
         ref={trackRef}
         id="look-gallery-track"
         tabIndex={0}
@@ -260,10 +292,10 @@ export default function LookGallery({
         {images.map((url, i) => {
           const note = notes[url]
           // Mobil ragen Hinweis und Zähler der Nachbarfotos angeschnitten an
-          // den Rand – nur die des aktiven Fotos zeigen (Platz bleibt gleich)
-          const dimmed = i !== active
+          // den Rand – nur die ganz sichtbarer Fotos zeigen (Platz bleibt gleich)
+          const dimmed = i !== active && !shown.includes(i)
           return (
-            <li
+            <div
               key={url}
               role="group"
               aria-roledescription="Folie"
@@ -277,14 +309,13 @@ export default function LookGallery({
                   aria-label={`Bild ${i + 1} vergrößern`}
                   onClick={() => setLightboxIndex(i)}
                   onFocus={(e) => revealOnFocus(i, e)}
-                  className="relative block aspect-[2/3] w-full overflow-hidden rounded-xl bg-stone-100 cursor-zoom-in"
+                  className={PHOTO_BUTTON}
                 >
                   <Image
                     src={url}
                     alt={altText(title, i)}
                     fill
                     priority={i === 0}
-                    loading={i === 1 ? "eager" : undefined}
                     sizes="(max-width: 767px) 82vw, (max-width: 1279px) 50vw, 460px"
                     className="object-cover"
                   />
@@ -301,12 +332,13 @@ export default function LookGallery({
                 </button>
                 {note && <Caption note={note} dimmed={dimmed} />}
               </figure>
-            </li>
+            </div>
           )
         })}
-      </ul>
+      </div>
 
-      <div className="look-gallery__controls mt-3 hidden h-10 items-center gap-3 tablet:flex">
+      {/* Pfeile 44px (Tablets sind Touch-Geräte), ab 1024px 40px */}
+      <div className="look-gallery__controls mt-3 hidden h-11 items-center gap-3 tablet:flex small:h-10">
         <div className="relative h-px flex-1 bg-stone-300">
           <div
             className="absolute -top-px h-[3px] bg-stone-800 duration-300 motion-safe:transition-[left]"
@@ -330,7 +362,7 @@ export default function LookGallery({
           aria-controls="look-gallery-track"
           onClick={() => go(active - 1)}
           disabled={active <= 0}
-          className="grid h-10 w-10 place-items-center rounded-full border border-stone-300 text-stone-800 transition-colors hover:border-stone-800 disabled:pointer-events-none disabled:opacity-40"
+          className="grid h-11 w-11 place-items-center rounded-full border border-stone-300 text-stone-800 transition-colors hover:border-stone-800 disabled:pointer-events-none disabled:opacity-40 small:h-10 small:w-10"
         >
           <ChevronRight size={18} className="rotate-180" />
         </button>
@@ -342,7 +374,7 @@ export default function LookGallery({
           aria-controls="look-gallery-track"
           onClick={() => go(active + 1)}
           disabled={active >= maxIndex}
-          className="grid h-10 w-10 place-items-center rounded-full border border-stone-300 text-stone-800 transition-colors hover:border-stone-800 disabled:pointer-events-none disabled:opacity-40"
+          className="grid h-11 w-11 place-items-center rounded-full border border-stone-300 text-stone-800 transition-colors hover:border-stone-800 disabled:pointer-events-none disabled:opacity-40 small:h-10 small:w-10"
         >
           <ChevronRight size={18} />
         </button>
