@@ -80,13 +80,12 @@ export default function ImageLightbox({
     const first = focusable[0]
     const last = focusable[focusable.length - 1]
     const active = document.activeElement
-    if (
-      e.shiftKey &&
-      (active === first || !dialogRef.current.contains(active))
-    ) {
+    // Nach einem Klick aufs Bild liegt der Fokus auf dem Dialog selbst
+    const onDialog = active === dialogRef.current
+    if (e.shiftKey && (active === first || onDialog)) {
       e.preventDefault()
       last.focus()
-    } else if (!e.shiftKey && active === last) {
+    } else if (!e.shiftKey && (active === last || onDialog)) {
       e.preventDefault()
       first.focus()
     }
@@ -101,7 +100,10 @@ export default function ImageLightbox({
   return createPortal(
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-sm"
+      // tabIndex -1: ein Klick aufs Bild setzt den Fokus auf den Dialog statt
+      // auf <body> – sonst griffe die Tab-Falle nicht mehr
+      tabIndex={-1}
+      className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-sm focus:outline-none"
       role="dialog"
       aria-modal="true"
       aria-label={`Bilder: ${title}`}
