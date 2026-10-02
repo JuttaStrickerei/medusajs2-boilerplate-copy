@@ -96,6 +96,7 @@ export default function LookItemsActions({
   // Link zum Selbstkopieren, wenn weder Teilen noch Zwischenablage gehen
   const [shareFallbackUrl, setShareFallbackUrl] = useState<string | null>(null)
   const shareInputRef = useRef<HTMLInputElement>(null)
+  const shareFallbackRef = useRef<HTMLDivElement>(null)
   const [barHidden, setBarHidden] = useState(false)
   const sizeAllRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLElement>(null)
@@ -160,6 +161,12 @@ export default function LookItemsActions({
 
   useEffect(() => {
     if (!shareFallbackUrl) return
+    // Das Feld liegt mobil unter dem Bildschirmrand: hinscrollen, sonst
+    // passiert nach dem Tippen auf „Teilen“ scheinbar nichts
+    shareFallbackRef.current?.scrollIntoView({
+      block: "nearest",
+      behavior: shouldReduceMotion() ? "auto" : "smooth",
+    })
     shareInputRef.current?.focus({ preventScroll: true })
     shareInputRef.current?.select()
   }, [shareFallbackUrl])
@@ -635,7 +642,10 @@ export default function LookItemsActions({
       </div>
 
       {shareFallbackUrl && (
-        <div className="mb-3 text-center text-xs text-stone-600">
+        <div
+          ref={shareFallbackRef}
+          className="mb-3 scroll-mb-6 text-center text-xs text-stone-600"
+        >
           <p>Link konnte nicht kopiert werden – bitte hier kopieren:</p>
           <input
             ref={shareInputRef}
