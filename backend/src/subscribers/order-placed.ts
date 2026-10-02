@@ -45,23 +45,29 @@ export default async function orderPlacedHandler({
       `[OrderPlaced] Order ${data.id} classified as ${fulfillmentType}`
     )
 
-    await notificationModuleService.createNotifications({
-      to: order.email,
-      channel: 'email',
-      template: EmailTemplates.ORDER_PLACED,
-      data: {
-        emailOptions: {
-          replyTo: 'office@strickerei-jutta.at',
-          subject: 'Ihre Bestellung wurde aufgegeben.'
-        },
-        order,
-        shippingAddress,
-        fulfillmentType,
-        pickupLocation,
-        preview: 'Vielen Dank für die Bestellung!'
-      }
-    })
-    logger.info(`[OrderPlaced] Order confirmation sent successfully for order ${data.id}`)
+    // Customer confirmation in its own try, so a failed send (Resend now
+    // reports those as errors) does not also skip the admin notification
+    try {
+      await notificationModuleService.createNotifications({
+        to: order.email,
+        channel: 'email',
+        template: EmailTemplates.ORDER_PLACED,
+        data: {
+          emailOptions: {
+            replyTo: 'office@strickerei-jutta.at',
+            subject: 'Ihre Bestellung wurde aufgegeben.'
+          },
+          order,
+          shippingAddress,
+          fulfillmentType,
+          pickupLocation,
+          preview: 'Vielen Dank für die Bestellung!'
+        }
+      })
+      logger.info(`[OrderPlaced] Order confirmation sent successfully for order ${data.id}`)
+    } catch (error) {
+      logger.error(`[OrderPlaced] Order confirmation email FAILED for order ${data.id}:`, error)
+    }
 
     // FIX: Send an additional admin notification without altering customer confirmation flow.
     await notificationModuleService.createNotifications({
