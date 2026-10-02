@@ -483,6 +483,62 @@
   .skeleton-image {
     @apply skeleton aspect-product w-full;
   }
+
+  /* Look-Seite: Foto-Slider. Fotos immer 2:3; Breite so, dass ein Foto
+     (ab 1280px zwei nebeneinander) samt Steuerleiste in den Bildschirm passt.
+     Mobil bleibt rechts ein Stück des nächsten Fotos sichtbar. */
+  .look-gallery {
+    --pv: 1;
+  }
+  .look-gallery__slide {
+    width: min(82vw, max(12rem, calc((100vh - 17rem) * 2 / 3)));
+  }
+  @supports (height: 100svh) {
+    .look-gallery__slide {
+      width: min(82vw, max(12rem, calc((100svh - 17rem) * 2 / 3)));
+    }
+  }
+  @media (min-width: 768px) {
+    .look-gallery {
+      width: 100%;
+      margin-inline: auto;
+      max-width: max(
+        16rem,
+        calc((100vh - 14.5rem) * 2 / 3 * var(--pv) + (var(--pv) - 1) * 0.5rem)
+      );
+    }
+    @supports (height: 100svh) {
+      .look-gallery {
+        max-width: max(
+          16rem,
+          calc(
+            (100svh - 14.5rem) * 2 / 3 * var(--pv) + (var(--pv) - 1) * 0.5rem
+          )
+        );
+      }
+    }
+    .look-gallery__slide {
+      width: calc((100% - (var(--pv) - 1) * 0.5rem) / var(--pv));
+    }
+  }
+  @media (min-width: 1280px) {
+    .look-gallery {
+      --pv: 2;
+    }
+    /* Zwei Fotos passen ganz nebeneinander: keine Steuerleiste nötig */
+    .look-gallery--n2 .look-gallery__controls {
+      display: none;
+    }
+  }
+}
+
+/* Look-Seite mobil: solange die feste Kaufleiste sichtbar ist, scrollt der
+   Browser fokussierte Elemente nicht unter sie (außerhalb von @layer, damit
+   Tailwind die klassenlose Regel nicht verwirft) */
+@media (max-width: 767px) {
+  html:has([data-look-buybar]:not([inert])) {
+    scroll-padding-bottom: 5rem;
+  }
 }
 
 /* Custom scrollbar for webkit browsers */
