@@ -3,20 +3,72 @@
 import { addLookToCart } from "@lib/data/looks"
 import { triggerCartRefresh } from "@lib/context/cart-context"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
-import { getPricesForVariant } from "@lib/util/get-product-price"
-import { cn, formatPrice } from "@lib/utils"
+import { sumLookPrices } from "@lib/util/look-price"
+import { cn, formatPrice, shouldReduceMotion } from "@lib/utils"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@components/ui"
 import { Check, Heart, Ruler, Share, ShoppingBag } from "@components/icons"
 import { useWishlist } from "@lib/context/wishlist-context"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Spinner from "@modules/common/icons/spinner"
+import { isSizeOption } from "@modules/products/components/product-actions/option-select"
+import {
+  isVariantInStock,
+  sortProductOptions,
+  translateOptionTitle,
+} from "@modules/products/hooks/use-variant-selection"
 import { useParams } from "next/navigation"
-import { useCallback, useState } from "react"
-import LookItemCard, { LookItemSelection } from "./look-item-card"
+import { useCallback, useEffect, useRef, useState } from "react"
+import LookItemCard, { LookBulkSize, LookItemSelection } from "./look-item-card"
+import LookOptionChips, { sortSizes } from "./look-option-chips"
 
 type LookItemsActionsProps = {
   lookId: string
   lookTitle: string
   products: HttpTypes.StoreProduct[]
+}
+
+// Feste deutsche Meldung: Server-Actions liefern in Produktion nur eine
+// generische englische Fehlermeldung
+const ADD_ERROR =
+  "Der Look konnte nicht in den Warenkorb gelegt werden. Bitte versuchen Sie es erneut."
+
+const uniqueValues = (option: HttpTypes.StoreProductOption) =>
+  Array.from(new Set((option.values ?? []).map((v) => v.value)))
+
+// Größen-Option mit echter Auswahl (mehr als ein Wert)
+const sizeValuesOf = (product: HttpTypes.StoreProduct) => {
+  if ((product.variants?.length ?? 0) < 2) return []
+  const option = product.options?.find((o) => isSizeOption(o.title ?? ""))
+  const values = option ? uniqueValues(option) : []
+  return values.length > 1 ? values : []
+}
+
+// Was die Karte nach der Vorauswahl melden wird – gilt, bis sie es tut
+// (Server-HTML und erster Paint zeigen so schon Summe und „Größe wählen“)
+const initialSelection = (
+  product: HttpTypes.StoreProduct
+): LookItemSelection => {
+  const variants = product.variants ?? []
+  const purchasable = variants.some(isVariantInStock)
+
+  if (variants.length === 1) {
+    const inStock = isVariantInStock(variants[0])
+    return {
+      purchasable,
+      status: inStock ? "ready" : "unavailable",
+      variant: inStock ? variants[0] : undefined,
+    }
+  }
+
+  const next = sortProductOptions(product.options).find(
+    (o) => uniqueValues(o).length > 1
+  )
+  return {
+    purchasable,
+    status: "incomplete",
+    missingLabel: next ? translateOptionTitle(next.title ?? "Option") : undefined,
+  }
 }
 
 export default function LookItemsActions({
@@ -30,7 +82,26 @@ export default function LookItemsActions({
   >({})
   const [isAdding, setIsAdding] = useState(false)
   const [added, setAdded] = useState(false)
+  const [addedNotice, setAddedNotice] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [bulkSize, setBulkSize] = useState<LookBulkSize | null>(null)
+  const [attention, setAttention] = useState<{
+    seq: number
+    target: "size-all" | "rows"
+  } | null>(null)
+  const [shareCopied, setShareCopied] = useState(false)
+  const [barHidden, setBarHidden] = useState(false)
+  const sizeAllRef = useRef<HTMLDivElement>(null)
+  const summaryRef = useRef<HTMLDivElement>(null)
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  const later = (fn: () => void, ms: number) => {
+    timers.current.push(setTimeout(fn, ms))
+  }
+  useEffect(() => {
+    const pending = timers.current
+    return () => pending.forEach(clearTimeout)
+  }, [])
 
   // „Alle merken“: alle Teile des Looks auf die Wunschliste (erneut klicken entfernt sie)
   const { items: wishlistItems, addToWishlist, removeFromWishlist } =
@@ -54,11 +125,23 @@ export default function LookItemsActions({
     )
   }
 
-  const handleShare = () => {
+  const handleShare = async () => {
+    const url = window.location.href
     if (navigator.share) {
-      navigator.share({ title: lookTitle, url: window.location.href })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
+      try {
+        await navigator.share({ title: lookTitle, url })
+        return
+      } catch (e) {
+        // Abbruch durch die Kundin ist kein Fehler
+        if (e instanceof DOMException && e.name === "AbortError") return
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setShareCopied(true)
+      later(() => setShareCopied(false), 2000)
+    } catch {
+      // Zwischenablage nicht erlaubt – nichts weiter zu tun
     }
   }
 
@@ -70,7 +153,8 @@ export default function LookItemsActions({
           current?.variant?.id === selection.variant?.id &&
           current?.purchasable === selection.purchasable &&
           current?.status === selection.status &&
-          current?.missingLabel === selection.missingLabel
+          current?.missingLabel === selection.missingLabel &&
+          current?.selectedSize === selection.selectedSize
         ) {
           return prev
         }
@@ -80,38 +164,109 @@ export default function LookItemsActions({
     []
   )
 
-  // Nur kaufbare Teile zählen; ausverkaufte werden übersprungen
-  const purchasable = products.filter(
-    (p) => selections[p.id]?.purchasable ?? true
-  )
-  const soldOut = products.filter(
-    (p) => selections[p.id] && !selections[p.id].purchasable
-  )
-  // Kaufbare Teile, die noch nicht bereit sind (in Anzeige-Reihenfolge)
-  const notReady = purchasable.filter(
-    (p) => selections[p.id]?.status !== "ready"
-  )
-  const ready = purchasable.length > 0 && notReady.length === 0
+  const sel = (p: HttpTypes.StoreProduct) =>
+    selections[p.id] ?? initialSelection(p)
 
-  const total = (() => {
-    let sum = 0
-    let currency: string | undefined
-    for (const p of purchasable) {
-      const variant = selections[p.id]?.variant
-      const price = variant ? getPricesForVariant(variant) : null
-      if (price) {
-        sum += price.calculated_price_number
-        currency = price.currency_code
-      }
-    }
-    return currency ? { sum, currency } : null
+  // Nur kaufbare Teile zählen; ausverkaufte werden übersprungen
+  const purchasable = products.filter((p) => sel(p).purchasable)
+  const soldOut = products.filter((p) => !sel(p).purchasable)
+  // Kaufbare Teile, die noch nicht bereit sind (in Anzeige-Reihenfolge)
+  const notReady = purchasable.filter((p) => sel(p).status !== "ready")
+  const ready = purchasable.length > 0 && notReady.length === 0
+  const isSingle = products.length === 1
+
+  // Live-Summe: gewählte Variante, sonst günstigster Preis je Teil
+  const total = sumLookPrices(purchasable, (p) =>
+    sel(p).status === "ready" ? sel(p).variant : undefined
+  )
+  const totalText = total
+    ? `${total.from ? "ab " : ""}${formatPrice(total.amount, total.currency)}`
+    : null
+
+  // „Ihre Größe für alle Teile“: ab zwei Teilen mit Größe und mindestens
+  // drei gemeinsamen Größen
+  const sizeBearing = purchasable.filter((p) => sizeValuesOf(p).length > 0)
+  const sizeCounts = new Map<string, number>()
+  sizeBearing.forEach((p) =>
+    sizeValuesOf(p).forEach((v) =>
+      sizeCounts.set(v, (sizeCounts.get(v) ?? 0) + 1)
+    )
+  )
+  const sharedSizes = sortSizes(
+    Array.from(sizeCounts.entries())
+      .filter(([, n]) => n >= 2)
+      .map(([v]) => v)
+  )
+  const showSizeAll = sizeBearing.length >= 2 && sharedSizes.length >= 3
+  const chosenSizes = sizeBearing.map((p) => sel(p).selectedSize)
+  const bulkCurrent =
+    chosenSizes.length > 0 &&
+    chosenSizes.every((s) => !!s && s === chosenSizes[0])
+      ? chosenSizes[0]
+      : undefined
+  const sizesDiffer = !bulkCurrent && chosenSizes.some(Boolean)
+  const allSizesMissing = chosenSizes.every((s) => !s)
+
+  // Hilfszeile „Noch offen: …“
+  const missingText = (() => {
+    if (!notReady.length) return null
+    const groups = new Map<string, string[]>()
+    notReady.forEach((p) => {
+      const s = sel(p)
+      const label =
+        s.status === "unavailable"
+          ? "verfügbare Variante"
+          : s.missingLabel ?? "Auswahl"
+      groups.set(label, [...(groups.get(label) ?? []), p.title ?? ""])
+    })
+    const parts = Array.from(groups.entries()).map(([label, titles]) =>
+      titles.length === purchasable.length && titles.length > 2
+        ? `${label} für alle ${titles.length} Teile`
+        : `${label} für ${titles.join(", ")}`
+    )
+    return `Noch offen: ${parts.join("; ")}`
   })()
 
+  const firstMissing = notReady[0] ? sel(notReady[0]) : undefined
+  const barMissingLabel =
+    firstMissing?.status === "unavailable"
+      ? "Auswahl prüfen"
+      : `${firstMissing?.missingLabel ?? "Auswahl"} wählen`
+
+  // Fehlt etwas: hinscrollen, markieren, erste freie Auswahl fokussieren
+  const guideToMissing = () => {
+    const target: "size-all" | "rows" =
+      showSizeAll && allSizesMissing ? "size-all" : "rows"
+    setAttention((a) => ({ seq: (a?.seq ?? 0) + 1, target }))
+
+    const el =
+      target === "size-all"
+        ? sizeAllRef.current
+        : notReady[0]
+        ? document.getElementById(`look-piece-${notReady[0].id}`)
+        : null
+    if (!el) return
+
+    el.scrollIntoView({
+      block: "center",
+      behavior: shouldReduceMotion() ? "auto" : "smooth",
+    })
+    const input =
+      el.querySelector<HTMLInputElement>(
+        "fieldset[data-missing] input:not(:disabled)"
+      ) ?? el.querySelector<HTMLInputElement>("fieldset input:not(:disabled)")
+    input?.focus({ preventScroll: true })
+  }
+
   const handleAddLook = async () => {
-    if (!ready) return
+    if (!purchasable.length || isAdding) return
+    if (!ready) {
+      guideToMissing()
+      return
+    }
 
     const chosen = purchasable
-      .map((p) => ({ product: p, variant: selections[p.id].variant! }))
+      .map((p) => ({ product: p, variant: sel(p).variant! }))
       .filter((c) => !!c.variant)
 
     setIsAdding(true)
@@ -137,131 +292,314 @@ export default function LookItemsActions({
       })
 
       setAdded(true)
-      setTimeout(() => setAdded(false), 2500)
-    } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Der Look konnte nicht hinzugefügt werden"
-      )
+      setAddedNotice(true)
+      later(() => setAdded(false), 2500)
+      later(() => setAddedNotice(false), 6000)
+    } catch {
+      setError(ADD_ERROR)
     } finally {
       setIsAdding(false)
     }
   }
 
-  const buttonText = () => {
-    if (added) return "Look hinzugefügt!"
-    if (!purchasable.length) return "Look derzeit ausverkauft"
-    if (!ready) {
-      // Eine nicht verfügbare Auswahl zuerst melden – sie blockiert sonst still
-      const unavailable = notReady.find(
-        (p) => selections[p.id]?.status === "unavailable"
-      )
-      if (unavailable) {
-        return `Bitte verfügbare Variante für „${unavailable.title}“ wählen`
-      }
-      if (notReady.length === 1) {
-        const label = selections[notReady[0].id]?.missingLabel ?? "Variante"
-        return `Bitte ${label} für „${notReady[0].title}“ wählen`
-      }
-      return "Bitte Ware auswählen"
-    }
-    // „Ganzen“ nur, wenn wirklich alle Teile des Looks hinzugefügt werden
-    const label =
-      soldOut.length > 0 ? "Look in den Warenkorb" : "Ganzen Look in den Warenkorb"
-    return total ? `${label} – ${formatPrice(total.sum, total.currency)}` : label
-  }
+  // Mobile Kaufleiste ausblenden, solange die Zusammenfassung sichtbar ist
+  // oder schon darüber gescrollt wurde (dann verdeckt sie nie den Footer)
+  useEffect(() => {
+    const el = summaryRef.current
+    if (!el || typeof IntersectionObserver === "undefined") return
+    const observer = new IntersectionObserver(
+      ([entry]) =>
+        setBarHidden(entry.isIntersecting || entry.boundingClientRect.top < 0),
+      { rootMargin: "0px 0px -72px 0px" }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const allSoldOut = purchasable.length === 0
+  const inlineLabel = isAdding
+    ? "Wird hinzugefügt …"
+    : added
+    ? "Im Warenkorb"
+    : allSoldOut
+    ? "Look derzeit ausverkauft"
+    : isSingle
+    ? "In den Warenkorb"
+    : soldOut.length > 0
+    ? "Look in den Warenkorb"
+    : "Ganzen Look in den Warenkorb"
+  const barLabel = isAdding
+    ? "Wird hinzugefügt …"
+    : added
+    ? "Im Warenkorb"
+    : allSoldOut
+    ? "Ausverkauft"
+    : ready
+    ? "In den Warenkorb"
+    : barMissingLabel
+
+  const buttonIcon = (size: number) =>
+    isAdding ? (
+      <Spinner size={size} />
+    ) : added ? (
+      <Check size={size} />
+    ) : (
+      <ShoppingBag size={size} />
+    )
+
+  const pieceLabel = `${products.length} ${products.length === 1 ? "Teil" : "Teile"}`
+  const helperIsAlert = !!attention && !!missingText
 
   return (
-    <div className="flex flex-col gap-4">
-      <ul className="flex flex-col gap-4">
-        {products.map((product) => (
-          <li key={product.id}>
-            <LookItemCard
-              product={product}
-              disabled={isAdding}
-              onSelectionChange={handleSelectionChange}
-            />
-          </li>
-        ))}
-      </ul>
-
-      <div className="sticky bottom-0 z-10 -mx-4 border-t border-stone-200 bg-white/95 px-4 py-4 backdrop-blur small:static small:mx-0 small:rounded-xl small:border small:px-5">
-        {soldOut.length > 0 && purchasable.length > 0 && (
-          <p className="mb-3 text-sm text-stone-600">
-            {soldOut.map((p) => p.title).join(", ")}{" "}
-            {soldOut.length === 1 ? "ist" : "sind"} derzeit ausverkauft und{" "}
-            {soldOut.length === 1 ? "wird" : "werden"} nicht hinzugefügt.
-          </p>
-        )}
-        <Button
-          onClick={handleAddLook}
-          disabled={!ready || isAdding}
-          loading={isAdding}
-          fullWidth
-          size="lg"
-          className={cn(added && "bg-green-600 hover:bg-green-600")}
-          leftIcon={added ? <Check size={20} /> : <ShoppingBag size={20} />}
-          data-testid="add-look-button"
-        >
-          {buttonText()}
-        </Button>
-
-        {/* Wie auf der Produktseite: drei gleich breite Felder unter dem Button */}
-        <div className="mt-3 grid grid-cols-3 gap-3">
-          <Button
-            variant="secondary"
-            onClick={handleWishlistAll}
-            leftIcon={
-              <Heart
-                size={18}
-                filled={allWishlisted}
-                className={allWishlisted ? "text-red-500" : ""}
-              />
+    <div>
+      {showSizeAll && (
+        <div ref={sizeAllRef} data-testid="look-size-all" className="mb-4">
+          <LookOptionChips
+            name="look-size-all"
+            legend="Ihre Größe für alle Teile"
+            kind="size"
+            values={sharedSizes}
+            current={bulkCurrent}
+            onChange={(value) =>
+              setBulkSize((b) => ({ value, seq: (b?.seq ?? 0) + 1 }))
             }
+            disabled={isAdding}
+            missing={allSizesMissing}
+            attention={attention?.target === "size-all" && allSizesMissing}
+            aside={
+              <span className="flex items-center gap-3">
+                {sizesDiffer && (
+                  <span className="text-xs text-stone-500">
+                    Individuell gewählt
+                  </span>
+                )}
+                <a
+                  href={`/${countryCode}/size-guide`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
+                >
+                  <Ruler size={14} aria-hidden />
+                  Größenberatung
+                  <span className="sr-only">(öffnet in neuem Tab)</span>
+                </a>
+              </span>
+            }
+          />
+        </div>
+      )}
+
+      <section
+        id="look-teile"
+        aria-labelledby="look-teile-h"
+        className="scroll-mt-20 small:scroll-mt-24"
+      >
+        <h2 id="look-teile-h" className="sr-only">
+          Teile im Look
+        </h2>
+        <ul className="divide-y divide-stone-200 border-t border-stone-200">
+          {products.map((product) => (
+            <li key={product.id}>
+              <LookItemCard
+                product={product}
+                disabled={isAdding}
+                onSelectionChange={handleSelectionChange}
+                bulkSize={bulkSize}
+                attention={attention?.target === "rows"}
+                showSingleAdd={!isSingle}
+              />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {soldOut.length > 0 && purchasable.length > 0 && (
+        <p className="mt-5 text-sm text-stone-600">
+          {soldOut.map((p) => p.title).join(", ")}{" "}
+          {soldOut.length === 1 ? "ist" : "sind"} derzeit ausverkauft und{" "}
+          {soldOut.length === 1 ? "wird" : "werden"} nicht hinzugefügt.
+        </p>
+      )}
+
+      {/* Zusammenfassung; ab 768px klebt sie unten im Bild, solange die
+          Teile-Liste sichtbar ist. Mobil übernimmt die feste Leiste unten. */}
+      <div
+        ref={summaryRef}
+        id="look-summary"
+        data-testid="look-summary-sticky"
+        className={cn(
+          "border-t border-stone-200 bg-stone-50/95 py-3 backdrop-blur-sm tablet:sticky tablet:bottom-0 tablet:z-10 tablet:-mx-1 tablet:px-1 small:py-2",
+          soldOut.length > 0 && purchasable.length > 0 ? "mt-3" : "mt-5"
+        )}
+      >
+        <div className="flex flex-col small:flex-row small:flex-wrap small:items-center small:gap-x-4">
+          <div className="flex items-baseline justify-between gap-3 small:order-2 small:block small:shrink-0">
+            <p className="text-[15px] text-stone-700 small:text-xs small:text-stone-500">
+              Ganzer Look
+              {/* ab 1024px steht die Anzahl schon in der Kopfzeile; so bleibt
+                  Platz für den Button in derselben Zeile */}
+              <span className="small:hidden"> · {pieceLabel}</span>
+            </p>
+            {totalText && (
+              <p className="text-right tabular-nums small:text-left">
+                {total?.onSale && (
+                  <span className="mr-2 text-sm text-stone-400 line-through">
+                    {formatPrice(total.original, total.currency)}
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "text-lg font-semibold",
+                    total?.onSale ? "text-red-700" : "text-stone-900"
+                  )}
+                >
+                  {totalText}
+                </span>
+              </p>
+            )}
+          </div>
+
+          <p
+            key={helperIsAlert ? attention?.seq : "helper"}
+            role={helperIsAlert ? "alert" : undefined}
+            aria-live={helperIsAlert ? undefined : "polite"}
             className={cn(
-              "w-full min-w-0 justify-center px-2 sm:px-3",
-              allWishlisted && "border-red-200 bg-red-50"
+              "text-xs small:order-1 small:w-full",
+              missingText && "mt-1 small:mb-0.5 small:mt-0",
+              helperIsAlert ? "text-red-700" : "text-stone-600"
             )}
           >
-            {allWishlisted ? "Gemerkt" : "Alle merken"}
-          </Button>
+            {missingText}
+          </p>
+
           <Button
-            variant="secondary"
-            leftIcon={<Share size={18} />}
-            className="w-full min-w-0 justify-center px-2 sm:px-3"
-            onClick={handleShare}
-          >
-            Teilen
-          </Button>
-          <a
-            href={`/${countryCode}/size-guide`}
-            target="_blank"
-            rel="noopener noreferrer"
+            size="lg"
+            fullWidth
+            onClick={handleAddLook}
+            disabled={allSoldOut}
+            aria-disabled={isAdding || undefined}
+            aria-busy={isAdding || undefined}
             className={cn(
-              "inline-flex items-center justify-center font-medium w-full min-w-0",
-              "transition-all duration-200 ease-out",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2",
-              "active:scale-[0.98]",
-              "bg-transparent text-stone-800 border border-stone-300",
-              "hover:bg-stone-50 hover:border-stone-400",
-              "active:bg-stone-100",
-              "h-10 px-2 sm:px-3 text-xs sm:text-sm rounded-lg gap-2",
-              "text-center"
+              "mt-2 whitespace-nowrap small:order-3 small:mt-0 small:h-11 small:w-auto small:flex-1 small:px-4 small:text-sm",
+              added && "bg-green-600 hover:bg-green-600"
             )}
+            leftIcon={buttonIcon(20)}
+            data-testid="add-look-button"
           >
-            <span className="flex-shrink-0" aria-hidden>
-              <Ruler size={18} />
-            </span>
-            <span className="leading-tight">Größenberatung</span>
-          </a>
+            {inlineLabel}
+          </Button>
         </div>
 
-        <p className="mt-2 text-center text-xs text-stone-500">
-          inkl. MwSt., zzgl.{" "}
-          <a href={`/${countryCode}/shipping`} className="underline hover:text-stone-700">
-            Versandkosten
-          </a>
+        <p role="status" className={cn("text-xs text-stone-700", addedNotice && "mt-2")}>
+          {addedNotice && (
+            <>
+              {lookTitle} liegt im Warenkorb ·{" "}
+              <LocalizedClientLink
+                href="/cart"
+                className="font-medium underline underline-offset-4 hover:text-stone-900"
+              >
+                Zum Warenkorb →
+              </LocalizedClientLink>
+            </>
+          )}
         </p>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="mt-2 text-xs text-red-700">
+            {error}
+          </p>
+        )}
+      </div>
+
+      <div className="flex h-11 items-center justify-center gap-6 text-[13px] text-stone-600">
+        {!isSingle && (
+          <button
+            type="button"
+            onClick={handleWishlistAll}
+            className="inline-flex items-center gap-1.5 hover:text-stone-900"
+          >
+            <Heart
+              size={14}
+              filled={allWishlisted}
+              aria-hidden
+              className={allWishlisted ? "text-red-500" : ""}
+            />
+            {allWishlisted ? "Gemerkt" : "Alle merken"}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={handleShare}
+          className="inline-flex items-center gap-1.5 hover:text-stone-900"
+        >
+          {shareCopied ? (
+            <Check size={14} aria-hidden />
+          ) : (
+            <Share size={14} aria-hidden />
+          )}
+          {shareCopied ? "Link kopiert" : "Teilen"}
+        </button>
+        <span role="status" className="sr-only">
+          {shareCopied ? "Link kopiert" : ""}
+        </span>
+        <a
+          href={`/${countryCode}/size-guide`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 hover:text-stone-900"
+        >
+          <Ruler size={14} aria-hidden />
+          Größenberatung
+          <span className="sr-only">(öffnet in neuem Tab)</span>
+        </a>
+      </div>
+
+      <p className="text-center text-xs text-stone-500">
+        inkl. MwSt., zzgl.{" "}
+        <a
+          href={`/${countryCode}/shipping`}
+          className="underline hover:text-stone-700"
+        >
+          Versandkosten
+        </a>
+      </p>
+
+      {/* Mobile Kaufleiste: fest unten, ab dem ersten Paint sichtbar */}
+      <div
+        data-testid="look-sticky-bar"
+        data-look-buybar=""
+        aria-hidden={barHidden || undefined}
+        inert={barHidden || undefined}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-4 border-t border-stone-200 bg-white/95 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur duration-200 motion-safe:transition-transform tablet:hidden",
+          barHidden && "translate-y-full"
+        )}
+      >
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-[0.12em] text-stone-500">
+            Ganzer Look
+          </p>
+          {totalText && (
+            <p className="text-base font-semibold tabular-nums text-stone-900">
+              {totalText}
+            </p>
+          )}
+        </div>
+        <Button
+          size="lg"
+          onClick={handleAddLook}
+          // während des Hinzufügens nicht deaktivieren: der Fokus bliebe sonst
+          // nicht auf dem Button (Klicks ignoriert handleAddLook)
+          disabled={allSoldOut}
+          aria-disabled={isAdding || undefined}
+          aria-busy={isAdding || undefined}
+          className={cn(
+            "h-12 shrink-0 px-5",
+            added && "bg-green-600 hover:bg-green-600"
+          )}
+          leftIcon={buttonIcon(18)}
+        >
+          {barLabel}
+        </Button>
       </div>
     </div>
   )
