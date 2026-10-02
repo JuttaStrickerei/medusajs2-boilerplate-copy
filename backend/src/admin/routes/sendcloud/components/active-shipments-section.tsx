@@ -46,7 +46,10 @@ export function ActiveShipmentsSection({
 
     setDownloadingId(shipment.fulfillment_id)
     try {
-      const response = await fetch(`/labels/${shipment.parcel_id}?format=a6`)
+      const response = await fetch(
+        `/admin/sendcloud/labels/${shipment.parcel_id}?format=a6`,
+        { credentials: "include" }
+      )
       if (!response.ok) throw new Error("Download failed")
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
