@@ -98,6 +98,7 @@ export default function LookItemsActions({
   const shareInputRef = useRef<HTMLInputElement>(null)
   const [barHidden, setBarHidden] = useState(false)
   const sizeAllRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLElement>(null)
   const summaryRef = useRef<HTMLDivElement>(null)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
@@ -336,6 +337,42 @@ export default function LookItemsActions({
     return () => observer.disconnect()
   }, [])
 
+  // Ab 768px klebt die Zusammenfassung unten im Bild. Landet der
+  // Tastatur-Fokus in der Teile-Liste dahinter, die Seite um die Überdeckung
+  // weiterscrollen (WCAG 2.4.11). Per CSS ginge das nur als scroll-padding der
+  // ganzen Seite – dann spränge sie auch beim Fokus auf klebende Elemente
+  // (Foto-Pfeile, Button der Zusammenfassung) weit nach unten.
+  useEffect(() => {
+    const list = listRef.current
+    const summary = summaryRef.current
+    if (!list || !summary) return
+    const wide = window.matchMedia("(min-width: 768px)")
+    let frame = 0
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target
+      if (!wide.matches || !(target instanceof HTMLElement)) return
+      cancelAnimationFrame(frame)
+      // erst nach dem eigenen Scrollen des Browsers messen
+      frame = requestAnimationFrame(() => {
+        if (
+          document.activeElement !== target ||
+          !target.matches(":focus-visible")
+        ) {
+          return
+        }
+        const covered =
+          target.getBoundingClientRect().bottom -
+          summary.getBoundingClientRect().top
+        if (covered > 0) window.scrollBy({ top: covered + 12 })
+      })
+    }
+    list.addEventListener("focusin", onFocusIn)
+    return () => {
+      list.removeEventListener("focusin", onFocusIn)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
+
   const allSoldOut = purchasable.length === 0
   const inlineLabel = isAdding
     ? "Wird hinzugefügt …"
@@ -383,6 +420,7 @@ export default function LookItemsActions({
       {/* Anker für „3 Teile“ in der Kopfzeile: schließt die Größe für alle
           Teile ein, damit sie nach dem Sprung nicht unter dem Header liegt */}
       <section
+        ref={listRef}
         id="look-teile"
         aria-labelledby="look-teile-h"
         className="scroll-mt-20 small:scroll-mt-24"

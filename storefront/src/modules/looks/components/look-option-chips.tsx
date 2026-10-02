@@ -102,9 +102,12 @@ export default function LookOptionChips({
                 !disabled && !isOut && "cursor-pointer"
               )}
             >
+              {/* Unsichtbar über dem ganzen Button (statt 1px „sr-only“):
+                  so scrollt der Browser beim Tabben den ganzen Button ins
+                  Bild und nicht nur einen Punkt an seiner Oberkante */}
               <input
                 type="radio"
-                className="peer sr-only"
+                className="peer absolute inset-0 m-0 h-full w-full cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
                 name={name}
                 value={value}
                 checked={current === value}
@@ -125,12 +128,13 @@ export default function LookOptionChips({
                           "small:text-[11px] small:tracking-tight"
                       )
                     : "h-9 rounded-full px-3 text-xs",
-                  "hover:border-stone-500",
+                  // Die Maus steht auf dem (unsichtbaren) Radio darüber
+                  !isOut && current !== value && "peer-hover:border-stone-500",
                   "peer-checked:border-stone-900 peer-checked:bg-stone-900 peer-checked:text-white",
                   "peer-focus-visible:ring-2 peer-focus-visible:ring-stone-500 peer-focus-visible:ring-offset-2",
                   "peer-disabled:cursor-not-allowed",
                   isOut
-                    ? "bg-stone-50 text-stone-400 line-through hover:border-stone-300"
+                    ? "bg-stone-50 text-stone-400 line-through"
                     : "peer-disabled:opacity-60"
                 )}
               >
