@@ -93,6 +93,9 @@ export default function LookItemsActions({
     target: "size-all" | "rows"
   } | null>(null)
   const [shareCopied, setShareCopied] = useState(false)
+  // Link zum Selbstkopieren, wenn weder Teilen noch Zwischenablage gehen
+  const [shareFallbackUrl, setShareFallbackUrl] = useState<string | null>(null)
+  const shareInputRef = useRef<HTMLInputElement>(null)
   const [barHidden, setBarHidden] = useState(false)
   const sizeAllRef = useRef<HTMLDivElement>(null)
   const summaryRef = useRef<HTMLDivElement>(null)
@@ -133,6 +136,7 @@ export default function LookItemsActions({
 
   const handleShare = async () => {
     const url = window.location.href
+    setShareFallbackUrl(null)
     if (navigator.share) {
       try {
         await navigator.share({ title: lookTitle, url })
@@ -147,9 +151,17 @@ export default function LookItemsActions({
       setShareCopied(true)
       later(() => setShareCopied(false), 2000)
     } catch {
-      // Zwischenablage nicht erlaubt – nichts weiter zu tun
+      // Zwischenablage nicht erlaubt: Link zum Selbstkopieren anzeigen,
+      // sonst bekäme die Kundin gar keine Rückmeldung
+      setShareFallbackUrl(url)
     }
   }
+
+  useEffect(() => {
+    if (!shareFallbackUrl) return
+    shareInputRef.current?.focus({ preventScroll: true })
+    shareInputRef.current?.select()
+  }, [shareFallbackUrl])
 
   const handleSelectionChange = useCallback(
     (productId: string, selection: LookItemSelection) => {
@@ -566,7 +578,11 @@ export default function LookItemsActions({
           {shareCopied ? "Link kopiert" : "Teilen"}
         </button>
         <span role="status" className="sr-only">
-          {shareCopied ? "Link kopiert" : ""}
+          {shareCopied
+            ? "Link kopiert"
+            : shareFallbackUrl
+            ? "Link konnte nicht kopiert werden"
+            : ""}
         </span>
         <a
           href={`/${countryCode}/size-guide`}
@@ -579,6 +595,20 @@ export default function LookItemsActions({
           <span className="sr-only">(öffnet in neuem Tab)</span>
         </a>
       </div>
+
+      {shareFallbackUrl && (
+        <div className="mb-3 text-center text-xs text-stone-600">
+          <p>Link konnte nicht kopiert werden – bitte hier kopieren:</p>
+          <input
+            ref={shareInputRef}
+            readOnly
+            value={shareFallbackUrl}
+            aria-label="Link zu diesem Look"
+            onFocus={(e) => e.currentTarget.select()}
+            className="mt-1.5 w-full rounded-md border border-stone-300 bg-white px-2.5 py-2 text-xs text-stone-800 focus:border-stone-500 focus:outline-none"
+          />
+        </div>
+      )}
 
       <p className="text-center text-xs text-stone-500">
         inkl. MwSt., zzgl.{" "}
