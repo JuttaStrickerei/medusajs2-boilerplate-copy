@@ -108,7 +108,9 @@ export default function ImageLightbox({
       onClick={close}
       onKeyDown={trapFocus}
     >
-      <div className="flex items-center justify-between px-4 py-3 text-white">
+      {/* Buttons 44px groß (Tippziel); py-2 statt py-3 hält die Kopfzeile etwa
+          so hoch wie vorher */}
+      <div className="flex items-center justify-between px-4 py-2 text-white">
         <span className="text-sm">
           {title} · {index + 1} / {count}
         </span>
@@ -116,7 +118,7 @@ export default function ImageLightbox({
           ref={closeRef}
           type="button"
           onClick={close}
-          className="rounded-full p-2 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+          className="grid h-11 w-11 place-items-center rounded-full hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
           aria-label="Schließen"
         >
           <Close size={22} />
@@ -148,7 +150,7 @@ export default function ImageLightbox({
             <button
               type="button"
               onClick={prev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-stone-800 hover:bg-white"
+              className="absolute left-2 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-stone-800 hover:bg-white"
               aria-label="Vorheriges Bild"
             >
               <ChevronRight size={22} className="rotate-180" />
@@ -156,7 +158,7 @@ export default function ImageLightbox({
             <button
               type="button"
               onClick={next}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-stone-800 hover:bg-white"
+              className="absolute right-2 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-stone-800 hover:bg-white"
               aria-label="Nächstes Bild"
             >
               <ChevronRight size={22} />
