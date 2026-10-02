@@ -59,11 +59,7 @@ export default function LookOptionChips({
     <fieldset
       data-option={kind}
       data-missing={missing || undefined}
-      className={cn(
-        "min-w-0",
-        attention && "rounded-lg ring-1 ring-red-300 ring-offset-2",
-        className
-      )}
+      className={cn("min-w-0", className)}
     >
       {/* Sichtbare Legende (Farbe, Länge …) links in der Zeile der Buttons:
           spart eine eigene Zeile über ihnen */}
@@ -79,77 +75,88 @@ export default function LookOptionChips({
         {legend}
       </legend>
       {aside && <div className="float-right">{aside}</div>}
-      <div className={cn("flex flex-wrap gap-1", aside && "clear-both pt-2")}>
-        {values.map((value) => {
-          const status = availability?.[value]?.status ?? "available"
-          const isOut = status === "soldout" || status === "unavailable"
-          const isLow = status === "low"
-          const srSuffix =
-            status === "soldout"
-              ? " (ausverkauft)"
-              : status === "unavailable"
-              ? " (nicht verfügbar)"
-              : isLow
-              ? ` (nur noch ${availability?.[value]?.quantity})`
-              : ""
+      {/* Rote Markierung nur um die Buttons: um die ganze Gruppe gezogen
+          klebte sie an der Legende und am Link daneben */}
+      <div className={cn(aside && "clear-both pt-2")}>
+        <div
+          className={cn(
+            "flex flex-wrap gap-1",
+            attention && "rounded-lg ring-1 ring-red-300 ring-offset-2"
+          )}
+        >
+          {values.map((value) => {
+            const status = availability?.[value]?.status ?? "available"
+            const isOut = status === "soldout" || status === "unavailable"
+            const isLow = status === "low"
+            const srSuffix =
+              status === "soldout"
+                ? " (ausverkauft)"
+                : status === "unavailable"
+                ? " (nicht verfügbar)"
+                : isLow
+                ? ` (nur noch ${availability?.[value]?.quantity})`
+                : ""
 
-          return (
-            <label
-              key={value}
-              className={cn(
-                "relative flex",
-                isSize && "min-w-[2.25rem] max-w-[3.5rem] flex-1",
-                !disabled && !isOut && "cursor-pointer"
-              )}
-            >
-              {/* Unsichtbar über dem ganzen Button (statt 1px „sr-only“):
-                  so scrollt der Browser beim Tabben den ganzen Button ins
-                  Bild und nicht nur einen Punkt an seiner Oberkante */}
-              <input
-                type="radio"
-                className="peer absolute inset-0 m-0 h-full w-full cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
-                name={name}
-                value={value}
-                checked={current === value}
-                disabled={!!disabled || isOut}
-                onChange={() => onChange(value)}
-              />
-              <span
+            return (
+              <label
+                key={value}
                 className={cn(
-                  "flex w-full items-center justify-center border border-stone-300 bg-white font-medium text-stone-800 transition-colors",
-                  isSize
-                    ? cn(
-                        "h-11 rounded-lg text-xs tabular-nums small:h-10",
-                        // „XXXL“ braucht in den schmalen Buttons einer Zeile
-                        // (ab 1024px rund 41px) etwas kleinere Schrift, sonst
-                        // klebt es am Rand
-                        narrow &&
-                          value.length >= 4 &&
-                          "small:text-[11px] small:tracking-tight"
-                      )
-                    : "h-9 rounded-full px-3 text-xs",
-                  // Die Maus steht auf dem (unsichtbaren) Radio darüber
-                  !isOut && current !== value && "peer-hover:border-stone-500",
-                  "peer-checked:border-stone-900 peer-checked:bg-stone-900 peer-checked:text-white",
-                  "peer-focus-visible:ring-2 peer-focus-visible:ring-stone-500 peer-focus-visible:ring-offset-2",
-                  "peer-disabled:cursor-not-allowed",
-                  isOut
-                    ? "bg-stone-50 text-stone-400 line-through"
-                    : "peer-disabled:opacity-60"
+                  "relative flex",
+                  isSize && "min-w-[2.25rem] max-w-[3.5rem] flex-1",
+                  !disabled && !isOut && "cursor-pointer"
                 )}
               >
-                {value}
-                {srSuffix && <span className="sr-only">{srSuffix}</span>}
-              </span>
-              {isLow && (
-                <span
-                  aria-hidden
-                  className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-amber-500"
+                {/* Unsichtbar über dem ganzen Button (statt 1px „sr-only“):
+                    so scrollt der Browser beim Tabben den ganzen Button ins
+                    Bild und nicht nur einen Punkt an seiner Oberkante */}
+                <input
+                  type="radio"
+                  className="peer absolute inset-0 m-0 h-full w-full cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
+                  name={name}
+                  value={value}
+                  checked={current === value}
+                  disabled={!!disabled || isOut}
+                  onChange={() => onChange(value)}
                 />
-              )}
-            </label>
-          )
-        })}
+                <span
+                  className={cn(
+                    "flex w-full items-center justify-center border border-stone-300 bg-white font-medium text-stone-800 transition-colors",
+                    isSize
+                      ? cn(
+                          "h-11 rounded-lg text-xs tabular-nums small:h-10",
+                          // „XXXL“ braucht in den schmalen Buttons einer Zeile
+                          // (ab 1024px rund 41px) etwas kleinere Schrift, sonst
+                          // klebt es am Rand
+                          narrow &&
+                            value.length >= 4 &&
+                            "small:text-[11px] small:tracking-tight"
+                        )
+                      : "h-9 rounded-full px-3 text-xs",
+                    // Die Maus steht auf dem (unsichtbaren) Radio darüber
+                    !isOut &&
+                      current !== value &&
+                      "peer-hover:border-stone-500",
+                    "peer-checked:border-stone-900 peer-checked:bg-stone-900 peer-checked:text-white",
+                    "peer-focus-visible:ring-2 peer-focus-visible:ring-stone-500 peer-focus-visible:ring-offset-2",
+                    "peer-disabled:cursor-not-allowed",
+                    isOut
+                      ? "bg-stone-50 text-stone-400 line-through"
+                      : "peer-disabled:opacity-60"
+                  )}
+                >
+                  {value}
+                  {srSuffix && <span className="sr-only">{srSuffix}</span>}
+                </span>
+                {isLow && (
+                  <span
+                    aria-hidden
+                    className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-amber-500"
+                  />
+                )}
+              </label>
+            )
+          })}
+        </div>
       </div>
     </fieldset>
   )
