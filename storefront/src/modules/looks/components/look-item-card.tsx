@@ -214,6 +214,8 @@ export default function LookItemCard({
   }
 
   const handleAddToCart = async () => {
+    // aria-disabled statt disabled: der Fokus bleibt so auf dem Button
+    if (disabled || isAdding) return
     if (!isReady || !selectedVariant?.id) {
       setOwnAttention(true)
       focusMissing()
@@ -429,10 +431,10 @@ export default function LookItemCard({
           <button
             type="button"
             onClick={handleAddToCart}
-            disabled={rowDisabled}
+            aria-disabled={rowDisabled || undefined}
             aria-busy={isAdding || undefined}
             className={cn(
-              "-my-1 inline-flex items-center gap-1.5 py-1 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-60",
+              "-my-1 inline-flex items-center gap-1.5 py-1 hover:text-stone-900 aria-disabled:cursor-not-allowed aria-disabled:opacity-60",
               addedToCart && "text-green-700 hover:text-green-700"
             )}
           >
