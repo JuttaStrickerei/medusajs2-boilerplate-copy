@@ -9,6 +9,12 @@ import { HttpTypes } from "@medusajs/types"
 import { ProductFilters } from "./index"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
 import { getProductMinVariantPriceForFilter } from "@lib/util/variant-price-for-filter"
+import {
+  COLOR_OPTION_TITLES,
+  SIZE_OPTION_TITLES,
+  getColorGroupKeys,
+  getSizeGroupKey,
+} from "@lib/util/filter-groups"
 
 const PRODUCT_LIMIT = 12
 
@@ -20,57 +26,56 @@ type PaginatedProductsParams = {
   order?: string
 }
 
-const COLOR_OPTION_TITLES = ["color", "farbe", "colour"]
-const SIZE_OPTION_TITLES = ["size", "größe", "groesse"]
-
 function matchesColorFilter(product: HttpTypes.StoreProduct, colors: string[]): boolean {
   if (!colors || colors.length === 0) return true
-  
-  const normalizedColors = colors.map((c) => c.toLowerCase())
-  
-  const hasMatchingColor = product.variants?.some((variant) => {
-    return variant.options?.some((option) => {
-      const optionTitle = option.option?.title?.toLowerCase() || ""
-      const optionValue = option.value?.toLowerCase() || ""
-      
-      if (COLOR_OPTION_TITLES.includes(optionTitle)) {
-        return normalizedColors.some((color) => 
-          optionValue === color || optionValue.includes(color) || color.includes(optionValue)
+
+  // Selected values are colour groups ("blau"); older links may still carry a
+  // shade ("königsblau"), which resolves to its group the same way.
+  const selectedGroups = new Set(colors.flatMap((c) => getColorGroupKeys(c)))
+
+  const colorValues =
+    product.variants?.flatMap((variant) =>
+      (variant.options || [])
+        .filter((option) =>
+          COLOR_OPTION_TITLES.includes(option.option?.title?.toLowerCase() || "")
         )
-      }
-      return false
-    })
-  })
-  
+        .map((option) => option.value || "")
+    ) ?? []
+
+  if (colorValues.length > 0) {
+    return colorValues.some((value) =>
+      getColorGroupKeys(value).some((key) => selectedGroups.has(key))
+    )
+  }
+
+  // Title fallback only for products without a colour option, otherwise
+  // "rosa" would match "Jacke ROSANA" in magenta.
   const productTitle = product.title?.toLowerCase() || ""
-  const hasColorInTitle = normalizedColors.some((color) => productTitle.includes(color))
-  
-  return hasMatchingColor || hasColorInTitle
+  return colors.some((color) => productTitle.includes(color.toLowerCase()))
 }
 
 function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): boolean {
   if (!sizes || sizes.length === 0) return true
-  
-  const normalizedSizes = sizes.map((s) => s.toLowerCase())
-  
+
+  // Numeric sizes match their letter size (42 → M), see filter-groups.ts
+  const selectedSizes = new Set(sizes.map(getSizeGroupKey))
+
   const hasMatchingSize = product.variants?.some((variant) => {
     return variant.options?.some((option) => {
       const optionTitle = option.option?.title?.toLowerCase() || ""
-      const optionValue = option.value?.toLowerCase() || ""
-      
+
       if (SIZE_OPTION_TITLES.includes(optionTitle)) {
-        return normalizedSizes.some((size) => optionValue === size)
+        return selectedSizes.has(getSizeGroupKey(option.value || ""))
       }
       return false
     })
   })
-  
+
   const hasSizeInVariant = product.variants?.some((variant) => {
-    const variantTitle = variant.title?.toLowerCase() || ""
-    return normalizedSizes.some((size) => variantTitle === size)
+    return selectedSizes.has(getSizeGroupKey(variant.title || ""))
   })
-  
-  return hasMatchingSize || hasSizeInVariant
+
+  return !!(hasMatchingSize || hasSizeInVariant)
 }
 
 function stripMaterialPercentage(raw: string): string {

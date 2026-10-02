@@ -5,7 +5,8 @@ const COLOR_OPTION_TITLES = ["color", "farbe", "colour"]
 const BUCKET_NO_COLOR = 999
 const BUCKET_UNKNOWN = 998
 
-const BUCKET_RULES: Array<{ bucket: number; pattern: RegExp }> = [
+// Also used by the shop filter (filter-groups.ts) to group colour shades.
+export const BUCKET_RULES: Array<{ bucket: number; pattern: RegExp }> = [
   {
     bucket: 0,
     pattern:

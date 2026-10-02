@@ -2,6 +2,13 @@
 
 import { HttpTypes } from "@medusajs/types"
 import { getProductMinVariantPriceForFilter } from "@lib/util/variant-price-for-filter"
+import {
+  COLOR_GROUPS,
+  COLOR_OPTION_TITLES,
+  SIZE_OPTION_TITLES,
+  getColorGroupKeys,
+  getSizeGroupKey,
+} from "@lib/util/filter-groups"
 import { listProducts } from "./products"
 import { listCategories } from "./categories"
 import { listCollections } from "./collections"
@@ -38,50 +45,8 @@ export interface DynamicFilterOptions {
   collections: HttpTypes.StoreCollection[]
 }
 
-const COLOR_HEX_MAP: Record<string, string> = {
-  schwarz: "#1a1a1a",
-  weiß: "#ffffff",
-  weiss: "#ffffff",
-  grau: "#6b7280",
-  beige: "#d4c4a8",
-  braun: "#8b6f47",
-  blau: "#2563eb",
-  navy: "#1e3a5f",
-  rot: "#dc2626",
-  bordeaux: "#722f37",
-  grün: "#16a34a",
-  oliv: "#6b8e23",
-  salbei: "#9caf88",
-  gelb: "#eab308",
-  rosa: "#f472b6",
-  lila: "#a855f7",
-  black: "#1a1a1a",
-  white: "#ffffff",
-  grey: "#6b7280",
-  gray: "#6b7280",
-  brown: "#8b6f47",
-  blue: "#2563eb",
-  red: "#dc2626",
-  green: "#16a34a",
-  olive: "#6b8e23",
-  sage: "#9caf88",
-  yellow: "#eab308",
-  pink: "#f472b6",
-  purple: "#a855f7",
-  lilac: "#c084fc",
-  kaschmir: "#e8dcc8",
-  cashmere: "#e8dcc8",
-  merino: "#f5f5dc",
-  alpaka: "#d2b48c",
-  alpaca: "#d2b48c",
-}
-
-const COLOR_OPTION_TITLES = ["color", "farbe", "colour"]
-const SIZE_OPTION_TITLES = ["size", "größe", "groesse"]
-
 const SIZE_SORT_ORDER: Record<string, number> = {
-  xxs: 0, xs: 1, s: 2, m: 3, l: 4, xl: 5, xxl: 6, "2xl": 7, "3xl": 8,
-  "34": 10, "36": 11, "38": 12, "40": 13, "42": 14, "44": 15, "46": 16, "48": 17,
+  xxs: 0, xs: 1, s: 2, m: 3, l: 4, xl: 5, xxl: 6, xxxl: 7,
 }
 
 function capitalize(str: string): string {
@@ -90,11 +55,8 @@ function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
+// Deterministic swatch colour for shades outside the known colour groups.
 function getHexForColor(colorName: string): string {
-  const hex = COLOR_HEX_MAP[colorName.toLowerCase()]
-  if (hex) return hex
-
-  // Generate a deterministic fallback color from the string
   let hash = 0
   for (let i = 0; i < colorName.length; i++) {
     hash = colorName.charCodeAt(i) + ((hash << 5) - hash)
@@ -104,7 +66,7 @@ function getHexForColor(colorName: string): string {
 }
 
 function extractColorsFromProducts(products: HttpTypes.StoreProduct[]): ColorOption[] {
-  const colorSet = new Map<string, string>()
+  const colorKeys = new Set<string>()
 
   for (const product of products) {
     const colorOption = product.options?.find(
@@ -114,17 +76,23 @@ function extractColorsFromProducts(products: HttpTypes.StoreProduct[]): ColorOpt
 
     for (const v of colorOption.values) {
       const val = v.value?.trim()
-      if (val && !colorSet.has(val.toLowerCase())) {
-        colorSet.set(val.toLowerCase(), val)
-      }
+      if (!val) continue
+      getColorGroupKeys(val).forEach((key) => colorKeys.add(key))
     }
   }
 
-  return Array.from(colorSet.entries()).map(([key, original]) => ({
-    value: key,
-    label: capitalize(original),
-    hex: getHexForColor(key),
-  }))
+  const groups = COLOR_GROUPS.filter((g) => colorKeys.has(g.value))
+  const groupValues = new Set(groups.map((g) => g.value))
+  const otherShades = Array.from(colorKeys)
+    .filter((key) => !groupValues.has(key))
+    .sort((a, b) => a.localeCompare(b, "de"))
+    .map((key) => ({
+      value: key,
+      label: capitalize(key),
+      hex: getHexForColor(key),
+    }))
+
+  return [...groups, ...otherShades]
 }
 
 function extractSizesFromProducts(products: HttpTypes.StoreProduct[]): SizeOption[] {
@@ -138,8 +106,11 @@ function extractSizesFromProducts(products: HttpTypes.StoreProduct[]): SizeOptio
 
     for (const v of sizeOption.values) {
       const val = v.value?.trim()
-      if (val && !sizeSet.has(val.toLowerCase())) {
-        sizeSet.set(val.toLowerCase(), val)
+      if (!val) continue
+      // Numeric sizes (36, 42, …) are grouped under their letter size
+      const key = getSizeGroupKey(val)
+      if (!sizeSet.has(key)) {
+        sizeSet.set(key, val)
       }
     }
   }
@@ -147,7 +118,7 @@ function extractSizesFromProducts(products: HttpTypes.StoreProduct[]): SizeOptio
   return Array.from(sizeSet.entries())
     .map(([key, original]) => ({
       value: key,
-      label: capitalize(original),
+      label: key in SIZE_SORT_ORDER ? key.toUpperCase() : capitalize(original),
     }))
     .sort((a, b) => {
       const orderA = SIZE_SORT_ORDER[a.value] ?? 100
