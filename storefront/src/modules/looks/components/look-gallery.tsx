@@ -152,6 +152,21 @@ export default function LookGallery({
     goTo(clamp(index, 0, maxIndex))
   }
 
+  // Tab auf ein nur angeschnittenes Foto: ganz in den Slider holen. Der
+  // Browser scrollt selbst nicht, solange ein Stück sichtbar ist – sonst
+  // spränge der Zähler beim Weitertabben von 1 auf 3.
+  const revealOnFocus = (
+    index: number,
+    e: React.FocusEvent<HTMLButtonElement>
+  ) => {
+    const track = trackRef.current
+    if (!track) return
+    const t = track.getBoundingClientRect()
+    const b = e.currentTarget.getBoundingClientRect()
+    if (b.left >= t.left - 1 && b.right <= t.right + 1) return
+    go(index)
+  }
+
   const onTrackKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
     if (e.target !== e.currentTarget) return
     const map: Record<string, number> = {
@@ -258,6 +273,7 @@ export default function LookGallery({
                   data-testid="look-photo"
                   aria-label={`Bild ${i + 1} vergrößern`}
                   onClick={() => setLightboxIndex(i)}
+                  onFocus={(e) => revealOnFocus(i, e)}
                   className="relative block aspect-[2/3] w-full overflow-hidden rounded-xl bg-stone-100 cursor-zoom-in"
                 >
                   <Image
