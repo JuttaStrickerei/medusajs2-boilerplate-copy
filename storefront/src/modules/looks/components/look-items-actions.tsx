@@ -362,7 +362,11 @@ export default function LookItemsActions({
   return (
     <div>
       {showSizeAll && (
-        <div ref={sizeAllRef} data-testid="look-size-all" className="mb-4">
+        <div
+          ref={sizeAllRef}
+          data-testid="look-size-all"
+          className="relative mb-4"
+        >
           <LookOptionChips
             name="look-size-all"
             legend="Ihre Größe für alle Teile"
@@ -376,25 +380,25 @@ export default function LookItemsActions({
             missing={allSizesMissing}
             attention={attention?.target === "size-all" && allSizesMissing}
             aside={
-              <span className="flex items-center gap-3">
-                {sizesDiffer && (
-                  <span className="text-xs text-stone-500">
-                    Individuell gewählt
-                  </span>
-                )}
-                <a
-                  href={`/${countryCode}/size-guide`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
-                >
-                  <Ruler size={14} aria-hidden />
-                  Größenberatung
-                  <span className="sr-only">(öffnet in neuem Tab)</span>
-                </a>
-              </span>
+              <a
+                href={`/${countryCode}/size-guide`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
+              >
+                <Ruler size={14} aria-hidden />
+                Größenberatung
+                <span className="sr-only">(öffnet in neuem Tab)</span>
+              </a>
             }
           />
+          {/* steht im Abstand unter den Buttons, damit die Teile darunter
+              nicht springen, wenn der Hinweis erscheint */}
+          {sizesDiffer && (
+            <p className="absolute left-0 top-full text-[11px] leading-4 text-stone-500">
+              Individuell gewählt
+            </p>
+          )}
         </div>
       )}
 
