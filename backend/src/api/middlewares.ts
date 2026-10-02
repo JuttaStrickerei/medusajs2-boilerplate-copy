@@ -1,4 +1,4 @@
-import { defineMiddlewares, validateAndTransformBody } from "@medusajs/framework/http"
+import { authenticate, defineMiddlewares, validateAndTransformBody } from "@medusajs/framework/http"
 import { wishlistMiddlewares } from "./store/wishlist/middlewares"
 import { storeLookMiddlewares } from "./store/looks/middlewares"
 import { adminLookMiddlewares } from "./admin/looks/middlewares"
@@ -41,5 +41,11 @@ export default defineMiddlewares({
       middlewares: [validateAndTransformBody(PostInvoiceConfigSchema)],
     },
     ...adminSendcloudShipmentMiddlewares,
+    // Sendcloud label proxy (customer names/addresses): admins only. Stored
+    // label_url links keep working for logged-in admins via the session cookie.
+    {
+      matcher: "/labels/*",
+      middlewares: [authenticate("user", ["session", "bearer", "api-key"])],
+    },
   ],
 })
