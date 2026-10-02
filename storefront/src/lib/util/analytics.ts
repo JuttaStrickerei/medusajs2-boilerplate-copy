@@ -2,8 +2,11 @@ import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "./get-product-price"
 
 /**
- * GA4 e-commerce helpers. `gtag` is defined inline in app/layout.tsx and
- * respects Google Consent Mode, so events can be sent unconditionally here.
+ * GA4 e-commerce helpers. `gtag` is defined inline in app/layout.tsx.
+ * Events are only sent after the visitor accepted the "analytics" category
+ * in the cookie banner: Consent Mode alone would still send cookieless
+ * pings (incl. order ids and values) before consent, which the privacy
+ * page rules out.
  * Amounts in Medusa v2 are already in currency units (110 = € 110,00).
  */
 
@@ -19,8 +22,24 @@ export type GaItem = {
   quantity?: number
 }
 
+// vanilla-cookieconsent v3 keeps its state as URI-encoded JSON in the
+// "cc_cookie" cookie ({ categories: ["necessary", "analytics"], ... })
+function hasAnalyticsConsent(): boolean {
+  try {
+    const match = document.cookie.match(/(?:^|;)\s*cc_cookie=([^;]+)/)
+    if (!match) return false
+    const state = JSON.parse(decodeURIComponent(match[1]))
+    return Array.isArray(state?.categories) && state.categories.includes("analytics")
+  } catch {
+    return false
+  }
+}
+
 export function trackEvent(name: string, params: Record<string, unknown>) {
   if (typeof window === "undefined" || typeof gtag !== "function") {
+    return
+  }
+  if (!hasAnalyticsConsent()) {
     return
   }
   gtag("event", name, params)
