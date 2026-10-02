@@ -390,27 +390,34 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 /**
  * Places an order for a cart. If no cart ID is provided, it will use the cart ID from the cookies.
  * @param cartId - optional - The ID of the cart to place an order for.
- * @returns The cart object if the order was successful, or null if not.
+ * @returns Redirects to the confirmation page on success. On failure it returns
+ * `{ error }` instead of throwing, because thrown server-action errors are
+ * replaced by React's generic message in production.
  */
 export async function placeOrder(cartId?: string) {
   const id = cartId || (await getCartId())
 
   if (!id) {
-    throw new Error("No existing cart found when placing an order")
+    return { error: "No existing cart found when placing an order" }
   }
 
   const headers = {
     ...(await getAuthHeaders()),
   }
 
-  const cartRes = await sdk.store.cart
-    .complete(id, {}, headers)
-    .then(async (cartRes) => {
-      const cartCacheTag = await getCacheTag("cart")
-      revalidateTag(cartCacheTag)
-      return cartRes
-    })
-    .catch(medusaError)
+  let cartRes: HttpTypes.StoreCompleteCartResponse
+  try {
+    cartRes = await sdk.store.cart
+      .complete(id, {}, headers)
+      .then(async (cartRes) => {
+        const cartCacheTag = await getCacheTag("cart")
+        revalidateTag(cartCacheTag)
+        return cartRes
+      })
+      .catch(medusaError)
+  } catch (e: any) {
+    return { error: e?.message || "Cart completion failed" }
+  }
 
   if (cartRes?.type === "order") {
     const countryCode =
@@ -427,7 +434,7 @@ export async function placeOrder(cartId?: string) {
   const message =
     (cartRes as any)?.error?.message ||
     "Die Zahlung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
-  throw new Error(message)
+  return { error: message }
 }
 
 /**
