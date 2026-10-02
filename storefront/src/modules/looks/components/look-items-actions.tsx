@@ -680,15 +680,16 @@ export default function LookItemsActions({
         </a>
       </p>
 
-      {/* Mobile Kaufleiste: fest unten, ab dem ersten Paint sichtbar */}
+      {/* Mobile Kaufleiste: fest unten, ab dem ersten Paint sichtbar.
+          Ausgeblendet per visibility statt inert: inert während eines
+          Tab-Schritts kostete einen zusätzlichen Tab-Stopp in der Liste. */}
       <div
         data-testid="look-sticky-bar"
         data-look-buybar=""
         aria-hidden={barHidden || undefined}
-        inert={barHidden || undefined}
         className={cn(
-          "fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-4 border-t border-stone-200 bg-white/95 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur duration-200 motion-safe:transition-transform tablet:hidden",
-          barHidden && "translate-y-full"
+          "fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-4 border-t border-stone-200 bg-white/95 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur duration-200 motion-safe:transition-[transform,visibility] tablet:hidden",
+          barHidden && "invisible translate-y-full"
         )}
       >
         <div className="min-w-0">

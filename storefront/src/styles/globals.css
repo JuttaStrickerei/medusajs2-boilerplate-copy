@@ -542,7 +542,7 @@
    Browser fokussierte Elemente nicht unter sie (außerhalb von @layer, damit
    Tailwind die klassenlose Regel nicht verwirft) */
 @media (max-width: 767px) {
-  html:has([data-look-buybar]:not([inert])) {
+  html:has([data-look-buybar]:not([aria-hidden])) {
     scroll-padding-bottom: 5rem;
   }
 }
