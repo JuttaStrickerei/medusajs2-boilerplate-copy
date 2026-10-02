@@ -96,7 +96,7 @@ export default function LookTemplate({
               <li>
                 <LocalizedClientLink
                   href="/looks"
-                  className="-my-2 inline-block py-2 hover:text-stone-800"
+                  className="-my-[13px] inline-block py-[13px] hover:text-stone-800"
                 >
                   Looks
                 </LocalizedClientLink>
@@ -191,11 +191,12 @@ export default function LookTemplate({
               14 Tage Widerrufsrecht ab Erhalt der Ware
             </li>
           </ul>
+          {/* py-3.5 mit negativem Rand: 44px Tippfläche, Text bleibt an Ort */}
           <LocalizedClientLink
             href="/shipping"
-            className="mt-2 inline-block text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
+            className="-mb-3.5 -mt-1.5 inline-block py-3.5 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
           >
-            Versand &amp; Rückgabe im Detail
+            Versand &amp; Retouren im Detail
           </LocalizedClientLink>
         </div>
       </div>
