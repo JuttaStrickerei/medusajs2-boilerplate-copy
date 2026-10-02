@@ -259,6 +259,9 @@ export default function LookGallery({
       >
         {images.map((url, i) => {
           const note = notes[url]
+          // Mobil ragen Hinweis und Zähler der Nachbarfotos angeschnitten an
+          // den Rand – nur die des aktiven Fotos zeigen (Platz bleibt gleich)
+          const dimmed = i !== active
           return (
             <li
               key={url}
@@ -288,12 +291,15 @@ export default function LookGallery({
                   <span
                     aria-hidden
                     data-testid="look-photo-counter"
-                    className="tablet:hidden absolute bottom-2.5 right-2.5 inline-flex h-6 items-center rounded-full bg-white/85 px-2 text-[11px] font-medium tabular-nums text-stone-700"
+                    className={cn(
+                      "tablet:hidden absolute bottom-2.5 right-2.5 inline-flex h-6 items-center rounded-full bg-white/85 px-2 text-[11px] font-medium tabular-nums text-stone-700 transition-opacity duration-200",
+                      dimmed && "opacity-0"
+                    )}
                   >
                     {i + 1} / {count}
                   </span>
                 </button>
-                {note && <Caption note={note} />}
+                {note && <Caption note={note} dimmed={dimmed} />}
               </figure>
             </li>
           )
@@ -350,9 +356,16 @@ export default function LookGallery({
   )
 }
 
-function Caption({ note }: { note: string }) {
+function Caption({ note, dimmed }: { note: string; dimmed?: boolean }) {
   return (
-    <figcaption className="flex gap-1.5 pt-2 text-xs leading-4 text-stone-600 tablet:text-[13px] tablet:leading-5">
+    <figcaption
+      className={cn(
+        "flex gap-1.5 pt-2 text-xs leading-4 text-stone-600 transition-opacity duration-200 tablet:text-[13px] tablet:leading-5",
+        // ab 768px stehen Nachbarfotos ganz außerhalb (bzw. ab 1280px ganz
+        // daneben) – dort bleibt jeder Hinweis sichtbar
+        dimmed && "opacity-0 tablet:opacity-100"
+      )}
+    >
       <Info size={14} aria-hidden className="mt-px shrink-0 text-stone-400" />
       {note}
     </figcaption>
