@@ -310,6 +310,4 @@ const medusaConfig = {
   plugins: []
 };
 
-console.log(JSON.stringify(medusaConfig, null, 2));
-
 export default /** @type {import('@medusajs/types').MedusaConfig} */ (defineConfig(medusaConfig))
