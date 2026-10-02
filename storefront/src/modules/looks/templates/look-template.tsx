@@ -10,7 +10,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { ViewItemList } from "@modules/common/components/analytics"
 import LookGallery from "../components/look-gallery"
 import LookItemsActions from "../components/look-items-actions"
-import ProductTabs from "@modules/products/components/product-tabs"
+import { RefreshCw, RotateCcw, Truck } from "@components/icons"
 
 type LookTemplateProps = {
   look: StoreLook
@@ -151,23 +151,40 @@ export default function LookTemplate({
           )}
 
           {products.length > 0 ? (
-            <>
-              <LookItemsActions
-                lookId={look.id}
-                lookTitle={look.title}
-                products={products}
-              />
-              {/* Dieselbe „Versand & Retouren“-Karte wie auf der Produktseite
-                  (Wrapper nötig: im Flex-Container würde mx-auto sie schrumpfen) */}
-              <div className="mt-6">
-                <ProductTabs product={products[0]} showDetails={false} />
-              </div>
-            </>
+            <LookItemsActions
+              lookId={look.id}
+              lookTitle={look.title}
+              products={products}
+            />
           ) : (
             <p className="text-stone-600">
               Die Teile dieses Looks sind derzeit nicht verfügbar.
             </p>
           )}
+
+          {/* Kurzfassung der „Versand & Retouren“-Karte aus product-tabs
+              (dieselben Aussagen; product-tabs ist "use client", daher hier
+              als Text statt Import) */}
+          <ul className="mt-6 space-y-1.5 border-t border-stone-200 pt-4 text-xs leading-5 text-stone-600">
+            <li className="flex gap-2">
+              <Truck size={14} aria-hidden className="mt-[3px] shrink-0 text-stone-400" />
+              Lieferung in etwa 2 Wochen – Versand innerhalb Österreichs
+            </li>
+            <li className="flex gap-2">
+              <RefreshCw size={14} aria-hidden className="mt-[3px] shrink-0 text-stone-400" />
+              Passt nicht? Wir tauschen unkompliziert.
+            </li>
+            <li className="flex gap-2">
+              <RotateCcw size={14} aria-hidden className="mt-[3px] shrink-0 text-stone-400" />
+              14 Tage Widerrufsrecht ab Erhalt der Ware
+            </li>
+          </ul>
+          <LocalizedClientLink
+            href="/shipping"
+            className="mt-2 inline-block text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
+          >
+            Versand &amp; Rückgabe im Detail
+          </LocalizedClientLink>
         </div>
       </div>
     </div>
