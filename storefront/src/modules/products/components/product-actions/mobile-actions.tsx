@@ -20,6 +20,7 @@ type MobileActionsProps = {
   inStock?: boolean
   handleAddToCart: () => void
   isAdding?: boolean
+  error?: string | null
   show: boolean
   optionsDisabled: boolean
 }
@@ -32,6 +33,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   inStock,
   handleAddToCart,
   isAdding,
+  error,
   show,
   optionsDisabled,
 }) => {
@@ -131,6 +133,9 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   : "In den Warenkorb"}
               </Button>
             </div>
+            {error && (
+              <p className="text-sm text-red-600 text-center">{error}</p>
+            )}
           </div>
         </Transition>
       </div>

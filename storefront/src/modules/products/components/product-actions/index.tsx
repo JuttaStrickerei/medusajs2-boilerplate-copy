@@ -40,6 +40,7 @@ export default function ProductActions({
   const [isAdding, setIsAdding] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
   const countryCode = useParams().countryCode as string
 
   // Wishlist hook - consume items directly for reliable reactivity
@@ -65,28 +66,37 @@ export default function ProductActions({
     if (!selectedVariant?.id) return null
 
     setIsAdding(true)
+    setAddError(null)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: quantity,
-      countryCode,
-    })
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: quantity,
+        countryCode,
+      })
 
-    // Trigger instant cart update
-    triggerCartRefresh()
+      // Trigger instant cart update
+      triggerCartRefresh()
 
-    const item = productToItem(product, selectedVariant, quantity)
-    trackEvent("add_to_cart", {
-      currency: gaCurrency(selectedVariant.calculated_price?.currency_code),
-      value: (item.price ?? 0) * quantity,
-      items: [item],
-    })
+      const item = productToItem(product, selectedVariant, quantity)
+      trackEvent("add_to_cart", {
+        currency: gaCurrency(selectedVariant.calculated_price?.currency_code),
+        value: (item.price ?? 0) * quantity,
+        items: [item],
+      })
 
-    setIsAdding(false)
-    setAddedToCart(true)
+      setAddedToCart(true)
 
-    // Reset the "added" state after 2 seconds
-    setTimeout(() => setAddedToCart(false), 2000)
+      // Reset the "added" state after 2 seconds
+      setTimeout(() => setAddedToCart(false), 2000)
+    } catch (e) {
+      console.error("Add to cart failed:", e)
+      setAddError(
+        "Der Artikel konnte nicht in den Warenkorb gelegt werden. Bitte versuchen Sie es erneut."
+      )
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   // Handle wishlist toggle
@@ -222,6 +232,12 @@ export default function ProductActions({
             {getButtonText()}
           </Button>
 
+          {addError && (
+            <p className="text-sm text-red-600" role="alert">
+              {addError}
+            </p>
+          )}
+
           {/* Secondary Actions — drei gleich breite Felder, Gesamtbreite wie „Bitte … wählen“-Button */}
           <div className="grid grid-cols-3 gap-3">
             <Button
@@ -291,6 +307,7 @@ export default function ProductActions({
           inStock={inStock}
           handleAddToCart={handleAddToCart}
           isAdding={isAdding}
+          error={addError}
           show={!inView}
           optionsDisabled={!!disabled || isAdding}
         />
