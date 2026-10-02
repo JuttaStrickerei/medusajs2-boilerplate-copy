@@ -96,10 +96,12 @@ export default function ImageLightbox({
 
   const caption = captions?.[images[index]]
 
+  // Fast deckender, weichgezeichneter Hintergrund: sonst scheint der
+  // Seitentext (z. B. der Foto-Hinweis) doppelt hinter der Bildunterschrift durch
   return createPortal(
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-[100] flex flex-col bg-black/90"
+      className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={`Bilder: ${title}`}
