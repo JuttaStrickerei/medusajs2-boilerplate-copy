@@ -245,12 +245,18 @@ export default function LookItemsActions({
           : s.missingLabel ?? "Auswahl"
       groups.set(label, [...(groups.get(label) ?? []), p.title ?? ""])
     })
+    // Mehrere Teile je Angabe als Anzahl, damit die Zeile im klebenden Teil
+    // kurz bleibt („Größe für 4 Teile, Farbe für Mantel ROUGA“); zwei Namen
+    // nur, wenn nur eine Angabe fehlt
+    const several = groups.size > 1
     const parts = Array.from(groups.entries()).map(([label, titles]) =>
-      titles.length === purchasable.length && titles.length > 2
+      titles.length === 1 || (titles.length === 2 && !several)
+        ? `${label} für ${titles.join(" und ")}`
+        : titles.length === purchasable.length
         ? `${label} für alle ${titles.length} Teile`
-        : `${label} für ${titles.join(", ")}`
+        : `${label} für ${titles.length} Teile`
     )
-    return `Noch offen: ${parts.join("; ")}`
+    return `Noch offen: ${parts.join(", ")}`
   })()
 
   const firstMissing = notReady[0] ? sel(notReady[0]) : undefined
@@ -543,7 +549,8 @@ export default function LookItemsActions({
             role={helperIsAlert ? "alert" : undefined}
             aria-live={helperIsAlert ? undefined : "polite"}
             className={cn(
-              "text-xs small:order-1 small:w-full",
+              // ab 768px klebt die Zusammenfassung: höchstens eine Zeile
+              "text-xs tablet:line-clamp-1 small:order-1 small:w-full",
               missingText && "mt-1 small:mb-0.5 small:mt-0",
               helperIsAlert ? "text-red-700" : "text-stone-600"
             )}
