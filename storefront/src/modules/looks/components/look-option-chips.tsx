@@ -28,6 +28,8 @@ type LookOptionChipsProps = {
   missing?: boolean
   // rechts neben der Legende (z. B. Link „Größenberatung“)
   aside?: React.ReactNode
+  // Größen-Buttons ab 1024px schmal (Zeile eines Teils neben dem Bild)
+  narrow?: boolean
   className?: string
 }
 
@@ -48,6 +50,7 @@ export default function LookOptionChips({
   attention,
   missing,
   aside,
+  narrow,
   className,
 }: LookOptionChipsProps) {
   const isSize = kind === "size"
@@ -112,7 +115,15 @@ export default function LookOptionChips({
                 className={cn(
                   "flex w-full items-center justify-center border border-stone-300 bg-white font-medium text-stone-800 transition-colors",
                   isSize
-                    ? "h-11 rounded-lg text-xs tabular-nums small:h-10"
+                    ? cn(
+                        "h-11 rounded-lg text-xs tabular-nums small:h-10",
+                        // „XXXL“ braucht in den schmalen Buttons einer Zeile
+                        // (ab 1024px rund 41px) etwas kleinere Schrift, sonst
+                        // klebt es am Rand
+                        narrow &&
+                          value.length >= 4 &&
+                          "small:text-[11px] small:tracking-tight"
+                      )
                     : "h-9 rounded-full px-3 text-xs",
                   "hover:border-stone-500",
                   "peer-checked:border-stone-900 peer-checked:bg-stone-900 peer-checked:text-white",

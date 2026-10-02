@@ -457,6 +457,7 @@ export default function LookItemCard({
           }`}
           legendVisible={false}
           kind="size"
+          narrow
           values={sizeValues}
           current={selectedSize}
           availability={availability[sizeOption.id]}
@@ -493,7 +494,7 @@ export default function LookItemCard({
       <div
         aria-live="polite"
         className={cn(
-          "col-span-2 text-xs small:col-start-2",
+          "col-span-2 text-xs small:col-span-1 small:col-start-2",
           status && "mt-1.5",
           status?.tone === "red" ? "text-red-700" : "text-amber-800"
         )}
@@ -509,7 +510,7 @@ export default function LookItemCard({
       {detailsOpen && (
         <div
           id={detailsId}
-          className="col-span-2 pt-3 small:order-last small:col-start-2"
+          className="col-span-2 pt-3 small:order-last small:col-span-1 small:col-start-2"
         >
           {details.length > 0 && (
             <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-xs">
