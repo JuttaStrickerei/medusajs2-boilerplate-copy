@@ -3,18 +3,25 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 /**
  * GET /labels/:parcel_id
  * 
- * Public endpoint to download shipping labels for Sendcloud parcels.
- * This endpoint proxies the request to Sendcloud with authentication.
+ * Downloads shipping labels for Sendcloud parcels (the stored label_url
+ * links point here). This endpoint proxies the request to Sendcloud with
+ * authentication.
  * 
  * Query parameters:
  * - format: "a4" or "a6" (default: "a6" for label printers)
  * 
- * Note: This is a public endpoint but parcel IDs are random Sendcloud IDs.
- * Security through obscurity - the IDs are not guessable.
+ * Note: Labels contain customer names and addresses, so this route requires
+ * a logged-in admin user (see /labels/* in src/api/middlewares.ts).
  */
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const parcel_id = req.params.parcel_id
   const format = (req.query.format as string)?.toLowerCase() || "a6" // Default to A6
+
+  // Sendcloud parcel IDs are numeric; anything else (e.g. "../") must not
+  // end up in the Sendcloud URL that is called with the shop's credentials
+  if (!/^\d+$/.test(parcel_id)) {
+    return res.status(400).json({ message: "Invalid parcel_id" })
+  }
 
   console.log("[SendcloudLabel] Downloading label for parcel:", parcel_id, "format:", format)
 

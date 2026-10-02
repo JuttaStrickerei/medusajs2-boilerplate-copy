@@ -52,9 +52,10 @@ export default async function backfill({ container }: ExecArgs) {
   logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   try {
-    // List all product categories
+    // List product categories the storefront can show (inactive and
+    // internal ones would be search hits that lead to a 404)
     const [categories] = await productModuleService.listAndCountProductCategories(
-      {},
+      { is_active: true, is_internal: false },
       { take: 100 }
     );
 

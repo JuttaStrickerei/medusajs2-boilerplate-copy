@@ -14,7 +14,9 @@ export function getMeiliSearchClient(): MeiliSearch | null {
     return null
   }
 
-  client = new MeiliSearch({ host, apiKey })
+  // Short timeout so a hanging Meili does not stall the search box; the
+  // callers fall back to the Medusa product search instead
+  client = new MeiliSearch({ host, apiKey, timeout: 3000 })
   return client
 }
 
@@ -67,7 +69,8 @@ export interface MultiSearchResults {
  */
 export async function searchProductsInMeiliSearch(
   query: string,
-  limit: number = 20
+  limit: number = 20,
+  options: { throwOnError?: boolean } = {}
 ): Promise<MeiliSearchProduct[]> {
   if (!query || query.trim().length < 2) {
     return []
@@ -101,10 +104,14 @@ export async function searchProductsInMeiliSearch(
 
     return results.hits
   } catch (error) {
+    if (options.throwOnError) throw error
     console.error('MeiliSearch search error:', error)
     return []
   }
 }
+
+// Fehler der Multi-Search nur einmal pro Ausfall loggen (nicht bei jedem Tastendruck)
+let multiSearchErrorLogged = false
 
 /**
  * Multi-search across products, categories, and collections
@@ -201,10 +208,26 @@ export async function searchAllInMeiliSearch(
       }
     })
 
+    multiSearchErrorLogged = false
     return results
   } catch (error) {
-    console.error('MeiliSearch multi-search error:', error)
-    return emptyResults
+    if (!multiSearchErrorLogged) {
+      console.error(
+        'MeiliSearch multi-search error, falling back to products-only search:',
+        error
+      )
+      multiSearchErrorLogged = true
+    }
+    // Fallback: nur Produkte suchen (wie /results), damit ein fehlender
+    // categories/collections-Index nicht auch die Produktvorschläge leert.
+    // Ist Meili ganz weg, wirft auch diese Suche, und searchAllEntities
+    // nutzt die Medusa-Produktsuche.
+    return {
+      ...emptyResults,
+      products: await searchProductsInMeiliSearch(query, limit, {
+        throwOnError: true,
+      }),
+    }
   }
 }
 

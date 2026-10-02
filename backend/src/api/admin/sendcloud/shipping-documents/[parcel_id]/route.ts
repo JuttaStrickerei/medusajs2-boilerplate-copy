@@ -286,6 +286,12 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const orderId = req.query.order_id as string
   const docType = (req.query.type as string) || "combined"
 
+  // Sendcloud parcel IDs are numeric; anything else (e.g. "../") must not
+  // end up in the Sendcloud URL that is called with the shop's credentials
+  if (!/^\d+$/.test(parcelId)) {
+    return res.status(400).json({ message: "Invalid parcel_id" })
+  }
+
   if (!orderId) {
     return res.status(400).json({ message: "order_id query parameter is required" })
   }

@@ -96,11 +96,11 @@ const FulfillmentCancelButtonWidget = ({
     setDownloadingId(fulfillment.id)
     
     try {
-      // Use our public label endpoint (A6 format by default)
+      // Use the admin label endpoint (A6 format by default)
       const backendUrl = window.location.origin
-      const labelUrl = `${backendUrl}/labels/${parcelId}`
+      const labelUrl = `${backendUrl}/admin/sendcloud/labels/${parcelId}`
       
-      const response = await fetch(labelUrl)
+      const response = await fetch(labelUrl, { credentials: "include" })
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))

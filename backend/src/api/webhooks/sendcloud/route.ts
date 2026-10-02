@@ -5,6 +5,7 @@ import {
   cancelOrderFulfillmentWorkflow,
   createOrderShipmentWorkflow,
   markFulfillmentAsDeliveredWorkflow,
+  markOrderFulfillmentAsDeliveredWorkflow,
   updateFulfillmentWorkflow
 } from "@medusajs/medusa/core-flows";
 import { SENDCLOUD_SHIPMENT_MODULE } from "../../../modules/sendcloud-shipment";
@@ -423,15 +424,61 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         case "delivered": {
           console.log(`[SendcloudWebhook] 📬 Marking as delivered: ${medusaFulfillmentId}`);
 
-          try {
-            await markFulfillmentAsDeliveredWorkflow(req.scope).run({
-              input: { id: medusaFulfillmentId }
-            });
-            console.log(`[SendcloudWebhook] ✅ Fulfillment marked as delivered`);
-          } catch (deliveryError: any) {
-            // If workflow fails (e.g., already delivered), log and continue.
-            // Metadata patch below still runs so sendcloud_status reflects reality.
-            console.warn(`[SendcloudWebhook] ⚠️ Delivery workflow failed (may already be delivered): ${deliveryError.message}`);
+          if (foundFulfillment.delivered_at) {
+            // Repeated "Delivered" tick: delivery (and its email) already happened.
+            console.log(`[SendcloudWebhook] ⏭️ Fulfillment already delivered, skipping delivery workflow`);
+          } else {
+            // Resolve order_id (same pattern as the shipped branch). Return parcels
+            // are linked to a return, not to the order, and must not trigger the
+            // customer "Zustellung" email.
+            let orderId: string | null = null;
+            if (!get(foundFulfillment, 'data.is_return')) {
+              try {
+                const queryService = req.scope.resolve("query") as any;
+                const { data: orderFulfillments } = await queryService.graph({
+                  entity: "order_fulfillment",
+                  fields: ["order_id"],
+                  filters: { fulfillment_id: medusaFulfillmentId },
+                });
+                orderId = orderFulfillments?.[0]?.order_id || null;
+              } catch (e) {
+                console.warn(`[SendcloudWebhook] Could not resolve order_id: ${(e as Error).message}`);
+              }
+            }
+
+            let delivered = false;
+            if (orderId) {
+              try {
+                // Order-level workflow: sets delivered_at, registers the delivery on
+                // the order and emits delivery.created → shipment-delivered email.
+                await markOrderFulfillmentAsDeliveredWorkflow(req.scope).run({
+                  input: { orderId, fulfillmentId: medusaFulfillmentId }
+                });
+                delivered = true;
+                console.log(`[SendcloudWebhook] ✅ Order fulfillment marked as delivered (order ${orderId})`);
+              } catch (deliveryError: any) {
+                // The fallback below sets delivered_at, so later "Delivered" ticks
+                // skip this branch: the customer email is not sent automatically.
+                // Staff must resend it / mark the order delivered in the admin.
+                console.error(
+                  `[SendcloudWebhook] ❌ Order delivery workflow failed for order ${orderId}, fulfillment ${medusaFulfillmentId}; ` +
+                  `falling back to fulfillment only, delivery email NOT sent: ${deliveryError.message}`
+                );
+              }
+            }
+
+            if (!delivered) {
+              try {
+                await markFulfillmentAsDeliveredWorkflow(req.scope).run({
+                  input: { id: medusaFulfillmentId }
+                });
+                console.log(`[SendcloudWebhook] ✅ Fulfillment marked as delivered`);
+              } catch (deliveryError: any) {
+                // If workflow fails (e.g., already delivered), log and continue.
+                // Metadata patch below still runs so sendcloud_status reflects reality.
+                console.warn(`[SendcloudWebhook] ⚠️ Delivery workflow failed (may already be delivered): ${deliveryError.message}`);
+              }
+            }
           }
 
           // ALWAYS patch metadata so sendcloud_status reflects "Delivered".

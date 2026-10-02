@@ -83,6 +83,15 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.send(Buffer.from(pdfBuffer))
     }
 
+    // Our own /labels/:parcel_id proxy requires an admin login, so fetching
+    // it server-side would get 401. Fetch the same A6 label from Sendcloud.
+    const proxyParcelId = labelUrl && !labelUrl.includes("sendcloud.sc")
+      ? labelUrl.match(/\/labels\/(\d+)(?:[/?#]|$)/)?.[1]
+      : undefined
+    if (proxyParcelId) {
+      labelUrl = `https://panel.sendcloud.sc/api/v2/labels/label_printer/${proxyParcelId}`
+    }
+
     // If we have a direct label URL, try to fetch it
     if (labelUrl) {
       console.log("[LabelDownload] Fetching from label URL:", labelUrl)
