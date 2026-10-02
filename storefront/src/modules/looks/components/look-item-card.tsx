@@ -332,11 +332,17 @@ export default function LookItemCard({
 
       <div className="col-start-2 row-start-1 min-w-0">
         <div className="flex items-start gap-2">
+          {/* py-2.5/-my-2.5: 44px Tippfläche ohne mehr Höhe in der Zeile;
+              relative, damit sie auch über der Zeile darunter greift. Das
+              Kürzen auf 2 Zeilen sitzt innen, sonst schiene eine dritte
+              Zeile im Innenabstand durch. */}
           <LocalizedClientLink
             href={`/products/${product.handle}`}
-            className="line-clamp-2 text-[15px] font-medium text-stone-900 underline-offset-4 hover:underline"
+            className="group/name relative -my-2.5 py-2.5 text-[15px] font-medium text-stone-900"
           >
-            {product.title}
+            <span className="line-clamp-2 underline-offset-4 group-hover/name:underline">
+              {product.title}
+            </span>
           </LocalizedClientLink>
           {price && (
             <p className="ml-auto shrink-0 text-right text-[15px] tabular-nums">

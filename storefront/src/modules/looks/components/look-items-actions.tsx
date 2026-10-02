@@ -458,7 +458,7 @@ export default function LookItemsActions({
                   href={`/${countryCode}/size-guide`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="-my-2 flex items-center gap-1 py-2 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
+                  className="-my-3.5 flex items-center gap-1 py-3.5 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
                 >
                   <Ruler size={14} aria-hidden />
                   Größenberatung
