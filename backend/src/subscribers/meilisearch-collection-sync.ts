@@ -1,15 +1,16 @@
 import type { SubscriberArgs, SubscriberConfig } from '@medusajs/framework';
 import { IProductModuleService, Logger } from '@medusajs/framework/types';
-import { Modules } from '@medusajs/framework/utils';
+import { Modules, ProductCollectionWorkflowEvents } from '@medusajs/framework/utils';
 import { MeiliSearchService } from '@rokmohar/medusa-plugin-meilisearch';
 
 /**
- * Collection event names (using string literals since no exported constants exist)
+ * Collection event names as emitted by Medusa's collection workflows
+ * ('product-collection.created' etc., one event per collection with payload { id })
  */
 const COLLECTION_EVENTS = {
-  CREATED: 'product_collection.created',
-  UPDATED: 'product_collection.updated',
-  DELETED: 'product_collection.deleted',
+  CREATED: ProductCollectionWorkflowEvents.CREATED,
+  UPDATED: ProductCollectionWorkflowEvents.UPDATED,
+  DELETED: ProductCollectionWorkflowEvents.DELETED,
 } as const;
 
 /**
