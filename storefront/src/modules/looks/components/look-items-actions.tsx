@@ -17,7 +17,7 @@ import {
   sortProductOptions,
   translateOptionTitle,
 } from "@modules/products/hooks/use-variant-selection"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import LookItemCard, { LookBulkSize, LookItemSelection } from "./look-item-card"
 import LookOptionChips, { sortSizes } from "./look-option-chips"
@@ -79,6 +79,7 @@ export default function LookItemsActions({
   products,
 }: LookItemsActionsProps) {
   const countryCode = useParams().countryCode as string
+  const router = useRouter()
   const [selections, setSelections] = useState<
     Record<string, LookItemSelection>
   >({})
@@ -335,10 +336,16 @@ export default function LookItemsActions({
     : soldOut.length > 0
     ? "Look in den Warenkorb"
     : "Ganzen Look in den Warenkorb"
+  // Mobil liegt die Bestätigung samt Link unter dem Bildschirmrand: solange
+  // sie gilt, führt der Button der Leiste zum Warenkorb (statt den Look ein
+  // zweites Mal hinzuzufügen)
+  const barGoesToCart = addedNotice && !isAdding
   const barLabel = isAdding
     ? "Wird hinzugefügt …"
     : added
     ? "Im Warenkorb"
+    : barGoesToCart
+    ? "Zum Warenkorb"
     : allSoldOut
     ? "Ausverkauft"
     : ready
@@ -606,7 +613,11 @@ export default function LookItemsActions({
         </div>
         <Button
           size="lg"
-          onClick={handleAddLook}
+          onClick={
+            barGoesToCart
+              ? () => router.push(`/${countryCode}/cart`)
+              : handleAddLook
+          }
           // während des Hinzufügens nicht deaktivieren: der Fokus bliebe sonst
           // nicht auf dem Button (Klicks ignoriert handleAddLook)
           disabled={allSoldOut}
