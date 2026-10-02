@@ -96,7 +96,7 @@ export default function LookTemplate({
               <li>
                 <LocalizedClientLink
                   href="/looks"
-                  className="hover:text-stone-800"
+                  className="-my-2 inline-block py-2 hover:text-stone-800"
                 >
                   Looks
                 </LocalizedClientLink>
@@ -119,7 +119,7 @@ export default function LookTemplate({
             >
               <a
                 href="#look-teile"
-                className="underline-offset-4 hover:underline"
+                className="-my-2 inline-block py-2 underline-offset-4 hover:underline"
               >
                 {pieceCount} {pieceCount === 1 ? "Teil" : "Teile"}
               </a>

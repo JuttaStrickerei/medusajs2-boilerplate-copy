@@ -368,7 +368,7 @@ export default function LookItemCard({
               })
             }
             className={cn(
-              "-my-2 -mr-2 grid h-10 w-10 shrink-0 place-items-center rounded-full text-stone-500 transition-colors hover:text-stone-900",
+              "-my-2.5 -mr-2.5 grid h-11 w-11 shrink-0 place-items-center rounded-full text-stone-500 transition-colors hover:text-stone-900",
               !price && "ml-auto"
             )}
             aria-pressed={isWishlisted}
@@ -415,7 +415,7 @@ export default function LookItemCard({
           onClick={() => setDetailsOpen((o) => !o)}
           aria-expanded={detailsOpen}
           aria-controls={detailsId}
-          className="-my-1 inline-flex items-center gap-1 py-1 hover:text-stone-900"
+          className="-my-3.5 inline-flex items-center gap-1 py-3.5 hover:text-stone-900"
         >
           Details
           <ChevronDown
@@ -434,7 +434,7 @@ export default function LookItemCard({
             aria-disabled={rowDisabled || undefined}
             aria-busy={isAdding || undefined}
             className={cn(
-              "-my-1 inline-flex items-center gap-1.5 py-1 hover:text-stone-900 aria-disabled:cursor-not-allowed aria-disabled:opacity-60",
+              "-my-3.5 inline-flex items-center gap-1.5 py-3.5 hover:text-stone-900 aria-disabled:cursor-not-allowed aria-disabled:opacity-60",
               addedToCart && "text-green-700 hover:text-green-700"
             )}
           >

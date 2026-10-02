@@ -394,7 +394,7 @@ export default function LookItemsActions({
                   href={`/${countryCode}/size-guide`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
+                  className="-my-2 flex items-center gap-1 py-2 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
                 >
                   <Ruler size={14} aria-hidden />
                   Größenberatung
@@ -528,12 +528,14 @@ export default function LookItemsActions({
         )}
       </div>
 
-      <div className="flex h-11 items-center justify-center gap-6 text-[13px] text-stone-600">
+      {/* Buttons so hoch wie die Zeile (44px Tippfläche); gap-4 + px-1 ergibt
+          denselben Abstand zwischen den Texten wie vorher gap-6 */}
+      <div className="flex h-11 items-center justify-center gap-4 text-[13px] text-stone-600">
         {!isSingle && (
           <button
             type="button"
             onClick={handleWishlistAll}
-            className="inline-flex items-center gap-1.5 hover:text-stone-900"
+            className="inline-flex h-11 items-center gap-1.5 px-1 hover:text-stone-900"
           >
             <Heart
               size={14}
@@ -547,7 +549,7 @@ export default function LookItemsActions({
         <button
           type="button"
           onClick={handleShare}
-          className="inline-flex items-center gap-1.5 hover:text-stone-900"
+          className="inline-flex h-11 items-center gap-1.5 px-1 hover:text-stone-900"
         >
           {shareCopied ? (
             <Check size={14} aria-hidden />
@@ -563,7 +565,7 @@ export default function LookItemsActions({
           href={`/${countryCode}/size-guide`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 hover:text-stone-900"
+          className="inline-flex h-11 items-center gap-1.5 px-1 hover:text-stone-900"
         >
           <Ruler size={14} aria-hidden />
           Größenberatung
