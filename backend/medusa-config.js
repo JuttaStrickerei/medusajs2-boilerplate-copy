@@ -257,8 +257,8 @@ const medusaConfig = {
           // ========================================
           // CATEGORIES - Product Categories Index
           // ========================================
-          product_categories: {
-            indexName: 'categories',  // Use 'categories' as the index name in MeiliSearch
+          // The key IS the MeiliSearch index name (plugin 0.2.1 has no 'indexName' option)
+          categories: {
             indexSettings: {
               searchableAttributes: [
                 'name',         // Priorität 1: Category name
@@ -283,8 +283,8 @@ const medusaConfig = {
           // ========================================
           // COLLECTIONS - Product Collections Index
           // ========================================
-          product_collections: {
-            indexName: 'collections',  // Use 'collections' as the index name in MeiliSearch
+          // The key IS the MeiliSearch index name (plugin 0.2.1 has no 'indexName' option)
+          collections: {
             indexSettings: {
               searchableAttributes: [
                 'title',        // Priorität 1: Collection title
