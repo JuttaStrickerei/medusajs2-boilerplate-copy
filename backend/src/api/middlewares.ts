@@ -26,6 +26,18 @@ export default defineMiddlewares({
       methods: ["POST"],
       bodyParser: { sizeLimit: "25mb" },
     },
+    // The CSV tools post the whole CSV as JSON; a full collection (300+ variant
+    // rows with descriptions) is well above the 100kb default body limit.
+    {
+      matcher: "/admin/products/upload-image-list",
+      methods: ["POST"],
+      bodyParser: { sizeLimit: "20mb" },
+    },
+    {
+      matcher: "/admin/products/import-csv",
+      methods: ["POST"],
+      bodyParser: { sizeLimit: "20mb" },
+    },
     ...wishlistMiddlewares,
     ...storeLookMiddlewares,
     ...adminLookMiddlewares,
