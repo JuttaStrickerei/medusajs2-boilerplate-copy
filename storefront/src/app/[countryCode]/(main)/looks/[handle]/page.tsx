@@ -11,6 +11,10 @@ type Props = {
   params: Promise<{ handle: string; countryCode: string }>
 }
 
+// Immer dynamisch: Die Seite liest Cookies. Gibt es beim Build keine Looks, hielte
+// Next die Route sonst für statisch und jede Look-Seite gäbe zur Laufzeit 500.
+export const dynamic = "force-dynamic"
+
 export const dynamicParams = true
 
 export async function generateStaticParams() {
