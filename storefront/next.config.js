@@ -38,6 +38,21 @@ const nextConfig = {
       },
     ]
   },
+  async headers() {
+    return [
+      {
+        // Videos haben versionierte Dateinamen (…-v2-…), daher 1 Jahr Cache
+        // statt des Next-Standards max-age=0 für public/.
+        source: "/videos/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ]
+  },
   logging: {
     fetches: {
       fullUrl: true,

@@ -1166,3 +1166,43 @@ export function Folder({ size = 24, className, ...props }: IconProps) {
   )
 }
 
+
+// Play Icon - for video controls
+export function Play({ size = 24, className, ...props }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn("", className)}
+      {...props}
+    >
+      <path d="M7 4.5v15l12-7.5-12-7.5z" />
+    </svg>
+  )
+}
+
+// Pause Icon - for video controls
+export function Pause({ size = 24, className, ...props }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn("", className)}
+      {...props}
+    >
+      <path d="M7 5h3v14H7zM14 5h3v14h-3z" />
+    </svg>
+  )
+}
