@@ -1,12 +1,10 @@
-import { Fragment } from "react"
-
 import { getBaseURL } from "@lib/util/env"
 import { cn } from "@lib/utils"
 import { ViewItemList } from "@modules/common/components/analytics"
 import JsonLd from "@modules/common/components/json-ld"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import LooksClosing from "@modules/looks/components/overview/looks-closing"
-import LooksInterlude from "@modules/looks/components/overview/looks-interlude"
 import LooksIntro from "@modules/looks/components/overview/looks-intro"
 import {
   LOOKS_LIST_ID,
@@ -23,8 +21,6 @@ import {
 import { LOOKBOOK_SEASON } from "@modules/looks/lib/worlds"
 
 const INTRO_ID = "looks-intro"
-// Der Zwischenteil steht nach der zweiten Welt (bzw. nach der letzten)
-const INTERLUDE_AFTER = 1
 
 type LooksOverviewProps = {
   overview: OverviewVM
@@ -57,7 +53,7 @@ const itemListSchema = (
 ) => ({
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: `${LOOKS_LIST_NAME} – ${LOOKBOOK_SEASON}`,
+  name: `Shop the Look – ${LOOKBOOK_SEASON}`,
   url: `${baseUrl}/${countryCode}/looks`,
   itemListOrder: "https://schema.org/ItemListOrderAscending",
   numberOfItems: looks.length,
@@ -82,13 +78,12 @@ export default function LooksOverview({
     return (
       <div className={cn(styles.root, "min-h-screen bg-stone-50")}>
         <JsonLd data={breadcrumbSchema(baseUrl, countryCode)} />
-        <LooksIntro id={INTRO_ID} count={0} isGrouped={false} />
+        <PageBreadcrumb items={[{ label: "Looks" }]} />
+        <LooksIntro id={INTRO_ID} count={0} worldCount={0} />
         <EmptyState />
       </div>
     )
   }
-
-  const interludeAfter = Math.min(INTERLUDE_AFTER, bands.length - 1)
 
   return (
     <div className={cn(styles.root, "bg-stone-50")}>
@@ -99,7 +94,12 @@ export default function LooksOverview({
         listId={LOOKS_LIST_ID}
         listName={LOOKS_LIST_NAME}
       />
-      <LooksIntro id={INTRO_ID} count={ordered.length} isGrouped={showNav} />
+      <PageBreadcrumb items={[{ label: "Looks" }]} />
+      <LooksIntro
+        id={INTRO_ID}
+        count={ordered.length}
+        worldCount={showNav ? bands.length : 0}
+      />
       {showNav && (
         <WorldNav
           sentinelId={INTRO_ID}
@@ -115,10 +115,7 @@ export default function LooksOverview({
         />
       )}
       {bands.map((band, i) => (
-        <Fragment key={band.key}>
-          <WorldBand world={band} index={i} />
-          {i === interludeAfter && <LooksInterlude />}
-        </Fragment>
+        <WorldBand key={band.key} world={band} index={i} />
       ))}
       <LooksClosing />
     </div>

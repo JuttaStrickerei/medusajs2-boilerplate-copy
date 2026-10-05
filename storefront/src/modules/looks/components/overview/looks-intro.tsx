@@ -4,33 +4,25 @@ type LooksIntroProps = {
   /** dient der Chip-Leiste als Merkpunkt „ganz oben“ */
   id: string
   count: number
-  /** nach Farbwelten gegliedert (sonst ein neutrales Band) */
-  isGrouped: boolean
+  /** Anzahl der Farbwelten (0 = ein neutrales Band) */
+  worldCount: number
 }
 
-export default function LooksIntro({ id, count, isGrouped }: LooksIntroProps) {
+// Seitenkopf wie bei Kategorien und Kollektionen: Überschrift und eine
+// kurze Zeile, damit die Looks gleich darunter beginnen
+export default function LooksIntro({ id, count, worldCount }: LooksIntroProps) {
   return (
     <header
       id={id}
-      className="content-container pb-4 pt-4 tablet:pb-6 tablet:pt-8 small:flex small:items-end small:justify-between small:gap-12 small:pb-8 small:pt-10"
+      className="content-container pb-5 pt-6 small:pb-6 small:pt-8"
     >
-      <div>
-        <p className="text-balance text-[11px] uppercase tracking-[0.15em] text-stone-500 tablet:text-xs">
-          Shop the Look · {LOOKBOOK_SEASON}
-        </p>
-        <h1 className="mt-1.5 font-serif text-[2rem] font-normal leading-[2.25rem] text-stone-900 tablet:text-5xl tablet:leading-[1.05] medium:text-6xl">
-          Looks in Farbe
-        </h1>
-      </div>
+      <h1 className="font-serif text-2xl font-medium text-stone-800 small:text-3xl medium:text-4xl">
+        Shop the Look
+      </h1>
       {count > 0 && (
-        <p className="mt-2 max-w-xl text-[15px] leading-[22px] text-stone-600 tablet:mt-3 tablet:text-base tablet:leading-[26px] small:mt-0 small:max-w-lg">
-          {count} abgestimmte Outfits aus unserer Strickerei
-          {isGrouped ? " – geordnet nach Farbwelten." : "."}
-          <span className="hidden tablet:inline">
-            {" "}
-            Bestellen Sie den ganzen Look mit einem Klick – oder nur Ihre
-            Lieblingsteile.
-          </span>
+        <p className="mt-2 text-sm text-stone-600 small:text-base">
+          {LOOKBOOK_SEASON} · {count} {count === 1 ? "Look" : "Looks"}
+          {worldCount > 1 ? ` in ${worldCount} Farbwelten` : ""}
         </p>
       )}
     </header>
