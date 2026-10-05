@@ -1,16 +1,23 @@
 /* Looks-Übersicht: was Tailwind nicht abdeckt. Seitenweite Regeln hängen an
    .root, damit sie nur auf dieser Seite gelten. */
 
-/* Sprungziele (Chips, Tastatur-Fokus) landen unter Navigation (64px / 80px)
-   und Chip-Leiste (52px / 56px). Kein scroll-mt an den Abschnitten, sonst
-   addieren sich beide Abstände. */
+/* Sprungziele (Chips, Tastatur-Fokus) landen genau unter Navigation
+   (64px / 80px) und Chip-Leiste (52px / 56px plus 2px Rahmen), damit kein
+   Streifen der vorigen Welt durchblitzt. Kein scroll-mt an den Abschnitten,
+   sonst addieren sich beide Abstände. */
 :global(html):has(.root) {
-  scroll-padding-top: 7.5rem;
+  scroll-padding-top: 7.375rem;
+}
+
+@media (min-width: 768px) {
+  :global(html):has(.root) {
+    scroll-padding-top: 7.625rem;
+  }
 }
 
 @media (min-width: 1024px) {
   :global(html):has(.root) {
-    scroll-padding-top: 8.75rem;
+    scroll-padding-top: 8.625rem;
   }
 }
 
