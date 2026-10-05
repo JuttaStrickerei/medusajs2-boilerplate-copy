@@ -57,7 +57,10 @@ export default function LookTile({
         }}
         aria-labelledby={nameId}
         aria-describedby={metaId}
-        className={cn(MAT, isLead && "small:flex-1")}
+        // Ohne cn(): tailwind-merge 3 streicht sonst „focus-visible:outline“
+        // neben „outline-2“ (Tailwind-4-Regel) und der Rahmen hinge am
+        // globalen :focus-visible
+        className={isLead ? `${MAT} small:flex-1` : MAT}
       >
         <LookTileMedia
           cover={look.cover}
