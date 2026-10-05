@@ -32,6 +32,8 @@ type LookTileProps = {
   listName?: string
   /** zusätzliche Klassen am <li> (nach den Standardklassen) */
   className?: string
+  /** eigene Bildbreiten für ein anderes Raster */
+  sizes?: string
 }
 
 /** Eine Look-Kachel; die ganze Kachel ist ein Link zur Look-Seite */
@@ -43,6 +45,7 @@ export default function LookTile({
   listId = LOOKS_LIST_ID,
   listName = LOOKS_LIST_NAME,
   className,
+  sizes,
 }: LookTileProps) {
   const nameId = `look-${look.handle}-name`
   const metaId = `look-${look.handle}-meta`
@@ -76,6 +79,7 @@ export default function LookTile({
           alt={look.alt}
           isLead={isLead}
           loading={loading}
+          sizes={sizes}
         />
         <div
           className={cn(

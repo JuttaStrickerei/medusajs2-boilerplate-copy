@@ -11,7 +11,7 @@ import WorldRail from "./world-rail"
 // Unter 1024px eine wischbare Reihe, ab 1024px ein Raster mit 4 (ab 1440: 5)
 // Spalten, alle Zeilen gleich hoch (auch eine Zeile nur mit der
 // Schlusskachel). py-1.5 lässt Platz für Fokusrahmen innerhalb der Reihe.
-const RAIL_LIST =
+export const RAIL_LIST =
   "no-scrollbar relative -mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-pl-6 px-6 py-1.5 tablet:gap-4 small:mx-0 small:grid small:auto-rows-fr small:snap-none small:grid-cols-4 small:gap-x-5 small:gap-y-10 small:overflow-visible small:p-0 medium:gap-x-6 large:grid-cols-5"
 
 type WorldBandProps = {
