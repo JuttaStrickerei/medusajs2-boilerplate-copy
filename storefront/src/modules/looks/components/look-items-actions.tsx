@@ -192,6 +192,12 @@ export default function LookItemsActions({
     []
   )
 
+  // Die einmalige Ansage gilt nur bis zur nächsten Auswahl – sonst käme sie
+  // bei zufällig gleichem Text ohne Klick wieder
+  useEffect(() => {
+    setAlertText(null)
+  }, [selections])
+
   const sel = (p: HttpTypes.StoreProduct) =>
     selections[p.id] ?? initialSelection(p)
 
@@ -544,8 +550,10 @@ export default function LookItemsActions({
           >
             {missingText}
           </p>
+          {/* nur solange der Text noch stimmt – sonst läse ein Screenreader
+              später noch „Noch offen“, obwohl alles gewählt ist */}
           <p key={attention?.seq ?? 0} role="alert" className="sr-only">
-            {alertText}
+            {alertText === missingText ? alertText : null}
           </p>
 
           <Button
