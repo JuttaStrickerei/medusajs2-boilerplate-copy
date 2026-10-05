@@ -3,6 +3,18 @@ import Image from "next/image"
 
 import { listCollections } from "@lib/data/collections"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import PageHeader from "@modules/common/components/page-header"
+import PlaceholderImage from "@modules/common/icons/placeholder-image"
+import {
+  CARD_BODY,
+  CARD_MAT,
+  CARD_MEDIA,
+  CARD_NAME,
+  CARD_NAME_UNDERLINE,
+  CARD_SIZES,
+  PRODUCT_GRID_WIDE,
+} from "@modules/products/components/product-preview/card-styles"
 
 export const metadata: Metadata = {
   title: "Alle Kollektionen",
@@ -25,69 +37,51 @@ export default async function CollectionsOverviewPage(props: Params) {
 
   return (
     <div className="bg-stone-50 min-h-screen">
-      <div className="content-container py-8 small:py-12">
-        {/* Page Header */}
-        <header className="mb-8 small:mb-10">
-          <h1 className="font-serif text-2xl small:text-3xl medium:text-4xl font-medium text-stone-800">
-            Alle Kollektionen
-          </h1>
-          <p className="mt-3 text-sm small:text-base text-stone-600 max-w-2xl">
-            Entdecken Sie die Kollektionen der Strickerei Jutta und finden Sie
-            die passende Auswahl für Ihren Stil.
-          </p>
-        </header>
+      <PageBreadcrumb items={[{ label: "Kollektionen" }]} />
+      <PageHeader
+        title="Alle Kollektionen"
+        meta="Entdecken Sie alle Kollektionen der Strickerei Jutta."
+      />
 
-        {/* Collections Grid or Empty State */}
+      <div className="content-container pb-12 small:pb-16">
+        {/* Kollektionen oder leerer Zustand */}
         {hasCollections ? (
           <section aria-label="Kollektionen">
-            <ul className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-4 small:gap-6">
-              {collections.map((collection) => (
-                <li key={collection.id}>
-                  <LocalizedClientLink
-                    href={`/collections/${collection.handle}`}
-                    className="group block h-full"
-                  >
-                    <article
-                      className="bg-white rounded-xl overflow-hidden border border-stone-200/60 shadow-sm
-                                 hover:shadow-lg hover:border-stone-200 transition-all duration-300 hover:-translate-y-1
-                                 flex flex-col h-full"
+            <ul className={PRODUCT_GRID_WIDE}>
+              {collections.map((collection) => {
+                const image = collection.metadata?.image as string | undefined
+                return (
+                  <li key={collection.id}>
+                    <LocalizedClientLink
+                      href={`/collections/${collection.handle}`}
+                      className={CARD_MAT}
                     >
-                      {/* Collection Title */}
-                      <div className="px-4 pt-4 pb-2 text-center">
-                        <h2 className="text-sm small:text-base font-medium text-stone-800 line-clamp-2">
-                          {collection.title}
-                        </h2>
-                      </div>
-
-                      {/* Collection Image or Placeholder */}
-                      <div
-                        className="relative aspect-[4/5] mx-3 mb-4 rounded-lg overflow-hidden
-                                   bg-gradient-to-br from-stone-100 to-stone-200
-                                   border border-stone-200/70"
-                      >
-                        {(collection.metadata?.image as string) ? (
+                      <div className={CARD_MEDIA}>
+                        {image ? (
                           <Image
-                            src={collection.metadata.image as string}
+                            src={image}
                             alt={collection.title}
                             fill
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            sizes={CARD_SIZES}
+                            className="object-cover"
                           />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="flex flex-col items-center gap-2 text-stone-500">
-                              <span className="inline-flex h-10 w-10 rounded-full border border-stone-300 bg-white/70 shadow-sm" />
-                              <span className="text-[11px] tracking-[0.18em] uppercase">
-                                Kollektion
-                              </span>
-                            </div>
-                          </div>
+                          <span className="absolute inset-0 flex items-center justify-center text-stone-300">
+                            <PlaceholderImage size={24} aria-hidden />
+                          </span>
                         )}
                       </div>
-                    </article>
-                  </LocalizedClientLink>
-                </li>
-              ))}
+                      <div className={CARD_BODY}>
+                        <h2 className={CARD_NAME}>
+                          <span className={CARD_NAME_UNDERLINE}>
+                            {collection.title}
+                          </span>
+                        </h2>
+                      </div>
+                    </LocalizedClientLink>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         ) : (
@@ -118,4 +112,3 @@ export default async function CollectionsOverviewPage(props: Params) {
     </div>
   )
 }
-
