@@ -68,9 +68,12 @@ function FilterSection({
       <div
         className={cn(
           // -mx-1 -mt-1 px-1 pt-1: Platz für Farbring und Fokusrahmen am
-          // linken und oberen Rand, sonst schneidet overflow-hidden sie ab
-          "-mx-1 -mt-1 overflow-hidden px-1 pt-1 transition-all duration-300 ease-in-out",
-          isOpen ? "max-h-[600px] pb-4" : "max-h-0"
+          // linken und oberen Rand, sonst schneidet overflow-hidden sie ab.
+          // Oben nur im offenen Zustand: zugeklappt bliebe sonst ein 4px-
+          // Streifen offen, in dem die Farbringe sichtbar wären. invisible
+          // nimmt die verdeckten Knöpfe auch aus der Tab-Reihenfolge.
+          "-mx-1 overflow-hidden px-1 transition-all duration-300 ease-in-out",
+          isOpen ? "-mt-1 max-h-[600px] pb-4 pt-1" : "invisible max-h-0"
         )}
       >
         <div className={cn(scrollable && "max-h-56 overflow-y-auto pr-1")}>
