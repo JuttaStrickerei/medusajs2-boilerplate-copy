@@ -95,12 +95,30 @@ export default function WorldRail({
     })
   }
 
+  // Tab auf eine nur halb sichtbare Karte: ganz in die Reihe holen (der
+  // Browser scrollt dafür nicht, solange ein Stück zu sehen ist)
+  const revealFocused = (e: React.FocusEvent<HTMLUListElement>) => {
+    const list = e.currentTarget
+    if (list.scrollWidth <= list.clientWidth) return
+    const item = (e.target as HTMLElement).closest("li")
+    if (!item) return
+    const l = list.getBoundingClientRect()
+    const r = item.getBoundingClientRect()
+    if (r.left >= l.left - 1 && r.right <= l.right + 1) return
+    item.scrollIntoView({
+      inline: "start",
+      block: "nearest",
+      behavior: shouldReduceMotion() ? "auto" : "smooth",
+    })
+  }
+
   return (
     <>
       <ul
         id={listId}
         ref={listRef}
         aria-label={label}
+        onFocus={revealFocused}
         className={listClassName}
       >
         {children}
