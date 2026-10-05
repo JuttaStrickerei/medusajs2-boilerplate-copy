@@ -100,7 +100,6 @@ export default function LookItemsActions({
   const [shareFallbackUrl, setShareFallbackUrl] = useState<string | null>(null)
   const shareInputRef = useRef<HTMLInputElement>(null)
   const shareFallbackRef = useRef<HTMLDivElement>(null)
-  const [barHidden, setBarHidden] = useState(false)
   const sizeAllRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLElement>(null)
   const summaryRef = useRef<HTMLDivElement>(null)
@@ -339,20 +338,6 @@ export default function LookItemsActions({
       setIsAdding(false)
     }
   }
-
-  // Mobile Kaufleiste ausblenden, solange die Zusammenfassung sichtbar ist
-  // oder schon darüber gescrollt wurde (dann verdeckt sie nie den Footer)
-  useEffect(() => {
-    const el = summaryRef.current
-    if (!el || typeof IntersectionObserver === "undefined") return
-    const observer = new IntersectionObserver(
-      ([entry]) =>
-        setBarHidden(entry.isIntersecting || entry.boundingClientRect.top < 0),
-      { rootMargin: "0px 0px -72px 0px" }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
 
   // Ab 768px klebt die Zusammenfassung unten im Bild. Landet der
   // Tastatur-Fokus in der Teile-Liste dahinter, die Seite um die Überdeckung
@@ -680,49 +665,125 @@ export default function LookItemsActions({
         </a>
       </p>
 
-      {/* Mobile Kaufleiste: fest unten, ab dem ersten Paint sichtbar.
-          Ausgeblendet per visibility statt inert: inert während eines
-          Tab-Schritts kostete einen zusätzlichen Tab-Stopp in der Liste. */}
-      <div
-        data-testid="look-sticky-bar"
-        data-look-buybar=""
-        aria-hidden={barHidden || undefined}
-        className={cn(
-          "fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-4 border-t border-stone-200 bg-white/95 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur duration-200 motion-safe:transition-[transform,visibility] tablet:hidden",
-          barHidden && "invisible translate-y-full"
-        )}
-      >
-        <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.12em] text-stone-500">
-            Ganzer Look
+      <LookBuyBar
+        summaryRef={summaryRef}
+        totalText={totalText}
+        label={barLabel}
+        icon={buttonIcon(18)}
+        onClick={
+          barGoesToCart
+            ? () => router.push(`/${countryCode}/cart`)
+            : handleAddLook
+        }
+        soldOut={allSoldOut}
+        isAdding={isAdding}
+        added={added}
+      />
+    </div>
+  )
+}
+
+type LookBuyBarProps = {
+  summaryRef: React.RefObject<HTMLDivElement | null>
+  totalText: string | null
+  label: string
+  icon: React.ReactNode
+  onClick: () => void
+  soldOut: boolean
+  isAdding: boolean
+  added: boolean
+}
+
+// Mobile Kaufleiste: fest unten, ab dem ersten Paint sichtbar. Ausgeblendet,
+// solange die Zusammenfassung sichtbar ist oder schon darüber gescrollt wurde
+// (dann verdeckt sie nie den Footer).
+// Eigener Zustand: das Ein-/Ausblenden rendert nur die Leiste neu. Würde die
+// ganze Teile-Liste neu gerendert, setzt React den name der Größen-Radios neu
+// und Chromium zählt die Gruppe dann als zwei Tab-Stopps.
+function LookBuyBar({
+  summaryRef,
+  totalText,
+  label,
+  icon,
+  onClick,
+  soldOut,
+  isAdding,
+  added,
+}: LookBuyBarProps) {
+  const [hidden, setHidden] = useState(false)
+
+  // Per Scroll statt IntersectionObserver: der verpasst Sprünge über die
+  // Zusammenfassung hinweg (Pos1/Ende, Anker) – die Leiste bliebe dann im
+  // falschen Zustand stehen
+  useEffect(() => {
+    const summary = summaryRef.current
+    if (!summary) return
+    let frame = 0
+    const update = () => {
+      frame = 0
+      setHidden(summary.getBoundingClientRect().top < window.innerHeight - 72)
+    }
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener("scroll", schedule, { passive: true })
+    window.addEventListener("resize", schedule)
+    // Layout ändert sich ohne Scrollen (z. B. „Details“ auf-/zuklappen)
+    const resize =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(schedule)
+    resize?.observe(document.body)
+    return () => {
+      window.removeEventListener("scroll", schedule)
+      window.removeEventListener("resize", schedule)
+      resize?.disconnect()
+      if (frame) cancelAnimationFrame(frame)
+    }
+  }, [summaryRef])
+
+  return (
+    // Ausgeblendet per visibility statt inert: inert während eines
+    // Tab-Schritts kostete einen zusätzlichen Tab-Stopp in der Liste
+    <div
+      data-testid="look-sticky-bar"
+      data-look-buybar=""
+      aria-hidden={hidden || undefined}
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-4 border-t border-stone-200 bg-white/95 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur motion-safe:transition-[transform,visibility] motion-safe:duration-200 tablet:hidden",
+        hidden && "invisible translate-y-full"
+      )}
+    >
+      <div className="min-w-0">
+        <p className="text-[11px] uppercase tracking-[0.12em] text-stone-500">
+          Ganzer Look
+        </p>
+        {totalText && (
+          <p className="text-base font-semibold tabular-nums text-stone-900">
+            {totalText}
           </p>
-          {totalText && (
-            <p className="text-base font-semibold tabular-nums text-stone-900">
-              {totalText}
-            </p>
-          )}
-        </div>
-        <Button
-          size="lg"
-          onClick={
-            barGoesToCart
-              ? () => router.push(`/${countryCode}/cart`)
-              : handleAddLook
-          }
-          // während des Hinzufügens nicht deaktivieren: der Fokus bliebe sonst
-          // nicht auf dem Button (Klicks ignoriert handleAddLook)
-          disabled={allSoldOut}
-          aria-disabled={isAdding || undefined}
-          aria-busy={isAdding || undefined}
-          className={cn(
-            "h-12 shrink-0 px-5",
-            added && "bg-green-600 hover:bg-green-600"
-          )}
-          leftIcon={buttonIcon(18)}
-        >
-          {barLabel}
-        </Button>
+        )}
       </div>
+      <Button
+        size="lg"
+        onClick={onClick}
+        // während des Hinzufügens nicht deaktivieren: der Fokus bliebe sonst
+        // nicht auf dem Button (Klicks ignoriert handleAddLook)
+        disabled={soldOut}
+        aria-disabled={isAdding || undefined}
+        aria-busy={isAdding || undefined}
+        // visibility wird erst am Ende des Wegfahrens hidden – bis dahin
+        // nicht per Tab erreichbar
+        tabIndex={hidden ? -1 : undefined}
+        className={cn(
+          "h-12 shrink-0 px-5",
+          added && "bg-green-600 hover:bg-green-600"
+        )}
+        leftIcon={icon}
+      >
+        {label}
+      </Button>
     </div>
   )
 }
