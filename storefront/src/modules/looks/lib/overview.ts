@@ -248,6 +248,14 @@ const isAllowedImageUrl = (
 
 const WORLD_KEYS = new Set(LOOK_WORLDS.map((w) => w.key))
 
+// Zahl aus metadata (Zahl oder Ziffern-Text aus dem Admin), sonst null
+const toNumber = (value: unknown): number | null => {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null
+  if (typeof value !== "string" || !value.trim()) return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
 /** Liest die optionalen Schlüssel; Ungültiges wird still ignoriert */
 export const sanitizeLookMetadata = (
   metadata: StoreLook["metadata"],
@@ -261,10 +269,9 @@ export const sanitizeLookMetadata = (
   if (typeof m.color_world === "string" && WORLD_KEYS.has(m.color_world)) {
     out.colorWorld = m.color_world
   }
-  const index = Number(m.cover_index)
+  const index = toNumber(m.cover_index)
   if (
-    m.cover_index !== null &&
-    m.cover_index !== "" &&
+    index !== null &&
     Number.isInteger(index) &&
     index >= 0 &&
     index < imageCount
@@ -280,11 +287,9 @@ export const sanitizeLookMetadata = (
   ) {
     out.coverPosition = m.cover_position
   }
-  const zoom = Number(m.cover_zoom)
+  const zoom = toNumber(m.cover_zoom)
   if (
-    m.cover_zoom !== null &&
-    m.cover_zoom !== "" &&
-    Number.isFinite(zoom) &&
+    zoom !== null &&
     zoom >= COVER_ZOOM_RANGE[0] &&
     zoom <= COVER_ZOOM_RANGE[1]
   ) {
