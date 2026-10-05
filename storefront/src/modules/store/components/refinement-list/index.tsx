@@ -72,9 +72,10 @@ function FilterSection({
       <div
         className={cn(
           // -mx-1 px-1: Platz für Farbring und Fokusrahmen am linken Rand,
-          // sonst schneidet overflow-hidden sie ab
+          // sonst schneidet overflow-hidden sie ab. invisible nimmt die
+          // verdeckten Knöpfe aus der Tab-Reihenfolge (wie in der Schublade)
           "-mx-1 overflow-hidden px-1 transition-all duration-200",
-          isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+          isOpen ? "max-h-[600px] opacity-100" : "invisible max-h-0 opacity-0"
         )}
       >
         <div
