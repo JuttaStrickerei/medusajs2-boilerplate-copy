@@ -488,7 +488,8 @@
      (ab 1280px zwei nebeneinander) samt Steuerleiste in den Bildschirm passt
      (14.75rem = Header, Abstand oben, reservierte Bildunterschrift, Leiste).
      Mobil bleibt rechts ein Stück des nächsten Fotos sichtbar; 19rem lässt
-     auf kurzen Handys den Hinweis unter dem Foto über der Kaufleiste. */
+     auf kurzen Handys den Hinweis unter dem Foto (mobil max. 3 Zeilen) über
+     der Kaufleiste. */
   .look-gallery {
     --pv: 1;
   }

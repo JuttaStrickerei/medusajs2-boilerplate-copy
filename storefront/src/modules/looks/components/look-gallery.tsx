@@ -45,9 +45,20 @@ const fullyVisible = (track: HTMLElement) => {
 const altText = (title: string, index: number) =>
   index === 0 ? title : `${title} – Bild ${index + 1}`
 
-// Fokusrahmen innen: der Slider schneidet alles ab, was über das Foto ragt
 const PHOTO_BUTTON =
-  "relative block aspect-[2/3] w-full overflow-hidden rounded-xl bg-stone-100 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-stone-800"
+  "group relative block aspect-[2/3] w-full overflow-hidden rounded-xl bg-stone-100 cursor-zoom-in focus-visible:outline-none"
+
+// Fokusrahmen als eigene Ebene ÜBER dem Foto: ein Rahmen außen würde vom
+// Slider abgeschnitten, ein outline innen vom Foto (fill) übermalt. outline
+// statt ring, weil Windows-Kontrastmodus Schatten (ring) ausblendet.
+function FocusRing() {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-0 rounded-xl group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-[-2px] group-focus-visible:outline-stone-800"
+    />
+  )
+}
 
 // Look-Fotos als Slider: mobil ein Foto plus Anschnitt des nächsten (wischen),
 // ab 768px Pfeile + Fortschrittslinie, ab 1280px zwei Fotos nebeneinander.
@@ -64,6 +75,9 @@ export default function LookGallery({
   // Pfeil, der den Fokus übernimmt, wenn der fokussierte am Ende deaktiviert wird
   const refocus = useRef<"prev" | "next" | null>(null)
   const interacted = useRef(false)
+  // Ziel einer laufenden Pfeiltasten-Bewegung: ein zweiter Druck während des
+  // weichen Scrollens geht von hier aus weiter statt von der alten Position
+  const pending = useRef<number | null>(null)
   const [active, setActive] = useState(0)
   // ganz sichtbare Fotos – deren Hinweis und Zähler bleiben eingeblendet
   const [shown, setShown] = useState<number[]>([0])
@@ -130,6 +144,7 @@ export default function LookGallery({
       }
       if (settle) clearTimeout(settle)
       settle = setTimeout(() => {
+        pending.current = null
         if (!interacted.current) return
         const step = stepOf(track)
         if (step <= 0) return
@@ -152,7 +167,14 @@ export default function LookGallery({
     track.addEventListener("pointerdown", markInteraction, { passive: true })
     track.addEventListener("touchstart", markInteraction, { passive: true })
     track.addEventListener("wheel", markInteraction, { passive: true })
+    // Drehen/Größenänderung ohne Scroll: sichtbare Fotos neu bestimmen
+    const resize =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => updateShown())
+    resize?.observe(track)
     return () => {
+      resize?.disconnect()
       track.removeEventListener("scroll", onScroll)
       track.removeEventListener("pointerdown", markInteraction)
       track.removeEventListener("touchstart", markInteraction)
@@ -198,17 +220,30 @@ export default function LookGallery({
     go(index)
   }
 
+  // Pfeiltasten nach der Scrollposition statt „active ± 1“: passen mehrere
+  // Fotos ins Bild (Handy quer), endet der Slider vor den letzten
+  // Einrastpunkten – ein Ziel dort bewegte nichts, ← bliebe hängen
   const onTrackKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.target !== e.currentTarget) return
+    const all = slidesOf(e.currentTarget)
+    if (!all.length) return
+    const offsets = all.map((s) => s.offsetLeft - all[0].offsetLeft)
+    const x = e.currentTarget.scrollLeft
+    const after = offsets.findIndex((o) => o > x + 1)
+    const left = Math.max(0, offsets.filter((o) => o < x - 1).length - 1)
+    const right = after === -1 ? maxIndex : after
+    const p = pending.current
     const map: Record<string, number> = {
-      ArrowLeft: active - 1,
-      ArrowRight: active + 1,
+      ArrowLeft: p === null ? left : Math.min(left, p - 1),
+      ArrowRight: p === null ? right : Math.max(right, p + 1),
       Home: 0,
       End: maxIndex,
     }
     if (!(e.key in map)) return
     e.preventDefault()
-    go(map[e.key])
+    const target = clamp(map[e.key], 0, maxIndex)
+    pending.current = target
+    go(target)
   }
 
   const lightbox =
@@ -259,6 +294,7 @@ export default function LookGallery({
               sizes="(max-width: 767px) 82vw, (max-width: 1279px) 50vw, 460px"
               className="object-cover"
             />
+            <FocusRing />
           </button>
           {note && <Caption note={note} />}
         </figure>
@@ -319,6 +355,7 @@ export default function LookGallery({
                     sizes="(max-width: 767px) 82vw, (max-width: 1279px) 50vw, 460px"
                     className="object-cover"
                   />
+                  <FocusRing />
                   <span
                     aria-hidden
                     data-testid="look-photo-counter"
@@ -399,7 +436,10 @@ function Caption({ note, dimmed }: { note: string; dimmed?: boolean }) {
       )}
     >
       <Info size={14} aria-hidden className="mt-px shrink-0 text-stone-400" />
-      {note}
+      {/* mobil höchstens 3 Zeilen, damit der Hinweis auf kurzen Handys über
+          der Kaufleiste endet; voller Text in der Lightbox (und für
+          Screenreader, das Kürzen ist rein optisch) */}
+      <span className="line-clamp-3 tablet:line-clamp-none">{note}</span>
     </figcaption>
   )
 }
