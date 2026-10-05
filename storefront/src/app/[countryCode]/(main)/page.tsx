@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 import Image from "next/image"
 import { Suspense } from "react"
-import FeaturedProducts from "@modules/home/components/featured-products"
+import HomeFeatured from "@modules/home/components/featured-products/home-featured"
 import FeaturedProductsSkeleton from "@modules/home/components/featured-products/skeleton"
 import Hero from "@modules/home/components/hero"
 import HomeLooks from "@modules/home/components/home-looks"
@@ -53,7 +53,7 @@ export default async function Home(props: {
 
       {/* Featured Products */}
       <Suspense fallback={<FeaturedProductsSkeleton />}>
-        <FeaturedProducts region={region} />
+        <HomeFeatured countryCode={countryCode} region={region} />
       </Suspense>
 
       {/* About Section — Bild wie auf /about: 4:3, gleiche Breite wie Timeline (max-w-5xl) */}

@@ -3,50 +3,77 @@ import { listProducts } from "@lib/data/products"
 import ProductPreview from "@modules/products/components/product-preview"
 import { PRODUCT_GRID } from "@modules/products/components/product-preview/card-styles"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { Button } from "@components/ui"
 import { ArrowRight } from "@components/icons"
+import { HOME_EYEBROW, HOME_H2 } from "../section-styles"
+
+const FEATURED_COUNT = 8
 
 interface FeaturedProductsProps {
   region: HttpTypes.StoreRegion
+  /** Produkte, die schon weiter oben stehen (z. B. Teile von „Shop the Look“) */
+  excludeIds?: string[]
+  /** „Herbst/Winter 2026“; null = ohne Saison in der Dachzeile */
+  seasonTitle?: string | null
 }
 
 export default async function FeaturedProducts({
   region,
+  excludeIds = [],
+  seasonTitle = null,
 }: FeaturedProductsProps) {
-  // Die 8 neuesten Produkte (= aktuelle Kollektion); ohne „order“ kämen sie
-  // in Anlage-Reihenfolge, also die ältesten zuerst
-  const { response } = await listProducts({
+  // Die neuesten Produkte (= aktuelle Kollektion); ohne „order“ kämen sie in
+  // Anlage-Reihenfolge, also die ältesten zuerst. Ein paar mehr laden, damit
+  // nach dem Weglassen der schon gezeigten Teile noch 8 bleiben.
+  const excluded = new Set(excludeIds)
+  const products = await listProducts({
     pageParam: 1,
     queryParams: {
-      limit: 8,
+      limit: FEATURED_COUNT + excluded.size,
       order: "-created_at",
     },
     regionId: region.id,
   })
+    .then(({ response }) =>
+      response.products
+        .filter((product) => !excluded.has(product.id))
+        .slice(0, FEATURED_COUNT)
+    )
+    .catch((error) => {
+      console.error("home: failed to load featured products", error)
+      return []
+    })
 
-  const products = response.products
-
-  if (!products || products.length === 0) {
+  if (!products.length) {
     return null
   }
 
+  const eyebrow = seasonTitle
+    ? `Aktuelle Kollektion · ${seasonTitle}`
+    : "Aktuelle Kollektion"
+
   return (
-    <section className="section-container bg-white">
+    <section
+      aria-labelledby="ausgewaehlte-produkte-title"
+      className="bg-white py-10 small:py-16"
+    >
       <div className="content-container">
-        {/* Section Header */}
-        <div className="flex flex-col small:flex-row small:items-end small:justify-between gap-4 mb-10 small:mb-12">
+        {/* Kopf wie die Look-Abschnitte darüber */}
+        <div className="mb-4 tablet:flex tablet:items-end tablet:justify-between tablet:gap-8 small:mb-7">
           <div>
-            <p className="text-sm text-stone-500 tracking-[0.15em] uppercase mb-2">
-              Aktuelle Kollektion
-            </p>
-            <h2 className="font-serif text-3xl small:text-4xl font-medium text-stone-800">
+            <p className={HOME_EYEBROW}>{eyebrow}</p>
+            <h2
+              id="ausgewaehlte-produkte-title"
+              className={`mt-1.5 ${HOME_H2}`}
+            >
               Ausgewählte Produkte
             </h2>
           </div>
-          <LocalizedClientLink href="/store">
-            <Button variant="secondary" rightIcon={<ArrowRight size={16} />}>
-              Alle Produkte
-            </Button>
+          <LocalizedClientLink
+            href="/store"
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-medium text-stone-900 underline-offset-4 hover:underline"
+          >
+            Alle Produkte
+            <ArrowRight size={16} aria-hidden />
           </LocalizedClientLink>
         </div>
 
