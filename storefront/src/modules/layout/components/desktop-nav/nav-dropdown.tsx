@@ -80,6 +80,12 @@ export default function NavDropdown({
   // Pfeil nach unten: erst öffnen, nach dem Rendern den ersten Link fokussieren
   const focusFirstOnOpen = useRef(false)
   const panelId = `nav-panel-${section.key}`
+  // Führt ein Eintrag der Liste auf dieselbe Seite (/store → „Alle
+  // Produkte“), trägt nur er aria-current; die Beschriftung bleibt optisch
+  // aktiv, sonst hieße es zweimal „aktuelle Seite“.
+  const isCurrentInPanel = section.links.some((link) =>
+    isExact(link.href, path)
+  )
 
   useEffect(() => {
     if (!isOpen || !focusFirstOnOpen.current) {
@@ -146,7 +152,7 @@ export default function NavDropdown({
         href={section.href}
         label={section.label}
         isActive={isActive}
-        isCurrentPage={isExact(section.href, path)}
+        isCurrentPage={isExact(section.href, path) && !isCurrentInPanel}
       />
       <button
         ref={toggleRef}
