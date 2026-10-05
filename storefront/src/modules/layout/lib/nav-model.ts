@@ -6,7 +6,12 @@ import type { LookSeason } from "@modules/looks/lib/seasons"
  * (LocalizedClientLink setzt ihn).
  */
 
-export type NavLink = { label: string; href: string }
+export type NavLink = {
+  label: string
+  href: string
+  /** leise Zusatzangabe rechts, z. B. „20 Looks“ */
+  meta?: string
+}
 
 export type NavSectionKey = "looks" | "shop"
 
@@ -21,7 +26,7 @@ export type NavSection = {
   leadIsOverview: boolean
 }
 
-type NavSeason = Pick<LookSeason, "title" | "href">
+type NavSeason = Pick<LookSeason, "title" | "href" | "lookCount">
 type NavCategoryLink = { name: string; handle: string | null }
 
 export const ABOUT_LINK: NavLink = { label: "Über uns", href: "/about" }
@@ -38,6 +43,7 @@ export const buildNavSections = (
     links: seasons.map((season) => ({
       label: season.title,
       href: season.href,
+      meta: `${season.lookCount} ${season.lookCount === 1 ? "Look" : "Looks"}`,
     })),
     leadIsOverview: false,
   },
