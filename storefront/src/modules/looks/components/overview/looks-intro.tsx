@@ -15,7 +15,7 @@ export default function LooksIntro({ id, count, isGrouped }: LooksIntroProps) {
       className="content-container pb-4 pt-4 tablet:pb-6 tablet:pt-8 small:flex small:items-end small:justify-between small:gap-12 small:pb-8 small:pt-10"
     >
       <div>
-        <p className="text-[11px] uppercase tracking-[0.15em] text-stone-500 tablet:text-xs">
+        <p className="text-balance text-[11px] uppercase tracking-[0.15em] text-stone-500 tablet:text-xs">
           Shop the Look · {LOOKBOOK_SEASON}
         </p>
         <h1 className="mt-1.5 font-serif text-[2rem] font-normal leading-[2.25rem] text-stone-900 tablet:text-5xl tablet:leading-[1.05] medium:text-6xl">
@@ -28,8 +28,8 @@ export default function LooksIntro({ id, count, isGrouped }: LooksIntroProps) {
           {isGrouped ? " – geordnet nach Farbwelten." : "."}
           <span className="hidden tablet:inline">
             {" "}
-            Wählen Sie einmal Ihre Größe und bestellen Sie den ganzen Look –
-            oder nur Ihre Lieblingsteile.
+            Bestellen Sie den ganzen Look mit einem Klick – oder nur Ihre
+            Lieblingsteile.
           </span>
         </p>
       )}

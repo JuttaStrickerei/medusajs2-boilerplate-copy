@@ -9,8 +9,8 @@ const STEPS = [
     text: "Alle Teile eines Looks sind farblich aufeinander abgestimmt.",
   },
   {
-    title: "Größe einmal wählen",
-    text: "Ihre Größe gilt für alle Teile – einzeln anpassen können Sie trotzdem.",
+    title: "Größe wählen",
+    text: "Bei Looks mit mehreren Teilen wählen Sie Ihre Größe einmal für alle – einzeln anpassen können Sie trotzdem.",
   },
   {
     title: "Ganz oder einzeln",

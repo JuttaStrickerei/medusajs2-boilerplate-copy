@@ -73,7 +73,7 @@ export default function WorldBand({ world, index }: WorldBandProps) {
               {world.name}
             </h2>
             {world.tagline && (
-              <p className="mt-1 text-sm leading-5 text-[color:var(--welt-text)] tablet:mt-2 tablet:text-base small:text-lg">
+              <p className="mt-1 text-pretty text-sm leading-5 text-[color:var(--welt-text)] tablet:mt-2 tablet:text-base small:text-lg">
                 {world.tagline}
               </p>
             )}
