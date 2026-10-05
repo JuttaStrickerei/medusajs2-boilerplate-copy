@@ -78,15 +78,16 @@ export default function WorldNav({ worlds, sentinelId }: WorldNavProps) {
     }
   }, [sentinelId])
 
-  // Aktiven Chip in der Leiste sichtbar halten (nur die Leiste scrollt,
-  // nie die Seite – daher kein scrollIntoView)
+  // Aktiven Chip in der Leiste sichtbar halten, ganz oben wieder an den
+  // Anfang (nur die Leiste scrollt, nie die Seite – daher kein scrollIntoView)
   useEffect(() => {
     const list = listRef.current
-    if (!list || !active || list.scrollWidth <= list.clientWidth) return
-    const chip = list.querySelector<HTMLElement>(`[data-chip="${active}"]`)
-    if (!chip) return
+    if (!list || list.scrollWidth <= list.clientWidth) return
+    const chip = active
+      ? list.querySelector<HTMLElement>(`[data-chip="${active}"]`)
+      : null
     list.scrollTo({
-      left: chip.offsetLeft - CHIP_INSET,
+      left: chip ? chip.offsetLeft - CHIP_INSET : 0,
       behavior: shouldReduceMotion() ? "auto" : "smooth",
     })
   }, [active])
