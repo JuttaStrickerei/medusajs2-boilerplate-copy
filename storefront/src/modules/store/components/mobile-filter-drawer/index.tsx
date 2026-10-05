@@ -156,8 +156,9 @@ export default function MobileFilterDrawer({
             <Dialog.Panel className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
-                <Dialog.Title className="text-lg font-medium text-stone-800">
-                  Filter & Sortieren
+                {/* gleicher Stil wie die Überschrift der Filterspalte */}
+                <Dialog.Title className="font-sans text-xs font-medium uppercase tracking-[0.15em] text-stone-500">
+                  Filter
                 </Dialog.Title>
                 <button
                   onClick={() => setIsOpen(false)}
