@@ -4,8 +4,9 @@ const PLACEHOLDER_PIECES = 3
 
 /**
  * Platzhalter der Look-Seite (die Route ist dynamisch und brauchte ohne ihn
- * rund eine Sekunde ohne Rückmeldung). Spalten und Fotobreite wie in
- * look-template.tsx / look-gallery.tsx, damit die echte Seite nicht springt.
+ * rund eine Sekunde ohne Rückmeldung). Brotkrümel-Leiste, Spalten und
+ * Fotobreite wie in look-template.tsx / look-gallery.tsx, damit die echte
+ * Seite nicht springt.
  */
 export default function LookLoading() {
   return (
@@ -13,14 +14,24 @@ export default function LookLoading() {
       <p role="status" className="sr-only">
         Look wird geladen …
       </p>
+      {/* Brotkrümel-Leiste wie PageBreadcrumb */}
+      <div aria-hidden className="border-b border-stone-200 bg-white">
+        <div className="content-container flex h-10 items-center small:h-[52px]">
+          <Skeleton className="h-3 w-40 small:w-48" />
+        </div>
+      </div>
       <div
         aria-hidden
         className="content-container grid grid-cols-1 pb-10 pt-4 tablet:grid-cols-[minmax(0,1fr)_340px] tablet:grid-rows-[auto_1fr] tablet:items-start tablet:gap-x-8 tablet:pt-6 small:grid-cols-[minmax(0,1fr)_minmax(380px,420px)] small:gap-x-10 small:pb-12 small:pt-8 medium:grid-cols-[minmax(0,1fr)_400px] medium:gap-x-12 large:gap-x-16"
       >
+        {/* Kopf wie im Template: H1 (Zeilenhöhen wie dort) und Meta-Zeile */}
         <div className="tablet:col-start-2 tablet:row-start-1">
-          <Skeleton className="mt-1 h-3 w-36" />
-          <Skeleton className="mt-3 h-8 w-56 tablet:h-10 medium:h-11 medium:w-64" />
-          <Skeleton className="mt-2 h-4 w-48" />
+          <div className="flex h-9 items-center tablet:h-[2.6rem] small:h-10 medium:h-[3.025rem]">
+            <Skeleton className="h-7 w-56 tablet:h-8 medium:h-10 medium:w-64" />
+          </div>
+          <div className="mt-1 flex h-5 items-center">
+            <Skeleton className="h-3.5 w-48" />
+          </div>
         </div>
 
         {/* Gleiche Breitenregeln wie der Foto-Slider (globals.css) */}
