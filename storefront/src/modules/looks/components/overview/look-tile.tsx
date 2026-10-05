@@ -118,9 +118,13 @@ export default function LookTile({
                 </p>
               )}
               {look.cover.showNote && (
-                <p className="mt-1 flex gap-1 text-[11px] leading-4 text-stone-500">
+                // eine Zeile, damit alle Karten einer Reihe gleich hoch bleiben;
+                // die Details stehen unter dem Foto auf der Look-Seite
+                <p className="mt-1 flex min-w-0 gap-1 text-[11px] leading-4 text-stone-500">
                   <Info size={12} aria-hidden className="mt-0.5 shrink-0" />
-                  Nicht alle Teile im Bild sind online erhältlich
+                  <span className="truncate">
+                    Nicht alles im Bild ist online
+                  </span>
                 </p>
               )}
               {look.cover.isAi && (
