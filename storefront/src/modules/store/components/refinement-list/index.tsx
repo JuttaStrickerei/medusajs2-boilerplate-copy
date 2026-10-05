@@ -6,6 +6,15 @@ import { ChevronDown, X } from "@components/icons"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
 import { useProductFilters, FilterState } from "@lib/hooks/use-product-filters"
 
+import {
+  PILL,
+  PILL_ACTIVE,
+  PILL_IDLE,
+  PILL_SM,
+  SWATCH,
+  SWATCH_ACTIVE,
+  SWATCH_IDLE,
+} from "./pill-styles"
 import { SortOptions } from "./sort-products"
 
 export type ProductFilters = Partial<FilterState>
@@ -62,7 +71,9 @@ function FilterSection({
       </button>
       <div
         className={cn(
-          "overflow-hidden transition-all duration-200",
+          // -mx-1 px-1: Platz für Farbring und Fokusrahmen am linken Rand,
+          // sonst schneidet overflow-hidden sie ab
+          "-mx-1 overflow-hidden px-1 transition-all duration-200",
           isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
         )}
       >
@@ -108,7 +119,7 @@ const RefinementList = ({
     <div className="space-y-1" data-testid={dataTestId}>
       {/* Header */}
       <div className="flex items-center justify-between pb-3 mb-2 border-b border-stone-200">
-        <h2 className="text-sm font-semibold text-stone-800 uppercase tracking-wide">
+        <h2 className="font-sans text-xs font-medium uppercase tracking-[0.15em] text-stone-500">
           Filter
           {activeFilterCount > 0 && (
             <span className="ml-2 text-stone-500 font-normal normal-case">
@@ -118,10 +129,11 @@ const RefinementList = ({
         </h2>
         {hasActiveFilters && (
           <button
+            type="button"
             onClick={clearAllFilters}
-            className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
+            className="text-xs text-stone-500 underline underline-offset-4 hover:text-stone-800"
           >
-            Löschen
+            Alle löschen
           </button>
         )}
       </div>
@@ -132,52 +144,52 @@ const RefinementList = ({
           {filters.category && (
             <button
               onClick={() => setCategory(filters.category)}
-              className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
+              className={cn(PILL, PILL_SM, PILL_ACTIVE)}
             >
               {getCategoryLabel(filters.category)}
-              <X size={10} />
+              <X size={12} />
             </button>
           )}
           {filters.collection && (
             <button
               onClick={() => setCollection(filters.collection)}
-              className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
+              className={cn(PILL, PILL_SM, PILL_ACTIVE)}
             >
               {getCollectionLabel(filters.collection)}
-              <X size={10} />
+              <X size={12} />
             </button>
           )}
           {filters.colors.map((color) => (
             <button
               key={color}
               onClick={() => toggleColor(color)}
-              className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
+              className={cn(PILL, PILL_SM, PILL_ACTIVE)}
             >
               {filterOptions.colors.find((c) => c.value === color)?.label ||
                 color}
-              <X size={10} />
+              <X size={12} />
             </button>
           ))}
           {filters.sizes.map((size) => (
             <button
               key={size}
               onClick={() => toggleSize(size)}
-              className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
+              className={cn(PILL, PILL_SM, PILL_ACTIVE)}
             >
               {filterOptions.sizes.find((s) => s.value === size)?.label ||
                 size.toUpperCase()}
-              <X size={10} />
+              <X size={12} />
             </button>
           ))}
           {filters.priceRange && (
             <button
               onClick={() => setPriceRange(filters.priceRange)}
-              className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-stone-800 text-white rounded-md hover:bg-stone-700 transition-colors"
+              className={cn(PILL, PILL_SM, PILL_ACTIVE)}
             >
               {filterOptions.priceRanges.find(
                 (r) => r.value === filters.priceRange
               )?.label || filters.priceRange}
-              <X size={10} />
+              <X size={12} />
             </button>
           )}
         </div>
@@ -243,12 +255,13 @@ const RefinementList = ({
               <button
                 key={color.value}
                 onClick={() => toggleColor(color.value)}
+                aria-pressed={filters.colors.includes(color.value)}
                 className={cn(
-                  "w-6 h-6 rounded-full border-2 transition-all",
+                  "h-6 w-6",
+                  SWATCH,
                   filters.colors.includes(color.value)
-                    ? "border-stone-800 ring-2 ring-stone-300 ring-offset-1"
-                    : "border-stone-200 hover:border-stone-400",
-                  color.value === "weiß" && "shadow-sm"
+                    ? SWATCH_ACTIVE
+                    : SWATCH_IDLE
                 )}
                 style={{ backgroundColor: color.hex }}
                 title={color.label}
@@ -267,11 +280,11 @@ const RefinementList = ({
               <button
                 key={size.value}
                 onClick={() => toggleSize(size.value)}
+                aria-pressed={filters.sizes.includes(size.value)}
                 className={cn(
-                  "px-2.5 py-1 text-xs font-medium rounded border transition-colors",
-                  filters.sizes.includes(size.value)
-                    ? "bg-stone-800 text-white border-stone-800"
-                    : "bg-white text-stone-600 border-stone-300 hover:border-stone-500"
+                  PILL,
+                  PILL_SM,
+                  filters.sizes.includes(size.value) ? PILL_ACTIVE : PILL_IDLE
                 )}
               >
                 {size.label}

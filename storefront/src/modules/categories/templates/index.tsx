@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
+import { cn } from "@lib/utils"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -10,6 +11,10 @@ import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import PageHeader from "@modules/common/components/page-header"
 import { HttpTypes } from "@medusajs/types"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
+import {
+  PILL,
+  PILL_IDLE,
+} from "@modules/store/components/refinement-list/pill-styles"
 import { ProductFilters } from "@modules/store/templates"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
 
@@ -104,7 +109,11 @@ export default function CategoryTemplate({
                       <li key={c.id}>
                         <LocalizedClientLink
                           href={`/categories/${buildCategoryPath(c)}`}
-                          className="inline-block px-4 py-2 text-sm text-stone-600 bg-stone-100 rounded-full hover:bg-stone-800 hover:text-white transition-colors"
+                          className={cn(
+                            PILL,
+                            PILL_IDLE,
+                            "h-11 px-4 text-sm small:h-9"
+                          )}
                         >
                           {c.name}
                         </LocalizedClientLink>
