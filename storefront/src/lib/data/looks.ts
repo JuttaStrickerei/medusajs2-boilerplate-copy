@@ -133,28 +133,34 @@ const fetchOverviewProducts = async (
 }
 
 /**
- * Alle Looks plus ihre Produkte in einer Abfrage (für Teile und Summen der
- * Übersicht). products = null, wenn die Produktabfrage scheitert: Die Seite
- * zeigt dann Looks ohne Preise statt eines Fehlers.
+ * Looks plus ihre Produkte in einer Abfrage (für Teile und Summen der
+ * Übersicht). Ohne `looks` alle Looks, sonst nur die übergebenen (z. B. die
+ * einer Saison), damit nur deren Produkte geladen werden. products = null,
+ * wenn die Produktabfrage scheitert: Die Seite zeigt dann Looks ohne Preise
+ * statt eines Fehlers.
  */
 export const listLooksForOverview = async (
-  countryCode: string
+  countryCode: string,
+  looks?: StoreLook[]
 ): Promise<{
   looks: StoreLook[]
   products: HttpTypes.StoreProduct[] | null
 }> => {
-  const looks = await listLooks()
-  const ids = Array.from(new Set(looks.flatMap((l) => l.product_ids)))
+  const all = looks ?? (await listLooks())
+  const ids = Array.from(new Set(all.flatMap((l) => l.product_ids)))
 
   if (!ids.length) {
-    return { looks, products: [] }
+    return { looks: all, products: [] }
   }
 
   try {
-    return { looks, products: await fetchOverviewProducts(ids, countryCode) }
+    return {
+      looks: all,
+      products: await fetchOverviewProducts(ids, countryCode),
+    }
   } catch (error) {
     console.error("looks: failed to load overview prices", error)
-    return { looks, products: null }
+    return { looks: all, products: null }
   }
 }
 

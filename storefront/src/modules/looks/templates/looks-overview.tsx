@@ -18,12 +18,16 @@ import {
   type LookTileVM,
   type OverviewVM,
 } from "@modules/looks/lib/overview"
-import { LOOKBOOK_SEASON } from "@modules/looks/lib/worlds"
+import type { LookSeason } from "@modules/looks/lib/seasons"
 
 const INTRO_ID = "looks-intro"
 
 type LooksOverviewProps = {
   overview: OverviewVM
+  /** null = keine Saisons bekannt (alle Looks, ohne Saisonzeile) */
+  season: LookSeason | null
+  /** ältere Saison unter /looks/saison/<handle> */
+  isArchive: boolean
   countryCode: string
 }
 
@@ -49,12 +53,16 @@ const breadcrumbSchema = (baseUrl: string, countryCode: string) => ({
 const itemListSchema = (
   looks: LookTileVM[],
   baseUrl: string,
-  countryCode: string
+  countryCode: string,
+  season: LookSeason | null,
+  isArchive: boolean
 ) => ({
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: `Shop the Look – ${LOOKBOOK_SEASON}`,
-  url: `${baseUrl}/${countryCode}/looks`,
+  name: `Shop the Look${season ? ` – ${season.title}` : ""}`,
+  url: `${baseUrl}/${countryCode}${
+    isArchive && season ? season.href : "/looks"
+  }`,
   itemListOrder: "https://schema.org/ItemListOrderAscending",
   numberOfItems: looks.length,
   itemListElement: looks.map((look) => ({
@@ -69,6 +77,8 @@ const itemListSchema = (
 /** /looks: kurzer Gang durch die Farbwelten, jede Kachel führt zum Look */
 export default function LooksOverview({
   overview,
+  season,
+  isArchive,
   countryCode,
 }: LooksOverviewProps) {
   const { bands, ordered, showNav } = overview
@@ -79,7 +89,12 @@ export default function LooksOverview({
       <div className={cn(styles.root, "min-h-screen bg-stone-50")}>
         <JsonLd data={breadcrumbSchema(baseUrl, countryCode)} />
         <PageBreadcrumb items={[{ label: "Looks" }]} />
-        <LooksIntro id={INTRO_ID} count={0} worldCount={0} />
+        <LooksIntro
+          id={INTRO_ID}
+          count={0}
+          worldCount={0}
+          seasonTitle={season?.title ?? null}
+        />
         <EmptyState />
       </div>
     )
@@ -87,7 +102,9 @@ export default function LooksOverview({
 
   return (
     <div className={cn(styles.root, "bg-stone-50")}>
-      <JsonLd data={itemListSchema(ordered, baseUrl, countryCode)} />
+      <JsonLd
+        data={itemListSchema(ordered, baseUrl, countryCode, season, isArchive)}
+      />
       <JsonLd data={breadcrumbSchema(baseUrl, countryCode)} />
       <ViewItemList
         items={ordered.map(toGaItem)}
@@ -99,6 +116,7 @@ export default function LooksOverview({
         id={INTRO_ID}
         count={ordered.length}
         worldCount={showNav ? bands.length : 0}
+        seasonTitle={season?.title ?? null}
       />
       {showNav && (
         <WorldNav

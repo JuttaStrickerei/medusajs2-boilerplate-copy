@@ -4,10 +4,9 @@
  * look.metadata (color_world, cover_index, cover_image, cover_position,
  * cover_zoom, tagline), sobald das Backend diese Schlüssel ausliefert.
  * Looks, die hier fehlen, ordnet die Übersicht automatisch über die Farbe
- * ihres ersten Teils zu.
+ * ihres ersten Teils zu. Die Saison steht nicht hier: Sie kommt aus der
+ * Kollektion der Teile (siehe seasons.ts).
  */
-
-export const LOOKBOOK_SEASON = "Herbst/Winter 2026"
 
 // Querformat 1200×630 für Social Sharing; null = Standardbild der Seite
 // (ein 2:3-Foto würde auf 1.91:1 schlecht beschnitten)
