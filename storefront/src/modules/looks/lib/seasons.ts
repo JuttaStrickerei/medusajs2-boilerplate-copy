@@ -36,12 +36,6 @@ export type LookSeasonIndex = {
 
 export const SEASON_PATH = "/looks/saison"
 
-export const EMPTY_SEASON_INDEX: LookSeasonIndex = {
-  seasons: [],
-  current: null,
-  seasonOf: {},
-}
-
 // Optional im Admin unter Metadaten der Kollektion: season_start = "2027-02"
 const SEASON_START_PATTERN = /^\d{4}-\d{2}(-\d{2})?$/
 // Nur ganze Wörter: Kürzel wie „hw“ träfen auch „scHWarz“
