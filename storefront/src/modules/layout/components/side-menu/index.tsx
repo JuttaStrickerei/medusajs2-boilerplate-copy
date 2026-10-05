@@ -225,13 +225,6 @@ export default function SideMenu({ regions, sections }: SideMenuProps) {
                         )}
                         <div className="flex items-center justify-center gap-6 text-sm text-stone-500">
                           <LocalizedClientLink
-                            href="/help"
-                            onClick={closeMenu}
-                            className="hover:text-stone-800 transition-colors"
-                          >
-                            Hilfe
-                          </LocalizedClientLink>
-                          <LocalizedClientLink
                             href="/faq"
                             onClick={closeMenu}
                             className="hover:text-stone-800 transition-colors"
