@@ -1,7 +1,11 @@
 import { Metadata } from "next"
 import Image from "next/image"
+import { Suspense } from "react"
 import FeaturedProducts from "@modules/home/components/featured-products"
+import FeaturedProductsSkeleton from "@modules/home/components/featured-products/skeleton"
 import Hero from "@modules/home/components/hero"
+import HomeLooks from "@modules/home/components/home-looks"
+import HomeLooksSkeleton from "@modules/home/components/home-looks/skeleton"
 import NewsletterForm from "@modules/home/components/newsletter-form"
 import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -34,8 +38,16 @@ export default async function Home(props: {
       {/* Hero Section */}
       <Hero />
 
+      {/* Farbwelten und Looks; eigene Suspense-Grenzen, damit der Hero
+          nicht auf die Looks- und Produktabfragen wartet */}
+      <Suspense fallback={<HomeLooksSkeleton />}>
+        <HomeLooks countryCode={countryCode} />
+      </Suspense>
+
       {/* Featured Products */}
-      <FeaturedProducts region={region} />
+      <Suspense fallback={<FeaturedProductsSkeleton />}>
+        <FeaturedProducts region={region} />
+      </Suspense>
 
       {/* About Section — Bild wie auf /about: 4:3, gleiche Breite wie Timeline (max-w-5xl) */}
       <section className="section-container bg-stone-50">

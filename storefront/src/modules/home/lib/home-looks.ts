@@ -43,8 +43,11 @@ export const mixWithWhite = (hex: string, weight: number): string => {
     .toUpperCase()}`
 }
 
-/** Hintergrund hinter dem Tür-Foto: helle Welten aufgehellt, dunkle wie die Chip-Leiste */
-export const doorTint = (band: WorldVM): string =>
+/**
+ * Hintergrund hinter dem Tür-Foto: helle Welten aufgehellt, dunkle wie die
+ * Chip-Leiste. Nimmt auch die Welt-Konfiguration (für den Platzhalter).
+ */
+export const doorTint = (band: Pick<WorldVM, "theme" | "chipTint">): string =>
   band.theme === "dark"
     ? band.chipTint
     : mixWithWhite(band.chipTint, DOOR_TINT_WEIGHT)
