@@ -3,6 +3,7 @@ import { HttpTypes } from "@medusajs/types"
 import type { StoreLook } from "@lib/data/looks"
 import { getBaseURL } from "@lib/util/env"
 import { productToItem } from "@lib/util/analytics"
+import { getPhotoNotes } from "@lib/util/look-photo-notes"
 import JsonLd from "@modules/common/components/json-ld"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ViewItemList } from "@modules/common/components/analytics"
@@ -29,6 +30,7 @@ export default function LookTemplate({
         .map((p) => p.thumbnail)
         .filter((url): url is string => !!url)
         .slice(0, 1)
+  const photoNotes = getPhotoNotes(look.metadata)
 
   const itemListSchema = {
     "@context": "https://schema.org",
@@ -98,22 +100,27 @@ export default function LookTemplate({
           <div className="flex flex-col gap-4 medium:sticky medium:top-24 medium:self-start">
             {images.length > 0 ? (
               images.map((url, index) => (
-                <div
-                  key={url}
-                  className="relative aspect-[3/4] overflow-hidden rounded-xl bg-stone-100"
-                >
-                  <Image
-                    src={url}
-                    alt={index === 0 ? look.title : `${look.title} – Bild ${index + 1}`}
-                    fill
-                    priority={index === 0}
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover"
-                  />
-                </div>
+                <figure key={url} className="flex flex-col gap-2">
+                  <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-stone-100">
+                    <Image
+                      src={url}
+                      alt={index === 0 ? look.title : `${look.title} – Bild ${index + 1}`}
+                      fill
+                      priority={index === 0}
+                      sizes="(max-width: 1279px) 100vw, 50vw"
+                      className="object-cover"
+                    />
+                  </div>
+                  {/* Hinweis unter dem Foto, damit er nichts vom Bild verdeckt */}
+                  {photoNotes.has(url) && (
+                    <figcaption className="px-1 text-xs leading-snug text-stone-500">
+                      {photoNotes.get(url)}
+                    </figcaption>
+                  )}
+                </figure>
               ))
             ) : (
-              <div className="aspect-[3/4] rounded-xl bg-gradient-to-br from-stone-100 to-stone-200" />
+              <div className="aspect-[2/3] rounded-xl bg-gradient-to-br from-stone-100 to-stone-200" />
             )}
           </div>
 
