@@ -1,18 +1,16 @@
 import { Metadata } from "next"
-import Image from "next/image"
 
 import { listCategories } from "@lib/data/categories"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import PageHeader from "@modules/common/components/page-header"
-import PlaceholderImage from "@modules/common/icons/placeholder-image"
+import TileImage from "@modules/common/components/tile-image"
 import {
   CARD_BODY,
   CARD_MAT,
   CARD_MEDIA,
   CARD_NAME,
   CARD_NAME_UNDERLINE,
-  CARD_SIZES,
   PRODUCT_GRID_WIDE,
 } from "@modules/products/components/product-preview/card-styles"
 
@@ -65,19 +63,7 @@ export default async function CategoriesOverviewPage(props: Params) {
                       className={CARD_MAT}
                     >
                       <div className={CARD_MEDIA}>
-                        {image ? (
-                          <Image
-                            src={image}
-                            alt={category.name}
-                            fill
-                            sizes={CARD_SIZES}
-                            className="object-cover"
-                          />
-                        ) : (
-                          <span className="absolute inset-0 flex items-center justify-center text-stone-300">
-                            <PlaceholderImage size={24} aria-hidden />
-                          </span>
-                        )}
+                        <TileImage src={image} />
                       </div>
                       <div className={CARD_BODY}>
                         <h2 className={CARD_NAME}>
