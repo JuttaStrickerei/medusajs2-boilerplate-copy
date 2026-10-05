@@ -293,8 +293,8 @@ function MenuLinkRow({
  * Aufklappbarer Bereich (Shop the Look, Shop). Die ganze Zeile klappt nur
  * auf, sie führt nirgends hin: Der erste Link darunter ist die Übersicht.
  * Offen startet der Bereich der aktuellen Seite; das Menü wird bei jedem
- * Öffnen neu aufgebaut. Zugeklappte Links sind `invisible`, also nicht per
- * Tab erreichbar.
+ * Öffnen neu aufgebaut. Zugeklappte Links sind `inert` und `invisible`,
+ * also nicht per Tab erreichbar.
  */
 function MenuAccordion({
   section,
@@ -325,12 +325,18 @@ function MenuAccordion({
           )}
         />
       </button>
-      {/* grid-rows 0fr → 1fr: weiches Auf- und Zuklappen ohne feste Höhe */}
+      {/* grid-rows 0fr → 1fr: weiches Auf- und Zuklappen ohne feste Höhe.
+          Beim Aufklappen springt die Sichtbarkeit sofort um, beim Zuklappen
+          bleibt sie bis zum Ende; `inert` nimmt die Links aber sofort aus
+          der Tab-Reihenfolge. */}
       <div
         id={panelId}
+        inert={!isExpanded}
         className={cn(
-          "grid transition-[grid-template-rows,visibility] duration-300 ease-in-out motion-reduce:transition-none",
-          isExpanded ? "grid-rows-[1fr]" : "invisible grid-rows-[0fr]"
+          "grid duration-300 ease-in-out motion-reduce:transition-none",
+          isExpanded
+            ? "grid-rows-[1fr] transition-[grid-template-rows]"
+            : "invisible grid-rows-[0fr] transition-[grid-template-rows,visibility]"
         )}
       >
         <div className="min-h-0 overflow-hidden">
