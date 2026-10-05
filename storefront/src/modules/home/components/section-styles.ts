@@ -9,3 +9,7 @@ export const HOME_H2 =
 
 export const HOME_SUB =
   "mt-1 text-pretty text-[15px] leading-[22px] text-stone-600"
+
+/** „Shop the Look“: Look und Teile, Abstände wie Produktraster und Looks */
+export const SPOTLIGHT_GRID =
+  "grid grid-cols-2 gap-x-3 gap-y-6 tablet:grid-cols-4 tablet:gap-x-4 tablet:gap-y-8 small:gap-x-5 small:gap-y-10 medium:gap-x-6 large:col-span-4"

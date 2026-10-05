@@ -6,6 +6,8 @@ import FeaturedProductsSkeleton from "@modules/home/components/featured-products
 import Hero from "@modules/home/components/hero"
 import HomeLooks from "@modules/home/components/home-looks"
 import HomeLooksSkeleton from "@modules/home/components/home-looks/skeleton"
+import LookSpotlight from "@modules/home/components/look-spotlight"
+import LookSpotlightSkeleton from "@modules/home/components/look-spotlight/skeleton"
 import NewsletterForm from "@modules/home/components/newsletter-form"
 import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -42,6 +44,11 @@ export default async function Home(props: {
           nicht auf die Looks- und Produktabfragen wartet */}
       <Suspense fallback={<HomeLooksSkeleton />}>
         <HomeLooks countryCode={countryCode} />
+      </Suspense>
+
+      {/* Shop the Look: ein Look mit seinen Teilen und Preisen */}
+      <Suspense fallback={<LookSpotlightSkeleton />}>
+        <LookSpotlight countryCode={countryCode} region={region} />
       </Suspense>
 
       {/* Featured Products */}
