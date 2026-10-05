@@ -24,7 +24,7 @@ import {
  */
 
 // Unter so vielen Looks lohnt keine Aufteilung in Farbwelten
-const MIN_LOOKS_FOR_WORLDS = 8
+export const MIN_LOOKS_FOR_WORLDS = 8
 const MIN_WORLDS = 2
 // Ab so vielen Looks bekommt eine Welt den großen Aufmacher (2×2)
 const MIN_LOOKS_FOR_LEAD = 4
