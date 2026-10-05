@@ -26,7 +26,10 @@ type PaginatedProductsParams = {
   order?: string
 }
 
-function matchesColorFilter(product: HttpTypes.StoreProduct, colors: string[]): boolean {
+function matchesColorFilter(
+  product: HttpTypes.StoreProduct,
+  colors: string[]
+): boolean {
   if (!colors || colors.length === 0) return true
 
   // Selected values are colour groups ("blau"); older links may still carry a
@@ -37,7 +40,9 @@ function matchesColorFilter(product: HttpTypes.StoreProduct, colors: string[]): 
     product.variants?.flatMap((variant) =>
       (variant.options || [])
         .filter((option) =>
-          COLOR_OPTION_TITLES.includes(option.option?.title?.toLowerCase() || "")
+          COLOR_OPTION_TITLES.includes(
+            option.option?.title?.toLowerCase() || ""
+          )
         )
         .map((option) => option.value || "")
     ) ?? []
@@ -54,7 +59,10 @@ function matchesColorFilter(product: HttpTypes.StoreProduct, colors: string[]): 
   return colors.some((color) => productTitle.includes(color.toLowerCase()))
 }
 
-function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): boolean {
+function matchesSizeFilter(
+  product: HttpTypes.StoreProduct,
+  sizes: string[]
+): boolean {
   if (!sizes || sizes.length === 0) return true
 
   // Numeric sizes match their letter size (42 → M), see filter-groups.ts
@@ -79,10 +87,16 @@ function matchesSizeFilter(product: HttpTypes.StoreProduct, sizes: string[]): bo
 }
 
 function stripMaterialPercentage(raw: string): string {
-  return raw.trim().replace(/^\d+\s*%\s*/, "").trim()
+  return raw
+    .trim()
+    .replace(/^\d+\s*%\s*/, "")
+    .trim()
 }
 
-function matchesMaterialFilter(product: HttpTypes.StoreProduct, materials: string[]): boolean {
+function matchesMaterialFilter(
+  product: HttpTypes.StoreProduct,
+  materials: string[]
+): boolean {
   if (!materials || materials.length === 0) return true
 
   const selectedMaterials = materials.map((m) => m.toLowerCase())
@@ -105,8 +119,8 @@ function matchesMaterialFilter(product: HttpTypes.StoreProduct, materials: strin
   const productTitle = product.title?.toLowerCase() || ""
   const productDescription = product.description?.toLowerCase() || ""
 
-  return selectedMaterials.some((mat) =>
-    productTitle.includes(mat) || productDescription.includes(mat)
+  return selectedMaterials.some(
+    (mat) => productTitle.includes(mat) || productDescription.includes(mat)
   )
 }
 
@@ -136,13 +150,20 @@ function filterProducts(
   priceRanges: DynamicFilterOptions["priceRanges"]
 ): HttpTypes.StoreProduct[] {
   if (!filters) return products
-  
+
   return products.filter((product) => {
     const matchesColor = matchesColorFilter(product, filters.colors || [])
     const matchesSize = matchesSizeFilter(product, filters.sizes || [])
-    const matchesMaterial = matchesMaterialFilter(product, filters.materials || [])
-    const matchesPrice = matchesPriceFilter(product, filters.priceRange, priceRanges)
-    
+    const matchesMaterial = matchesMaterialFilter(
+      product,
+      filters.materials || []
+    )
+    const matchesPrice = matchesPriceFilter(
+      product,
+      filters.priceRange,
+      priceRanges
+    )
+
     return matchesColor && matchesSize && matchesMaterial && matchesPrice
   })
 }
@@ -205,40 +226,57 @@ export default async function PaginatedProducts({
     countryCode,
   })
 
-  const hasClientFilters = filters && (
-    (filters.colors && filters.colors.length > 0) ||
-    (filters.sizes && filters.sizes.length > 0) ||
-    (filters.materials && filters.materials.length > 0) ||
-    filters.priceRange
-  )
+  const hasClientFilters =
+    filters &&
+    ((filters.colors && filters.colors.length > 0) ||
+      (filters.sizes && filters.sizes.length > 0) ||
+      (filters.materials && filters.materials.length > 0) ||
+      filters.priceRange)
 
   let filteredProducts = products
   let filteredCount = count
 
   if (hasClientFilters) {
-    filteredProducts = filterProducts(products, filters, filterOptions?.priceRanges || [])
+    filteredProducts = filterProducts(
+      products,
+      filters,
+      filterOptions?.priceRanges || []
+    )
     filteredCount = filteredProducts.length
   }
 
   const startIndex = (page - 1) * PRODUCT_LIMIT
-  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + PRODUCT_LIMIT)
-  
+  const paginatedProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + PRODUCT_LIMIT
+  )
+
   const totalPages = Math.ceil(filteredCount / PRODUCT_LIMIT)
 
   if (filteredProducts.length === 0) {
     return (
       <div className="text-center py-16">
         <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            className="w-8 h-8 text-stone-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.5"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
         </div>
         <h3 className="text-lg font-medium text-stone-800 mb-2">
           Keine Produkte gefunden
         </h3>
         <p className="text-stone-600 max-w-md mx-auto">
-          Mit den aktuellen Filtereinstellungen konnten keine passenden Produkte gefunden werden. 
-          Bitte passen Sie Ihre Filter an.
+          Mit den aktuellen Filtereinstellungen konnten keine passenden Produkte
+          gefunden werden. Bitte passen Sie Ihre Filter an.
         </p>
       </div>
     )
@@ -247,14 +285,20 @@ export default async function PaginatedProducts({
   return (
     <>
       {/* Results count */}
-      <div className="mb-6 text-sm text-stone-600">
+      <div className="mb-4 text-sm tabular-nums text-stone-600">
         {filteredCount} {filteredCount === 1 ? "Produkt" : "Produkte"} gefunden
         {hasClientFilters && " (gefiltert)"}
       </div>
-      
+
       <ViewItemList
         listId={categoryId ?? collectionId ?? "store"}
-        listName={categoryId ? "Kategorie" : collectionId ? "Kollektion" : "Alle Produkte"}
+        listName={
+          categoryId
+            ? "Kategorie"
+            : collectionId
+            ? "Kollektion"
+            : "Alle Produkte"
+        }
         items={paginatedProducts.map((p) => productToItem(p))}
       />
       <ul
