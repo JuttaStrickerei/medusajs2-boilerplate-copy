@@ -186,7 +186,8 @@ export default function ProductPreview({
           )}
         </LocalizedClientLink>
 
-        {/* Wunschliste: eigener Knopf neben dem Link, nicht darin */}
+        {/* Wunschliste: eigener Knopf neben dem Link, nicht darin. Sichtbar
+            36px, die Tippfläche (::before) reicht auf 44px */}
         <button
           type="button"
           onClick={handleWishlistToggle}
@@ -197,7 +198,7 @@ export default function ProductPreview({
               : "Zur Wunschliste hinzufügen"
           }
           className={cn(
-            "absolute right-1.5 top-1.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-white hover:text-stone-900",
+            "absolute right-1.5 top-1.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 before:absolute before:-inset-1 before:rounded-full before:content-[''] text-stone-700 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-white hover:text-stone-900",
             isWishlisted && "text-red-500 hover:text-red-600"
           )}
         >
