@@ -34,7 +34,7 @@ function DoorsPlaceholder() {
   return (
     <div className="bg-stone-50">
       <ColorStrip swatches={LOOK_WORLDS.flatMap((world) => world.swatches)} />
-      <div className="content-container pb-10 pt-5 small:pb-16 small:pt-6">
+      <div className="content-container pb-10 pt-6 small:pb-16 small:pt-7">
         <div className="mb-4 small:mb-7">
           <p className={HOME_EYEBROW}>Shop the Look</p>
           <p className={cn("mt-1.5", HOME_H2)}>Finden Sie Ihre Farbe</p>

@@ -11,7 +11,9 @@ const fadeIn = (delay: string) => ({
 
 const Hero = () => {
   return (
-    <section className="relative flex h-[calc(100svh_-_4rem)] min-h-[32rem] items-end overflow-hidden bg-stone-900 text-white small:h-[calc(100svh_-_5rem)]">
+    // Etwas kürzer als der Bildschirm: Farbstreifen und „Shop the Look“ des
+    // nächsten Abschnitts schauen unten hervor und laden zum Scrollen ein
+    <section className="relative flex h-[calc(100svh_-_7.5rem)] min-h-[32rem] items-end overflow-hidden bg-stone-900 text-white small:h-[calc(100svh_-_9rem)]">
       <HeroVideo />
 
       {/* Content */}
