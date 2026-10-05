@@ -94,9 +94,11 @@ export default function LookTemplate({
           <nav aria-label="Brotkrümelnavigation">
             <ol className="flex text-[11px] uppercase tracking-[0.16em] text-stone-500">
               <li>
+                {/* relative: liegt über der folgenden H1, sonst nähme die
+                    den unteren Teil der 44px-Tippfläche */}
                 <LocalizedClientLink
                   href="/looks"
-                  className="-my-[13px] inline-block py-[13px] hover:text-stone-800"
+                  className="relative -my-[13.5px] inline-block py-[13.5px] hover:text-stone-800"
                 >
                   Looks
                 </LocalizedClientLink>
