@@ -1,15 +1,16 @@
-import Image from "next/image"
 import { HttpTypes } from "@medusajs/types"
 import type { StoreLook } from "@lib/data/looks"
 import { getBaseURL } from "@lib/util/env"
 import { productToItem } from "@lib/util/analytics"
 import { getPhotoNotes } from "@lib/util/look-photo-notes"
+import { sumLookPrices } from "@lib/util/look-price"
+import { formatPrice } from "@lib/utils"
 import JsonLd from "@modules/common/components/json-ld"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ViewItemList } from "@modules/common/components/analytics"
-import { ChevronRight } from "@components/icons"
+import LookGallery from "../components/look-gallery"
 import LookItemsActions from "../components/look-items-actions"
-import ProductTabs from "@modules/products/components/product-tabs"
+import { RefreshCw, RotateCcw, Truck } from "@components/icons"
 
 type LookTemplateProps = {
   look: StoreLook
@@ -30,7 +31,12 @@ export default function LookTemplate({
         .map((p) => p.thumbnail)
         .filter((url): url is string => !!url)
         .slice(0, 1)
-  const photoNotes = getPhotoNotes(look.metadata)
+  // Map → einfaches Objekt: Client-Komponenten bekommen nur serialisierbare Props
+  const notes = Object.fromEntries(getPhotoNotes(look.metadata))
+
+  // Kopfzeile: „3 Teile · zusammen € 210,00“ (günstigste Variante je Teil)
+  const total = sumLookPrices(products)
+  const pieceCount = products.length
 
   const itemListSchema = {
     "@context": "https://schema.org",
@@ -83,82 +89,117 @@ export default function LookTemplate({
         listName={`Look: ${look.title}`}
       />
 
-      <div className="content-container py-6 small:py-10">
-        <nav
-          aria-label="Brotkrümelnavigation"
-          className="mb-6 flex items-center gap-1 text-sm text-stone-500"
-        >
-          <LocalizedClientLink href="/looks" className="hover:text-stone-800">
-            Looks
-          </LocalizedClientLink>
-          <ChevronRight size={14} />
-          <span className="text-stone-800">{look.title}</span>
-        </nav>
-
-        <div className="grid grid-cols-1 gap-8 medium:grid-cols-2 medium:gap-12">
-          {/* Bilder */}
-          <div className="flex flex-col gap-4 medium:sticky medium:top-24 medium:self-start">
-            {images.length > 0 ? (
-              images.map((url, index) => (
-                <figure key={url} className="flex flex-col gap-2">
-                  <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-stone-100">
-                    <Image
-                      src={url}
-                      alt={index === 0 ? look.title : `${look.title} – Bild ${index + 1}`}
-                      fill
-                      priority={index === 0}
-                      sizes="(max-width: 1279px) 100vw, 50vw"
-                      className="object-cover"
-                    />
-                  </div>
-                  {/* Hinweis unter dem Foto, damit er nichts vom Bild verdeckt */}
-                  {photoNotes.has(url) && (
-                    <figcaption className="px-1 text-xs leading-snug text-stone-500">
-                      {photoNotes.get(url)}
-                    </figcaption>
-                  )}
-                </figure>
-              ))
-            ) : (
-              <div className="aspect-[2/3] rounded-xl bg-gradient-to-br from-stone-100 to-stone-200" />
-            )}
-          </div>
-
-          {/* Teile */}
-          <div className="flex flex-col gap-6">
-            <header>
-              <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
-                Shop the Look
-              </p>
-              <h1 className="mt-2 font-serif text-2xl small:text-3xl medium:text-4xl font-medium text-stone-800">
-                {look.title}
-              </h1>
-              {look.description && (
-                <p className="mt-3 whitespace-pre-line text-sm small:text-base text-stone-600">
-                  {look.description}
-                </p>
+      <div className="content-container grid grid-cols-1 pb-10 pt-4 tablet:grid-cols-[minmax(0,1fr)_340px] tablet:grid-rows-[auto_1fr] tablet:items-start tablet:gap-x-8 tablet:pt-6 small:grid-cols-[minmax(0,1fr)_minmax(380px,420px)] small:gap-x-10 small:pb-12 small:pt-8 medium:grid-cols-[minmax(0,1fr)_400px] medium:gap-x-12 large:gap-x-16">
+        <header className="tablet:col-start-2 tablet:row-start-1">
+          <nav aria-label="Brotkrümelnavigation">
+            <ol className="flex text-[11px] uppercase tracking-[0.16em] text-stone-500">
+              <li>
+                {/* relative: liegt über der folgenden H1, sonst nähme die
+                    den unteren Teil der 44px-Tippfläche */}
+                <LocalizedClientLink
+                  href="/looks"
+                  className="relative -my-[13.5px] inline-block py-[13.5px] hover:text-stone-800"
+                >
+                  Looks
+                </LocalizedClientLink>
+              </li>
+              <li aria-hidden className="mx-1.5 text-stone-300">
+                /
+              </li>
+              <li>
+                <span aria-current="page">{look.title}</span>
+              </li>
+            </ol>
+          </nav>
+          <h1 className="mt-1.5 font-serif text-[1.75rem] font-normal leading-9 text-stone-900 tablet:text-[2.25rem] tablet:leading-[2.6rem] small:text-4xl medium:text-[2.75rem] medium:leading-[1.1]">
+            {look.title}
+          </h1>
+          {pieceCount > 0 && (
+            <p
+              data-testid="look-meta"
+              className="mt-1 text-sm tabular-nums text-stone-600"
+            >
+              <a
+                href="#look-teile"
+                className="-my-2 inline-block py-2 underline-offset-4 hover:underline"
+              >
+                {pieceCount} {pieceCount === 1 ? "Teil" : "Teile"}
+              </a>
+              {total && (
+                <>
+                  {" · "}
+                  {pieceCount > 1 ? "zusammen " : ""}
+                  {total.from ? "ab " : ""}
+                  {formatPrice(total.amount, total.currency)}
+                </>
               )}
-            </header>
+            </p>
+          )}
+        </header>
 
-            {products.length > 0 ? (
-              <>
-                <LookItemsActions
-                  lookId={look.id}
-                  lookTitle={look.title}
-                  products={products}
-                />
-                {/* Dieselbe „Versand & Retouren“-Karte wie auf der Produktseite
-                    (Wrapper nötig: im Flex-Container würde mx-auto sie schrumpfen) */}
-                <div>
-                  <ProductTabs product={products[0]} showDetails={false} />
-                </div>
-              </>
-            ) : (
-              <p className="text-stone-600">
-                Die Teile dieses Looks sind derzeit nicht verfügbar.
-              </p>
-            )}
-          </div>
+        <div className="-mx-6 mt-4 self-start tablet:sticky tablet:top-[89px] tablet:col-start-1 tablet:row-span-2 tablet:row-start-1 tablet:mx-0 tablet:mt-0 small:top-[113px]">
+          {images.length > 0 ? (
+            <LookGallery images={images} title={look.title} notes={notes} />
+          ) : (
+            <div className="mx-6 aspect-[2/3] rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 tablet:mx-0" />
+          )}
+        </div>
+
+        <div className="mt-3 min-w-0 self-start tablet:col-start-2 tablet:row-start-2 tablet:mt-6">
+          {look.description && (
+            <p className="mb-4 max-w-[46ch] whitespace-pre-line text-sm text-stone-600">
+              {look.description}
+            </p>
+          )}
+
+          {products.length > 0 ? (
+            <LookItemsActions
+              lookId={look.id}
+              lookTitle={look.title}
+              products={products}
+            />
+          ) : (
+            <p className="text-stone-600">
+              Die Teile dieses Looks sind derzeit nicht verfügbar.
+            </p>
+          )}
+
+          {/* Kurzfassung der „Versand & Retouren“-Karte aus product-tabs
+              (dieselben Aussagen; product-tabs ist "use client", daher hier
+              als Text statt Import) */}
+          <ul className="mt-6 space-y-1.5 border-t border-stone-200 pt-4 text-xs leading-5 text-stone-600">
+            <li className="flex gap-2">
+              <Truck
+                size={14}
+                aria-hidden
+                className="mt-[3px] shrink-0 text-stone-400"
+              />
+              Lieferung in etwa 2 Wochen – Versand innerhalb Österreichs
+            </li>
+            <li className="flex gap-2">
+              <RefreshCw
+                size={14}
+                aria-hidden
+                className="mt-[3px] shrink-0 text-stone-400"
+              />
+              Passt nicht? Wir tauschen unkompliziert.
+            </li>
+            <li className="flex gap-2">
+              <RotateCcw
+                size={14}
+                aria-hidden
+                className="mt-[3px] shrink-0 text-stone-400"
+              />
+              14 Tage Widerrufsrecht ab Erhalt der Ware
+            </li>
+          </ul>
+          {/* py-3.5 mit negativem Rand: 44px Tippfläche, Text bleibt an Ort */}
+          <LocalizedClientLink
+            href="/shipping"
+            className="-mb-3.5 -mt-1.5 inline-block py-3.5 text-xs text-stone-600 underline underline-offset-4 hover:text-stone-900"
+          >
+            Versand &amp; Retouren im Detail
+          </LocalizedClientLink>
         </div>
       </div>
     </div>

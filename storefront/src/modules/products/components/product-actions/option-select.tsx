@@ -37,7 +37,7 @@ const SIZE_ORDER: Record<string, number> = {
 const normalizeSizeValue = (value: string) =>
   value.trim().toUpperCase().replace(/\s+/g, "")
 
-const getSizeRank = (value: string): number => {
+export const getSizeRank = (value: string): number => {
   const normalized = normalizeSizeValue(value)
 
   if (normalized in SIZE_ORDER) {
@@ -51,7 +51,7 @@ const getSizeRank = (value: string): number => {
   return Number.POSITIVE_INFINITY
 }
 
-const isSizeOption = (title: string) => {
+export const isSizeOption = (title: string) => {
   const normalizedTitle = title.trim().toLowerCase()
   return (
     normalizedTitle.includes("size") ||
