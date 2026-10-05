@@ -116,7 +116,9 @@ function RailPlaceholder() {
             >
               <div className="rounded bg-white p-1.5 ring-1 ring-black/[0.06]">
                 <div className="aspect-[2/3] animate-pulse rounded-[4px] bg-[#EFF2F5]" />
-                <div className="px-2 pb-1.5 pt-2 tablet:px-2.5 tablet:pb-2 tablet:pt-2.5">
+                {/* Höhe wie Name, Teile und Preis (lange Namen und Preise
+                    brechen auf schmalen Kacheln um) */}
+                <div className="min-h-[98px] px-2 pb-1.5 pt-2 tablet:min-h-[106px] tablet:px-2.5 tablet:pb-2 tablet:pt-2.5 small:min-h-[86px]">
                   <span className="flex h-5 items-center">
                     <span className={cn(BAR, "h-3.5 w-1/2")} />
                   </span>

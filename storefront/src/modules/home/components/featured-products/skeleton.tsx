@@ -1,5 +1,8 @@
-import { PRODUCT_GRID } from "@modules/products/components/product-preview/card-styles"
-import SkeletonProductPreview from "@modules/skeletons/components/skeleton-product-preview"
+import {
+  CARD_BODY,
+  CARD_MAT,
+  PRODUCT_GRID,
+} from "@modules/products/components/product-preview/card-styles"
 import { HOME_EYEBROW, HOME_H2 } from "../section-styles"
 
 const PLACEHOLDER_CARDS = 8
@@ -23,7 +26,16 @@ export default function FeaturedProductsSkeleton() {
         </div>
         <div className={`${PRODUCT_GRID} small:grid-cols-4`}>
           {Array.from({ length: PLACEHOLDER_CARDS }, (_, i) => (
-            <SkeletonProductPreview key={i} />
+            <div key={i} className={CARD_MAT}>
+              <div className="aspect-[2/3] animate-pulse rounded-[4px] bg-stone-100" />
+              {/* Höhe wie Name, Farbpunkte, Preis und „inkl. MwSt.“ */}
+              <div
+                className={`${CARD_BODY} min-h-[92px] gap-2 tablet:min-h-[100px]`}
+              >
+                <span className="h-3.5 w-3/4 animate-pulse rounded bg-stone-100" />
+                <span className="h-3.5 w-1/3 animate-pulse rounded bg-stone-100" />
+              </div>
+            </div>
           ))}
         </div>
       </div>
