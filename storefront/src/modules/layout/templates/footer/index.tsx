@@ -91,7 +91,7 @@ export default async function Footer() {
                 Kategorien
               </h4>
               <ul className="space-y-3">
-                {productCategories.slice(0, 6).map((category) => (
+                {productCategories.map((category) => (
                   <li key={category.id}>
                     <LocalizedClientLink
                       href={`/categories/${category.handle}`}
