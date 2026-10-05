@@ -11,8 +11,9 @@ export const CARD_MAT =
 export const CARD_MEDIA =
   "relative block aspect-[2/3] overflow-hidden rounded-[4px] bg-stone-100 isolate"
 
+/** relative: der Fokusrahmen des Karten-Links liegt sonst oben unter der Bildfläche */
 export const CARD_BODY =
-  "flex flex-1 flex-col px-2 pb-1.5 pt-2 tablet:px-2.5 tablet:pb-2 tablet:pt-2.5"
+  "relative flex flex-1 flex-col px-2 pb-1.5 pt-2 tablet:px-2.5 tablet:pb-2 tablet:pt-2.5"
 
 export const CARD_NAME =
   "line-clamp-2 font-serif text-[15px] font-normal leading-5 text-stone-900 tablet:text-base"
