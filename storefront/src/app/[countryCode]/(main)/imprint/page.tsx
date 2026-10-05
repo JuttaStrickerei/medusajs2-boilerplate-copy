@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 
 export const metadata: Metadata = {
   title: "Impressum",
@@ -10,18 +10,7 @@ export const metadata: Metadata = {
 export default function ImprintPage() {
   return (
     <div className="bg-stone-50">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-stone-200">
-        <div className="content-container py-3">
-          <nav className="flex text-sm text-stone-500">
-            <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
-              Home
-            </LocalizedClientLink>
-            <span className="mx-2">/</span>
-            <span className="text-stone-800">Impressum</span>
-          </nav>
-        </div>
-      </div>
+      <PageBreadcrumb items={[{ label: "Impressum" }]} />
 
       <div className="py-12 small:py-20">
         <div className="content-container">
@@ -31,8 +20,8 @@ export default function ImprintPage() {
                 Impressum
               </h1>
               <p className="text-stone-600 text-base mb-8 leading-relaxed">
-                Impressum und Offenlegung gem. §§ 24, 25 MedienG sowie Angaben gem. § 5 ECG und § 63
-                GewO
+                Impressum und Offenlegung gem. §§ 24, 25 MedienG sowie Angaben
+                gem. § 5 ECG und § 63 GewO
               </p>
 
               <div className="prose prose-stone max-w-none">
@@ -49,7 +38,9 @@ export default function ImprintPage() {
                   Österreich
                 </address>
 
-                <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">Kontakt</h2>
+                <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
+                  Kontakt
+                </h2>
                 <p className="text-stone-600 mb-6">
                   Telefon:{" "}
                   <a
@@ -73,15 +64,20 @@ export default function ImprintPage() {
                 </h2>
                 <dl className="text-stone-600 mb-6 space-y-3">
                   <div>
-                    <dt className="font-medium text-stone-800">Unternehmensgegenstand</dt>
+                    <dt className="font-medium text-stone-800">
+                      Unternehmensgegenstand
+                    </dt>
                     <dd className="mt-1">
                       Herstellung und Vertrieb von Strickwaren
                     </dd>
                   </div>
                   <div>
-                    <dt className="font-medium text-stone-800">Gewerbewortlaut</dt>
+                    <dt className="font-medium text-stone-800">
+                      Gewerbewortlaut
+                    </dt>
                     <dd className="mt-1">
-                      Maschinenstricker und Wirker gem. § 94 Ziffer 46 GewO 1973 i.d.g.F.
+                      Maschinenstricker und Wirker gem. § 94 Ziffer 46 GewO 1973
+                      i.d.g.F.
                     </dd>
                   </div>
                   <div>
@@ -106,11 +102,15 @@ export default function ImprintPage() {
                   Bezirkshauptmannschaft Mattersburg
                 </p>
                 <p className="text-stone-600 mb-4">
-                  <strong className="text-stone-800 font-medium">Kammerzugehörigkeit:</strong>{" "}
+                  <strong className="text-stone-800 font-medium">
+                    Kammerzugehörigkeit:
+                  </strong>{" "}
                   Mitglied der Wirtschaftskammer Burgenland
                 </p>
                 <p className="text-stone-600 mb-6">
-                  <strong className="text-stone-800 font-medium">Anwendbare Rechtsvorschriften:</strong>{" "}
+                  <strong className="text-stone-800 font-medium">
+                    Anwendbare Rechtsvorschriften:
+                  </strong>{" "}
                   Gewerbeordnung 1994 (jederzeit abrufbar unter:{" "}
                   <a
                     href="https://www.ris.bka.gv.at"
@@ -127,7 +127,8 @@ export default function ImprintPage() {
                   Streitschlichtung
                 </h2>
                 <p className="text-stone-600 mb-6">
-                  Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer
+                  Wir sind nicht bereit oder verpflichtet, an
+                  Streitbeilegungsverfahren vor einer
                   Verbraucherschlichtungsstelle teilzunehmen.
                 </p>
 
@@ -135,18 +136,20 @@ export default function ImprintPage() {
                   Haftung für Inhalte
                 </h2>
                 <p className="text-stone-600 mb-6">
-                  Als Diensteanbieter sind wir für eigene Inhalte auf diesen Seiten nach den
-                  allgemeinen Gesetzen verantwortlich. Wir sind jedoch nicht verpflichtet,
-                  übermittelte oder gespeicherte fremde Informationen zu überwachen.
+                  Als Diensteanbieter sind wir für eigene Inhalte auf diesen
+                  Seiten nach den allgemeinen Gesetzen verantwortlich. Wir sind
+                  jedoch nicht verpflichtet, übermittelte oder gespeicherte
+                  fremde Informationen zu überwachen.
                 </p>
 
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
                   Urheberrecht
                 </h2>
                 <p className="text-stone-600 mb-0">
-                  Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten
-                  unterliegen dem österreichischen Urheberrecht. Die Vervielfältigung, Bearbeitung,
-                  Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes
+                  Die durch die Seitenbetreiber erstellten Inhalte und Werke auf
+                  diesen Seiten unterliegen dem österreichischen Urheberrecht.
+                  Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art
+                  der Verwertung außerhalb der Grenzen des Urheberrechtes
                   bedürfen der schriftlichen Zustimmung.
                 </p>
               </div>
