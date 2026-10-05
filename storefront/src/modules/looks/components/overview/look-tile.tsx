@@ -138,7 +138,6 @@ export default function LookTile({
                       alt=""
                       width={48}
                       height={72}
-                      sizes="48px"
                       loading="lazy"
                       className="h-[72px] w-12 rounded-[3px] bg-white object-contain ring-1 ring-black/5"
                     />
