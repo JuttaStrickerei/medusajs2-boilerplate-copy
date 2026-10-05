@@ -61,6 +61,10 @@ export default function ProductPreview({
   const secondaryImage = product.images?.[1]?.url
 
   const colors = getColorOptions(product)
+  // Die sichtbaren Abzeichen liegen im aria-hidden Bild-Link
+  const badgeLabel = [isNew && "Neu", hasSale && "Sale"]
+    .filter(Boolean)
+    .join(", ")
   const href = `/products/${product.handle}`
 
   // Get the first available variant for quick add
@@ -237,6 +241,7 @@ export default function ProductPreview({
         <h3 className={CARD_NAME}>
           <span className={CARD_NAME_UNDERLINE}>{product.title}</span>
         </h3>
+        {badgeLabel && <span className="sr-only">{badgeLabel}</span>}
         {colors.length > 0 && (
           <span
             role="img"
