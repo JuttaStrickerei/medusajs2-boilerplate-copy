@@ -25,6 +25,13 @@
  *   bleiben.
  * - Wird für einen Look kein einziges Produkt gefunden, wird er übersprungen
  *   (zählt als Fehler) statt leer angelegt.
+ * - Übernehmen statt doppelt anlegen: Gibt es den Look schon unter
+ *   "look-<handle>" (im Admin angelegt, z. B. Andreas' Import vom 2026-10-04),
+ *   wird dieser Look ergänzt. Fotos mit gleichem Dateinamen werden aus dem
+ *   bestehenden Upload übernommen, nicht neu hochgeladen. Titel, Handle und
+ *   Rang bleiben, wie sie dort gepflegt sind – Abweichungen vom Manifest
+ *   stehen nur in der Ausgabe. Geschrieben werden Foto-Reihenfolge,
+ *   Hinweise und Quellangaben (und die Teile, falls sie abweichen).
  *
  * Sicherheit: Bricht ab, wenn der Datenbank-Host nicht auf der DEV-Liste
  * steht (oder EXPECT_DB_HOST nicht passt), wenn Datenbank-, Redis- oder
@@ -400,6 +407,17 @@ const currentProductIdsOf = (look: ExistingLook): string[] =>
     .map(linkedProductId)
     .filter((id): id is string => !!id)
 
+// Präfix, unter dem Looks im Admin angelegt wurden (Andreas' Import)
+const ADOPT_HANDLE_PREFIX = "look-"
+
+// "Looks/O02/DSC06502.jpg" → "DSC06502"
+const stemOf = (file: string) => path.basename(file, path.extname(file))
+
+// Upload-URL ".../DSC06424-01M4348SMFCPMGP9N8G16Y5DBF.webp" → "DSC06424"
+// (der File-Provider hängt eine ULID an den Dateinamen)
+const uploadedStemOf = (url: string) =>
+  path.basename(url, path.extname(url)).replace(/-[0-9A-Z]{26}$/, "")
+
 export default async function importHw26Looks({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const out: Log = (line = "") => logger.info(line)
@@ -468,6 +486,7 @@ export default async function importHw26Looks({ container }: ExecArgs) {
   // Unique-Index auf handle gilt auch nur für deleted_at IS NULL, ein
   // gelöschter Look mit gleichem Handle blockiert das Anlegen also nicht.
   const lookHandles = looks.map((look) => look.handle)
+  const adoptHandles = lookHandles.map((handle) => ADOPT_HANDLE_PREFIX + handle)
   const { data: lookData } = await query.graph({
     entity: "look",
     fields: [
@@ -484,7 +503,7 @@ export default async function importHw26Looks({ container }: ExecArgs) {
       "items.deleted_at",
       "items.product_link.product_id",
     ],
-    filters: { handle: lookHandles },
+    filters: { handle: [...lookHandles, ...adoptHandles] },
   })
   const existingByHandle = new Map(
     (lookData as unknown as ExistingLook[])
@@ -519,7 +538,12 @@ export default async function importHw26Looks({ container }: ExecArgs) {
   for (const look of looks) {
     const lines: string[] = []
     const warnings: string[] = []
-    const existing = existingByHandle.get(look.handle) ?? null
+    const existing =
+      existingByHandle.get(look.handle) ??
+      existingByHandle.get(ADOPT_HANDLE_PREFIX + look.handle) ??
+      null
+    // im Admin angelegter Look, der ergänzt statt ersetzt wird
+    const adopted = !!existing && existing.handle !== look.handle
 
     out()
     out(
@@ -561,16 +585,32 @@ export default async function importHw26Looks({ container }: ExecArgs) {
           `  (${deletedCount.get(look.handle)} gelöschte(r) Look(s) mit diesem Handle – zählen nicht)`
         )
       }
-      if (existing && !storedSourcesOf(existing).length) {
-        warnings.push(
-          "Look existiert schon, aber ohne HW26-Quellangaben – alle Fotos werden neu hochgeladen und ersetzt"
-        )
-      }
-
       // Fotos: unveränderte (gleiche Datei + gleicher Inhalt) wiederverwenden
       const reusable = new Map(
         storedSourcesOf(existing).map((s) => [sourceKey(s), s.url])
       )
+      // Ohne Quellangaben (im Admin angelegt): Fotos mit gleichem Dateinamen
+      // aus dem bestehenden Upload übernehmen statt sie doppelt hochzuladen
+      const uploadedByStem = new Map(
+        storedSourcesOf(existing).length
+          ? []
+          : (existing?.images ?? []).map((url) => [uploadedStemOf(url), url])
+      )
+
+      if (existing && !storedSourcesOf(existing).length) {
+        const unmatched = look.photos.filter(
+          (photo) => !uploadedByStem.has(stemOf(photo.file))
+        )
+        if (unmatched.length) {
+          warnings.push(
+            `Look existiert schon, aber ohne HW26-Quellangaben – ${unmatched.length} Foto(s) ohne passenden Upload werden neu hochgeladen`
+          )
+        } else {
+          lines.push(
+            "  (Fotos aus dem bestehenden Upload übernommen – Dateinamen passen)"
+          )
+        }
+      }
       const sources: PhotoSource[] = []
       const photoLines: string[] = []
       let toUpload = 0
@@ -579,12 +619,17 @@ export default async function importHw26Looks({ container }: ExecArgs) {
         const n = i + 1
         const buffer = readFileSync(photoPathOf(hw26Dir, look, photo))
         const sha256 = createHash("sha256").update(buffer).digest("hex")
-        const reuseUrl = reusable.get(sourceKey({ file: photo.file, sha256 }))
+        const storedUrl = reusable.get(sourceKey({ file: photo.file, sha256 }))
+        const reuseUrl = storedUrl ?? uploadedByStem.get(stemOf(photo.file))
 
         if (reuseUrl) {
           summary.reused++
           sources.push({ file: photo.file, bytes: buffer.length, sha256, url: reuseUrl })
-          photoLines.push(`    ${n}. ${photo.file}  ${size(buffer.length)}  unverändert`)
+          photoLines.push(
+            `    ${n}. ${photo.file}  ${size(buffer.length)}  ${
+              storedUrl ? "unverändert" : `übernommen: ${path.basename(reuseUrl)}`
+            }`
+          )
         } else {
           toUpload++
           const ext = path.extname(photo.file).toLowerCase()
@@ -666,10 +711,21 @@ export default async function importHw26Looks({ container }: ExecArgs) {
         const update: Omit<UpdateLookWorkflowInput, "id"> = {}
         const fields: string[] = []
 
+        if (adopted) {
+          lines.push(
+            `  (Handle bleibt "${existing.handle}" – Manifest sagt "${look.handle}")`
+          )
+        }
         if (existing.title !== look.title) {
-          update.title = look.title
-          fields.push("title")
-          changeLines.push(`    title: "${existing.title}" → "${look.title}"`)
+          if (adopted) {
+            lines.push(
+              `  (Titel bleibt "${existing.title}" – Manifest sagt "${look.title}")`
+            )
+          } else {
+            update.title = look.title
+            fields.push("title")
+            changeLines.push(`    title: "${existing.title}" → "${look.title}"`)
+          }
         }
         // Status nur beim Anlegen setzen: Ein im Admin freigeschalteter Look
         // (z. B. TAVIA, sobald Preis und Material da sind) soll durch einen
@@ -680,9 +736,15 @@ export default async function importHw26Looks({ container }: ExecArgs) {
           )
         }
         if ((existing.rank ?? 0) !== look.rank) {
-          update.rank = look.rank
-          fields.push("rank")
-          changeLines.push(`    rank: ${existing.rank ?? 0} → ${look.rank}`)
+          if (adopted) {
+            lines.push(
+              `  (Rang bleibt ${existing.rank ?? 0} – Manifest sagt ${look.rank})`
+            )
+          } else {
+            update.rank = look.rank
+            fields.push("rank")
+            changeLines.push(`    rank: ${existing.rank ?? 0} → ${look.rank}`)
+          }
         }
 
         const currentImages = existing.images ?? []
@@ -722,7 +784,9 @@ export default async function importHw26Looks({ container }: ExecArgs) {
           action = "SKIP (alles aktuell)"
           summary.skip++
         } else {
-          action = `UPDATE (${fields.join(", ")})`
+          action = `UPDATE (${fields.join(", ")})${
+            adopted ? ` – ergänzt ${existing.handle}` : ""
+          }`
           if (apply) {
             await updateLookWorkflow(container).run({
               input: { id: existing.id, ...update },
