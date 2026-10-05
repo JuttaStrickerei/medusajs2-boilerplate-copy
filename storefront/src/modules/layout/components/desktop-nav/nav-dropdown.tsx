@@ -62,7 +62,7 @@ type NavDropdownProps = {
  * Bereich mit Untermenü nach dem WAI-Muster „Disclosure Navigation“:
  * Beschriftung führt zur Übersicht, der Pfeil daneben öffnet die Liste.
  * Kein role="menu": es sind gewöhnliche Links. Geschlossene Listen sind
- * `invisible`, also weder fokussierbar noch vorgelesen.
+ * `inert` und `invisible`, also weder fokussierbar noch vorgelesen.
  */
 export default function NavDropdown({
   section,
@@ -173,9 +173,12 @@ export default function NavDropdown({
           ((80 − 44) / 2 + 8 = 26px).
           Beim Öffnen wird nur die Deckkraft überblendet: Die Sichtbarkeit
           springt sofort um, sonst ließe sich der erste Link nicht gleich
-          fokussieren. Beim Schließen bleibt sie bis zum Ende sichtbar. */}
+          fokussieren. Beim Schließen bleibt sie bis zum Ende sichtbar,
+          damit das Ausblenden zu sehen ist; `inert` nimmt die Links aber
+          sofort aus der Tab-Reihenfolge (Escape, dann gleich Tab). */}
       <div
         id={panelId}
+        inert={!isOpen}
         className={cn(
           "absolute left-0 top-full z-50 pt-[26px] duration-200 motion-reduce:transition-none",
           isOpen
