@@ -31,7 +31,7 @@ export default async function Nav() {
 
             {/* Mobile Menu */}
             <div className="flex small:hidden">
-              <SideMenu regions={regions} />
+              <SideMenu regions={regions} sections={sections} />
             </div>
 
             {/* Center Logo */}
