@@ -9,11 +9,20 @@ import { addToCart } from "@lib/data/cart"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import { cn, isProductNew } from "@lib/utils"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PlaceholderImage from "@modules/common/icons/placeholder-image"
 import { Badge, Button } from "@components/ui"
 import { Heart, ShoppingBag, Check } from "@components/icons"
 import { triggerCartRefresh } from "@lib/context/cart-context"
 import { useWishlist } from "@lib/context/wishlist-context"
 import PreviewPrice from "./price"
+import {
+  CARD_BODY,
+  CARD_MAT,
+  CARD_MEDIA,
+  CARD_NAME,
+  CARD_NAME_UNDERLINE,
+  CARD_SIZES,
+} from "./card-styles"
 
 interface ProductPreviewProps {
   product: HttpTypes.StoreProduct
@@ -22,31 +31,37 @@ interface ProductPreviewProps {
   className?: string
 }
 
+/** Feste Breite des Hover-Fotos; es erscheint erst ab 1280px (Karte ≤ 300px) */
+const HOVER_IMAGE_WIDTH = 300
+const HOVER_IMAGE_HEIGHT = 450
+const MAX_COLOR_DOTS = 5
+
 export default function ProductPreview({
   product,
   isFeatured,
   region,
   className,
 }: ProductPreviewProps) {
-  const [isHovered, setIsHovered] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false)
   const [isAdded, setIsAdded] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-  
+
   // Wishlist hook - consume items directly for reliable reactivity
   const { items: wishlistItems, toggleWishlist } = useWishlist()
-  const isWishlisted = wishlistItems.some(item => item.id === product.id)
+  const isWishlisted = wishlistItems.some((item) => item.id === product.id)
 
   const { cheapestPrice } = getProductPrice({ product })
   const isNew = product.created_at ? isProductNew(product.created_at) : false
-  
+
   // Check if product has a sale price
   const hasSale = cheapestPrice?.price_type === "sale"
-  
+
   // Get secondary image for hover effect
   const primaryImage = product.thumbnail || product.images?.[0]?.url
   const secondaryImage = product.images?.[1]?.url
+
+  const colors = getColorOptions(product)
+  const href = `/products/${product.handle}`
 
   // Get the first available variant for quick add
   const firstVariant = product.variants?.[0]
@@ -88,10 +103,10 @@ export default function ProductPreview({
           quantity: 1,
           countryCode: region.countries?.[0]?.iso_2 || "at",
         })
-        
+
         // Show success state
         setIsAdded(true)
-        
+
         // Trigger cart update immediately
         triggerCartRefresh()
 
@@ -101,7 +116,7 @@ export default function ProductPreview({
           value: item.price ?? 0,
           items: [item],
         })
-        
+
         // Reset after 2 seconds
         setTimeout(() => setIsAdded(false), 2000)
       } catch (error) {
@@ -111,174 +126,141 @@ export default function ProductPreview({
   }
 
   return (
-    <div
-      className={cn(
-        "group relative bg-white rounded-xl overflow-hidden",
-        "border border-stone-200/60",
-        "shadow-sm hover:shadow-lg hover:border-stone-200",
-        "transition-all duration-300 ease-out",
-        "hover:-translate-y-1",
-        "flex flex-col h-full", // Ensure full height and flex
-        className
-      )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Image Container */}
-      <LocalizedClientLink
-        href={`/products/${product.handle}`}
-        className="block relative aspect-[4/5] overflow-hidden bg-stone-50"
-      >
-        {/* Primary Image */}
-        {primaryImage && (
-          <Image
-            src={primaryImage}
-            alt={product.title || "Product image"}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className={cn(
-              "object-cover transition-all duration-500",
-              isHovered && secondaryImage ? "opacity-0 scale-105" : "opacity-100 scale-100",
-              !imageLoaded && "opacity-0"
-            )}
-            onLoad={() => setImageLoaded(true)}
-            priority={isFeatured}
-          />
-        )}
-        
-        {/* Secondary Image (Hover) */}
-        {secondaryImage && (
-          <Image
-            src={secondaryImage}
-            alt={`${product.title} - alternate view`}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className={cn(
-              "object-cover absolute inset-0 transition-all duration-500",
-              isHovered ? "opacity-100 scale-100" : "opacity-0 scale-105"
-            )}
-          />
-        )}
-
-        {/* Loading Skeleton */}
-        {!imageLoaded && (
-          <div className="absolute inset-0 bg-stone-200 animate-pulse" />
-        )}
-
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-          {isNew && (
-            <Badge variant="new" className="animate-fade-in">
-              Neu
-            </Badge>
+    <div className={cn(CARD_MAT, className)}>
+      <div className="relative">
+        {/* Bildfläche: zweiter Weg zur Produktseite, für Tastatur und
+            Screenreader genügt der Link unter dem Bild */}
+        <LocalizedClientLink
+          href={href}
+          tabIndex={-1}
+          aria-hidden
+          className={CARD_MEDIA}
+        >
+          {primaryImage ? (
+            <Image
+              src={primaryImage}
+              alt={product.title || "Produktbild"}
+              fill
+              sizes={CARD_SIZES}
+              priority={isFeatured}
+              className="object-cover mix-blend-multiply"
+            />
+          ) : (
+            <span className="absolute inset-0 flex items-center justify-center text-stone-300">
+              <PlaceholderImage size={24} aria-hidden />
+            </span>
           )}
-          {hasSale && (
-            <Badge variant="sale" className="animate-fade-in">
-              Sale
-            </Badge>
-          )}
-        </div>
 
-        {/* Wishlist Button */}
+          {/* Zweites Foto beim Überfahren; unter 1280px display:none, daher
+              lädt ein Handy es nie. Die deckende Fläche verhindert, dass sich
+              die beiden multiplizierten Fotos überlagern. */}
+          {secondaryImage && (
+            <span className="absolute inset-0 isolate hidden bg-stone-100 opacity-0 transition-opacity duration-500 ease-out medium:block [@media(hover:hover)]:group-hover:opacity-100">
+              <Image
+                src={secondaryImage}
+                alt=""
+                width={HOVER_IMAGE_WIDTH}
+                height={HOVER_IMAGE_HEIGHT}
+                loading="lazy"
+                className="h-full w-full object-cover mix-blend-multiply"
+              />
+            </span>
+          )}
+
+          {(isNew || hasSale) && (
+            <span className="absolute left-2 top-2 z-10 flex flex-col items-start gap-1">
+              {isNew && (
+                <Badge
+                  variant="secondary"
+                  className="bg-white/95 text-[11px] leading-4 text-stone-800 ring-1 ring-black/5"
+                >
+                  Neu
+                </Badge>
+              )}
+              {hasSale && (
+                <Badge variant="sale" className="text-[11px] leading-4">
+                  Sale
+                </Badge>
+              )}
+            </span>
+          )}
+        </LocalizedClientLink>
+
+        {/* Wunschliste: eigener Knopf neben dem Link, nicht darin */}
         <button
+          type="button"
           onClick={handleWishlistToggle}
+          aria-pressed={isWishlisted}
+          aria-label={
+            isWishlisted
+              ? "Von Wunschliste entfernen"
+              : "Zur Wunschliste hinzufügen"
+          }
           className={cn(
-            "absolute top-3 right-3 z-10",
-            "w-9 h-9 rounded-full flex items-center justify-center",
-            "bg-white/90 backdrop-blur-sm shadow-sm",
-            "transition-all duration-200",
-            "hover:bg-white hover:scale-110",
-            isWishlisted && "text-red-500"
+            "absolute right-1.5 top-1.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-white hover:text-stone-900",
+            isWishlisted && "text-red-500 hover:text-red-600"
           )}
-          aria-label={isWishlisted ? "Von Wunschliste entfernen" : "Zur Wunschliste hinzufügen"}
         >
           <Heart size={18} filled={isWishlisted} />
         </button>
 
-        {/* Quick Actions Overlay */}
-        <div
-          className={cn(
-            "absolute inset-x-3 bottom-3 z-10",
-            "flex gap-2",
-            "transition-all duration-300",
-            isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-          )}
-        >
+        {/* Schnell in den Warenkorb: nur mit Maus (Überfahren) oder Tastatur;
+            auf Touch-Geräten nicht vorhanden, damit ein Tippen aufs Bild nie
+            unbemerkt etwas in den Warenkorb legt */}
+        <div className="absolute inset-x-1.5 bottom-1.5 z-10 hidden translate-y-1 opacity-0 transition duration-200 group-focus-within:translate-y-0 group-focus-within:opacity-100 [@media(hover:hover)]:block [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100">
           <Button
             size="sm"
-            className={cn(
-              "flex-1 shadow-lg transition-all",
-              isAdded 
-                ? "bg-green-600 text-white hover:bg-green-600" 
-                : "bg-white/95 backdrop-blur-sm text-stone-800 hover:bg-white"
-            )}
             onClick={handleQuickAdd}
             disabled={isPending}
+            className={cn(
+              "h-9 w-full rounded-full text-[13px] shadow-sm ring-1 ring-black/5",
+              isAdded
+                ? "bg-green-600 text-white hover:bg-green-600"
+                : "bg-white/95 text-stone-800 hover:bg-white"
+            )}
           >
             {isPending ? (
-              <span className="w-4 h-4 border-2 border-stone-400 border-t-transparent rounded-full animate-spin mr-1.5" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-stone-400 border-t-transparent" />
             ) : isAdded ? (
-              <Check size={16} className="mr-1.5" />
+              <Check size={16} />
             ) : (
-              <ShoppingBag size={16} className="mr-1.5" />
+              <ShoppingBag size={16} />
             )}
             {isAdded ? "Hinzugefügt" : canQuickAdd ? "Hinzufügen" : "Auswählen"}
           </Button>
         </div>
-      </LocalizedClientLink>
+      </div>
 
-      {/* Product Info */}
-      <div className="p-4 flex flex-col flex-1">
-        {/* Collection Tag - Fixed height */}
-        <div className="h-4 flex items-center">
-          {product.collection ? (
-            <LocalizedClientLink
-              href={`/collections/${product.collection.handle}`}
-              className="text-[11px] text-stone-400 uppercase tracking-wider hover:text-stone-600 transition-colors truncate"
-            >
-              {product.collection.title}
-            </LocalizedClientLink>
-          ) : (
-            <span className="text-[11px] text-stone-300 uppercase tracking-wider">Produkt</span>
-          )}
-        </div>
-
-        {/* Title - Min height for consistency, allows overflow */}
-        <LocalizedClientLink href={`/products/${product.handle}`} className="mt-1.5 block">
-          <h3 className="font-medium text-stone-800 leading-snug group-hover:text-stone-600 transition-colors min-h-[2.5rem]">
-            {product.title}
-          </h3>
-        </LocalizedClientLink>
-
-        {/* Color Options - Fixed height */}
-        <div className="mt-2 h-5 flex items-center">
-          {getColorOptions(product).length > 0 ? (
-            <div className="flex items-center gap-1.5">
-              {getColorOptions(product).slice(0, 5).map((color, index) => (
-                <span
-                  key={index}
-                  className="w-4 h-4 rounded-full border border-stone-200 shadow-sm"
-                  style={{ backgroundColor: color.hex || "#e5e5e5" }}
-                  title={color.value}
-                />
-              ))}
-              {getColorOptions(product).length > 5 && (
-                <span className="text-[10px] text-stone-400 font-medium">
-                  +{getColorOptions(product).length - 5}
-                </span>
-              )}
-            </div>
-          ) : null}
-        </div>
-
-        {/* Spacer to push price to bottom */}
-        <div className="flex-1 min-h-3" />
-
-        {/* Price Section - Always at bottom */}
-        <div className="pt-3 border-t border-stone-100 mt-auto">
+      {/* Der eine zugängliche Link der Karte */}
+      <LocalizedClientLink href={href} className={CARD_BODY}>
+        <h3 className={CARD_NAME}>
+          <span className={CARD_NAME_UNDERLINE}>{product.title}</span>
+        </h3>
+        {colors.length > 0 && (
+          <span
+            role="img"
+            aria-label={`Farben: ${colors.map((c) => c.value).join(", ")}`}
+            className="mt-1.5 flex items-center gap-1"
+          >
+            {colors.slice(0, MAX_COLOR_DOTS).map((color) => (
+              <span
+                key={color.value}
+                title={color.value}
+                className="h-2.5 w-2.5 rounded-full ring-1 ring-black/10"
+                style={{ backgroundColor: color.hex || "#e5e5e5" }}
+              />
+            ))}
+            {colors.length > MAX_COLOR_DOTS && (
+              <span className="text-[11px] leading-none text-stone-500">
+                +{colors.length - MAX_COLOR_DOTS}
+              </span>
+            )}
+          </span>
+        )}
+        <div className="mt-auto pt-1.5">
           {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
         </div>
-      </div>
+      </LocalizedClientLink>
     </div>
   )
 }
@@ -286,21 +268,24 @@ export default function ProductPreview({
 // Helper function to extract color options
 function getColorOptions(product: HttpTypes.StoreProduct) {
   const colorOption = product.options?.find(
-    (o) => o.title?.toLowerCase() === "color" || o.title?.toLowerCase() === "farbe"
+    (o) =>
+      o.title?.toLowerCase() === "color" || o.title?.toLowerCase() === "farbe"
   )
-  
+
   if (!colorOption?.values) return []
-  
+
   // Get unique colors
   const seen = new Set<string>()
-  return colorOption.values.filter((v) => {
-    if (seen.has(v.value)) return false
-    seen.add(v.value)
-    return true
-  }).map((v) => ({
-    value: v.value,
-    hex: getColorHex(v.value),
-  }))
+  return colorOption.values
+    .filter((v) => {
+      if (seen.has(v.value)) return false
+      seen.add(v.value)
+      return true
+    })
+    .map((v) => ({
+      value: v.value,
+      hex: getColorHex(v.value),
+    }))
 }
 
 // Map color names to hex values
@@ -345,6 +330,6 @@ function getColorHex(colorName: string): string | undefined {
     alpaka: "#d2b48c",
     alpaca: "#d2b48c",
   }
-  
+
   return colorMap[colorName.toLowerCase()]
 }

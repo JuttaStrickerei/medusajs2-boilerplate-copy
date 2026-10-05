@@ -1,6 +1,7 @@
 import { listProductsWithSort } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import ProductPreview from "@modules/products/components/product-preview"
+import { PRODUCT_GRID } from "@modules/products/components/product-preview/card-styles"
 import { ViewItemList } from "@modules/common/components/analytics"
 import { productToItem } from "@lib/util/analytics"
 import { Pagination } from "@modules/store/components/pagination"
@@ -301,10 +302,7 @@ export default async function PaginatedProducts({
         }
         items={paginatedProducts.map((p) => productToItem(p))}
       />
-      <ul
-        className="grid grid-cols-2 w-full small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8"
-        data-testid="products-list"
-      >
+      <ul className={PRODUCT_GRID} data-testid="products-list">
         {paginatedProducts.map((p) => {
           return (
             <li key={p.id}>
