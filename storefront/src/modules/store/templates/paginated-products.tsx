@@ -18,6 +18,8 @@ import {
 } from "@lib/util/filter-groups"
 
 const PRODUCT_LIMIT = 12
+/** Erste Reihe (bis 4 Spalten): diese Fotos laden sofort, das erste ist das LCP-Bild */
+const PRIORITY_CARDS = 4
 
 type PaginatedProductsParams = {
   limit: number
@@ -303,10 +305,14 @@ export default async function PaginatedProducts({
         items={paginatedProducts.map((p) => productToItem(p))}
       />
       <ul className={PRODUCT_GRID} data-testid="products-list">
-        {paginatedProducts.map((p) => {
+        {paginatedProducts.map((p, index) => {
           return (
             <li key={p.id}>
-              <ProductPreview product={p} region={region} />
+              <ProductPreview
+                product={p}
+                region={region}
+                isFeatured={index < PRIORITY_CARDS}
+              />
             </li>
           )
         })}
