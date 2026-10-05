@@ -1,6 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { listProducts } from "@lib/data/products"
 import ProductPreview from "@modules/products/components/product-preview"
+import { PRODUCT_GRID } from "@modules/products/components/product-preview/card-styles"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
 import { ArrowRight } from "@components/icons"
@@ -49,8 +50,9 @@ export default async function FeaturedProducts({
           </LocalizedClientLink>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-4 small:gap-6">
+        {/* Raster und Abstände wie die Produktlisten; 4 Spalten ab 1024px,
+            damit die 8 Produkte zwei volle Reihen ergeben */}
+        <div className={`${PRODUCT_GRID} small:grid-cols-4`}>
           {products.map((product, index) => (
             <ProductPreview
               key={product.id}
@@ -58,7 +60,6 @@ export default async function FeaturedProducts({
               region={region}
               isFeatured={index < 4}
               className="animate-fade-in-up"
-              style={{ animationDelay: `${index * 0.1}s` } as React.CSSProperties}
             />
           ))}
         </div>
