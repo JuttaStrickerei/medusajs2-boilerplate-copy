@@ -61,6 +61,10 @@ export default function ProductPreview({
   const secondaryImage = product.images?.[1]?.url
 
   const colors = getColorOptions(product)
+  // Punkte nur für Farben mit bekanntem Farbwert; unbekannte zählen ins „+N“
+  const colorDots = colors.filter((c) => c.hex).slice(0, MAX_COLOR_DOTS)
+  const moreColorCount = colors.length - colorDots.length
+  const colorLabel = `Farben: ${colors.map((c) => c.value).join(", ")}`
   // Die sichtbaren Abzeichen liegen im aria-hidden Bild-Link
   const badgeLabel = [isNew && "Neu", hasSale && "Sale"]
     .filter(Boolean)
@@ -242,26 +246,28 @@ export default function ProductPreview({
           <span className={CARD_NAME_UNDERLINE}>{product.title}</span>
         </h3>
         {badgeLabel && <span className="sr-only">{badgeLabel}</span>}
-        {colors.length > 0 && (
+        {colorDots.length > 0 ? (
           <span
             role="img"
-            aria-label={`Farben: ${colors.map((c) => c.value).join(", ")}`}
+            aria-label={colorLabel}
             className="mt-1.5 flex items-center gap-1"
           >
-            {colors.slice(0, MAX_COLOR_DOTS).map((color) => (
+            {colorDots.map((color) => (
               <span
                 key={color.value}
                 title={color.value}
                 className="h-2.5 w-2.5 rounded-full ring-1 ring-black/10"
-                style={{ backgroundColor: color.hex || "#e5e5e5" }}
+                style={{ backgroundColor: color.hex }}
               />
             ))}
-            {colors.length > MAX_COLOR_DOTS && (
+            {moreColorCount > 0 && (
               <span className="text-[11px] leading-none text-stone-500">
-                +{colors.length - MAX_COLOR_DOTS}
+                +{moreColorCount}
               </span>
             )}
           </span>
+        ) : (
+          colors.length > 0 && <span className="sr-only">{colorLabel}</span>
         )}
         <div className="mt-auto pt-1.5">
           {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
