@@ -18,7 +18,7 @@ export default function LookLoading() {
         className="content-container grid grid-cols-1 pb-10 pt-4 tablet:grid-cols-[minmax(0,1fr)_340px] tablet:grid-rows-[auto_1fr] tablet:items-start tablet:gap-x-8 tablet:pt-6 small:grid-cols-[minmax(0,1fr)_minmax(380px,420px)] small:gap-x-10 small:pb-12 small:pt-8 medium:grid-cols-[minmax(0,1fr)_400px] medium:gap-x-12 large:gap-x-16"
       >
         <div className="tablet:col-start-2 tablet:row-start-1">
-          <Skeleton className="mt-0.5 h-3 w-36" />
+          <Skeleton className="mt-1 h-3 w-36" />
           <Skeleton className="mt-3 h-8 w-56 tablet:h-10 medium:h-11 medium:w-64" />
           <Skeleton className="mt-2 h-4 w-48" />
         </div>
