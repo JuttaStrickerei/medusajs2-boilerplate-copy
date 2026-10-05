@@ -27,6 +27,11 @@ type LookTileProps = {
   /** Aufmacher rechts statt links (jede zweite Welt) */
   isMirrored: boolean
   loading: ImageLoading
+  /** GA-Liste, z. B. für die Startseite; ohne Angabe die Looks-Übersicht */
+  listId?: string
+  listName?: string
+  /** zusätzliche Klassen am <li> (nach den Standardklassen) */
+  className?: string
 }
 
 /** Eine Look-Kachel; die ganze Kachel ist ein Link zur Look-Seite */
@@ -35,6 +40,9 @@ export default function LookTile({
   isLead,
   isMirrored,
   loading,
+  listId = LOOKS_LIST_ID,
+  listName = LOOKS_LIST_NAME,
+  className,
 }: LookTileProps) {
   const nameId = `look-${look.handle}-name`
   const metaId = `look-${look.handle}-meta`
@@ -44,15 +52,16 @@ export default function LookTile({
       className={cn(
         RAIL_ITEM,
         isLead && "small:col-span-2 small:row-span-2 small:flex small:flex-col",
-        isLead && isMirrored && "small:col-start-3 large:col-start-4"
+        isLead && isMirrored && "small:col-start-3 large:col-start-4",
+        className
       )}
     >
       <TrackedLink
         href={`/looks/${look.handle}`}
         event="select_item"
         params={{
-          item_list_id: LOOKS_LIST_ID,
-          item_list_name: LOOKS_LIST_NAME,
+          item_list_id: listId,
+          item_list_name: listName,
           items: [toGaItem(look)],
         }}
         aria-labelledby={nameId}
