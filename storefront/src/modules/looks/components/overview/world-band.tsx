@@ -45,19 +45,19 @@ export default function WorldBand({ world, index }: WorldBandProps) {
       data-world={world.key}
       aria-labelledby={titleId}
       style={world.style}
-      className="bg-[color:var(--welt-bg)] pb-8 pt-4 tablet:py-10 small:py-14 large:py-16"
+      className="bg-[color:var(--welt-bg)] pb-8 pt-4 tablet:py-8 small:py-10 large:py-12"
     >
       <div className="content-container">
         <header
           className={cn(
-            "mb-3 tablet:mb-6 tablet:flex tablet:items-end tablet:justify-between tablet:gap-8 small:mb-8",
+            "mb-3 tablet:mb-5 tablet:flex tablet:items-end tablet:justify-between tablet:gap-8 small:mb-6",
             reveal
           )}
         >
           <div>
             <h2
               id={titleId}
-              className="flex items-center gap-2.5 font-serif text-[1.625rem] font-normal leading-8 text-[color:var(--welt-ink)] tablet:text-4xl tablet:leading-[1.1] medium:text-5xl"
+              className="flex items-center gap-2.5 font-serif text-[1.625rem] font-normal leading-8 text-[color:var(--welt-ink)] tablet:text-3xl tablet:leading-[1.15] medium:text-[2rem]"
             >
               {dots.length > 0 && (
                 <span aria-hidden className="flex -space-x-1 tablet:hidden">
@@ -73,29 +73,9 @@ export default function WorldBand({ world, index }: WorldBandProps) {
               {world.name}
             </h2>
             {world.tagline && (
-              <p className="mt-1 text-pretty text-sm leading-5 text-[color:var(--welt-text)] tablet:mt-2 tablet:text-base small:text-lg">
+              <p className="mt-1 text-pretty text-sm leading-5 text-[color:var(--welt-text)] tablet:text-base">
                 {world.tagline}
               </p>
-            )}
-            {world.swatches.length > 0 && (
-              <ul
-                aria-label="Farben dieser Welt"
-                className="mt-3 hidden flex-wrap gap-x-4 gap-y-1 tablet:flex"
-              >
-                {world.swatches.map((swatch) => (
-                  <li
-                    key={swatch.hex}
-                    className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[color:var(--welt-muted)]"
-                  >
-                    <span
-                      aria-hidden
-                      className="h-3 w-3 rounded-full ring-1 ring-[color:var(--welt-dot-ring)]"
-                      style={{ backgroundColor: swatch.hex }}
-                    />
-                    {swatch.name}
-                  </li>
-                ))}
-              </ul>
             )}
           </div>
           <div className="hidden shrink-0 flex-col items-end gap-1 text-right tablet:flex">

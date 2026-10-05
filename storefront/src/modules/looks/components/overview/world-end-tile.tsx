@@ -26,21 +26,23 @@ export default function WorldEndTile({ world }: { world: WorldVM }) {
     : "Alle Produkte ansehen"
 
   return (
-    <li className={cn(RAIL_ITEM, "flex", world.endClasses)}>
+    // Ab 1024px kompakt am unteren Rand der Zeile statt die ganze Zelle zu
+    // füllen – die Farbkarte soll begleiten, nicht dominieren
+    <li className={cn(RAIL_ITEM, "flex small:self-end", world.endClasses)}>
       <TrackedLink
         href={world.storeHref}
         event="select_content"
         params={{ content_type: "farbwelt_einzelteile", content_id: world.key }}
         // sichtbarer Titel bleibt im Namen (WCAG 2.5.3), die Welt ergänzt ihn
         aria-label={hasColors ? `${title} – ${world.name}` : title}
-        className="group flex min-h-[12rem] w-full flex-col overflow-hidden rounded bg-[color:var(--welt-end-bg)] text-[color:var(--welt-end-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--welt-focus)]"
+        className="group flex min-h-[12rem] w-full flex-col overflow-hidden rounded small:min-h-0 bg-[color:var(--welt-end-bg)] text-[color:var(--welt-end-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--welt-focus)]"
       >
         {/* Farbkarte wie bei Garnen: jede Farbe der Welt als breiter Streifen,
             Name senkrecht – füllt die Kachel mit Farbe statt leerer Fläche */}
         {hasColors && (
           <span
             aria-hidden
-            className="flex min-h-[7rem] flex-1"
+            className="flex min-h-[7rem] flex-1 small:h-24 small:min-h-0 small:flex-none"
             style={{
               borderBottom:
                 "1px solid color-mix(in srgb, currentColor 18%, transparent)",
@@ -49,13 +51,13 @@ export default function WorldEndTile({ world }: { world: WorldVM }) {
             {world.swatches.map((swatch) => (
               <span
                 key={swatch.hex}
-                className="flex flex-1 items-end justify-center pb-3"
+                className="flex flex-1 items-end justify-center pb-3 small:items-center small:pb-0"
                 style={{
                   backgroundColor: swatch.hex,
                   color: inkFor(swatch.hex),
                 }}
               >
-                <span className="rotate-180 text-[10px] uppercase tracking-[0.18em] [writing-mode:vertical-rl]">
+                <span className="rotate-180 text-[10px] uppercase tracking-[0.18em] [writing-mode:vertical-rl] small:rotate-0 small:[writing-mode:horizontal-tb]">
                   {swatch.name}
                 </span>
               </span>
