@@ -62,8 +62,9 @@ export default function AboutPage() {
         meta="Von der ersten Strickmaschine zur digitalen Boutique"
       />
 
-      {/* Story — vertikale Timeline */}
-      <section className="py-16 small:py-24 bg-white">
+      {/* Story — vertikale Timeline; oben knapp, damit sie direkt an den
+          Seitenkopf anschließt */}
+      <section className="pb-16 pt-4 small:pb-24 small:pt-8 bg-white">
         <div className="content-container">
           <div className="max-w-5xl mx-auto">
             {/* Mobile: Einfache Liste mit Bildern */}
