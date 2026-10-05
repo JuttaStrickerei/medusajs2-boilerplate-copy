@@ -3,7 +3,9 @@ import { cn } from "@lib/utils"
 import { ViewItemList } from "@modules/common/components/analytics"
 import JsonLd from "@modules/common/components/json-ld"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import PageBreadcrumb, {
+  type Crumb,
+} from "@modules/common/components/page-breadcrumb"
 import LooksClosing from "@modules/looks/components/overview/looks-closing"
 import LooksIntro from "@modules/looks/components/overview/looks-intro"
 import {
@@ -31,7 +33,17 @@ type LooksOverviewProps = {
   countryCode: string
 }
 
-const breadcrumbSchema = (baseUrl: string, countryCode: string) => ({
+// Ältere Saison: „Startseite / Looks / <Saison>“, sonst „Startseite / Looks“
+const breadcrumbItems = (archiveSeason: LookSeason | null): Crumb[] =>
+  archiveSeason
+    ? [{ label: "Looks", href: "/looks" }, { label: archiveSeason.title }]
+    : [{ label: "Looks" }]
+
+const breadcrumbSchema = (
+  baseUrl: string,
+  countryCode: string,
+  archiveSeason: LookSeason | null
+) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
@@ -47,6 +59,16 @@ const breadcrumbSchema = (baseUrl: string, countryCode: string) => ({
       name: "Looks",
       item: `${baseUrl}/${countryCode}/looks`,
     },
+    ...(archiveSeason
+      ? [
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: archiveSeason.title,
+            item: `${baseUrl}/${countryCode}${archiveSeason.href}`,
+          },
+        ]
+      : []),
   ],
 })
 
@@ -83,12 +105,13 @@ export default function LooksOverview({
 }: LooksOverviewProps) {
   const { bands, ordered, showNav } = overview
   const baseUrl = getBaseURL()
+  const archiveSeason = isArchive ? season : null
 
   if (!ordered.length) {
     return (
       <div className={cn(styles.root, "min-h-screen bg-stone-50")}>
-        <JsonLd data={breadcrumbSchema(baseUrl, countryCode)} />
-        <PageBreadcrumb items={[{ label: "Looks" }]} />
+        <JsonLd data={breadcrumbSchema(baseUrl, countryCode, archiveSeason)} />
+        <PageBreadcrumb items={breadcrumbItems(archiveSeason)} />
         <LooksIntro
           id={INTRO_ID}
           count={0}
@@ -105,13 +128,13 @@ export default function LooksOverview({
       <JsonLd
         data={itemListSchema(ordered, baseUrl, countryCode, season, isArchive)}
       />
-      <JsonLd data={breadcrumbSchema(baseUrl, countryCode)} />
+      <JsonLd data={breadcrumbSchema(baseUrl, countryCode, archiveSeason)} />
       <ViewItemList
         items={ordered.map(toGaItem)}
         listId={LOOKS_LIST_ID}
         listName={LOOKS_LIST_NAME}
       />
-      <PageBreadcrumb items={[{ label: "Looks" }]} />
+      <PageBreadcrumb items={breadcrumbItems(archiveSeason)} />
       <LooksIntro
         id={INTRO_ID}
         count={ordered.length}
