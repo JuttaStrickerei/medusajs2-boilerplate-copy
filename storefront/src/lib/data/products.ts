@@ -3,6 +3,7 @@
 import { sdk } from "@lib/config"
 import { sortProducts } from "@lib/util/sort-products"
 import { HttpTypes } from "@medusajs/types"
+import { PRODUCT_LIST_FIELDS } from "@lib/constants/product-fields"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
@@ -74,8 +75,7 @@ export const listProducts = async ({
           region_id: region?.id,
           // Include country_code for tax calculation
           ...(taxCountryCode && { country_code: taxCountryCode }),
-          fields:
-            "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+images",
+          fields: PRODUCT_LIST_FIELDS,
           ...queryParams,
         },
         headers,

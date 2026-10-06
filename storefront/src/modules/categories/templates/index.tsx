@@ -65,7 +65,7 @@ export default function CategoryTemplate({
     <div className="bg-stone-50 min-h-screen" data-testid="category-container">
       <PageBreadcrumb
         items={[
-          { label: "Kategorien", href: "/categories" },
+          { label: "Alle Produkte", href: "/store" },
           ...parents.map((parent) => ({
             label: parent.name,
             href: `/categories/${buildCategoryPath(parent)}`,
