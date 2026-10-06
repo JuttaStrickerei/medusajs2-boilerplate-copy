@@ -18,6 +18,8 @@ export type SeasonCollection = {
 }
 
 export type LookSeason = {
+  /** ID der Produkt-Kollektion */
+  collectionId: string
   handle: string
   title: string
   lookCount: number
@@ -131,6 +133,7 @@ export const buildSeasonIndex = (
     .filter((c) => countOf(c.handle) > 0)
     .sort(byNewest)
     .map((c, i) => ({
+      collectionId: c.id,
       handle: c.handle,
       title: c.title,
       // Looks ohne Kollektion zählen zur aktuellen Saison, damit sie auf

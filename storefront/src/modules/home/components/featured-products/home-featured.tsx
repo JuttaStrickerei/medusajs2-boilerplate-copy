@@ -30,7 +30,7 @@ export default async function HomeFeatured({
     <FeaturedProducts
       region={region}
       excludeIds={spotlight?.productIds ?? []}
-      seasonTitle={season?.title ?? null}
+      season={season}
     />
   )
 }

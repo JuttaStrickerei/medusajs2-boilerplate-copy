@@ -1,4 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
+import type { LookSeason } from "@modules/looks/lib/seasons"
 import { listProducts } from "@lib/data/products"
 import ProductPreview from "@modules/products/components/product-preview"
 import { PRODUCT_GRID } from "@modules/products/components/product-preview/card-styles"
@@ -13,14 +14,14 @@ interface FeaturedProductsProps {
   region: HttpTypes.StoreRegion
   /** Produkte, die schon weiter oben stehen (z. B. Teile von „Shop the Look“) */
   excludeIds?: string[]
-  /** „Herbst/Winter 2026“; null = ohne Saison in der Dachzeile */
-  seasonTitle?: string | null
+  /** Saison für die Dachzeile; null = ohne Saison */
+  season?: Pick<LookSeason, "collectionId" | "title"> | null
 }
 
 export default async function FeaturedProducts({
   region,
   excludeIds = [],
-  seasonTitle = null,
+  season = null,
 }: FeaturedProductsProps) {
   // Die neuesten Produkte (= aktuelle Kollektion); ohne „order“ kämen sie in
   // Anlage-Reihenfolge, also die ältesten zuerst. Ein paar mehr laden, damit
@@ -48,7 +49,14 @@ export default async function FeaturedProducts({
     return null
   }
 
-  // „Kollektion Herbst/Winter 2026“ passt auch auf dem Handy in eine Zeile
+  // Die Saison nur nennen, wenn wirklich jedes Produkt aus ihr stammt (eine
+  // neuere Kollektion ohne Looks käme sonst unter dem alten Namen). „Kollektion
+  // Herbst/Winter 2026“ passt auch auf dem Handy in eine Zeile.
+  const seasonTitle =
+    season &&
+    products.every((product) => product.collection_id === season.collectionId)
+      ? season.title
+      : null
   const eyebrow = seasonTitle
     ? `Kollektion ${seasonTitle}`
     : "Aktuelle Kollektion"
