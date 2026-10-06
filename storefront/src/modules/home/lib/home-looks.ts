@@ -83,9 +83,10 @@ export const doorMeta = (band: WorldVM): string => {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   }).format(minCents / CENTS_PER_EURO)
-  // „ab“ nur, wenn die Looks verschieden viel kosten
+  // „ab“ nur, wenn die Looks verschieden viel kosten; geschütztes Leerzeichen,
+  // damit schmale Türen nicht zwischen „ab“ und dem Preis umbrechen
   const isSinglePrice = cents.every((c) => c === minCents)
-  return `${count} · ${isSinglePrice ? "" : "ab "}${price}`
+  return `${count} · ${isSinglePrice ? "" : "ab\u00A0"}${price}`
 }
 
 export type Spotlight = {

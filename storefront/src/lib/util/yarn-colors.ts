@@ -23,6 +23,11 @@ const YARN_HEX: Record<string, string> = {
   hellgrau: "#C5C0BC",
   grau: "#73757D",
   schwarz: "#0F0D11",
+  // Noch kein Studiofoto in diesen Farben: gedämpfte Wolltöne statt des
+  // grellen Filter-Grüns
+  grün: "#4F6B48",
+  oliv: "#6B6B3D",
+  salbei: "#9AA88A",
 }
 
 const GROUP_HEX = new Map(COLOR_GROUPS.map((group) => [group.value, group.hex]))
