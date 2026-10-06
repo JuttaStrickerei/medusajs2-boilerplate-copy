@@ -6,7 +6,11 @@ import { useWishlist } from "@lib/context/wishlist-context"
 import { listProducts } from "@lib/data/products"
 import ProductPreview from "@modules/products/components/product-preview"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { Button, SkeletonProductCard } from "@components/ui"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import PageHeader from "@modules/common/components/page-header"
+import { PRODUCT_GRID_WIDE } from "@modules/products/components/product-preview/card-styles"
+import SkeletonProductPreview from "@modules/skeletons/components/skeleton-product-preview"
+import { Button } from "@components/ui"
 import { ArrowRight, Heart, Trash } from "@components/icons"
 
 type WishlistTemplateProps = {
@@ -78,22 +82,20 @@ export default function WishlistTemplate({
     .filter((p): p is HttpTypes.StoreProduct => p !== undefined)
 
   return (
-    <div className="py-12">
-      <div className="content-container">
-        {/* Header */}
-        <header className="mb-8 pb-6 border-b border-stone-200">
-          <h1 className="font-serif text-3xl small:text-4xl font-medium text-stone-800 tracking-tight">
-            Wunschliste
-          </h1>
-          <p className="mt-2 text-stone-500">
-            {isEmpty
-              ? "Speichern Sie Ihre Lieblingsprodukte für später"
-              : `${itemCount} ${
-                  itemCount === 1 ? "Artikel" : "Artikel"
-                } gespeichert`}
-          </p>
-        </header>
+    <div className="min-h-screen bg-stone-50">
+      <PageBreadcrumb items={[{ label: "Wunschliste" }]} />
+      <PageHeader
+        title="Wunschliste"
+        meta={
+          isEmpty
+            ? "Speichern Sie Ihre Lieblingsprodukte für später"
+            : `${itemCount} ${
+                itemCount === 1 ? "Artikel" : "Artikel"
+              } gespeichert`
+        }
+      />
 
+      <div className="content-container pb-12 small:pb-16">
         {isEmpty ? (
           /* Empty State */
           <div className="bg-white rounded-2xl border border-stone-200/70 p-12 text-center">
@@ -117,7 +119,7 @@ export default function WishlistTemplate({
         ) : (
           <>
             {/* Clear-all row */}
-            <div className="flex justify-end mb-6">
+            <div className="mb-4 flex justify-end">
               <button
                 onClick={clearWishlist}
                 className="text-sm text-stone-500 hover:text-red-500 transition-colors flex items-center gap-2"
@@ -127,11 +129,11 @@ export default function WishlistTemplate({
               </button>
             </div>
 
-            {/* Grid — matches shop layout exactly */}
-            <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-4 small:gap-6">
+            {/* Raster ohne Filterspalte, wie Suche und Ähnliche Produkte */}
+            <div className={PRODUCT_GRID_WIDE}>
               {orderedProducts.length === 0 && isLoading
                 ? Array.from({ length: itemCount }).map((_, i) => (
-                    <SkeletonProductCard key={i} />
+                    <SkeletonProductPreview key={i} />
                   ))
                 : orderedProducts.map((product) => (
                     <ProductPreview

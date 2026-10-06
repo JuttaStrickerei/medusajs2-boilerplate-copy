@@ -1,8 +1,18 @@
 import { Metadata } from "next"
-import Image from "next/image"
 
 import { listCategories } from "@lib/data/categories"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import PageHeader from "@modules/common/components/page-header"
+import TileImage from "@modules/common/components/tile-image"
+import {
+  CARD_BODY,
+  CARD_MAT,
+  CARD_MEDIA,
+  CARD_NAME,
+  CARD_NAME_UNDERLINE,
+  PRODUCT_GRID_WIDE,
+} from "@modules/products/components/product-preview/card-styles"
 
 export const metadata: Metadata = {
   title: "Alle Kategorien",
@@ -26,74 +36,46 @@ export default async function CategoriesOverviewPage(props: Params) {
   })
 
   // Nur Hauptkategorien anzeigen (ohne Parent)
-  const rootCategories = categories.filter((category) => !category.parent_category)
+  const rootCategories = categories.filter(
+    (category) => !category.parent_category
+  )
   const hasCategories = rootCategories.length > 0
 
   return (
     <div className="bg-stone-50 min-h-screen">
-      <div className="content-container py-8 small:py-12">
-        {/* Page Header */}
-        <header className="mb-8 small:mb-10">
-          <h1 className="font-serif text-2xl small:text-3xl medium:text-4xl font-medium text-stone-800">
-            Alle Kategorien
-          </h1>
-          <p className="mt-3 text-sm small:text-base text-stone-600 max-w-2xl">
-            Entdecken Sie die Kategorien der Strickerei Jutta und finden Sie
-            die passende Auswahl für Ihren Anlass.
-          </p>
-        </header>
+      <PageBreadcrumb items={[{ label: "Kategorien" }]} />
+      <PageHeader
+        title="Alle Kategorien"
+        meta="Entdecken Sie alle Kategorien der Strickerei Jutta."
+      />
 
-        {/* Categories Grid or Empty State */}
+      <div className="content-container pb-12 small:pb-16">
+        {/* Kategorien oder leerer Zustand */}
         {hasCategories ? (
           <section aria-label="Kategorien">
-            <ul className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-4 small:gap-6">
-              {rootCategories.map((category) => (
-                <li key={category.id}>
-                  <LocalizedClientLink
-                    href={`/categories/${category.handle}`}
-                    className="group block h-full"
-                  >
-                    <article
-                      className="bg-white rounded-xl overflow-hidden border border-stone-200/60 shadow-sm
-                                 hover:shadow-lg hover:border-stone-200 transition-all duration-300 hover:-translate-y-1
-                                 flex flex-col h-full"
+            <ul className={PRODUCT_GRID_WIDE}>
+              {rootCategories.map((category) => {
+                const image = category.metadata?.image as string | undefined
+                return (
+                  <li key={category.id}>
+                    <LocalizedClientLink
+                      href={`/categories/${category.handle}`}
+                      className={CARD_MAT}
                     >
-                      {/* Category Title */}
-                      <div className="px-4 pt-4 pb-2 text-center">
-                        <h2 className="text-sm small:text-base font-medium text-stone-800 line-clamp-2">
-                          {category.name}
+                      <div className={CARD_MEDIA}>
+                        <TileImage src={image} />
+                      </div>
+                      <div className={CARD_BODY}>
+                        <h2 className={CARD_NAME}>
+                          <span className={CARD_NAME_UNDERLINE}>
+                            {category.name}
+                          </span>
                         </h2>
                       </div>
-
-                      {/* Category Image or Placeholder */}
-                      <div
-                        className="relative aspect-[4/5] mx-3 mb-4 rounded-lg overflow-hidden
-                                   bg-gradient-to-br from-stone-100 to-stone-200
-                                   border border-stone-200/70"
-                      >
-                        {(category.metadata?.image as string) ? (
-                          <Image
-                            src={category.metadata.image as string}
-                            alt={category.name}
-                            fill
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="flex flex-col items-center gap-2 text-stone-500">
-                              <span className="inline-flex h-10 w-10 rounded-full border border-stone-300 bg-white/70 shadow-sm" />
-                              <span className="text-[11px] tracking-[0.18em] uppercase">
-                                Kategorie
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  </LocalizedClientLink>
-                </li>
-              ))}
+                    </LocalizedClientLink>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         ) : (
@@ -124,4 +106,3 @@ export default async function CategoriesOverviewPage(props: Params) {
     </div>
   )
 }
-

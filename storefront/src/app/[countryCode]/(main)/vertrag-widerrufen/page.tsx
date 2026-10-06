@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import RevocationForm from "@modules/revocation/components/revocation-form"
 
 export const metadata: Metadata = {
@@ -11,18 +12,7 @@ export const metadata: Metadata = {
 export default function RevocationPage() {
   return (
     <div className="bg-stone-50">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-stone-200">
-        <div className="content-container py-3">
-          <nav aria-label="Brotkrümelnavigation" className="flex text-sm text-stone-600">
-            <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
-              Home
-            </LocalizedClientLink>
-            <span className="mx-2" aria-hidden="true">/</span>
-            <span className="text-stone-800" aria-current="page">Vertrag widerrufen</span>
-          </nav>
-        </div>
-      </div>
+      <PageBreadcrumb items={[{ label: "Vertrag widerrufen" }]} />
 
       <div className="content-container py-12 small:py-16">
         <div className="max-w-2xl mx-auto space-y-8">
@@ -32,15 +22,15 @@ export default function RevocationPage() {
             </h1>
             <div className="space-y-3 text-stone-700">
               <p>
-                Als Verbraucherin bzw. Verbraucher können Sie einen bei uns geschlossenen
-                Vertrag binnen 14 Tagen ab Erhalt der Ware ohne Angabe von Gründen widerrufen.
-                Hier können Sie Ihren Widerruf online erklären – eine Anmeldung ist dafür nicht
-                nötig.
+                Als Verbraucherin bzw. Verbraucher können Sie einen bei uns
+                geschlossenen Vertrag binnen 14 Tagen ab Erhalt der Ware ohne
+                Angabe von Gründen widerrufen. Hier können Sie Ihren Widerruf
+                online erklären – eine Anmeldung ist dafür nicht nötig.
               </p>
               <p>
-                Nach dem Absenden erhalten Sie sofort eine Eingangsbestätigung per E-Mail mit
-                dem Inhalt Ihrer Erklärung sowie Datum und Uhrzeit des Eingangs. Details finden
-                Sie in unserer{" "}
+                Nach dem Absenden erhalten Sie sofort eine Eingangsbestätigung
+                per E-Mail mit dem Inhalt Ihrer Erklärung sowie Datum und
+                Uhrzeit des Eingangs. Details finden Sie in unserer{" "}
                 <LocalizedClientLink
                   href="/terms#widerrufsrecht"
                   className="text-stone-800 underline underline-offset-2 hover:text-stone-600"
@@ -63,7 +53,10 @@ export default function RevocationPage() {
             aria-labelledby="muster-heading"
             className="bg-white rounded-2xl border border-stone-200 p-6 small:p-10"
           >
-            <h2 id="muster-heading" className="font-serif text-2xl font-medium text-stone-800 mb-3">
+            <h2
+              id="muster-heading"
+              className="font-serif text-2xl font-medium text-stone-800 mb-3"
+            >
               Alternativ: Muster-Widerrufsformular
             </h2>
             <p className="text-stone-700 mb-4">
@@ -74,8 +67,8 @@ export default function RevocationPage() {
               >
                 office@strickerei-jutta.at
               </a>{" "}
-              erklären, zum Beispiel mit dem folgenden Muster-Widerrufsformular. Die Verwendung
-              des Formulars ist nicht vorgeschrieben.
+              erklären, zum Beispiel mit dem folgenden Muster-Widerrufsformular.
+              Die Verwendung des Formulars ist nicht vorgeschrieben.
             </p>
             <a
               href="/muster-widerrufsformular.pdf"
@@ -85,25 +78,30 @@ export default function RevocationPage() {
               Muster-Widerrufsformular herunterladen (PDF)
             </a>
             <div className="border-l-4 border-stone-300 pl-4 text-stone-700 space-y-2 text-sm">
-              <p className="font-medium text-stone-800">Muster-Widerrufsformular</p>
+              <p className="font-medium text-stone-800">
+                Muster-Widerrufsformular
+              </p>
               <p>
-                (Wenn Sie den Vertrag widerrufen wollen, dann füllen Sie bitte dieses Formular
-                aus und senden Sie es zurück.)
+                (Wenn Sie den Vertrag widerrufen wollen, dann füllen Sie bitte
+                dieses Formular aus und senden Sie es zurück.)
               </p>
               <ul className="space-y-2">
                 <li>
-                  – An Ing. Jutta Strobl, Wiener Neustädterstraße 47, 7021 Draßburg, Österreich,
-                  E-Mail: office@strickerei-jutta.at:
+                  – An Ing. Jutta Strobl, Wiener Neustädterstraße 47, 7021
+                  Draßburg, Österreich, E-Mail: office@strickerei-jutta.at:
                 </li>
                 <li>
-                  – Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag
-                  über den Kauf der folgenden Waren (*)/die Erbringung der folgenden
-                  Dienstleistung (*)
+                  – Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*)
+                  abgeschlossenen Vertrag über den Kauf der folgenden Waren
+                  (*)/die Erbringung der folgenden Dienstleistung (*)
                 </li>
                 <li>– Bestellt am (*)/erhalten am (*)</li>
                 <li>– Name des/der Verbraucher(s)</li>
                 <li>– Anschrift des/der Verbraucher(s)</li>
-                <li>– Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier)</li>
+                <li>
+                  – Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf
+                  Papier)
+                </li>
                 <li>– Datum</li>
               </ul>
               <p>(*) Unzutreffendes streichen.</p>

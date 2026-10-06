@@ -7,6 +7,7 @@ import { sumLookPrices } from "@lib/util/look-price"
 import { formatPrice } from "@lib/utils"
 import JsonLd from "@modules/common/components/json-ld"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import { ViewItemList } from "@modules/common/components/analytics"
 import LookGallery from "../components/look-gallery"
 import LookItemsActions from "../components/look-items-actions"
@@ -88,30 +89,13 @@ export default function LookTemplate({
         listId={`look_${look.handle}`}
         listName={`Look: ${look.title}`}
       />
+      <PageBreadcrumb
+        items={[{ label: "Looks", href: "/looks" }, { label: look.title }]}
+      />
 
       <div className="content-container grid grid-cols-1 pb-10 pt-4 tablet:grid-cols-[minmax(0,1fr)_340px] tablet:grid-rows-[auto_1fr] tablet:items-start tablet:gap-x-8 tablet:pt-6 small:grid-cols-[minmax(0,1fr)_minmax(380px,420px)] small:gap-x-10 small:pb-12 small:pt-8 medium:grid-cols-[minmax(0,1fr)_400px] medium:gap-x-12 large:gap-x-16">
         <header className="tablet:col-start-2 tablet:row-start-1">
-          <nav aria-label="Brotkrümelnavigation">
-            <ol className="flex text-[11px] uppercase tracking-[0.16em] text-stone-500">
-              <li>
-                {/* relative: liegt über der folgenden H1, sonst nähme die
-                    den unteren Teil der 44px-Tippfläche */}
-                <LocalizedClientLink
-                  href="/looks"
-                  className="relative -my-[13.5px] inline-block py-[13.5px] hover:text-stone-800"
-                >
-                  Looks
-                </LocalizedClientLink>
-              </li>
-              <li aria-hidden className="mx-1.5 text-stone-300">
-                /
-              </li>
-              <li>
-                <span aria-current="page">{look.title}</span>
-              </li>
-            </ol>
-          </nav>
-          <h1 className="mt-1.5 font-serif text-[1.75rem] font-normal leading-9 text-stone-900 tablet:text-[2.25rem] tablet:leading-[2.6rem] small:text-4xl medium:text-[2.75rem] medium:leading-[1.1]">
+          <h1 className="font-serif text-[1.75rem] font-normal leading-9 text-stone-900 tablet:text-[2.25rem] tablet:leading-[2.6rem] small:text-4xl medium:text-[2.75rem] medium:leading-[1.1]">
             {look.title}
           </h1>
           {pieceCount > 0 && (

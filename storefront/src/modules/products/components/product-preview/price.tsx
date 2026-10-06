@@ -1,4 +1,4 @@
-import { cn, formatPrice, calculateDiscount } from "@lib/utils"
+import { formatPrice, calculateDiscount } from "@lib/utils"
 
 interface PriceProps {
   price: {
@@ -10,49 +10,41 @@ interface PriceProps {
   className?: string
 }
 
+// Ruhiger Preis wie auf den Look-Kacheln: 14px, mittleres Gewicht
 export default function PreviewPrice({ price, className }: PriceProps) {
   const isOnSale = price.price_type === "sale"
-  const discount = isOnSale 
-    ? calculateDiscount(price.original_price_number, price.calculated_price_number)
+  const discount = isOnSale
+    ? calculateDiscount(
+        price.original_price_number,
+        price.calculated_price_number
+      )
     : 0
 
   return (
-    <div className={cn("", className)}>
-      {/* Price Row */}
-      <div className="flex items-baseline gap-2 flex-wrap">
-        {/* Current Price */}
+    <div className={className}>
+      <p className="flex flex-wrap items-baseline gap-x-1.5 text-sm font-medium leading-5 tabular-nums">
         <span
-          className={cn(
-            "text-lg font-semibold",
-            isOnSale ? "text-red-600" : "text-stone-800"
-          )}
+          className={isOnSale ? "text-red-700" : "text-stone-900"}
           data-testid="product-price"
         >
           {formatPrice(price.calculated_price_number, price.currency_code)}
         </span>
-
-        {/* Original Price (if on sale) */}
         {isOnSale && (
           <span
-            className="text-sm text-stone-400 line-through"
+            className="text-[13px] font-normal text-stone-500 line-through"
             data-testid="original-price"
           >
             {formatPrice(price.original_price_number, price.currency_code)}
           </span>
         )}
-
-        {/* Discount Badge */}
         {isOnSale && discount > 0 && (
-          <span className="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+          <span className="rounded-full bg-red-600 px-1.5 text-[11px] leading-4 text-white">
             −{discount}%
           </span>
         )}
-      </div>
-      
-      {/* VAT Note - Always shown */}
-      <p className="text-[11px] text-stone-400 mt-1">
-        inkl. MwSt.
       </p>
+      {/* Pflichtangabe; stone-500 statt stone-400 für ausreichenden Kontrast */}
+      <p className="text-[11px] leading-4 text-stone-500">inkl. MwSt.</p>
     </div>
   )
 }

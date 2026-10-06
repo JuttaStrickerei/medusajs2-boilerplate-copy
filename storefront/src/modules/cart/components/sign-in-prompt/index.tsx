@@ -7,7 +7,7 @@ import { User } from "@components/icons"
 
 const SignInPrompt = () => {
   const pathname = usePathname()
-  
+
   // Create redirect URL to return to cart after login (pathname already includes countryCode)
   const redirectUrl = pathname || "/cart"
   // LocalizedClientLink adds countryCode automatically, so we only need /account
@@ -20,7 +20,8 @@ const SignInPrompt = () => {
           <User size={24} className="text-stone-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-stone-800">
+          {/* eigene Größe, sonst greift die globale h3-Größe (bis 36px) */}
+          <h3 className="font-sans text-base font-medium leading-6 tracking-normal text-stone-800">
             Sie haben bereits ein Konto?
           </h3>
           <p className="text-sm text-stone-500 mt-0.5">

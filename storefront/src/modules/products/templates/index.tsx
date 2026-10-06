@@ -9,6 +9,7 @@ import RelatedProducts from "@modules/products/components/related-products"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import JsonLd from "@modules/common/components/json-ld"
 import { Badge } from "@components/ui"
 import { Sparkles, RefreshCw, Shield } from "@components/icons"
@@ -148,39 +149,20 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         item={productToItem(product)}
         currency={gaCurrency(region.currency_code)}
       />
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-stone-200">
-        <div className="content-container py-3">
-          <nav className="flex items-center gap-2 text-xs text-stone-400 flex-wrap">
-            <LocalizedClientLink
-              href="/"
-              className="hover:text-stone-700 transition-colors"
-            >
-              Startseite
-            </LocalizedClientLink>
-            <span className="text-stone-300">/</span>
-            <LocalizedClientLink
-              href="/store"
-              className="hover:text-stone-700 transition-colors"
-            >
-              Alle Produkte
-            </LocalizedClientLink>
-            {product.collection && (
-              <>
-                <span className="text-stone-300">/</span>
-                <LocalizedClientLink
-                  href={`/collections/${product.collection.handle}`}
-                  className="hover:text-stone-700 transition-colors"
-                >
-                  {product.collection.title}
-                </LocalizedClientLink>
-              </>
-            )}
-            <span className="text-stone-300">/</span>
-            <span className="text-stone-600 line-clamp-1">{product.title}</span>
-          </nav>
-        </div>
-      </div>
+      <PageBreadcrumb
+        items={[
+          { label: "Alle Produkte", href: "/store" },
+          ...(product.collection
+            ? [
+                {
+                  label: product.collection.title,
+                  href: `/collections/${product.collection.handle}`,
+                },
+              ]
+            : []),
+          { label: product.title },
+        ]}
+      />
 
       {/* Main Product Section */}
       <section className="bg-white">

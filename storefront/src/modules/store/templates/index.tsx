@@ -2,9 +2,10 @@ import { Suspense } from "react"
 import RefinementList from "@modules/store/components/refinement-list"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import PageHeader from "@modules/common/components/page-header"
+import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import PaginatedProducts from "./paginated-products"
-import { SkeletonProductGrid } from "@components/ui"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
 
 export interface ProductFilters {
@@ -63,41 +64,18 @@ export default function StoreTemplate({
 
   return (
     <div className="bg-stone-50 min-h-screen">
-      {/* Page Header */}
-      <div className="bg-white border-b border-stone-200">
-        <div className="content-container py-8 small:py-12 medium:py-16">
-          <div className="text-center max-w-2xl mx-auto">
-            <p className="text-xs small:text-sm text-stone-500 tracking-[0.15em] uppercase mb-2 small:mb-3">
-              Entdecken Sie
-            </p>
-            <h1 className="font-serif text-2xl small:text-3xl medium:text-4xl large:text-5xl font-medium text-stone-800 mb-3 small:mb-4">
-              Unsere Kollektionen
-            </h1>
-            <p className="text-sm small:text-base text-stone-600 leading-relaxed hidden small:block">
-              Handgefertigte Strickwaren aus feinsten Naturfasern. Jedes Stück
-              ein Unikat, gefertigt mit 60 Jahren Erfahrung.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Breadcrumb */}
-      <div className="content-container py-3 small:py-4">
-        <nav className="flex items-center gap-2 text-xs small:text-sm text-stone-500">
-          <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
-            Home
-          </LocalizedClientLink>
-          <span>/</span>
-          <span className="text-stone-800">Alle Produkte</span>
-        </nav>
-      </div>
+      <PageBreadcrumb items={[{ label: "Alle Produkte" }]} />
+      <PageHeader
+        title="Alle Produkte"
+        meta="Handgefertigte Strickwaren aus feinsten Naturfasern."
+      />
 
       {/* Main Content */}
       <div className="content-container pb-12 small:pb-16">
-        <div className="flex flex-col tablet:flex-row gap-6 tablet:gap-8">
-          {/* Filters Sidebar - Desktop/Tablet */}
-          <aside className="hidden tablet:block w-56 medium:w-64 flex-shrink-0">
-            <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5 max-h-[calc(100vh-7rem)] overflow-y-auto">
+        <div className="flex flex-col gap-6 small:flex-row small:gap-8">
+          {/* Filter-Spalte ab 1024px */}
+          <aside className="hidden w-56 flex-shrink-0 small:block medium:w-64">
+            <div className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-6 overflow-y-auto rounded border border-stone-200 bg-white p-4 medium:p-5">
               <RefinementList
                 sortBy={sort}
                 filters={filters}
@@ -107,9 +85,9 @@ export default function StoreTemplate({
           </aside>
 
           {/* Products Grid */}
-          <main className="flex-1">
+          <main className="min-w-0 flex-1">
             {/* Mobile Filter Bar */}
-            <div className="tablet:hidden mb-4">
+            <div className="mb-4 small:hidden">
               <div className="flex items-center gap-3">
                 <MobileFilterDrawer
                   sortBy={sort}
@@ -127,7 +105,7 @@ export default function StoreTemplate({
             </div>
 
             {/* Products */}
-            <Suspense fallback={<SkeletonProductGrid count={12} />}>
+            <Suspense fallback={<SkeletonProductGrid numberOfProducts={12} />}>
               <PaginatedProducts
                 sortBy={sort}
                 page={pageNumber}
