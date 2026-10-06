@@ -4,7 +4,16 @@ import { cn } from "@lib/utils"
 import { doorTint } from "@modules/home/lib/home-looks"
 import { RAIL_ITEM } from "@modules/looks/components/overview/look-tile"
 import { LOOK_WORLDS } from "@modules/looks/lib/worlds"
-import { HOME_EYEBROW, HOME_H2, HOME_SUB } from "../section-styles"
+import {
+  DOORS_GRID,
+  DOORS_LABEL,
+  DOORS_META,
+  DOORS_SEAM,
+  DOORS_SECTION,
+  DOORS_TITLE,
+  HOME_H2,
+  HOME_SUB,
+} from "../section-styles"
 import { ColorStrip } from "./world-doors"
 
 const RAIL_PLACEHOLDERS = 4
@@ -32,23 +41,16 @@ export default function HomeLooksSkeleton() {
 
 function DoorsPlaceholder() {
   return (
-    <div className="bg-stone-50">
-      <ColorStrip swatches={LOOK_WORLDS.flatMap((world) => world.swatches)} />
-      <div className="content-container pb-10 pt-6 small:pb-16 small:pt-7">
-        <div className="mb-4 small:mb-7">
-          <p className={HOME_EYEBROW}>Shop the Look</p>
-          <p className={cn("mt-1.5", HOME_H2)}>Finden Sie Ihre Farbe</p>
-          {/* Unterzeile: zwei Zeilen auf dem Handy, ab 768px eine */}
-          <div className={cn(HOME_SUB, "flex flex-col")}>
-            <span className="flex h-[22px] items-center">
-              <span className={cn(BAR, "h-3 w-full max-w-md")} />
-            </span>
-            <span className="flex h-[22px] items-center tablet:hidden">
-              <span className={cn(BAR, "h-3 w-1/2")} />
-            </span>
-          </div>
+    <div className={DOORS_SECTION}>
+      <div className={DOORS_SEAM}>
+        <ColorStrip swatches={LOOK_WORLDS.flatMap((world) => world.swatches)} />
+      </div>
+      <div className="content-container pb-10 small:pb-16">
+        <div className={DOORS_LABEL}>
+          <p className={DOORS_TITLE}>Finden Sie Ihre Farbe</p>
+          <p className={DOORS_META}>Looks werden geladen</p>
         </div>
-        <ul className="grid grid-cols-2 gap-3 tablet:grid-cols-4 tablet:gap-4 small:gap-6">
+        <ul className={DOORS_GRID}>
           {LOOK_WORLDS.map((world) => (
             <li key={world.key} className="flex">
               <div

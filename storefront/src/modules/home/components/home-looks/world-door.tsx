@@ -48,7 +48,8 @@ export default function WorldDoor({ band }: { band: WorldVM }) {
             cover={lead.cover}
             alt={lead.alt}
             isLead={false}
-            loading="lazy"
+            // schaut schon im ersten Bildschirm aus dem Hero
+            loading="eager"
             sizes={DOOR_SIZES}
             // KI-Titelbilder haben einen eigenen Hintergrund: nicht tönen
             tint={lead.cover.isAi ? undefined : doorTint(band)}

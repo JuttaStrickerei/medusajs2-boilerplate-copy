@@ -155,15 +155,20 @@ const HeroVideo = () => {
       />
 
       {status !== "loading" && (
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label={control[status].label}
-          title={control[status].label}
-          className="absolute bottom-6 right-6 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition-colors hover:bg-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white small:bottom-8 medium:right-8"
-        >
-          {control[status].icon}
-        </button>
+        // Rechts in der Zeile „Finden Sie Ihre Farbe“, bündig mit den Türen
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(var(--home-peek,1rem)_+_0.5rem)] z-20">
+          <div className="content-container flex justify-end">
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label={control[status].label}
+              title={control[status].label}
+              className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition-colors hover:bg-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              {control[status].icon}
+            </button>
+          </div>
+        </div>
       )}
     </>
   )

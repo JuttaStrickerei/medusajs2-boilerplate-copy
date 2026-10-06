@@ -1,13 +1,20 @@
 import type { WorldVM } from "@modules/looks/lib/overview"
-import { HOME_EYEBROW, HOME_H2, HOME_SUB } from "../section-styles"
+import {
+  DOORS_GRID,
+  DOORS_LABEL,
+  DOORS_META,
+  DOORS_SEAM,
+  DOORS_SECTION,
+  DOORS_TITLE,
+} from "../section-styles"
 import WorldDoor from "./world-door"
 
 const FARBWELTEN_TITLE_ID = "farbwelten-title"
 
 type WorldDoorsProps = {
   bands: WorldVM[]
-  eyebrow: string
-  lookCount: number
+  /** z. B. „20 Looks · Herbst/Winter 2026“ */
+  meta: string
 }
 
 /** Farbstreifen aller Welten über die volle Breite, wie eine Garn-Farbkarte */
@@ -26,36 +33,28 @@ export function ColorStrip({ swatches }: { swatches: { hex: string }[] }) {
 }
 
 /**
- * „Finden Sie Ihre Farbe“: eine Tür je Farbwelt, direkt unter dem Hero.
- * Ohne Einblend-Animation, damit der Rand, der unter dem Hero hervorschaut,
- * nie springt.
+ * „Finden Sie Ihre Farbe“: eine Tür je Farbwelt. Die Türen schauen unten in
+ * den Hero hinein, so zeigt schon der erste Bildschirm vier Outfits.
+ * Ohne Einblend-Animation, damit dieser Rand nie springt.
  */
-export default function WorldDoors({
-  bands,
-  eyebrow,
-  lookCount,
-}: WorldDoorsProps) {
-  const worldCount = bands.length
-
+export default function WorldDoors({ bands, meta }: WorldDoorsProps) {
   return (
     <section
       id="farbwelten"
       aria-labelledby={FARBWELTEN_TITLE_ID}
-      className="bg-stone-50"
+      className={DOORS_SECTION}
     >
-      <ColorStrip swatches={bands.flatMap((band) => band.swatches)} />
-      <div className="content-container pb-10 pt-6 small:pb-16 small:pt-7">
-        <header className="mb-4 small:mb-7">
-          <p className={HOME_EYEBROW}>{eyebrow}</p>
-          <h2 id={FARBWELTEN_TITLE_ID} className={`mt-1.5 ${HOME_H2}`}>
+      <div className={DOORS_SEAM}>
+        <ColorStrip swatches={bands.flatMap((band) => band.swatches)} />
+      </div>
+      <div className="content-container pb-10 small:pb-16">
+        <header className={DOORS_LABEL}>
+          <h2 id={FARBWELTEN_TITLE_ID} className={DOORS_TITLE}>
             Finden Sie Ihre Farbe
           </h2>
-          <p className={HOME_SUB}>
-            {lookCount} Looks in {worldCount} Farbwelten – fertig kombiniert,
-            jedes Teil auch einzeln.
-          </p>
+          <p className={DOORS_META}>{meta}</p>
         </header>
-        <ul className="grid grid-cols-2 gap-3 tablet:grid-cols-4 tablet:gap-4 small:gap-6">
+        <ul className={DOORS_GRID}>
           {bands.map((band) => (
             <WorldDoor key={band.key} band={band} />
           ))}

@@ -49,7 +49,10 @@ export default async function HomeLooks({
   return (
     <>
       {hasDoors && (
-        <WorldDoors bands={doors} eyebrow={eyebrow} lookCount={total} />
+        <WorldDoors
+          bands={doors}
+          meta={season ? `${total} Looks · ${season.title}` : `${total} Looks`}
+        />
       )}
       {railLooks.length > 0 && (
         <LooksRail
