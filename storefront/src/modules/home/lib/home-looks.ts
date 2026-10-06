@@ -52,28 +52,36 @@ export const doorTint = (band: Pick<WorldVM, "theme" | "chipTint">): string =>
     ? band.chipTint
     : mixWithWhite(band.chipTint, DOOR_TINT_WEIGHT)
 
-/** „5 Looks · ab € 80“ (ganze Euro, abgerundet); ohne Preise nur die Anzahl */
+const CENTS_PER_EURO = 100
+
+/**
+ * „5 Looks · ab € 80“: der niedrigste echte Look-Preis, nie abgerundet
+ * (krumme Preise mit Cent, „ab € 89,90“). Ohne Preise nur die Anzahl.
+ */
 export const doorMeta = (band: WorldVM): string => {
   const { looks } = band
   const count = looks.length === 1 ? "1 Look" : `${looks.length} Looks`
-  const amounts = looks
+  // in Cent, damit Gleitkomma-Reste (89.89999…) nicht zählen
+  const cents = looks
     .map((l) => l.amount)
     .filter((a): a is number => typeof a === "number")
-  if (!amounts.length) return count
+    .map((a) => Math.round(a * CENTS_PER_EURO))
+  if (!cents.length) return count
 
   const currency = (
     looks.find((l) => l.currency)?.currency ?? "eur"
   ).toUpperCase()
-  const euro = new Intl.NumberFormat("de-AT", {
+  const minCents = Math.min(...cents)
+  const digits = minCents % CENTS_PER_EURO === 0 ? 0 : 2
+  const price = new Intl.NumberFormat("de-AT", {
     style: "currency",
     currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
-  const min = Math.floor(Math.min(...amounts))
-  // „ab“ nur, wenn es wirklich verschiedene (oder krumme) Preise gibt
-  const isSinglePrice = amounts.every((a) => a === min)
-  return `${count} · ${isSinglePrice ? "" : "ab "}${euro.format(min)}`
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(minCents / CENTS_PER_EURO)
+  // „ab“ nur, wenn die Looks verschieden viel kosten
+  const isSinglePrice = cents.every((c) => c === minCents)
+  return `${count} · ${isSinglePrice ? "" : "ab "}${price}`
 }
 
 export type Spotlight = {
