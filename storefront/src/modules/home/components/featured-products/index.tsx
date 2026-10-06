@@ -48,8 +48,9 @@ export default async function FeaturedProducts({
     return null
   }
 
+  // „Kollektion Herbst/Winter 2026“ passt auch auf dem Handy in eine Zeile
   const eyebrow = seasonTitle
-    ? `Aktuelle Kollektion · ${seasonTitle}`
+    ? `Kollektion ${seasonTitle}`
     : "Aktuelle Kollektion"
 
   return (
