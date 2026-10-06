@@ -78,6 +78,16 @@ export default function WorldNav({ worlds, sentinelId }: WorldNavProps) {
     }
   }, [sentinelId])
 
+  // Sprunglink von einer anderen Seite (z. B. Farbwelt-Tür der Startseite):
+  // Next scrollt nicht hin, weil die Welten erst nach dem Lade-Platzhalter
+  // erscheinen. Ohne passenden #hash passiert nichts.
+  const worldKeys = worlds.map((w) => w.key).join(",")
+  useEffect(() => {
+    const key = decodeURIComponent(window.location.hash.slice(1))
+    if (!key || !worldKeys.split(",").includes(key)) return
+    document.getElementById(key)?.scrollIntoView({ block: "start" })
+  }, [worldKeys])
+
   // Aktiven Chip in der Leiste sichtbar halten, ganz oben wieder an den
   // Anfang (nur die Leiste scrollt, nie die Seite – daher kein scrollIntoView)
   useEffect(() => {
