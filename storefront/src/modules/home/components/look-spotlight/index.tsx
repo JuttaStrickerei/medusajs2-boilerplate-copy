@@ -21,9 +21,10 @@ export const SPOTLIGHT_LIST_NAME = "Startseite – Shop the Look"
 const TITLE_ID = "shop-the-look-title"
 
 // Spaltenbreiten wie das Raster unten: 2 auf dem Handy, 4 ab 768px, ab
-// 1440px 4 von 5 Spalten (die fünfte hält die Summe)
+// 1440px 4 von 5 Spalten (die fünfte hält die Summe). Bis 1440px wachsen die
+// Spalten mit: (Breite − Seitenränder − 3 Lücken) / 4
 const SPOTLIGHT_TILE_SIZES =
-  "(min-width:1440px) 256px, (min-width:1280px) 286px, (min-width:1024px) 229px, (min-width:768px) 168px, calc(50vw - 30px)"
+  "(min-width:1440px) 256px, (min-width:1280px) calc(25vw - 34px), (min-width:1024px) calc(25vw - 27px), (min-width:768px) calc(25vw - 24px), calc(50vw - 30px)"
 
 /**
  * „Shop the Look“: ein Look neben seinen Teilen, jedes mit eigenem Preis,
