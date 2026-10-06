@@ -74,7 +74,7 @@ export default function LooksRail({
           <TrackedLink
             href="/looks"
             event="select_content"
-            params={{ content_type: "home_alle_looks" }}
+            params={{ content_type: "home_alle_looks", content_id: "header" }}
             className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-medium text-stone-900 underline-offset-4 hover:underline"
           >
             Alle {total} Looks

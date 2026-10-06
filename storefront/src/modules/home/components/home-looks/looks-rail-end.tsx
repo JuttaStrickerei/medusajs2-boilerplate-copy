@@ -21,7 +21,7 @@ export default function LooksRailEnd({ bands, total }: LooksRailEndProps) {
       <TrackedLink
         href="/looks"
         event="select_content"
-        params={{ content_type: "home_alle_looks" }}
+        params={{ content_type: "home_alle_looks", content_id: "end_card" }}
         className={END_LINK}
       >
         <div aria-hidden className="flex flex-1 flex-col">
