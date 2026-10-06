@@ -42,7 +42,12 @@ export default function LooksRailEnd({ bands, total }: LooksRailEndProps) {
             <p className="font-serif text-xl leading-7">
               Alle {total} Looks ansehen
             </p>
-            <p className="mt-1 text-sm opacity-90">Nach Farbwelten geordnet</p>
+            {/* Ohne Farbwelten zeigt /looks ein einziges Band „Alle Looks“ */}
+            {bands.length > 0 && (
+              <p className="mt-1 text-sm opacity-90">
+                Nach Farbwelten geordnet
+              </p>
+            )}
           </div>
           <span
             aria-hidden
