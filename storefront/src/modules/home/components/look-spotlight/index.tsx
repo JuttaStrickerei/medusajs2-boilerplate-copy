@@ -4,6 +4,7 @@ import { getHomeLooks, listProductsInOrder } from "@lib/data/home"
 import { productToItem } from "@lib/util/analytics"
 import { cn } from "@lib/utils"
 import { ViewItemList } from "@modules/common/components/analytics"
+import { toCardProduct } from "@modules/home/lib/card-product"
 import {
   HOME_SPOTLIGHT_LOOK,
   pickSpotlight,
@@ -106,7 +107,10 @@ export default async function LookSpotlight({
             />
             {products.map((product) => (
               <li key={product.id}>
-                <ProductPreview product={product} region={region} />
+                <ProductPreview
+                  product={toCardProduct(product)}
+                  region={region}
+                />
               </li>
             ))}
           </ul>
