@@ -1,9 +1,9 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { ArrowDown } from "@components/icons"
+import { ArrowDown, ArrowRight } from "@components/icons"
 import HeroVideo from "./hero-video"
 
 // Vollflächiges Intro-Video (Drohnenflug zur Manufaktur), Schrift als HTML darüber –
-// ruhig und reduziert, die Links führen zu den Looks bzw. zur Kollektion.
+// ruhig und reduziert, ein Weg: zu den Looks.
 const fadeIn = (delay: string) => ({
   animationDelay: delay,
   animationFillMode: "both",
@@ -44,20 +44,19 @@ const Hero = () => {
         />
 
         <div
-          className="mt-6 flex flex-col items-center justify-center gap-2 small:flex-row small:gap-10 animate-fade-in-up"
+          className="mt-7 flex justify-center animate-fade-in-up"
           style={fadeIn("1.8s")}
         >
           <LocalizedClientLink
             href="/looks"
-            className="py-2 text-xs small:text-sm font-medium tracking-[0.2em] uppercase underline decoration-white/50 underline-offset-8 transition-colors hover:decoration-white"
+            className="group inline-flex min-h-11 items-center gap-2 bg-white px-6 text-xs font-medium uppercase tracking-[0.2em] text-stone-900 transition-colors hover:bg-stone-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white small:text-sm"
           >
             Looks entdecken
-          </LocalizedClientLink>
-          <LocalizedClientLink
-            href="/store"
-            className="py-2 text-xs small:text-sm font-medium tracking-[0.2em] uppercase underline decoration-white/50 underline-offset-8 transition-colors hover:decoration-white"
-          >
-            Kollektion entdecken
+            <ArrowRight
+              size={16}
+              aria-hidden
+              className="transition-transform duration-300 group-hover:translate-x-0.5"
+            />
           </LocalizedClientLink>
         </div>
       </div>
