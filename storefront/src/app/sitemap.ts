@@ -4,6 +4,7 @@ import { listProducts } from "@lib/data/products"
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import { listLooks } from "@lib/data/looks"
+import { getLookSeasonIndex } from "@lib/data/look-seasons"
 
 // Single-market for now (Austria). When DACH regions (/de, /ch) go live,
 // loop over their country codes here and add hreflang alternates.
@@ -38,17 +39,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "" ? 1 : 0.5,
   }))
 
-  const [productEntries, categoryEntries, collectionEntries, lookEntries] =
-    await Promise.all([
-      getProductEntries(prefix),
-      getCategoryEntries(prefix),
-      getCollectionEntries(prefix),
-      getLookEntries(prefix),
-    ])
+  const [
+    productEntries,
+    categoryEntries,
+    collectionEntries,
+    lookEntries,
+    lookSeasonEntries,
+  ] = await Promise.all([
+    getProductEntries(prefix),
+    getCategoryEntries(prefix),
+    getCollectionEntries(prefix),
+    getLookEntries(prefix),
+    getLookSeasonEntries(prefix),
+  ])
 
   return [
     ...staticEntries,
     ...collectionEntries,
+    ...lookSeasonEntries,
     ...lookEntries,
     ...categoryEntries,
     ...productEntries,
@@ -131,4 +139,19 @@ async function getLookEntries(prefix: string): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly",
     priority: 0.6,
   }))
+}
+
+// Nur ältere Saisons: Die aktuelle ist /looks (steht schon oben)
+async function getLookSeasonEntries(
+  prefix: string
+): Promise<MetadataRoute.Sitemap> {
+  // getLookSeasonIndex fängt Fehler selbst ab und liefert dann keine Saisons
+  const { index } = await getLookSeasonIndex()
+  return index.seasons
+    .filter((season) => !season.isCurrent)
+    .map((season) => ({
+      url: `${prefix}${season.href}`,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    }))
 }
