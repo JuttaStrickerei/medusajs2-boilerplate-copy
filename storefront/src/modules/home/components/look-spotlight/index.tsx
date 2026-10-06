@@ -16,8 +16,8 @@ import ProductPreview from "@modules/products/components/product-preview"
 import { SPOTLIGHT_GRID } from "../section-styles"
 import SpotlightSummary from "./spotlight-summary"
 
-export const SPOTLIGHT_LIST_ID = "home_shop_the_look"
-export const SPOTLIGHT_LIST_NAME = "Startseite – Shop the Look"
+const SPOTLIGHT_LIST_ID = "home_shop_the_look"
+const SPOTLIGHT_LIST_NAME = "Startseite – Shop the Look"
 const TITLE_ID = "shop-the-look-title"
 
 // Spaltenbreiten wie das Raster unten: 2 auf dem Handy, 4 ab 768px, ab

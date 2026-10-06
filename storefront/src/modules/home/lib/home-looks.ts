@@ -14,11 +14,11 @@ import type {
 /** Look im Abschnitt „Shop the Look“; hier ändern, um einen anderen zu zeigen */
 export const HOME_SPOTLIGHT_LOOK = "look-viola"
 export const RAIL_MAX_LOOKS = 8
-export const SPOTLIGHT_MAX_PIECES = 3
+const SPOTLIGHT_MAX_PIECES = 3
 /** Anteil der Weltfarbe in der Tönung der Tür-Fotos (Rest Weiß) */
-export const DOOR_TINT_WEIGHT = 0.6
+const DOOR_TINT_WEIGHT = 0.6
 /** Ab so vielen Teilen gilt ein Look als ganzes Outfit */
-export const MIN_PIECES_FOR_LOOK = 2
+const MIN_PIECES_FOR_LOOK = 2
 
 const HEX_PATTERN = /^#([0-9a-f]{6})$/i
 const WHITE_CHANNEL = 255
@@ -28,7 +28,7 @@ const WHITE_CHANNEL = 255
  * CSS color-mix(), damit auch ältere iPads die Tönung zeigen. Unbekannte
  * Formate kommen unverändert zurück.
  */
-export const mixWithWhite = (hex: string, weight: number): string => {
+const mixWithWhite = (hex: string, weight: number): string => {
   const match = hex.match(HEX_PATTERN)
   if (!match) return hex
   const share = Math.min(1, Math.max(0, weight))

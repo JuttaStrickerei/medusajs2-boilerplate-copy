@@ -2,7 +2,7 @@ import type { WorldVM } from "@modules/looks/lib/overview"
 import { HOME_EYEBROW, HOME_H2, HOME_SUB } from "../section-styles"
 import WorldDoor from "./world-door"
 
-export const FARBWELTEN_TITLE_ID = "farbwelten-title"
+const FARBWELTEN_TITLE_ID = "farbwelten-title"
 
 type WorldDoorsProps = {
   bands: WorldVM[]

@@ -17,8 +17,8 @@ import { FALLBACK_WORLD } from "@modules/looks/lib/worlds"
 import { HOME_EYEBROW, HOME_H2, HOME_SUB } from "../section-styles"
 import LooksRailEnd from "./looks-rail-end"
 
-export const HOME_LOOKS_LIST_ID = "home_looks"
-export const HOME_LOOKS_LIST_NAME = "Startseite – Looks der Saison"
+const HOME_LOOKS_LIST_ID = "home_looks"
+const HOME_LOOKS_LIST_NAME = "Startseite – Looks der Saison"
 const TITLE_ID = "looks-der-saison-title"
 
 // Ab 1024px eine Reihe: 3 Looks + Schlusskarte (4 Spalten), ab 1440px 4 + 1
