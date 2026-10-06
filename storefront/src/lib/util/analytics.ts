@@ -10,7 +10,7 @@ import { getProductPrice } from "./get-product-price"
  * Amounts in Medusa v2 are already in currency units (110 = € 110,00).
  */
 
-const BRAND = "Strickerei Jutta"
+export const BRAND = "Strickerei Jutta"
 
 export type GaItem = {
   item_id: string
@@ -18,8 +18,11 @@ export type GaItem = {
   item_brand: string
   item_variant?: string
   item_category?: string
+  item_category2?: string
   price?: number
   quantity?: number
+  // 1-based position in a list (e.g. the looks overview)
+  index?: number
 }
 
 // vanilla-cookieconsent v3 keeps its state as URI-encoded JSON in the
@@ -29,7 +32,9 @@ function hasAnalyticsConsent(): boolean {
     const match = document.cookie.match(/(?:^|;)\s*cc_cookie=([^;]+)/)
     if (!match) return false
     const state = JSON.parse(decodeURIComponent(match[1]))
-    return Array.isArray(state?.categories) && state.categories.includes("analytics")
+    return (
+      Array.isArray(state?.categories) && state.categories.includes("analytics")
+    )
   } catch {
     return false
   }
@@ -95,7 +100,8 @@ type LineItemLike = {
 /** Item from a cart or order line item. */
 export function lineItemToItem(item: LineItemLike): GaItem {
   return {
-    item_id: item.variant_sku || item.variant_id || item.product_id || item.title,
+    item_id:
+      item.variant_sku || item.variant_id || item.product_id || item.title,
     item_name: item.product_title || item.title,
     item_brand: BRAND,
     ...(item.variant_title ? { item_variant: item.variant_title } : {}),

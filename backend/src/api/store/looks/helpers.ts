@@ -26,10 +26,22 @@ type StoreLookRow = {
   } | null)[]
 } & Record<string, unknown>
 
-// Nur diese metadata-Schlüssel liest der Storefront (SEO-Overrides und
-// Foto-Hinweise). Alles andere, z. B. die Quell-Buchhaltung des
-// HW26-Importskripts, bleibt aus der öffentlichen API draußen.
-const PUBLIC_METADATA_KEYS = ["seo_title", "seo_description", "photo_notes"]
+// Nur diese metadata-Schlüssel liest der Storefront: SEO-Overrides,
+// Foto-Hinweise und die optionalen Angaben der Looks-Übersicht (Farbwelt,
+// Titelbild samt Ausschnitt, Stimmungszeile; der Storefront prüft sie).
+// Alles andere, z. B. die Quell-Buchhaltung des HW26-Importskripts, bleibt
+// aus der öffentlichen API draußen.
+const PUBLIC_METADATA_KEYS = [
+  "seo_title",
+  "seo_description",
+  "photo_notes",
+  "color_world",
+  "cover_index",
+  "cover_image",
+  "cover_position",
+  "cover_zoom",
+  "tagline",
+]
 
 const toPublicMetadata = (metadata: unknown): Record<string, unknown> | null => {
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
