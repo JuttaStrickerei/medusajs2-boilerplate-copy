@@ -29,6 +29,16 @@ const SENTINEL_MARGIN = "-120px 0px 0px 0px"
 const CLICK_LOCK_MS = 1000
 const CHIP_INSET = 24
 
+// Welt aus dem #hash; kaputte %-Folgen (z. B. „#%E0%A4%A“) ergeben null
+// statt eines Fehlers, der sonst die ganze Seite abstürzen ließe
+const worldKeyFromHash = (): string | null => {
+  try {
+    return decodeURIComponent(window.location.hash.slice(1)) || null
+  } catch {
+    return null
+  }
+}
+
 const CHIP =
   "group inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-stone-300 bg-white px-3.5 text-[13px] text-stone-800 transition-colors hover:border-stone-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 aria-[current=location]:border-transparent aria-[current=location]:bg-[color:var(--chip-accent)] aria-[current=location]:text-white tablet:px-4 tablet:text-sm"
 
@@ -83,7 +93,7 @@ export default function WorldNav({ worlds, sentinelId }: WorldNavProps) {
   // erscheinen. Ohne passenden #hash passiert nichts.
   const worldKeys = worlds.map((w) => w.key).join(",")
   useEffect(() => {
-    const key = decodeURIComponent(window.location.hash.slice(1))
+    const key = worldKeyFromHash()
     if (!key || !worldKeys.split(",").includes(key)) return
     document.getElementById(key)?.scrollIntoView({ block: "start" })
   }, [worldKeys])
