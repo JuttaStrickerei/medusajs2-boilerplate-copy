@@ -125,19 +125,19 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         name: "Alle Produkte",
         item: `${baseUrl}/${countryCode}/store`,
       },
-      ...(product.collection
+      ...(category
         ? [
             {
               "@type": "ListItem",
               position: 3,
-              name: product.collection.title,
-              item: `${baseUrl}/${countryCode}/collections/${product.collection.handle}`,
+              name: category.name,
+              item: `${baseUrl}/${countryCode}/categories/${category.handle}`,
             },
           ]
         : []),
       {
         "@type": "ListItem",
-        position: product.collection ? 4 : 3,
+        position: category ? 4 : 3,
         name: product.title,
         item: productUrl,
       },
