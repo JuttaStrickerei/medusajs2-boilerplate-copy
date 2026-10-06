@@ -20,6 +20,13 @@ type LookTileMediaProps = {
   alt: string
   isLead: boolean
   loading: ImageLoading
+  /** eigene Bildbreiten für ein anderes Raster (sonst die der Übersicht) */
+  sizes?: string
+  /**
+   * Farbe, in die das Studiofoto hineinmultipliziert wird (der helle
+   * Studiohintergrund nimmt sie an). Ohne Angabe bleibt das Foto unverändert.
+   */
+  tint?: string
 }
 
 /**
@@ -31,27 +38,33 @@ export default function LookTileMedia({
   alt,
   isLead,
   loading,
+  sizes,
+  tint,
 }: LookTileMediaProps) {
-  const sizes = isLead ? LEAD_SIZES : TILE_SIZES
+  const imageSizes = sizes ?? (isLead ? LEAD_SIZES : TILE_SIZES)
+  const tintStyle = tint ? { backgroundColor: tint } : undefined
 
   return (
     <div
       className={cn(
         // Hintergrund = Studio-Hintergrund der Fotos: nichts blitzt beim Laden
         "relative aspect-[2/3] overflow-hidden rounded-[4px] bg-[#EFF2F5]",
-        isLead && "small:aspect-auto small:min-h-[20rem] small:flex-1"
+        isLead && "small:aspect-auto small:min-h-[20rem] small:flex-1",
+        // isolate: das Multiplizieren bleibt in der Bildfläche
+        tint && "isolate"
       )}
+      style={tintStyle}
     >
       {cover.src && (
         <Image
           fill
           src={cover.src}
           alt={alt}
-          sizes={sizes}
+          sizes={imageSizes}
           priority={loading === "priority"}
           fetchPriority={loading === "priority" ? "high" : undefined}
           loading={loading === "eager" ? "eager" : undefined}
-          className="object-cover"
+          className={cn("object-cover", tint && "mix-blend-multiply")}
           style={{
             objectPosition: cover.position,
             transform: cover.zoom ? `scale(${cover.zoom})` : undefined,
@@ -61,11 +74,17 @@ export default function LookTileMedia({
       )}
       {/* Zweites Foto beim Überfahren; unter 1280px display:none, daher lädt
           ein Handy es nie. Es erscheint nur ab 1280px in fester Breite, daher
-          feste Maße statt „sizes“: zwei statt acht srcset-Einträge im HTML. */}
+          feste Maße statt „sizes“: zwei statt acht srcset-Einträge im HTML.
+          Mit Tönung bekommt es eine eigene deckende Fläche, sonst
+          multiplizierte es sich mit dem Foto darunter und würde trüb. */}
       {cover.hoverSrc && (
         <div
           aria-hidden
-          className="absolute inset-0 hidden opacity-0 transition-opacity duration-500 ease-out group-focus-visible:opacity-100 medium:block [@media(hover:hover)]:group-hover:opacity-100"
+          className={cn(
+            "absolute inset-0 hidden opacity-0 transition-opacity duration-500 ease-out group-focus-visible:opacity-100 medium:block [@media(hover:hover)]:group-hover:opacity-100",
+            tint && "isolate"
+          )}
+          style={tintStyle}
         >
           <Image
             src={cover.hoverSrc}
@@ -73,7 +92,10 @@ export default function LookTileMedia({
             loading="lazy"
             width={isLead ? HOVER_LEAD_WIDTH : HOVER_TILE_WIDTH}
             height={(isLead ? HOVER_LEAD_WIDTH : HOVER_TILE_WIDTH) * 1.5}
-            className="h-full w-full object-cover"
+            className={cn(
+              "h-full w-full object-cover",
+              tint && "mix-blend-multiply"
+            )}
           />
         </div>
       )}

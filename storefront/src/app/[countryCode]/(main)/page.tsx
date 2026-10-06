@@ -1,9 +1,14 @@
 import { Metadata } from "next"
 import Image from "next/image"
-import FeaturedProducts from "@modules/home/components/featured-products"
+import { Suspense } from "react"
+import HomeFeatured from "@modules/home/components/featured-products/home-featured"
+import FeaturedProductsSkeleton from "@modules/home/components/featured-products/skeleton"
 import Hero from "@modules/home/components/hero"
+import HomeLooks from "@modules/home/components/home-looks"
+import HomeLooksSkeleton from "@modules/home/components/home-looks/skeleton"
+import LookSpotlight from "@modules/home/components/look-spotlight"
+import LookSpotlightSkeleton from "@modules/home/components/look-spotlight/skeleton"
 import NewsletterForm from "@modules/home/components/newsletter-form"
-import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
@@ -11,7 +16,8 @@ import { IMAGES } from "@lib/constants/images"
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Strickerei Jutta | Österreichische Handwerkskunst in 3. Generation",
+    absolute:
+      "Strickerei Jutta | Österreichische Handwerkskunst in 3. Generation",
   },
   description:
     "Entdecken Sie handgefertigte Strickwaren aus feinsten Naturfasern. Kaschmir, Merinowolle und Alpaka - 60 Jahre Tradition und Qualität aus Österreich.",
@@ -24,11 +30,8 @@ export default async function Home(props: {
   const { countryCode } = params
 
   const region = await getRegion(countryCode)
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
 
-  if (!collections || !region) {
+  if (!region) {
     return null
   }
 
@@ -37,8 +40,21 @@ export default async function Home(props: {
       {/* Hero Section */}
       <Hero />
 
+      {/* Farbwelten und Looks; eigene Suspense-Grenzen, damit der Hero
+          nicht auf die Looks- und Produktabfragen wartet */}
+      <Suspense fallback={<HomeLooksSkeleton />}>
+        <HomeLooks countryCode={countryCode} />
+      </Suspense>
+
+      {/* Shop the Look: ein Look mit seinen Teilen und Preisen */}
+      <Suspense fallback={<LookSpotlightSkeleton />}>
+        <LookSpotlight countryCode={countryCode} region={region} />
+      </Suspense>
+
       {/* Featured Products */}
-      <FeaturedProducts collections={collections} region={region} />
+      <Suspense fallback={<FeaturedProductsSkeleton />}>
+        <HomeFeatured countryCode={countryCode} region={region} />
+      </Suspense>
 
       {/* About Section — Bild wie auf /about: 4:3, gleiche Breite wie Timeline (max-w-5xl) */}
       <section className="section-container bg-stone-50">
@@ -52,11 +68,12 @@ export default async function Home(props: {
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover"
-                priority
               />
               {/* Floating Badge */}
               <div className="absolute bottom-6 left-6 bg-white p-4 rounded-xl shadow-lg z-10">
-                <p className="font-serif text-2xl font-medium text-stone-800">in 3. Generation</p>
+                <p className="font-serif text-2xl font-medium text-stone-800">
+                  in 3. Generation
+                </p>
                 <p className="text-sm text-stone-600">Gegründet in Draßburg</p>
               </div>
             </div>
@@ -71,16 +88,15 @@ export default async function Home(props: {
               </h2>
               <div className="space-y-4 text-stone-600 leading-relaxed">
                 <p>
-                  Unsere Philosophie ist einfach: Qualität ohne Kompromisse. Wir verwenden 
-                  ausschließlich feinste Naturfasern und fertigen jedes Stück mit der Präzision 
-                  und Sorgfalt, die unsere Kunden seit Jahrzehnten schätzen.
+                  Unsere Philosophie ist einfach: Qualität ohne Kompromisse. Wir
+                  verwenden ausschließlich feinste Naturfasern und fertigen
+                  jedes Stück mit der Präzision und Sorgfalt, die unsere Kunden
+                  seit Jahrzehnten schätzen.
                 </p>
               </div>
               <div className="pt-4">
                 <LocalizedClientLink href="/about">
-                  <Button variant="secondary">
-                    Mehr erfahren
-                  </Button>
+                  <Button variant="secondary">Mehr erfahren</Button>
                 </LocalizedClientLink>
               </div>
             </div>
