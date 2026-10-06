@@ -11,8 +11,12 @@ import type {
  * View-Model der Looks-Übersicht und liefern immer neue Objekte.
  */
 
-/** Look im Abschnitt „Shop the Look“; hier ändern, um einen anderen zu zeigen */
-export const HOME_SPOTLIGHT_LOOK = "look-viola"
+/**
+ * Look im Abschnitt „Shop the Look“; hier ändern, um einen anderen zu zeigen.
+ * Am besten keiner, der schon eine Farbwelt-Tür anführt (dort steht dessen
+ * Foto bereits); die Reihe „Looks der Saison“ lässt ihn von selbst aus.
+ */
+export const HOME_SPOTLIGHT_LOOK = "look-conte-aaron-tini"
 export const RAIL_MAX_LOOKS = 8
 const SPOTLIGHT_MAX_PIECES = 3
 /** Anteil der Weltfarbe in der Tönung der Tür-Fotos (Rest Weiß) */
@@ -79,9 +83,10 @@ export const doorMeta = (band: WorldVM): string => {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   }).format(minCents / CENTS_PER_EURO)
-  // „ab“ nur, wenn die Looks verschieden viel kosten
+  // „ab“ nur, wenn die Looks verschieden viel kosten; geschütztes Leerzeichen,
+  // damit schmale Türen nicht zwischen „ab“ und dem Preis umbrechen
   const isSinglePrice = cents.every((c) => c === minCents)
-  return `${count} · ${isSinglePrice ? "" : "ab "}${price}`
+  return `${count} · ${isSinglePrice ? "" : "ab\u00A0"}${price}`
 }
 
 export type Spotlight = {

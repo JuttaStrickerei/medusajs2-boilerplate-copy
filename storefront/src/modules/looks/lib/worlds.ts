@@ -8,6 +8,8 @@
  * Kollektion der Teile (siehe seasons.ts).
  */
 
+import { yarnSwatch } from "@lib/util/yarn-colors"
+
 // Querformat 1200×630 für Social Sharing; null = Standardbild der Seite
 // (ein 2:3-Foto würde auf 1.91:1 schlecht beschnitten)
 export const LOOKS_OG_IMAGE: string | null = null
@@ -96,10 +98,10 @@ export const LOOK_WORLDS: LookWorld[] = [
     shortName: "Beere",
     tagline: "Lila, Bordeaux und Altrosa – Farbe, die wärmt.",
     swatches: [
-      { name: "Lila", hex: "#7C40A7" },
-      { name: "Bordeaux", hex: "#4B111A" },
-      { name: "Magenta", hex: "#95404C" },
-      { name: "Altrosa", hex: "#D2B3B4" },
+      yarnSwatch("Lila"),
+      yarnSwatch("Bordeaux"),
+      yarnSwatch("Magenta"),
+      yarnSwatch("Altrosa"),
     ],
     handles: [
       "look-viola",
@@ -125,10 +127,10 @@ export const LOOK_WORLDS: LookWorld[] = [
     shortName: "Marine & Rot",
     tagline: "Marineblau trifft Rot – klassisch, mit Mut zur Farbe.",
     swatches: [
-      { name: "Marine", hex: "#191A28" },
-      { name: "Rot", hex: "#A6131C" },
-      { name: "Petrol", hex: "#437694" },
-      { name: "Königsblau", hex: "#1D2D51" },
+      yarnSwatch("Marine"),
+      yarnSwatch("Rot"),
+      yarnSwatch("Petrol"),
+      yarnSwatch("Königsblau"),
     ],
     handles: [
       "look-talvo-nalea",
@@ -155,10 +157,10 @@ export const LOOK_WORLDS: LookWorld[] = [
     shortName: "Moos & Senf",
     tagline: "Gelb, Senf und Erdtöne – natürlich und sonnig.",
     swatches: [
-      { name: "Gelb", hex: "#DFBB69" },
-      { name: "Senf", hex: "#917942" },
-      { name: "Dunkelgrün", hex: "#34402F" },
-      { name: "Braun", hex: "#625B56" },
+      yarnSwatch("Gelb"),
+      yarnSwatch("Senf"),
+      yarnSwatch("Dunkelgrün"),
+      yarnSwatch("Braun"),
     ],
     handles: [
       "look-solara",
@@ -184,9 +186,9 @@ export const LOOK_WORLDS: LookWorld[] = [
     shortName: "Grau",
     tagline: "Hellgrau, Grau und Schwarz – grafisch und zeitlos.",
     swatches: [
-      { name: "Hellgrau", hex: "#C5C0BC" },
-      { name: "Grau", hex: "#73757D" },
-      { name: "Schwarz", hex: "#0F0D11" },
+      yarnSwatch("Hellgrau"),
+      yarnSwatch("Grau"),
+      yarnSwatch("Schwarz"),
     ],
     handles: [
       "look-ray-dorli-floka",

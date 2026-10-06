@@ -13,6 +13,7 @@ import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
 import { IMAGES } from "@lib/constants/images"
+import { HOME_PEEK_VARS } from "@modules/home/components/section-styles"
 
 export const metadata: Metadata = {
   title: {
@@ -37,14 +38,16 @@ export default async function Home(props: {
 
   return (
     <>
-      {/* Hero Section */}
-      <Hero />
+      {/* Hero und Looks teilen die Maße der hereinschauenden Türen */}
+      <div className={HOME_PEEK_VARS}>
+        <Hero />
 
-      {/* Farbwelten und Looks; eigene Suspense-Grenzen, damit der Hero
-          nicht auf die Looks- und Produktabfragen wartet */}
-      <Suspense fallback={<HomeLooksSkeleton />}>
-        <HomeLooks countryCode={countryCode} />
-      </Suspense>
+        {/* Farbwelten und Looks; eigene Suspense-Grenzen, damit der Hero
+            nicht auf die Looks- und Produktabfragen wartet */}
+        <Suspense fallback={<HomeLooksSkeleton />}>
+          <HomeLooks countryCode={countryCode} />
+        </Suspense>
+      </div>
 
       {/* Shop the Look: ein Look mit seinen Teilen und Preisen */}
       <Suspense fallback={<LookSpotlightSkeleton />}>

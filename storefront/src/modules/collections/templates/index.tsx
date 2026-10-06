@@ -33,7 +33,7 @@ export default function CollectionTemplate({
     <div className="bg-stone-50 min-h-screen">
       <PageBreadcrumb
         items={[
-          { label: "Kollektionen", href: "/collections" },
+          { label: "Alle Produkte", href: "/store" },
           { label: collection.title },
         ]}
       />

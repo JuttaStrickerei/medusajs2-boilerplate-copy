@@ -9,10 +9,10 @@ const DOOR_SIZES =
   "(min-width:1440px) 314px, (min-width:1024px) calc(25vw - 32px), (min-width:768px) calc(25vw - 36px), calc(50vw - 42px)"
 
 // Ohne cn(): tailwind-merge 3 streicht sonst „focus-visible:outline“ neben
-// „outline-2“. Der Rahmen ist immer stone-900: Graus --welt-focus ist fast
-// weiß und auf stone-50 unsichtbar.
+// „outline-2“. Dunkler Rahmen mit weißem Saum (Schatten): sichtbar auf
+// stone-50 und auf dem dunklen Video, in das die Türen hineinragen.
 const DOOR_LINK =
-  "group flex h-full w-full flex-col overflow-hidden rounded-md bg-[color:var(--welt-bg)] text-[color:var(--welt-ink)] ring-1 ring-black/5 transition-shadow duration-300 [@media(hover:hover)]:hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stone-900"
+  "group flex h-full w-full flex-col overflow-hidden rounded-md bg-[color:var(--welt-bg)] text-[color:var(--welt-ink)] ring-1 ring-black/5 transition-shadow duration-300 [@media(hover:hover)]:hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 focus-visible:shadow-[0_0_0_6px_#fff]"
 
 /**
  * Tür zu einer Farbwelt: getönte Karte mit Farbkarte, dem Aufmacher-Look
@@ -48,7 +48,8 @@ export default function WorldDoor({ band }: { band: WorldVM }) {
             cover={lead.cover}
             alt={lead.alt}
             isLead={false}
-            loading="lazy"
+            // schaut schon im ersten Bildschirm aus dem Hero
+            loading="eager"
             sizes={DOOR_SIZES}
             // KI-Titelbilder haben einen eigenen Hintergrund: nicht tönen
             tint={lead.cover.isAi ? undefined : doorTint(band)}

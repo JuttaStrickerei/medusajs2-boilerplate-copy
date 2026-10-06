@@ -33,6 +33,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     return notFound()
   }
 
+  // Produkte hängen an höchstens einer (flachen) Kategorie
+  const category = product.categories?.[0]
+
   // --- Structured data (JSON-LD) for search engines ---
   const baseUrl = getBaseURL()
   const productUrl = `${baseUrl}/${countryCode}/products/${product.handle}`
@@ -122,19 +125,19 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         name: "Alle Produkte",
         item: `${baseUrl}/${countryCode}/store`,
       },
-      ...(product.collection
+      ...(category
         ? [
             {
               "@type": "ListItem",
               position: 3,
-              name: product.collection.title,
-              item: `${baseUrl}/${countryCode}/collections/${product.collection.handle}`,
+              name: category.name,
+              item: `${baseUrl}/${countryCode}/categories/${category.handle}`,
             },
           ]
         : []),
       {
         "@type": "ListItem",
-        position: product.collection ? 4 : 3,
+        position: category ? 4 : 3,
         name: product.title,
         item: productUrl,
       },
@@ -152,13 +155,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       <PageBreadcrumb
         items={[
           { label: "Alle Produkte", href: "/store" },
-          ...(product.collection
-            ? [
-                {
-                  label: product.collection.title,
-                  href: `/collections/${product.collection.handle}`,
-                },
-              ]
+          // Wie im Menü „Shop“: über die Kategorie, nicht die Kollektion
+          ...(category
+            ? [{ label: category.name, href: `/categories/${category.handle}` }]
             : []),
           { label: product.title },
         ]}

@@ -14,6 +14,7 @@ import { Badge, Button } from "@components/ui"
 import { Heart, ShoppingBag, Check } from "@components/icons"
 import { triggerCartRefresh } from "@lib/context/cart-context"
 import { useWishlist } from "@lib/context/wishlist-context"
+import { yarnDotBackground } from "@lib/util/yarn-colors"
 import PreviewPrice from "./price"
 import {
   CARD_BODY,
@@ -62,7 +63,7 @@ export default function ProductPreview({
 
   const colors = getColorOptions(product)
   // Punkte nur für Farben mit bekanntem Farbwert; unbekannte zählen ins „+N“
-  const colorDots = colors.filter((c) => c.hex).slice(0, MAX_COLOR_DOTS)
+  const colorDots = colors.filter((c) => c.background).slice(0, MAX_COLOR_DOTS)
   const moreColorCount = colors.length - colorDots.length
   const colorLabel = `Farben: ${colors.map((c) => c.value).join(", ")}`
   // Die sichtbaren Abzeichen liegen im aria-hidden Bild-Link
@@ -256,8 +257,8 @@ export default function ProductPreview({
               <span
                 key={color.value}
                 title={color.value}
-                className="h-2.5 w-2.5 rounded-full ring-1 ring-black/10"
-                style={{ backgroundColor: color.hex }}
+                className="h-2.5 w-2.5 rounded-full ring-1 ring-black/15"
+                style={{ background: color.background }}
               />
             ))}
             {moreColorCount > 0 && (
@@ -296,52 +297,6 @@ function getColorOptions(product: HttpTypes.StoreProduct) {
     })
     .map((v) => ({
       value: v.value,
-      hex: getColorHex(v.value),
+      background: yarnDotBackground(v.value),
     }))
-}
-
-// Map color names to hex values
-function getColorHex(colorName: string): string | undefined {
-  const colorMap: Record<string, string> = {
-    // German color names
-    schwarz: "#1a1a1a",
-    weiß: "#ffffff",
-    weiss: "#ffffff",
-    grau: "#6b7280",
-    beige: "#d4c4a8",
-    braun: "#8b6f47",
-    blau: "#2563eb",
-    navy: "#1e3a5f",
-    rot: "#dc2626",
-    bordeaux: "#722f37",
-    grün: "#16a34a",
-    oliv: "#6b8e23",
-    salbei: "#9caf88",
-    gelb: "#eab308",
-    rosa: "#f472b6",
-    lila: "#a855f7",
-    // English color names
-    black: "#1a1a1a",
-    white: "#ffffff",
-    grey: "#6b7280",
-    gray: "#6b7280",
-    brown: "#8b6f47",
-    blue: "#2563eb",
-    red: "#dc2626",
-    green: "#16a34a",
-    olive: "#6b8e23",
-    sage: "#9caf88",
-    yellow: "#eab308",
-    pink: "#f472b6",
-    purple: "#a855f7",
-    lilac: "#c084fc",
-    // Material names
-    kaschmir: "#e8dcc8",
-    cashmere: "#e8dcc8",
-    merino: "#f5f5dc",
-    alpaka: "#d2b48c",
-    alpaca: "#d2b48c",
-  }
-
-  return colorMap[colorName.toLowerCase()]
 }
