@@ -1,0 +1,1168 @@
+{
+  "source": "HW26_Onlineshop_FINAL_v8 (10.10.2026), Produktliste.csv + Ordner",
+  "collection_handle": "herbst_winter_2026",
+  "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL",
+    "XXXL"
+  ],
+  "one_size_value": "One Size",
+  "products": [
+    {
+      "handle": "blazer-conte",
+      "title": "Blazer CONTE",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 600,
+      "colours": [
+        {
+          "name": "Marine",
+          "code": "MAR",
+          "look": "O58",
+          "price": 150,
+          "folder": "Looks/Look-O58_CONTE-Aaron-Tini/Blazer-CONTE_Marine",
+          "files": [
+            "Blazer-CONTE_Marine_1-vorne.jpg",
+            "Blazer-CONTE_Marine_2-45grad.jpg",
+            "Blazer-CONTE_Marine_4-hinten.jpg",
+            "Blazer-CONTE_Marine_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Rot",
+          "code": "ROT",
+          "look": "O58",
+          "price": 150,
+          "folder": "Looks/Look-O58_CONTE-Aaron-Tini/Blazer-CONTE_Rot",
+          "files": [
+            "Blazer-CONTE_Rot_1-vorne.jpg",
+            "Blazer-CONTE_Rot_2-45grad.jpg",
+            "Blazer-CONTE_Rot_4-hinten.jpg",
+            "Blazer-CONTE_Rot_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "hose-fenja-5",
+      "title": "Hose Fenja 5",
+      "category": "Hosen",
+      "one_size": false,
+      "material": "68% PES, 26% Viskose, 6% Elastan",
+      "weight": 450,
+      "colours": [
+        {
+          "name": "Dunkelgrün",
+          "code": "DGR",
+          "look": "O28",
+          "price": 110,
+          "folder": "Looks/Look-O28_SELVA-Fenja/Hose-Fenja-5_Dunkelgruen",
+          "files": [
+            "Hose-Fenja-5_Dunkelgruen_1-vorne.jpg",
+            "Hose-Fenja-5_Dunkelgruen_4-hinten.jpg",
+            "Hose-Fenja-5_Dunkelgruen_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "hose-glena",
+      "title": "Hose GLENA",
+      "category": "Hosen",
+      "one_size": false,
+      "material": "63% Polyester, 34% Viskose, 3% Elastan",
+      "weight": 450,
+      "colours": [
+        {
+          "name": "Braun",
+          "code": "BRN",
+          "look": "O35",
+          "price": 100,
+          "folder": "Looks/Look-O35_GLENA-BRUNA/Hose-GLENA_Braun",
+          "files": [
+            "Hose-GLENA_Braun_1-vorne.jpg",
+            "Hose-GLENA_Braun_2-45grad.jpg",
+            "Hose-GLENA_Braun_4-hinten.jpg",
+            "Hose-GLENA_Braun_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "hose-hilda",
+      "title": "Hose Hilda",
+      "category": "Hosen",
+      "one_size": false,
+      "material": "95% PES, 5% Elastan",
+      "weight": 450,
+      "colours": [
+        {
+          "name": "Schwarz",
+          "code": "SCH",
+          "look": "O61",
+          "price": 90,
+          "folder": "Looks/Look-O61_IRIS-Hilda/Hose-Hilda_Schwarz",
+          "files": [
+            "Hose-Hilda_Schwarz_1-vorne.jpg",
+            "Hose-Hilda_Schwarz_4-hinten.jpg",
+            "Hose-Hilda_Schwarz_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "hose-melva",
+      "title": "Hose MELVA",
+      "category": "Hosen",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 400,
+      "colours": [
+        {
+          "name": "Altrosa",
+          "code": "ALT",
+          "look": "O32",
+          "price": 100,
+          "folder": "Looks/Look-O32_MELVA/Hose-MELVA_Altrosa",
+          "files": [
+            "Hose-MELVA_Altrosa_1-vorne.jpg",
+            "Hose-MELVA_Altrosa_4-hinten.jpg",
+            "Hose-MELVA_Altrosa_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "hose-senna",
+      "title": "Hose SENNA",
+      "category": "Hosen",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 550,
+      "colours": [
+        {
+          "name": "Senf",
+          "code": "SEN",
+          "look": "O57",
+          "price": 90,
+          "folder": "Looks/Look-O57_SENNA/Hose-SENNA_Senf",
+          "files": [
+            "Hose-SENNA_Senf_1-vorne.jpg",
+            "Hose-SENNA_Senf_4-hinten.jpg",
+            "Hose-SENNA_Senf_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "hose-solara",
+      "title": "Hose SOLARA",
+      "category": "Hosen",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 550,
+      "colours": [
+        {
+          "name": "Gelb",
+          "code": "GEL",
+          "look": "O42",
+          "price": 90,
+          "folder": "Looks/Look-O42_SOLARA/Hose-SOLARA_Gelb",
+          "files": [
+            "Hose-SOLARA_Gelb_1-vorne.jpg",
+            "Hose-SOLARA_Gelb_2-45grad.jpg",
+            "Hose-SOLARA_Gelb_4-hinten.jpg",
+            "Hose-SOLARA_Gelb_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "hose-tini",
+      "title": "Hose Tini",
+      "category": "Hosen",
+      "one_size": false,
+      "material": "98% Baumwolle, 2% Elastan",
+      "weight": 450,
+      "colours": [
+        {
+          "name": "Rot",
+          "code": "ROT",
+          "look": "O58",
+          "price": 110,
+          "folder": "Looks/Look-O58_CONTE-Aaron-Tini/Hose-Tini_Rot",
+          "files": [
+            "Hose-Tini_Rot_1-vorne.jpg",
+            "Hose-Tini_Rot_2-45grad.jpg",
+            "Hose-Tini_Rot_4-hinten.jpg",
+            "Hose-Tini_Rot_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "jacke-cora",
+      "title": "Jacke CORA",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 600,
+      "colours": [
+        {
+          "name": "Senf",
+          "code": "SEN",
+          "look": "O05",
+          "price": 150,
+          "folder": "Looks/Look-O05_CORA-MILA/Jacke-CORA_Senf",
+          "files": [
+            "Jacke-CORA_Senf_1-vorne.jpg",
+            "Jacke-CORA_Senf_2-45grad.jpg",
+            "Jacke-CORA_Senf_4-hinten.jpg",
+            "Jacke-CORA_Senf_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "jacke-floka",
+      "title": "Jacke FLOKA",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": null,
+      "weight": 600,
+      "colours": [
+        {
+          "name": "Hellgrau",
+          "code": "HGR",
+          "look": "O11",
+          "price": 230,
+          "folder": "Looks/Look-O11_Ray-Dorli-FLOKA/Jacke-FLOKA_Hellgrau",
+          "files": [
+            "Jacke-FLOKA_Hellgrau_1-vorne.jpg",
+            "Jacke-FLOKA_Hellgrau_2-45grad.jpg",
+            "Jacke-FLOKA_Hellgrau_4-hinten.jpg",
+            "Jacke-FLOKA_Hellgrau_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "jacke-grisol",
+      "title": "Jacke GRISOL",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 450,
+      "colours": [
+        {
+          "name": "Grau/Schwarz",
+          "code": "GRS",
+          "look": "O34",
+          "price": 130,
+          "folder": "Looks/Look-O34_GRISOL/Jacke-GRISOL_Grau-Schwarz",
+          "files": [
+            "Jacke-GRISOL_Grau-Schwarz_1-vorne.jpg",
+            "Jacke-GRISOL_Grau-Schwarz_2-45grad.jpg",
+            "Jacke-GRISOL_Grau-Schwarz_4-hinten.jpg",
+            "Jacke-GRISOL_Grau-Schwarz_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "jacke-nalea",
+      "title": "Jacke NALEA",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 650,
+      "colours": [
+        {
+          "name": "Türkis",
+          "code": "TUE",
+          "look": "O33",
+          "price": 140,
+          "folder": "Looks/Look-O33_TALVO-NALEA/Jacke-NALEA_Tuerkis",
+          "files": [
+            "Jacke-NALEA_Tuerkis_1-vorne.jpg",
+            "Jacke-NALEA_Tuerkis_2-45grad.jpg",
+            "Jacke-NALEA_Tuerkis_4-hinten.jpg",
+            "Jacke-NALEA_Tuerkis_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "jacke-rosana",
+      "title": "Jacke ROSANA",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 600,
+      "colours": [
+        {
+          "name": "Magenta",
+          "code": "MAG",
+          "look": "O27",
+          "price": 140,
+          "folder": "Looks/Look-O27_ROSANA/Jacke-ROSANA_Magenta",
+          "files": [
+            "Jacke-ROSANA_Magenta_1-vorne.jpg",
+            "Jacke-ROSANA_Magenta_2-45grad.jpg",
+            "Jacke-ROSANA_Magenta_4-hinten.jpg",
+            "Jacke-ROSANA_Magenta_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "kleid-polly",
+      "title": "Kleid POLLY",
+      "category": "Kleider",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 600,
+      "colours": [
+        {
+          "name": "Schwarz",
+          "code": "SCH",
+          "look": "O04",
+          "price": 140,
+          "folder": "Looks/Look-O04_POLLY/Kleid-POLLY_Schwarz",
+          "files": [
+            "Kleid-POLLY_Schwarz_1-vorne.jpg",
+            "Kleid-POLLY_Schwarz_2-45grad.jpg",
+            "Kleid-POLLY_Schwarz_4-hinten.jpg",
+            "Kleid-POLLY_Schwarz_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "mantel-bruna",
+      "title": "Mantel BRUNA",
+      "category": "Mäntel",
+      "one_size": false,
+      "material": "100% Wolle",
+      "weight": 800,
+      "colours": [
+        {
+          "name": "Braun",
+          "code": "BRN",
+          "look": "O35",
+          "price": 180,
+          "folder": "Looks/Look-O35_GLENA-BRUNA/Mantel-BRUNA_Braun",
+          "files": [
+            "Mantel-BRUNA_Braun_1-vorne.jpg",
+            "Mantel-BRUNA_Braun_2-45grad.jpg",
+            "Mantel-BRUNA_Braun_4-hinten.jpg",
+            "Mantel-BRUNA_Braun_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Grau",
+          "code": "GRA",
+          "look": "O35",
+          "price": 180,
+          "folder": "Looks/Look-O35_GLENA-BRUNA/Mantel-BRUNA_Grau",
+          "files": [
+            "Mantel-BRUNA_Grau_1-vorne.jpg",
+            "Mantel-BRUNA_Grau_2-45grad.jpg",
+            "Mantel-BRUNA_Grau_4-hinten.jpg",
+            "Mantel-BRUNA_Grau_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Grün",
+          "code": "GRU",
+          "look": "O35",
+          "price": 180,
+          "folder": "Looks/Look-O35_GLENA-BRUNA/Mantel-BRUNA_Gruen",
+          "files": [
+            "Mantel-BRUNA_Gruen_1-vorne.jpg",
+            "Mantel-BRUNA_Gruen_2-45grad.jpg",
+            "Mantel-BRUNA_Gruen_4-hinten.jpg",
+            "Mantel-BRUNA_Gruen_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "mantel-nera",
+      "title": "Mantel NERA",
+      "category": "Mäntel",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": null,
+      "colours": [
+        {
+          "name": "Schwarz",
+          "code": "SCH",
+          "look": "EZ",
+          "price": null,
+          "folder": "Looks/Einzelteile_ohne-Look/Mantel-NERA_Schwarz",
+          "files": [
+            "Mantel-NERA_Schwarz_1-vorne.jpg",
+            "Mantel-NERA_Schwarz_2-45grad.jpg",
+            "Mantel-NERA_Schwarz_4-hinten.jpg",
+            "Mantel-NERA_Schwarz_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Marine",
+          "code": "MAR",
+          "look": "EZ",
+          "price": null,
+          "folder": "Looks/Einzelteile_ohne-Look/Mantel-NERA_Marine",
+          "files": [
+            "Mantel-NERA_Marine_1-vorne.jpg",
+            "Mantel-NERA_Marine_2-45grad.jpg",
+            "Mantel-NERA_Marine_4-hinten.jpg",
+            "Mantel-NERA_Marine_5-detail.jpg"
+          ]
+        }
+      ],
+      "create": true,
+      "status": "draft"
+    },
+    {
+      "handle": "mantel-rouga",
+      "title": "Mantel ROUGA",
+      "category": "Mäntel",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 900,
+      "colours": [
+        {
+          "name": "Rot",
+          "code": "ROT",
+          "look": "O18",
+          "price": 180,
+          "folder": "Looks/Look-O18_ROUGA/Mantel-ROUGA_Rot",
+          "files": [
+            "Mantel-ROUGA_Rot_1-vorne.jpg",
+            "Mantel-ROUGA_Rot_2-45grad.jpg",
+            "Mantel-ROUGA_Rot_4-hinten.jpg",
+            "Mantel-ROUGA_Rot_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Schwarz",
+          "code": "SCH",
+          "look": "O18",
+          "price": 180,
+          "folder": "Looks/Look-O18_ROUGA/Mantel-ROUGA_Schwarz",
+          "files": [
+            "Mantel-ROUGA_Schwarz_1-vorne.jpg",
+            "Mantel-ROUGA_Schwarz_2-45grad.jpg",
+            "Mantel-ROUGA_Schwarz_4-hinten.jpg",
+            "Mantel-ROUGA_Schwarz_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Marine",
+          "code": "MAR",
+          "look": "O18",
+          "price": 180,
+          "folder": "Looks/Look-O18_ROUGA/Mantel-ROUGA_Marine",
+          "files": [
+            "Mantel-ROUGA_Marine_1-vorne.jpg",
+            "Mantel-ROUGA_Marine_2-45grad.jpg",
+            "Mantel-ROUGA_Marine_4-hinten.jpg",
+            "Mantel-ROUGA_Marine_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "mantel-tavia",
+      "title": "Mantel TAVIA",
+      "category": "Mäntel",
+      "one_size": false,
+      "material": null,
+      "weight": 800,
+      "colours": [
+        {
+          "name": "Beige",
+          "code": "BEI",
+          "look": "O52",
+          "price": null,
+          "folder": "Looks/Look-O52_TAVIA/Mantel-TAVIA_Beige",
+          "files": [
+            "Mantel-TAVIA_Beige_1-vorne.jpg",
+            "Mantel-TAVIA_Beige_2-45grad.jpg",
+            "Mantel-TAVIA_Beige_4-hinten.jpg",
+            "Mantel-TAVIA_Beige_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "mantel-velara",
+      "title": "Mantel VELARA",
+      "category": "Mäntel",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 900,
+      "colours": [
+        {
+          "name": "Hellgrau",
+          "code": "HGR",
+          "look": "O43",
+          "price": 180,
+          "folder": "Looks/Look-O43_VELARA/Mantel-VELARA_Hellgrau",
+          "files": [
+            "Mantel-VELARA_Hellgrau_1-vorne.jpg",
+            "Mantel-VELARA_Hellgrau_2-45grad.jpg",
+            "Mantel-VELARA_Hellgrau_4-hinten.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "poncho-selva",
+      "title": "Poncho SELVA",
+      "category": "Poncho",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 400,
+      "colours": [],
+      "status": "draft",
+      "store_only": true,
+      "store_only_preview": "Looks/Look-O28_SELVA-Fenja/Poncho-SELVA_Dunkelgruen/Poncho-SELVA_Dunkelgruen_Preview_nur-im-Geschaeft.jpg"
+    },
+    {
+      "handle": "poncho-senna",
+      "title": "Poncho SENNA",
+      "category": "Poncho",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 250,
+      "colours": [
+        {
+          "name": "Senf",
+          "code": "SEN",
+          "look": "O57",
+          "price": 70,
+          "folder": "Looks/Look-O57_SENNA/Poncho-SENNA_Senf",
+          "files": [
+            "Poncho-SENNA_Senf_1-vorne.jpg",
+            "Poncho-SENNA_Senf_2-45grad.jpg",
+            "Poncho-SENNA_Senf_4-hinten.jpg",
+            "Poncho-SENNA_Senf_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Marine",
+          "code": "MAR",
+          "look": "O57",
+          "price": 70,
+          "folder": "Looks/Look-O57_SENNA/Poncho-SENNA_Marine",
+          "files": [
+            "Poncho-SENNA_Marine_1-vorne.jpg",
+            "Poncho-SENNA_Marine_2-45grad.jpg",
+            "Poncho-SENNA_Marine_4-hinten.jpg",
+            "Poncho-SENNA_Marine_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "poncho-solara",
+      "title": "Poncho SOLARA",
+      "category": "Poncho",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 400,
+      "colours": [
+        {
+          "name": "Gelb",
+          "code": "GEL",
+          "look": "O42",
+          "price": 110,
+          "folder": "Looks/Look-O42_SOLARA/Poncho-SOLARA_Gelb",
+          "files": [
+            "Poncho-SOLARA_Gelb_1-vorne.jpg",
+            "Poncho-SOLARA_Gelb_2-45grad.jpg",
+            "Poncho-SOLARA_Gelb_4-hinten.jpg",
+            "Poncho-SOLARA_Gelb_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-aaron",
+      "title": "Pullover Aaron",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Marine",
+          "code": "MAR",
+          "look": "O58",
+          "price": 80,
+          "folder": "Looks/Look-O58_CONTE-Aaron-Tini/Pullover-Aaron_Marine",
+          "files": [
+            "Pullover-Aaron_Marine_1-vorne.jpg",
+            "Pullover-Aaron_Marine_2-45grad.jpg",
+            "Pullover-Aaron_Marine_4-hinten.jpg",
+            "Pullover-Aaron_Marine_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Türkis",
+          "code": "TUE",
+          "look": "O58",
+          "price": 80,
+          "folder": "Looks/Look-O58_CONTE-Aaron-Tini/Pullover-Aaron_Tuerkis",
+          "files": [
+            "Pullover-Aaron_Tuerkis_1-vorne.jpg",
+            "Pullover-Aaron_Tuerkis_2-45grad.jpg",
+            "Pullover-Aaron_Tuerkis_4-hinten.jpg",
+            "Pullover-Aaron_Tuerkis_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-iris",
+      "title": "Pullover IRIS",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 400,
+      "colours": [
+        {
+          "name": "Königsblau",
+          "code": "KON",
+          "look": "O61",
+          "price": 90,
+          "folder": "Looks/Look-O61_IRIS-Hilda/Pullover-IRIS_Koenigsblau",
+          "files": [
+            "Pullover-IRIS_Koenigsblau_1-vorne.jpg",
+            "Pullover-IRIS_Koenigsblau_2-45grad.jpg",
+            "Pullover-IRIS_Koenigsblau_4-hinten.jpg",
+            "Pullover-IRIS_Koenigsblau_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-mila",
+      "title": "Pullover MILA",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 250,
+      "colours": [
+        {
+          "name": "Sand",
+          "code": "SAN",
+          "look": "O05",
+          "price": 80,
+          "folder": "Looks/Look-O05_CORA-MILA/Pullover-MILA_Sand",
+          "files": [
+            "Pullover-MILA_Sand_1-vorne.jpg",
+            "Pullover-MILA_Sand_2-45grad.jpg",
+            "Pullover-MILA_Sand_4-hinten.jpg",
+            "Pullover-MILA_Sand_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-neva",
+      "title": "Pullover NEVA",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 400,
+      "colours": [
+        {
+          "name": "Bordeaux",
+          "code": "BOR",
+          "look": "O03",
+          "price": 120,
+          "folder": "Looks/Look-O03_NEVA/Pullover-NEVA_Bordeaux",
+          "files": [
+            "Pullover-NEVA_Bordeaux_1-vorne.jpg",
+            "Pullover-NEVA_Bordeaux_2-45grad.jpg",
+            "Pullover-NEVA_Bordeaux_4-hinten.jpg",
+            "Pullover-NEVA_Bordeaux_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-norva",
+      "title": "Pullover NORVA",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Bordeaux",
+          "code": "BOR",
+          "look": "O30",
+          "price": 80,
+          "folder": "Looks/Look-O30_NORVA/Pullover-NORVA_Bordeaux",
+          "files": [
+            "Pullover-NORVA_Bordeaux_1-vorne.jpg",
+            "Pullover-NORVA_Bordeaux_2-45grad.jpg",
+            "Pullover-NORVA_Bordeaux_4-hinten.jpg",
+            "Pullover-NORVA_Bordeaux_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-ray",
+      "title": "Pullover Ray",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Schwarz",
+          "code": "SCH",
+          "look": "O11",
+          "price": 100,
+          "folder": "Looks/Look-O11_Ray-Dorli-FLOKA/Pullover-Ray_Schwarz",
+          "files": [
+            "Pullover-Ray_Schwarz_1-vorne.jpg",
+            "Pullover-Ray_Schwarz_2-45grad.jpg",
+            "Pullover-Ray_Schwarz_4-hinten.jpg",
+            "Pullover-Ray_Schwarz_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-selva",
+      "title": "Pullover SELVA",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 400,
+      "colours": [
+        {
+          "name": "Dunkelgrün",
+          "code": "DGR",
+          "look": "O28",
+          "price": 80,
+          "folder": "Looks/Look-O28_SELVA-Fenja/Pullover-SELVA_Dunkelgruen",
+          "files": [
+            "Pullover-SELVA_Dunkelgruen_1-vorne.jpg",
+            "Pullover-SELVA_Dunkelgruen_3-seite.jpg",
+            "Pullover-SELVA_Dunkelgruen_4-hinten.jpg",
+            "Pullover-SELVA_Dunkelgruen_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-solara",
+      "title": "Pullover SOLARA",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Gelb",
+          "code": "GEL",
+          "look": "O42",
+          "price": 100,
+          "folder": "Looks/Look-O42_SOLARA/Pullover-SOLARA_Gelb",
+          "files": [
+            "Pullover-SOLARA_Gelb_1-vorne.jpg",
+            "Pullover-SOLARA_Gelb_2-45grad.jpg",
+            "Pullover-SOLARA_Gelb_4-hinten.jpg",
+            "Pullover-SOLARA_Gelb_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-tesso",
+      "title": "Pullover TESSO",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Hellgrau",
+          "code": "HGR",
+          "look": "O17",
+          "price": 80,
+          "folder": "Looks/Look-O17_TESSO/Pullover-TESSO_Hellgrau",
+          "files": [
+            "Pullover-TESSO_Hellgrau_1-vorne.jpg",
+            "Pullover-TESSO_Hellgrau_2-45grad.jpg",
+            "Pullover-TESSO_Hellgrau_4-hinten.jpg",
+            "Pullover-TESSO_Hellgrau_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-viola",
+      "title": "Pullover VIOLA",
+      "category": "Pullover",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 400,
+      "colours": [
+        {
+          "name": "Lila",
+          "code": "LIL",
+          "look": "O02",
+          "price": 100,
+          "folder": "Looks/Look-O02_VIOLA/Pullover-VIOLA_Lila",
+          "files": [
+            "Pullover-VIOLA_Lila_1-vorne.jpg",
+            "Pullover-VIOLA_Lila_2-45grad.jpg",
+            "Pullover-VIOLA_Lila_4-hinten.jpg",
+            "Pullover-VIOLA_Lila_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "pullover-zora",
+      "title": "Pullover ZORA",
+      "category": "Pullover",
+      "one_size": false,
+      "material": null,
+      "weight": null,
+      "colours": [
+        {
+          "name": "Eisblau",
+          "code": "EIS",
+          "look": "EZ",
+          "price": null,
+          "folder": "Looks/Einzelteile_ohne-Look/Pullover-ZORA_Eisblau",
+          "files": [
+            "Pullover-ZORA_Eisblau_1-vorne.jpg",
+            "Pullover-ZORA_Eisblau_2-45grad.jpg",
+            "Pullover-ZORA_Eisblau_4-hinten.jpg"
+          ]
+        }
+      ],
+      "create": true,
+      "status": "draft"
+    },
+    {
+      "handle": "rock-dorli",
+      "title": "Rock Dorli",
+      "category": "Röcke",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Schwarz",
+          "code": "SCH",
+          "look": "O11",
+          "price": 85,
+          "folder": "Looks/Look-O11_Ray-Dorli-FLOKA/Rock-Dorli_Schwarz",
+          "files": [
+            "Rock-Dorli_Schwarz_1-vorne.jpg",
+            "Rock-Dorli_Schwarz_4-hinten.jpg",
+            "Rock-Dorli_Schwarz_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "rock-grisol",
+      "title": "Rock GRISOL",
+      "category": "Röcke",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Grau/Schwarz",
+          "code": "GRS",
+          "look": "O34",
+          "price": 75,
+          "folder": "Looks/Look-O34_GRISOL/Rock-GRISOL_Grau-Schwarz",
+          "files": [
+            "Rock-GRISOL_Grau-Schwarz_1-vorne.jpg",
+            "Rock-GRISOL_Grau-Schwarz_4-hinten.jpg",
+            "Rock-GRISOL_Grau-Schwarz_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "rock-nalea",
+      "title": "Rock NALEA",
+      "category": "Röcke",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Türkis",
+          "code": "TUE",
+          "look": "O33",
+          "price": 85,
+          "folder": "Looks/Look-O33_TALVO-NALEA/Rock-NALEA_Tuerkis",
+          "files": [
+            "Rock-NALEA_Tuerkis_1-vorne.jpg",
+            "Rock-NALEA_Tuerkis_4-hinten.jpg",
+            "Rock-NALEA_Tuerkis_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Bordeaux",
+          "code": "BOR",
+          "look": "O03",
+          "price": 75,
+          "folder": "Looks/Look-O03_NEVA/Rock-NALEA_Bordeaux",
+          "files": [
+            "Rock-NALEA_Bordeaux_1-vorne.jpg",
+            "Rock-NALEA_Bordeaux_4-hinten.jpg",
+            "Rock-NALEA_Bordeaux_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "rock-neva",
+      "title": "Rock NEVA",
+      "status": "draft",
+      "retired": "ersetzt durch Rock NALEA Bordeaux (laut Samuel, v6)",
+      "colours": []
+    },
+    {
+      "handle": "rock-peonia",
+      "title": "Rock PEONIA",
+      "category": "Röcke",
+      "one_size": false,
+      "material": null,
+      "weight": null,
+      "colours": [
+        {
+          "name": "Pink/Schwarz",
+          "code": "PIS",
+          "look": "EZ",
+          "price": null,
+          "folder": "Looks/Einzelteile_ohne-Look/Rock-PEONIA_Pink-Schwarz",
+          "files": [
+            "Rock-PEONIA_Pink-Schwarz_1-vorne.jpg",
+            "Rock-PEONIA_Pink-Schwarz_4-hinten.jpg",
+            "Rock-PEONIA_Pink-Schwarz_5-detail.jpg"
+          ]
+        }
+      ],
+      "create": true,
+      "status": "draft"
+    },
+    {
+      "handle": "rock-viola",
+      "title": "Rock VIOLA",
+      "category": "Röcke",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 400,
+      "colours": [
+        {
+          "name": "Lila",
+          "code": "LIL",
+          "look": "O02",
+          "price": 85,
+          "folder": "Looks/Look-O02_VIOLA/Rock-VIOLA_Lila",
+          "files": [
+            "Rock-VIOLA_Lila_1-vorne.jpg",
+            "Rock-VIOLA_Lila_4-hinten.jpg",
+            "Rock-VIOLA_Lila_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "schal-rosana",
+      "title": "Schal ROSANA",
+      "category": "Schals",
+      "one_size": true,
+      "material": "100% Viskose",
+      "weight": 250,
+      "colours": [
+        {
+          "name": "Magenta",
+          "code": "MAG",
+          "look": "O27",
+          "price": 60,
+          "folder": "Looks/Look-O27_ROSANA/Schal-ROSANA_Magenta",
+          "files": [
+            "Schal-ROSANA_Magenta_1-getragen.jpg",
+            "Schal-ROSANA_Magenta_3-flach.jpg",
+            "Schal-ROSANA_Magenta_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "schal-velara",
+      "title": "Schal VELARA",
+      "category": "Schals",
+      "one_size": true,
+      "material": "100% Merinowolle",
+      "weight": 200,
+      "colours": [
+        {
+          "name": "Hellgrau",
+          "code": "HGR",
+          "look": "O43",
+          "price": 40,
+          "folder": "Looks/Look-O43_VELARA/Schal-VELARA_Hellgrau",
+          "files": [
+            "Schal-VELARA_Hellgrau_1-getragen.jpg",
+            "Schal-VELARA_Hellgrau_3-flach.jpg",
+            "Schal-VELARA_Hellgrau_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "schal-viola",
+      "title": "Schal VIOLA",
+      "category": "Schals",
+      "one_size": true,
+      "material": "100% Merinowolle",
+      "weight": null,
+      "colours": [
+        {
+          "name": "Lila",
+          "code": "LIL",
+          "look": "O02",
+          "price": 25,
+          "folder": "Looks/Look-O02_VIOLA/Schal-VIOLA_Lila",
+          "files": [
+            "Schal-VIOLA_Lila_1-getragen.jpg",
+            "Schal-VIOLA_Lila_3-flach.jpg",
+            "Schal-VIOLA_Lila_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "top-nalea",
+      "title": "Top NALEA",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 200,
+      "colours": [
+        {
+          "name": "Türkis",
+          "code": "TUE",
+          "look": "O33",
+          "price": 80,
+          "folder": "Looks/Look-O33_TALVO-NALEA/Top-NALEA_Tuerkis",
+          "files": [
+            "Top-NALEA_Tuerkis_1-vorne.jpg",
+            "Top-NALEA_Tuerkis_2-45grad.jpg",
+            "Top-NALEA_Tuerkis_4-hinten.jpg",
+            "Top-NALEA_Tuerkis_5-detail.jpg"
+          ]
+        },
+        {
+          "name": "Schwarz",
+          "code": "SCH",
+          "look": "O33",
+          "price": 80,
+          "folder": "Looks/Look-O33_TALVO-NALEA/Top-NALEA_Schwarz",
+          "files": [
+            "Top-NALEA_Schwarz_1-vorne.jpg",
+            "Top-NALEA_Schwarz_2-45grad.jpg",
+            "Top-NALEA_Schwarz_4-hinten.jpg",
+            "Top-NALEA_Schwarz_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "top-vita",
+      "title": "Top VITA",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Merinowolle",
+      "weight": 300,
+      "colours": [
+        {
+          "name": "Hellgrau",
+          "code": "HGR",
+          "look": "O50",
+          "price": 90,
+          "folder": "Looks/Look-O50_VITA/Top-VITA_Hellgrau",
+          "files": [
+            "Top-VITA_Hellgrau_1-vorne.jpg",
+            "Top-VITA_Hellgrau_2-45grad.jpg",
+            "Top-VITA_Hellgrau_4-hinten.jpg",
+            "Top-VITA_Hellgrau_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "tunika-melva",
+      "title": "Tunika MELVA",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Viskose",
+      "weight": 350,
+      "colours": [
+        {
+          "name": "Altrosa",
+          "code": "ALT",
+          "look": "O32",
+          "price": 90,
+          "folder": "Looks/Look-O32_MELVA/Tunika-MELVA_Altrosa",
+          "files": [
+            "Tunika-MELVA_Altrosa_1-vorne.jpg",
+            "Tunika-MELVA_Altrosa_2-45grad.jpg",
+            "Tunika-MELVA_Altrosa_4-hinten.jpg",
+            "Tunika-MELVA_Altrosa_5-detail.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "handle": "weste-talvo",
+      "title": "Weste TALVO",
+      "category": "Oberteile",
+      "one_size": false,
+      "material": "100% Wolle",
+      "weight": 400,
+      "colours": [
+        {
+          "name": "Petrol",
+          "code": "PET",
+          "look": "O33",
+          "price": 130,
+          "folder": "Looks/Look-O33_TALVO-NALEA/Weste-TALVO_Petrol",
+          "files": [
+            "Weste-TALVO_Petrol_1-vorne.jpg",
+            "Weste-TALVO_Petrol_2-45grad.jpg",
+            "Weste-TALVO_Petrol_4-hinten.jpg",
+            "Weste-TALVO_Petrol_5-detail.jpg"
+          ]
+        }
+      ]
+    }
+  ]
+}
