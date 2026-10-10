@@ -26,8 +26,10 @@
  *   Vorschaubild je Variante und Produkt setzen. Dateiname wie beim
  *   Bulk-Upload (<Look>_<handle>_<farbe>_<n-ansicht>) plus Prüfsumme, damit ein
  *   zweiter Lauf erkennt, dass nichts zu tun ist.
- * Material, Gewicht und Preise stimmen laut Abgleich schon; Abweichungen stehen
- * nur in der Ausgabe.
+ * - Preise: je Farbe der Preis aus den Daten (EUR-Basispreis aller Varianten
+ *   dieser Farbe), z. B. Rock NALEA Bordeaux 85 € oder die neuen Teile.
+ * Material und Gewicht stimmen laut Abgleich schon; Abweichungen stehen nur in
+ * der Ausgabe.
  *
  * Sicherheit: dieselbe DEV-Prüfung wie der Look-Import
  * (lib/assert-dev-environment.ts).
@@ -88,6 +90,7 @@ type DevVariant = {
   sku?: string | null
   thumbnail?: string | null
   options?: { option_id?: string | null; value: string }[] | null
+  prices?: { amount?: number | string | null; currency_code?: string | null }[] | null
 }
 type DevImage = {
   id: string
@@ -150,6 +153,12 @@ const viewOf = (file: string) =>
 
 const findOption = (options: DevOption[] | null | undefined, titles: string[]) =>
   (options ?? []).find((o) => titles.includes(o.title.trim().toLowerCase()))
+
+// EUR-Preis einer Variante (HW26 hat nur einfache EUR-Preise ohne Regeln)
+const basePriceOf = (variant: DevVariant): number | null => {
+  const price = (variant.prices ?? []).find((p) => p.currency_code === CURRENCY)
+  return price?.amount == null ? null : Number(price.amount)
+}
 
 const valueOf = (variant: DevVariant, optionId?: string) =>
   variant.options?.find((o) => o.option_id === optionId)?.value
@@ -230,6 +239,8 @@ const PRODUCT_FIELDS = [
   "variants.thumbnail",
   "variants.options.option_id",
   "variants.options.value",
+  "variants.prices.amount",
+  "variants.prices.currency_code",
   "images.id",
   "images.url",
   "images.rank",
@@ -569,6 +580,32 @@ export default async function syncHw26V8Products({ container }: ExecArgs) {
             }
           } else {
             summary.uploads += planned.length
+          }
+        }
+      }
+
+      // 6. Preise je Farbe (neue Varianten aus Schritt 4 haben ihn schon)
+      if (dev && !wanted.retired && !wanted.store_only) {
+        const colourOption = findOption(dev.options, COLOUR_TITLES)
+        const updates: { id: string; prices: { amount: number; currency_code: string }[] }[] = []
+        for (const c of wanted.colours) {
+          if (!c.price) continue
+          const wrong = (dev.variants ?? []).filter(
+            (v) => valueOf(v, colourOption?.id) === c.name && basePriceOf(v) !== c.price
+          )
+          if (!wrong.length) continue
+          const before = [...new Set(wrong.map((v) => basePriceOf(v) ?? "–"))].join("/")
+          lines.push(`  Preis ${c.name}: ${before} → ${c.price} € (${wrong.length} Variante(n))`)
+          for (const v of wrong) {
+            updates.push({ id: v.id, prices: [{ amount: c.price, currency_code: CURRENCY }] })
+          }
+        }
+        if (updates.length) {
+          steps.push("preise")
+          if (apply) {
+            await updateProductVariantsWorkflow(container).run({
+              input: { product_variants: updates },
+            })
           }
         }
       }
