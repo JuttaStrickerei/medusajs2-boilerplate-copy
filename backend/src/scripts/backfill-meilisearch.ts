@@ -77,7 +77,7 @@ export default async function backfill({ container }: ExecArgs) {
 
       // Insert into MeiliSearch
       const index = meiliClient.index('categories');
-      const result = await index.addDocuments(categoryDocs);
+      const result = await index.addDocuments(categoryDocs, { primaryKey: 'id' });
       await meiliClient.waitForTask(result.taskUid);
 
       logger.info(`✅ Backfilled ${categoryDocs.length} categories`);
@@ -117,7 +117,7 @@ export default async function backfill({ container }: ExecArgs) {
 
       // Insert into MeiliSearch
       const index = meiliClient.index('collections');
-      const result = await index.addDocuments(collectionDocs);
+      const result = await index.addDocuments(collectionDocs, { primaryKey: 'id' });
       await meiliClient.waitForTask(result.taskUid);
 
       logger.info(`✅ Backfilled ${collectionDocs.length} collections`);
