@@ -8,10 +8,10 @@ import { getPhotoNotes } from "@lib/util/look-photo-notes"
 import { sumLookPrices, type LookPriceSum } from "@lib/util/look-price"
 import { formatPrice } from "@lib/utils"
 import {
+  ALL_LOOK_WORLDS,
   AUTO_WORLD_BY_COLOR,
   FALLBACK_WORLD,
   LOOK_ART,
-  LOOK_WORLDS,
   PIECE_TYPES,
   type LookWorld,
   type WorldSwatch,
@@ -246,7 +246,7 @@ const isAllowedImageUrl = (
   }
 }
 
-const WORLD_KEYS = new Set(LOOK_WORLDS.map((w) => w.key))
+const WORLD_KEYS = new Set(ALL_LOOK_WORLDS.map((w) => w.key))
 
 // Zahl aus metadata (Zahl oder Ziffern-Text aus dem Admin), sonst null
 const toNumber = (value: unknown): number | null => {
@@ -370,7 +370,7 @@ const colorOfFirstPiece = (
 }
 
 const CONFIG_WORLD_BY_HANDLE = new Map(
-  LOOK_WORLDS.flatMap((w) => w.handles.map((h) => [h, w.key] as const))
+  ALL_LOOK_WORLDS.flatMap((w) => w.handles.map((h) => [h, w.key] as const))
 )
 
 /** metadata → Konfiguration → Farbe des ersten Teils → „Weitere Looks“ */
@@ -505,7 +505,7 @@ export const buildOverview = ({
     return { look, tile: buildTile(look, lookProducts, minioHost) }
   })
 
-  const grouped = LOOK_WORLDS.map((world) => ({
+  const grouped = ALL_LOOK_WORLDS.map((world) => ({
     world,
     entries: orderInWorld(
       entries.filter((e) => e.tile.worldKey === world.key),
