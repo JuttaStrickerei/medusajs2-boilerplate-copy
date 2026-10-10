@@ -397,7 +397,7 @@
       "title": "Mantel NERA",
       "category": "Mäntel",
       "one_size": false,
-      "material": "100% Merinowolle",
+      "material": "100% Wolle",
       "weight": null,
       "colours": [
         {
@@ -482,25 +482,9 @@
     {
       "handle": "mantel-tavia",
       "title": "Mantel TAVIA",
-      "category": "Mäntel",
-      "one_size": false,
-      "material": null,
-      "weight": 800,
-      "colours": [
-        {
-          "name": "Beige",
-          "code": "BEI",
-          "look": "O52",
-          "price": 180,
-          "folder": "Looks/Look-O52_TAVIA/Mantel-TAVIA_Beige",
-          "files": [
-            "Mantel-TAVIA_Beige_1-vorne.jpg",
-            "Mantel-TAVIA_Beige_2-45grad.jpg",
-            "Mantel-TAVIA_Beige_4-hinten.jpg",
-            "Mantel-TAVIA_Beige_5-detail.jpg"
-          ]
-        }
-      ]
+      "status": "draft",
+      "retired": "ausverkauft (laut Samuel, 10.10.2026)",
+      "colours": []
     },
     {
       "handle": "mantel-velara",
@@ -843,7 +827,7 @@
       "title": "Pullover ZORA",
       "category": "Pullover",
       "one_size": false,
-      "material": null,
+      "material": "100% Wolle",
       "weight": null,
       "colours": [
         {
@@ -952,7 +936,7 @@
       "title": "Rock PEONIA",
       "category": "Röcke",
       "one_size": false,
-      "material": null,
+      "material": "100% Wolle",
       "weight": null,
       "colours": [
         {

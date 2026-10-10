@@ -28,8 +28,9 @@
  *   zweiter Lauf erkennt, dass nichts zu tun ist.
  * - Preise: je Farbe der Preis aus den Daten (EUR-Basispreis aller Varianten
  *   dieser Farbe), z. B. Rock NALEA Bordeaux 85 € oder die neuen Teile.
- * Material und Gewicht stimmen laut Abgleich schon; Abweichungen stehen nur in
- * der Ausgabe.
+ * - Material: aus den Daten, wenn es abweicht (Schreibweise egal).
+ * - Ausverkauft/ersetzt (retired): nur Status Entwurf, sonst nichts.
+ * Gewicht stimmt laut Abgleich schon; Abweichungen stehen nur in der Ausgabe.
  *
  * Sicherheit: dieselbe DEV-Prüfung wie der Look-Import
  * (lib/assert-dev-environment.ts).
@@ -389,12 +390,18 @@ export default async function syncHw26V8Products({ container }: ExecArgs) {
         }
       }
 
-      // Abweichungen von Material/Gewicht nur melden
+      // Material aus den Daten (z. B. NERA, ZORA, PEONIA: 100% Wolle laut Samuel)
       const squash = (s?: string | number | null) => String(s ?? "").replace(/\s+/g, "").toLowerCase()
       if (dev && wanted.material && squash(dev.material) !== squash(wanted.material)) {
-        summary.warnings++
-        lines.push(`  ! Material auf DEV "${dev.material ?? "–"}", Liste "${wanted.material}" – nicht geändert`)
+        steps.push("material")
+        lines.push(`  Material: ${dev.material ?? "–"} → ${wanted.material}`)
+        if (apply) {
+          await updateProductsWorkflow(container).run({
+            input: { products: [{ id: dev.id, material: wanted.material }] },
+          })
+        }
       }
+      // Abweichungen beim Gewicht nur melden
       if (dev && wanted.weight && squash(dev.weight) !== squash(wanted.weight)) {
         summary.warnings++
         lines.push(`  ! Gewicht auf DEV ${dev.weight ?? "–"}, Liste ${wanted.weight} – nicht geändert`)

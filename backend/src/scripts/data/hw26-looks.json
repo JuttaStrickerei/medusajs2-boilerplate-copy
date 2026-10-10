@@ -253,31 +253,6 @@
     }
   },
   {
-    "code": "O52",
-    "handle": "tavia",
-    "title": "Look TAVIA",
-    "rank": 100,
-    "status": "draft",
-    "folder": "Look-O52_TAVIA",
-    "photos": [
-      {
-        "file": "DSC02464.jpg",
-        "note": "Nicht im Onlineshop: Hose TAVIA und gemustertes Tuch – fragen Sie gerne in unserer Boutique nach."
-      },
-      {
-        "file": "DSC02467.jpg",
-        "note": "Nicht im Onlineshop: gemustertes Tuch – fragen Sie gerne in unserer Boutique nach."
-      },
-      {
-        "file": "DSC02504.jpg",
-        "note": "Nicht im Onlineshop: Hose TAVIA und gemustertes Tuch – fragen Sie gerne in unserer Boutique nach."
-      }
-    ],
-    "products": [
-      "mantel-tavia"
-    ]
-  },
-  {
     "code": "O57",
     "handle": "senna",
     "title": "Look SENNA",

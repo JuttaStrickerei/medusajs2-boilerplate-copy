@@ -899,7 +899,7 @@ export default async function importHw26Looks({ container }: ExecArgs) {
           }
         }
         // Status nur beim Anlegen setzen: Ein im Admin freigeschalteter Look
-        // (z. B. TAVIA, sobald Preis und Material da sind) soll durch einen
+        // (z. B. erst, wenn Preis und Material da sind) soll durch einen
         // späteren Lauf nicht wieder auf Entwurf zurückfallen.
         if (existing.status !== look.status) {
           lines.push(
