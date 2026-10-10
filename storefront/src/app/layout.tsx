@@ -1,6 +1,6 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
-import { Inter, Playfair_Display } from "next/font/google"
+import localFont from "next/font/local"
 import Script from "next/script"
 import "styles/globals.css"
 import { ToastProvider } from "@components/ui"
@@ -13,17 +13,25 @@ import JsonLd from "@modules/common/components/json-ld"
 
 const GA_ID = "G-VQG5PFKSXB"
 
-const inter = Inter({
-  subsets: ["latin"],
+// Schriften liegen im Projekt (src/fonts, Google-Fonts-Subset "latin"), damit
+// der Build nicht von fonts.googleapis.com abhängt. Der Familienname bleibt
+// "Inter" / "Playfair Display", weil globals.css und tailwind.config.js ihn
+// direkt verwenden.
+const inter = localFont({
+  src: "../fonts/inter-latin-variable.woff2",
+  weight: "100 900",
   display: "swap",
   variable: "--font-inter",
+  declarations: [{ prop: "font-family", value: "Inter" }],
 })
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
+const playfair = localFont({
+  src: "../fonts/playfair-display-latin-variable.woff2",
+  weight: "400 700",
   display: "swap",
   variable: "--font-playfair",
-  weight: ["400", "500", "600", "700"],
+  declarations: [{ prop: "font-family", value: "Playfair Display" }],
+  adjustFontFallback: "Times New Roman",
 })
 
 export const metadata: Metadata = {
