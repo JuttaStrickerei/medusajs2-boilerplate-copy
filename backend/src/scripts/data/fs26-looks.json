@@ -1,0 +1,366 @@
+[
+  {
+    "code": "F01",
+    "handle": "look-kleid-dot",
+    "title": "Look Kleid DOT",
+    "rank": 101,
+    "status": "published",
+    "folder": "Look-F01_Kleid-DOT",
+    "photos": [
+      {
+        "file": "DSC00181.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00154.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "kleid-dot"
+    ]
+  },
+  {
+    "code": "F02",
+    "handle": "look-dottir",
+    "title": "Look DOTTIR",
+    "rank": 102,
+    "status": "published",
+    "folder": "Look-F02_DOTTIR",
+    "photos": [
+      {
+        "file": "DSC00063.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00076.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "kleid-dottir"
+    ]
+  },
+  {
+    "code": "F03",
+    "handle": "look-reno",
+    "title": "Look RENO",
+    "rank": 103,
+    "status": "published",
+    "folder": "Look-F03_RENO-Rot",
+    "photos": [
+      {
+        "file": "DSC02849.jpg",
+        "note": "Nicht im Onlineshop: schwarzer Rock mit Bordüre – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC02952.jpg",
+        "note": "Nicht im Onlineshop: Hose mit Blumenmuster – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC04909.jpg",
+        "note": "Nicht im Onlineshop: Rock mit Zickzackmuster – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC04896.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "pullover-reno"
+    ]
+  },
+  {
+    "code": "F04",
+    "handle": "look-maria-weiss",
+    "title": "Look MARIA in Weiß",
+    "rank": 104,
+    "status": "published",
+    "folder": "Look-F04_MARIA-Weiss",
+    "photos": [
+      {
+        "file": "DSC00622.jpg",
+        "note": "Nicht im Onlineshop: rote Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00619.jpg",
+        "note": "Nicht im Onlineshop: rote Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00730.jpg",
+        "note": "Nicht im Onlineshop: rote Punkte-Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00735.jpg",
+        "note": "Nicht im Onlineshop: rote Punkte-Hose – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-maria"
+    ]
+  },
+  {
+    "code": "F05",
+    "handle": "look-extra",
+    "title": "Look EXTRA",
+    "rank": 105,
+    "status": "published",
+    "folder": "Look-F05_EXTRA",
+    "photos": [
+      {
+        "file": "DSC05213.jpg",
+        "note": "Nicht im Onlineshop: schwarzes Top und schwarze Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC05256.jpg",
+        "note": "Nicht im Onlineshop: schwarzes Top und schwarze Hose – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "jacke-extra"
+    ]
+  },
+  {
+    "code": "F06",
+    "handle": "look-buttoni",
+    "title": "Look BUTTONI",
+    "rank": 106,
+    "status": "published",
+    "folder": "Look-F06_BUTTONI",
+    "photos": [
+      {
+        "file": "DSC01459.jpg",
+        "note": "Nicht im Onlineshop: gemusterte Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC01520.jpg",
+        "note": "Nicht im Onlineshop: helle Jacke und gemusterte Hose – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-buttoni"
+    ]
+  },
+  {
+    "code": "F07",
+    "handle": "look-renoff",
+    "title": "Look RENOFF",
+    "rank": 107,
+    "status": "published",
+    "folder": "Look-F07_RENOFF",
+    "photos": [
+      {
+        "file": "DSC03954.jpg",
+        "note": "Nicht im Onlineshop: weiße Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC03942.jpg",
+        "note": "Nicht im Onlineshop: weiße Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC03967.jpg",
+        "note": "Nicht im Onlineshop: weiße Hose – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-renoff"
+    ]
+  },
+  {
+    "code": "F08",
+    "handle": "look-max-dot",
+    "title": "Look MAX & DOT",
+    "rank": 108,
+    "status": "published",
+    "folder": "Look-F08_MAX-DOT",
+    "photos": [
+      {
+        "file": "DSC00378.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00343.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "pullover-max",
+      "hose-dot"
+    ]
+  },
+  {
+    "code": "F09",
+    "handle": "look-bernir",
+    "title": "Look BERNIR",
+    "rank": 109,
+    "status": "published",
+    "folder": "Look-F09_BERNIR",
+    "photos": [
+      {
+        "file": "DSC04866.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC04746.jpg",
+        "note": "Nicht im Onlineshop: weiße Bluse und gestreifte Hose (rechts im Bild) – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "kleid-bernir"
+    ]
+  },
+  {
+    "code": "F10",
+    "handle": "look-maria-braun",
+    "title": "Look MARIA in Braun",
+    "rank": 110,
+    "status": "published",
+    "folder": "Look-F10_MARIA-Braun",
+    "photos": [
+      {
+        "file": "DSC01099.jpg",
+        "note": "Nicht im Onlineshop: schwarze Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC01089.jpg",
+        "note": "Nicht im Onlineshop: schwarze Hose – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-maria"
+    ]
+  },
+  {
+    "code": "F11",
+    "handle": "look-kimo-ela",
+    "title": "Look KIMO & ELA",
+    "rank": 111,
+    "status": "published",
+    "folder": "Look-F11_KIMO-ELA",
+    "photos": [
+      {
+        "file": "DSC01588.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC01682.jpg",
+        "note": "Nicht im Onlineshop: brauner Poncho – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-kimo",
+      "hose-ela"
+    ]
+  },
+  {
+    "code": "F12",
+    "handle": "look-dot-ela",
+    "title": "Look DOT & ELA",
+    "rank": 112,
+    "status": "published",
+    "folder": "Look-F12_DOT-ELA",
+    "photos": [
+      {
+        "file": "DSC01403.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC01453.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "jacke-dot",
+      "top-ela",
+      "rock-dot"
+    ]
+  },
+  {
+    "code": "F13",
+    "handle": "look-tunika-dot",
+    "title": "Look Tunika DOT & Hose 7/8 DOT",
+    "rank": 113,
+    "status": "published",
+    "folder": "Look-F13_Tunika-DOT",
+    "photos": [
+      {
+        "file": "DSC02006.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC02024.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "tunika-dot",
+      "hose-7-8-dot"
+    ]
+  },
+  {
+    "code": "F14",
+    "handle": "look-reno-runo",
+    "title": "Look RENO & RUNO",
+    "rank": 114,
+    "status": "published",
+    "folder": "Look-F14_RENO-RUNO",
+    "photos": [
+      {
+        "file": "DSC05067.jpg",
+        "note": "Nicht im Onlineshop: gemustertes Tuch – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC05134.jpg",
+        "note": "Nicht im Onlineshop: gemustertes Tuch – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-reno",
+      "hose-runo"
+    ]
+  },
+  {
+    "code": "F15",
+    "handle": "look-ruth",
+    "title": "Look RUTH",
+    "rank": 115,
+    "status": "published",
+    "folder": "Look-F15_RUTH",
+    "photos": [
+      {
+        "file": "DSC04096.jpg",
+        "note": "Nicht im Onlineshop: Punkte-Hose in Oliv – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC04139.jpg",
+        "note": "Nicht im Onlineshop: Punkte-Hose in Oliv – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "poncho-ruth"
+    ]
+  },
+  {
+    "code": "F16",
+    "handle": "look-lilie-lana",
+    "title": "Look LILIE & LANA",
+    "rank": 116,
+    "status": "published",
+    "folder": "Look-F16_LILIE-LANA",
+    "photos": [
+      {
+        "file": "DSC03459.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC03575.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "poncho-lilie",
+      "pullover-lilie",
+      "hose-lana"
+    ]
+  }
+]

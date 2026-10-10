@@ -1,7 +1,7 @@
 /**
- * HW26-Looks importieren (Shop the Look)
+ * Saison-Looks importieren (Shop the Look) – HW26, FS26
  *
- * Legt die Looks aus src/scripts/data/hw26-looks.json an oder gleicht sie
+ * Legt die Looks aus src/scripts/data/<saison>-looks.json an oder gleicht sie
  * ab. Standard ist ein PROBELAUF: das Skript zeigt nur, was es tun würde,
  * lädt nichts hoch und schreibt nichts.
  *
@@ -9,14 +9,19 @@
  *   HW26_DIR="/Volumes/OWC Envoy Pro FX/Work/Jutta/Jutta_HW26/HW26_Onlineshop_FINAL" \
  *     pnpm medusa exec ./src/scripts/import-hw26-looks.ts
  *
+ *   SEASON=fs26 FS26_DIR="/Volumes/OWC Envoy Pro FX/Work/Jutta/Jutta_FS26/FS26_Onlineshop_FINAL" \
+ *     pnpm medusa exec ./src/scripts/import-hw26-looks.ts
+ *
+ *   SEASON=fs26    Frühjahr/Sommer 2026 (ohne SEASON: hw26 wie bisher)
  *   APPLY=1        wirklich hochladen und schreiben
  *   ONLY=O02,O18   nur diese Looks
  *
  * Wiederholbar: Ein zweiter Probelauf nach APPLY=1 meldet 0 Änderungen.
  * - Fotos: shrinkImage() + uploadFilesWorkflow wie /admin/bulk-images/upload,
  *   Dateiname look-<handle>_<n>.webp. Quelle (Datei, Größe, SHA-256) und URL
- *   stehen in look.metadata.hw26_photo_sources. Unveränderte Fotos werden
- *   nicht noch einmal hochgeladen.
+ *   stehen in look.metadata.<saison>_photo_sources. Unveränderte Fotos werden
+ *   nicht noch einmal hochgeladen. FS26 sucht die Fotos eines Looks in
+ *   _Look-Fotos_Kollektionsseite und _Look-Fotos_Shooting.
  * - Hinweise je Foto: look.metadata.photo_notes = { "<Bild-URL>": "<Text>" }.
  * - Teile: product_ids wird nur mitgeschickt, wenn sich die Liste samt
  *   Reihenfolge ändert, weil updateLookWorkflow sonst alle Teile neu anlegt.
@@ -48,6 +53,7 @@ import { ExecArgs } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { uploadFilesWorkflow } from "@medusajs/medusa/core-flows"
 import { assertHandleIsFree } from "../api/admin/looks/helpers"
+import { assertDevEnvironment } from "../lib/assert-dev-environment"
 import { shrinkImage } from "../lib/shrink-image"
 import { LOOK_MODULE } from "../modules/look"
 import LookModuleService from "../modules/look/service"
@@ -56,19 +62,47 @@ import {
   updateLookWorkflow,
   UpdateLookWorkflowInput,
 } from "../workflows/update-look"
-import manifestData from "./data/hw26-looks.json"
+import fs26ManifestData from "./data/fs26-looks.json"
+import hw26ManifestData from "./data/hw26-looks.json"
 
-const PHOTO_SUBDIR = "_Look-Fotos_Kollektionsseite"
-const CODE_RE = /^O\d{2}$/
+type SeasonConfig = {
+  label: string
+  manifest: unknown
+  dirEnv: string
+  exampleDir: string
+  codeRe: RegExp
+  // Schlüssel in look.metadata für Quelle und URL der Fotos
+  sourcesKey: string
+  // Unterordner eines Look-Ordners, in denen die Fotos liegen
+  photoSubdirs: string[]
+}
+
+const SEASONS: Record<string, SeasonConfig> = {
+  hw26: {
+    label: "HW26",
+    manifest: hw26ManifestData,
+    dirEnv: "HW26_DIR",
+    exampleDir:
+      "/Volumes/OWC Envoy Pro FX/Work/Jutta/Jutta_HW26/HW26_Onlineshop_FINAL",
+    codeRe: /^O\d{2}$/,
+    sourcesKey: "hw26_photo_sources",
+    photoSubdirs: ["_Look-Fotos_Kollektionsseite"],
+  },
+  fs26: {
+    label: "FS26",
+    manifest: fs26ManifestData,
+    dirEnv: "FS26_DIR",
+    exampleDir:
+      "/Volumes/OWC Envoy Pro FX/Work/Jutta/Jutta_FS26/FS26_Onlineshop_FINAL",
+    codeRe: /^F\d{2}$/,
+    sourcesKey: "fs26_photo_sources",
+    // Shooting = zweites Foto, wo die Kollektionsseite nur eines zeigt
+    photoSubdirs: ["_Look-Fotos_Kollektionsseite", "_Look-Fotos_Shooting"],
+  },
+}
+
 // Wie handleSchema in api/admin/looks/validators.ts
 const HANDLE_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-// "centerbeam" = Prod-Postgres-Proxy, "interchange" = Prod-Redis-Proxy
-// (Stand jutta-railway-Skill; Proxys können sich ändern)
-const PROD_MARKERS = ["prod", "centerbeam", "interchange"]
-// Positiv-Liste: nur diese Datenbank-Hosts gelten als DEV. "crossover" ist
-// der Dev-Postgres-Proxy (Stand jutta-railway-Skill). Ändert sich der Proxy,
-// den neuen Host bewusst per EXPECT_DB_HOST=<host> freigeben.
-const DEV_DB_HOSTS = ["crossover.proxy.rlwy.net", "localhost", "127.0.0.1"]
 const MIME_BY_EXT: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -91,7 +125,7 @@ type ManifestLook = {
   products: string[]
 }
 
-// Ein Eintrag in look.metadata.hw26_photo_sources
+// Ein Eintrag in look.metadata.<saison>_photo_sources
 type PhotoSource = { file: string; bytes: number; sha256: string; url: string }
 
 type ExistingLookItem = {
@@ -144,98 +178,15 @@ const stableStringify = (value: unknown): string => {
   return JSON.stringify(value) ?? "null"
 }
 
-// Nur Host (und Port) einer Verbindungs-URL – niemals Zugangsdaten
-const hostOf = (raw: string | undefined): string | null => {
-  if (!raw?.trim()) return null
-  try {
-    const url = new URL(raw)
-    if (url.hostname) {
-      return url.port ? `${url.hostname}:${url.port}` : url.hostname
-    }
-  } catch {
-    // z. B. Passwort mit Sonderzeichen – unten von Hand zerlegen
-  }
-  const withoutScheme = raw.replace(/^[a-z][a-z0-9+.-]*:\/\//i, "")
-  const afterAt = withoutScheme.slice(withoutScheme.lastIndexOf("@") + 1)
-  const match = afterAt.match(/^([^/?#\s]+)/)
-  return match ? match[1] : null
-}
-
-const bucketHostOf = (raw: string | undefined): string | null => {
-  const host = (raw ?? "")
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .split("/")[0]
-  return host || null
-}
-
-function checkEnvironment(out: Log) {
-  const dbHost = hostOf(process.env.DATABASE_URL)
-  const redisSet = !!process.env.REDIS_URL?.trim()
-  const redisHost = redisSet ? hostOf(process.env.REDIS_URL) : null
-  const bucketHost = bucketHostOf(process.env.MINIO_ENDPOINT)
-
-  out("Umgebung")
-  out(`  Datenbank: ${dbHost ?? "(nicht lesbar)"}`)
-  out(
-    `  Redis:     ${
-      redisSet ? redisHost ?? "(nicht lesbar)" : "– (nicht gesetzt, In-Memory)"
-    }`
-  )
-  out(`  Bucket:    ${bucketHost ?? "– (MINIO_ENDPOINT nicht gesetzt)"}`)
-
-  const problems: string[] = []
-
-  if (!dbHost) {
-    problems.push("DATABASE_URL fehlt oder ist nicht lesbar")
-  } else {
-    // hostOf liefert "host:port" – verglichen wird der Hostname ohne Port
-    const dbHostname = dbHost.toLowerCase().replace(/:\d+$/, "")
-    const expected = process.env.EXPECT_DB_HOST?.trim().toLowerCase()
-    const allowed = expected ? [expected.replace(/:\d+$/, "")] : DEV_DB_HOSTS
-    if (!allowed.includes(dbHostname)) {
-      problems.push(
-        `Datenbank-Host "${dbHost}" ist kein bekannter DEV-Host (${allowed.join(", ")}). ` +
-          `Ist das sicher DEV, mit EXPECT_DB_HOST=${dbHost} bestätigen.`
-      )
-    }
-  }
-  if (redisSet && !redisHost) problems.push("REDIS_URL ist nicht lesbar")
-
-  if (!bucketHost) {
-    problems.push(
-      "MINIO_ENDPOINT fehlt – die Fotos würden im lokalen static/-Ordner landen"
-    )
-  } else {
-    if (!bucketHost.toLowerCase().includes("dev")) {
-      problems.push(`Bucket-Host "${bucketHost}" enthält nicht "dev"`)
-    }
-    if (!process.env.MINIO_ACCESS_KEY || !process.env.MINIO_SECRET_KEY) {
-      problems.push(
-        "MINIO_ACCESS_KEY oder MINIO_SECRET_KEY fehlt – dann nutzt Medusa den lokalen Datei-Provider"
-      )
-    }
-  }
-
-  const hosts: [string, string | null][] = [
-    ["Datenbank", dbHost],
-    ["Redis", redisHost],
-    ["Bucket", bucketHost],
-  ]
-  for (const [label, host] of hosts) {
-    const marker = host
-      ? PROD_MARKERS.find((m) => host.toLowerCase().includes(m))
-      : undefined
-    if (marker) {
-      problems.push(`${label}-Host "${host}" sieht nach PROD aus ("${marker}")`)
-    }
-  }
-
-  if (problems.length) {
+function parseSeason(): SeasonConfig {
+  const raw = (process.env.SEASON ?? "hw26").trim().toLowerCase()
+  const season = SEASONS[raw]
+  if (!season) {
     throw new Error(
-      `Abbruch – das ist nicht die DEV-Umgebung:\n  - ${problems.join("\n  - ")}`
+      `SEASON="${raw}" ist unbekannt – erlaubt: ${Object.keys(SEASONS).join(", ")}`
     )
   }
+  return season
 }
 
 function parseApply(): boolean {
@@ -247,7 +198,7 @@ function parseApply(): boolean {
   )
 }
 
-function parseManifest(raw: unknown): ManifestLook[] {
+function parseManifest(raw: unknown, codeRe: RegExp): ManifestLook[] {
   if (!Array.isArray(raw)) {
     throw new Error("Manifest: erwartet eine Liste von Looks")
   }
@@ -271,7 +222,7 @@ function parseManifest(raw: unknown): ManifestLook[] {
     const status = text("status")
     const rank = e.rank
 
-    if (!CODE_RE.test(code)) problems.push(`${at}: code fehlt oder ist ungültig`)
+    if (!codeRe.test(code)) problems.push(`${at}: code fehlt oder ist ungültig`)
     if (!HANDLE_RE.test(handle)) problems.push(`${at}: handle "${handle}" ist ungültig`)
     if (!title) problems.push(`${at}: title fehlt`)
     if (!folder || /[\\/]/.test(folder) || folder.startsWith(".")) {
@@ -369,8 +320,24 @@ function selectLooks(manifest: ManifestLook[], only: string | undefined) {
   return manifest.filter((look) => codes.includes(look.code))
 }
 
-const photoPathOf = (dir: string, look: ManifestLook, photo: ManifestPhoto) =>
-  path.join(dir, "Looks", look.folder, PHOTO_SUBDIR, photo.file)
+// Pfad eines Look-Fotos: genau ein Unterordner der Saison muss es enthalten,
+// sonst null (fehlt) bzw. Fehler (doppelt, wäre nicht eindeutig)
+const photoPathOf = (
+  dir: string,
+  season: SeasonConfig,
+  look: ManifestLook,
+  photo: ManifestPhoto
+): string | null => {
+  const found = season.photoSubdirs
+    .map((subdir) => path.join(dir, "Looks", look.folder, subdir, photo.file))
+    .filter((file) => existsSync(file) && statSync(file).isFile())
+  if (found.length > 1) {
+    throw new Error(
+      `Foto ${photo.file} liegt in mehreren Unterordnern von ${look.folder}: ${season.photoSubdirs.join(", ")}`
+    )
+  }
+  return found[0] ?? null
+}
 
 const isPhotoSource = (value: unknown): value is PhotoSource => {
   if (!value || typeof value !== "object") return false
@@ -384,8 +351,11 @@ const isPhotoSource = (value: unknown): value is PhotoSource => {
   )
 }
 
-const storedSourcesOf = (look: ExistingLook | null): PhotoSource[] => {
-  const raw = look?.metadata?.hw26_photo_sources
+const storedSourcesOf = (
+  look: ExistingLook | null,
+  sourcesKey: string
+): PhotoSource[] => {
+  const raw = look?.metadata?.[sourcesKey]
   return Array.isArray(raw) ? raw.filter(isPhotoSource) : []
 }
 
@@ -422,11 +392,12 @@ export default async function importHw26Looks({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const out: Log = (line = "") => logger.info(line)
   const apply = parseApply()
+  const season = parseSeason()
 
   out()
-  out("HW26-Looks importieren")
+  out(`${season.label}-Looks importieren`)
   out("======================")
-  checkEnvironment(out)
+  assertDevEnvironment(out)
   out(
     `  Modus:     ${
       apply
@@ -435,20 +406,20 @@ export default async function importHw26Looks({ container }: ExecArgs) {
     }`
   )
 
-  const hw26Dir = process.env.HW26_DIR?.trim()
-  if (!hw26Dir) {
+  const sourceDir = process.env[season.dirEnv]?.trim()
+  if (!sourceDir) {
     throw new Error(
-      'HW26_DIR fehlt, z. B. HW26_DIR="/Volumes/OWC Envoy Pro FX/Work/Jutta/Jutta_HW26/HW26_Onlineshop_FINAL"'
+      `${season.dirEnv} fehlt, z. B. ${season.dirEnv}="${season.exampleDir}"`
     )
   }
-  if (!existsSync(path.join(hw26Dir, "Looks"))) {
+  if (!existsSync(path.join(sourceDir, "Looks"))) {
     throw new Error(
-      `In HW26_DIR fehlt der Ordner "Looks" (${hw26Dir}) – ist die Platte angesteckt?`
+      `In ${season.dirEnv} fehlt der Ordner "Looks" (${sourceDir}) – ist die Platte angesteckt?`
     )
   }
-  out(`  Quelle:    ${hw26Dir}`)
+  out(`  Quelle:    ${sourceDir}`)
 
-  const manifest = parseManifest(manifestData as unknown)
+  const manifest = parseManifest(season.manifest, season.codeRe)
   const looks = selectLooks(manifest, process.env.ONLY)
   out(
     `  Looks:     ${looks.length} von ${manifest.length}${
@@ -457,11 +428,20 @@ export default async function importHw26Looks({ container }: ExecArgs) {
   )
 
   // Alle Fotos müssen da sein, bevor irgendetwas passiert
-  const missing = looks.flatMap((look) =>
-    look.photos
-      .map((photo) => photoPathOf(hw26Dir, look, photo))
-      .filter((file) => !existsSync(file) || !statSync(file).isFile())
-  )
+  const photoPaths = new Map<string, string>()
+  const missing: string[] = []
+  for (const look of looks) {
+    for (const photo of look.photos) {
+      const file = photoPathOf(sourceDir, season, look, photo)
+      if (file) {
+        photoPaths.set(`${look.code}/${photo.file}`, file)
+      } else {
+        missing.push(
+          path.join(sourceDir, "Looks", look.folder, `{${season.photoSubdirs.join(",")}}`, photo.file)
+        )
+      }
+    }
+  }
   if (missing.length) {
     throw new Error(`Fotos fehlen:\n  - ${missing.join("\n  - ")}`)
   }
@@ -587,23 +567,23 @@ export default async function importHw26Looks({ container }: ExecArgs) {
       }
       // Fotos: unveränderte (gleiche Datei + gleicher Inhalt) wiederverwenden
       const reusable = new Map(
-        storedSourcesOf(existing).map((s) => [sourceKey(s), s.url])
+        storedSourcesOf(existing, season.sourcesKey).map((s) => [sourceKey(s), s.url])
       )
       // Ohne Quellangaben (im Admin angelegt): Fotos mit gleichem Dateinamen
       // aus dem bestehenden Upload übernehmen statt sie doppelt hochzuladen
       const uploadedByStem = new Map(
-        storedSourcesOf(existing).length
+        storedSourcesOf(existing, season.sourcesKey).length
           ? []
           : (existing?.images ?? []).map((url) => [uploadedStemOf(url), url])
       )
 
-      if (existing && !storedSourcesOf(existing).length) {
+      if (existing && !storedSourcesOf(existing, season.sourcesKey).length) {
         const unmatched = look.photos.filter(
           (photo) => !uploadedByStem.has(stemOf(photo.file))
         )
         if (unmatched.length) {
           warnings.push(
-            `Look existiert schon, aber ohne HW26-Quellangaben – ${unmatched.length} Foto(s) ohne passenden Upload werden neu hochgeladen`
+            `Look existiert schon, aber ohne ${season.label}-Quellangaben – ${unmatched.length} Foto(s) ohne passenden Upload werden neu hochgeladen`
           )
         } else {
           lines.push(
@@ -614,10 +594,14 @@ export default async function importHw26Looks({ container }: ExecArgs) {
       const sources: PhotoSource[] = []
       const photoLines: string[] = []
       let toUpload = 0
+      // Dateiname look-<handle>_<n>; FS26-Handles beginnen schon mit "look-"
+      const uploadPrefix = look.handle.startsWith(ADOPT_HANDLE_PREFIX)
+        ? look.handle
+        : `${ADOPT_HANDLE_PREFIX}${look.handle}`
 
       for (const [i, photo] of look.photos.entries()) {
         const n = i + 1
-        const buffer = readFileSync(photoPathOf(hw26Dir, look, photo))
+        const buffer = readFileSync(photoPaths.get(`${look.code}/${photo.file}`)!)
         const sha256 = createHash("sha256").update(buffer).digest("hex")
         const storedUrl = reusable.get(sourceKey({ file: photo.file, sha256 }))
         const reuseUrl = storedUrl ?? uploadedByStem.get(stemOf(photo.file))
@@ -635,7 +619,7 @@ export default async function importHw26Looks({ container }: ExecArgs) {
           const ext = path.extname(photo.file).toLowerCase()
           const image = await shrinkImage(
             buffer,
-            `look-${look.handle}_${n}${ext}`,
+            `${uploadPrefix}_${n}${ext}`,
             MIME_BY_EXT[ext]
           )
 
@@ -681,7 +665,7 @@ export default async function importHw26Looks({ container }: ExecArgs) {
       // Nur diese zwei Schlüssel gehören dem Import; der Look-Service
       // mischt metadata flach (mergeMetadata), andere Schlüssel bleiben.
       const managedMetadata = {
-        hw26_photo_sources: sources,
+        [season.sourcesKey]: sources,
         photo_notes: photoNotes,
       }
 
