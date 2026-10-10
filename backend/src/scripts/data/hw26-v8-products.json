@@ -404,7 +404,7 @@
           "name": "Schwarz",
           "code": "SCH",
           "look": "EZ",
-          "price": null,
+          "price": 180,
           "folder": "Looks/Einzelteile_ohne-Look/Mantel-NERA_Schwarz",
           "files": [
             "Mantel-NERA_Schwarz_1-vorne.jpg",
@@ -417,7 +417,7 @@
           "name": "Marine",
           "code": "MAR",
           "look": "EZ",
-          "price": null,
+          "price": 180,
           "folder": "Looks/Einzelteile_ohne-Look/Mantel-NERA_Marine",
           "files": [
             "Mantel-NERA_Marine_1-vorne.jpg",
@@ -491,7 +491,7 @@
           "name": "Beige",
           "code": "BEI",
           "look": "O52",
-          "price": null,
+          "price": 180,
           "folder": "Looks/Look-O52_TAVIA/Mantel-TAVIA_Beige",
           "files": [
             "Mantel-TAVIA_Beige_1-vorne.jpg",
@@ -850,7 +850,7 @@
           "name": "Eisblau",
           "code": "EIS",
           "look": "EZ",
-          "price": null,
+          "price": 90,
           "folder": "Looks/Einzelteile_ohne-Look/Pullover-ZORA_Eisblau",
           "files": [
             "Pullover-ZORA_Eisblau_1-vorne.jpg",
@@ -930,7 +930,7 @@
           "name": "Bordeaux",
           "code": "BOR",
           "look": "O03",
-          "price": 75,
+          "price": 85,
           "folder": "Looks/Look-O03_NEVA/Rock-NALEA_Bordeaux",
           "files": [
             "Rock-NALEA_Bordeaux_1-vorne.jpg",
@@ -959,7 +959,7 @@
           "name": "Pink/Schwarz",
           "code": "PIS",
           "look": "EZ",
-          "price": null,
+          "price": 85,
           "folder": "Looks/Einzelteile_ohne-Look/Rock-PEONIA_Pink-Schwarz",
           "files": [
             "Rock-PEONIA_Pink-Schwarz_1-vorne.jpg",

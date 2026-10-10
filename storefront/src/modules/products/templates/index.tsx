@@ -12,8 +12,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import JsonLd from "@modules/common/components/json-ld"
 import { Badge } from "@components/ui"
-import { Info, Sparkles, RefreshCw, Shield } from "@components/icons"
-import { AI_IMAGES_NOTE, hasAiImages } from "@lib/util/ai-images"
+import { Sparkles, RefreshCw, Shield } from "@components/icons"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { getBaseURL } from "@lib/util/env"
 import { ViewItem } from "@modules/common/components/analytics"
@@ -178,12 +177,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                 thumbnail={product?.thumbnail}
                 title={product.title}
               />
-              {hasAiImages(product) && (
-                <p className="mt-3 flex items-start gap-1.5 text-xs leading-relaxed text-stone-500">
-                  <Info size={14} aria-hidden className="mt-0.5 shrink-0" />
-                  {AI_IMAGES_NOTE}
-                </p>
-              )}
             </div>
 
             {/* Product Info */}
