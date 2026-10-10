@@ -7,7 +7,14 @@ import { sumLookPrices } from "@lib/util/look-price"
 import { cn, formatPrice, shouldReduceMotion } from "@lib/utils"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@components/ui"
-import { Check, Heart, Ruler, Share, ShoppingBag } from "@components/icons"
+import {
+  Check,
+  Heart,
+  MapPin,
+  Ruler,
+  Share,
+  ShoppingBag,
+} from "@components/icons"
 import { useWishlist } from "@lib/context/wishlist-context"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
@@ -17,15 +24,25 @@ import {
   sortProductOptions,
   translateOptionTitle,
 } from "@modules/products/hooks/use-variant-selection"
+import type { StoreOnlyPiece } from "@lib/util/look-store-only"
+import Image from "next/image"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
-import LookItemCard, { LookBulkSize, LookItemSelection } from "./look-item-card"
+import LookItemCard, {
+  LookBulkSize,
+  LookItemSelection,
+  lookColorPreset,
+} from "./look-item-card"
 import LookOptionChips, { sortSizes } from "./look-option-chips"
 
 type LookItemsActionsProps = {
   lookId: string
   lookTitle: string
   products: HttpTypes.StoreProduct[]
+  // Produkt-Handle → Farbe im Look (vorgewählt)
+  itemColors?: Record<string, string>
+  // Teile, die es nur im Geschäft gibt: nur Vorschau mit Hinweis
+  storeOnlyPieces?: StoreOnlyPiece[]
 }
 
 // Feste deutsche Meldung: Server-Actions liefern in Produktion nur eine
@@ -47,7 +64,9 @@ const sizeValuesOf = (product: HttpTypes.StoreProduct) => {
 // Was die Karte nach der Vorauswahl melden wird – gilt, bis sie es tut
 // (Server-HTML und erster Paint zeigen so schon Summe und „Größe wählen“)
 const initialSelection = (
-  product: HttpTypes.StoreProduct
+  product: HttpTypes.StoreProduct,
+  // vorgewählte Optionen (Farbe des Looks) zählen nicht als offen
+  preset?: Record<string, string>
 ): LookItemSelection => {
   const variants = product.variants ?? []
   const purchasable = variants.some(isVariantInStock)
@@ -62,7 +81,7 @@ const initialSelection = (
   }
 
   const next = sortProductOptions(product.options).find(
-    (o) => uniqueValues(o).length > 1
+    (o) => uniqueValues(o).length > 1 && !preset?.[o.id]
   )
   return {
     purchasable,
@@ -77,6 +96,8 @@ export default function LookItemsActions({
   lookId,
   lookTitle,
   products,
+  itemColors = {},
+  storeOnlyPieces = [],
 }: LookItemsActionsProps) {
   const countryCode = useParams().countryCode as string
   const router = useRouter()
@@ -199,7 +220,11 @@ export default function LookItemsActions({
   }, [selections])
 
   const sel = (p: HttpTypes.StoreProduct) =>
-    selections[p.id] ?? initialSelection(p)
+    selections[p.id] ??
+    initialSelection(
+      p,
+      lookColorPreset(p, p.handle ? itemColors[p.handle] : undefined)
+    )
 
   // Nur kaufbare Teile zählen; ausverkaufte werden übersprungen
   const purchasable = products.filter((p) => sel(p).purchasable)
@@ -487,7 +512,15 @@ export default function LookItemsActions({
                 bulkSize={bulkSize}
                 attention={attention?.target === "rows"}
                 showSingleAdd={!isSingle}
+                preferredColor={
+                  product.handle ? itemColors[product.handle] : undefined
+                }
               />
+            </li>
+          ))}
+          {storeOnlyPieces.map((piece) => (
+            <li key={`${piece.title}-${piece.image}`}>
+              <StoreOnlyPieceRow piece={piece} />
             </li>
           ))}
         </ul>
@@ -688,6 +721,37 @@ export default function LookItemsActions({
         added={added}
       />
     </div>
+  )
+}
+
+// Teil nur im Geschäft: gleiche Zeile wie ein Look-Teil, aber ohne Link,
+// Preis, Auswahl und Warenkorb
+function StoreOnlyPieceRow({ piece }: { piece: StoreOnlyPiece }) {
+  return (
+    <article
+      className="grid grid-cols-[4rem_minmax(0,1fr)] gap-x-3 py-4 small:grid-cols-[4.5rem_minmax(0,1fr)] small:gap-x-4"
+      data-testid="look-store-only-item"
+    >
+      <div className="relative col-start-1 row-span-2 aspect-[3/4] w-full self-start overflow-hidden rounded-md bg-stone-100">
+        <Image
+          src={piece.image}
+          alt={piece.title}
+          fill
+          sizes="72px"
+          className="object-cover"
+        />
+      </div>
+      <div className="col-start-2 min-w-0">
+        <p className="text-[15px] font-medium text-stone-900">{piece.title}</p>
+        {piece.color && (
+          <p className="mt-0.5 text-xs text-stone-500">{piece.color}</p>
+        )}
+        <p className="mt-2 flex items-start gap-1.5 text-xs text-stone-700">
+          <MapPin size={14} aria-hidden className="mt-px shrink-0" />
+          <span>{piece.note} – fragen Sie gerne in unserer Boutique nach.</span>
+        </p>
+      </div>
+    </article>
   )
 }
 

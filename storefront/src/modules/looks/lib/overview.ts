@@ -5,6 +5,7 @@ import type { StoreLook } from "@lib/data/looks"
 import { BRAND, type GaItem } from "@lib/util/analytics"
 import { COLOR_OPTION_TITLES, getColorGroupKeys } from "@lib/util/filter-groups"
 import { getPhotoNotes } from "@lib/util/look-photo-notes"
+import { colorThumbnail, getItemColors } from "@lib/util/look-item-colors"
 import { sumLookPrices, type LookPriceSum } from "@lib/util/look-price"
 import { formatPrice } from "@lib/utils"
 import {
@@ -321,6 +322,7 @@ export const resolveCover = (
 ): LookCover => {
   const art = LOOK_ART[look.handle] ?? {}
   const images = look.images ?? []
+  const lookColors = getItemColors(look.metadata)
   const artIndex =
     typeof art.coverIndex === "number" && images[art.coverIndex]
       ? art.coverIndex
@@ -330,7 +332,9 @@ export const resolveCover = (
 
   const studio =
     (studioIndex >= 0 ? images[studioIndex] : null) ??
-    products?.find((p) => p.thumbnail)?.thumbnail ??
+    (products ?? [])
+      .map((p) => colorThumbnail(p, lookColors[p.handle ?? ""]))
+      .find((url): url is string => !!url) ??
     look.product_thumbnails[0] ??
     null
 
@@ -406,6 +410,7 @@ const buildTile = (
     minioHost
   )
   const title = look.title
+  const itemColors = getItemColors(look.metadata)
   const types = products ? products.map((p) => pieceType(p.title ?? "")) : []
   const count = products ? products.length : look.product_ids.length
   const sum = products ? sumLookPrices(products) : null
@@ -426,7 +431,7 @@ const buildTile = (
     amount: sum?.amount ?? null,
     currency: sum?.currency ?? null,
     thumbs: (products ?? [])
-      .map((p) => p.thumbnail)
+      .map((p) => colorThumbnail(p, itemColors[p.handle ?? ""]))
       .filter((t): t is string => !!t)
       .slice(0, MAX_PACKSHOTS),
     mood: overrides.tagline ?? LOOK_ART[look.handle]?.mood ?? null,

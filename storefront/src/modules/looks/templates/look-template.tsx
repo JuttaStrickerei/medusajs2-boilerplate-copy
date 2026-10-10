@@ -2,7 +2,9 @@ import { HttpTypes } from "@medusajs/types"
 import type { StoreLook } from "@lib/data/looks"
 import { getBaseURL } from "@lib/util/env"
 import { productToItem } from "@lib/util/analytics"
+import { colorThumbnail, getItemColors } from "@lib/util/look-item-colors"
 import { getPhotoNotes } from "@lib/util/look-photo-notes"
+import { getStoreOnlyPieces } from "@lib/util/look-store-only"
 import { sumLookPrices } from "@lib/util/look-price"
 import { formatPrice } from "@lib/utils"
 import JsonLd from "@modules/common/components/json-ld"
@@ -26,10 +28,12 @@ export default function LookTemplate({
 }: LookTemplateProps) {
   const baseUrl = getBaseURL()
   const lookUrl = `${baseUrl}/${countryCode}/looks/${look.handle}`
+  const itemColors = getItemColors(look.metadata)
+  const storeOnlyPieces = getStoreOnlyPieces(look.metadata)
   const images = look.images?.length
     ? look.images
     : products
-        .map((p) => p.thumbnail)
+        .map((p) => colorThumbnail(p, itemColors[p.handle ?? ""]))
         .filter((url): url is string => !!url)
         .slice(0, 1)
   // Map → einfaches Objekt: Client-Komponenten bekommen nur serialisierbare Props
@@ -141,6 +145,8 @@ export default function LookTemplate({
               lookId={look.id}
               lookTitle={look.title}
               products={products}
+              itemColors={itemColors}
+              storeOnlyPieces={storeOnlyPieces}
             />
           ) : (
             <p className="text-stone-600">
