@@ -26,7 +26,10 @@
     ],
     "products": [
       "mantel-rouga"
-    ]
+    ],
+    "item_colors": {
+      "mantel-rouga": "Rot"
+    }
   },
   {
     "code": "O03",
@@ -46,9 +49,12 @@
       }
     ],
     "products": [
-      "rock-neva",
+      "rock-nalea",
       "pullover-neva"
-    ]
+    ],
+    "item_colors": {
+      "rock-nalea": "Bordeaux"
+    }
   },
   {
     "code": "O02",
@@ -129,8 +135,12 @@
     ],
     "products": [
       "jacke-rosana",
-      "schal-rosana"
-    ]
+      "schal-rosana",
+      "top-nalea"
+    ],
+    "item_colors": {
+      "top-nalea": "Schwarz"
+    }
   },
   {
     "code": "O30",
@@ -237,7 +247,10 @@
     "products": [
       "hose-glena",
       "mantel-bruna"
-    ]
+    ],
+    "item_colors": {
+      "mantel-bruna": "Braun"
+    }
   },
   {
     "code": "O52",
@@ -288,7 +301,10 @@
     "products": [
       "poncho-senna",
       "hose-senna"
-    ]
+    ],
+    "item_colors": {
+      "poncho-senna": "Senf"
+    }
   },
   {
     "code": "O42",
@@ -331,11 +347,11 @@
     "photos": [
       {
         "file": "DSC00039.jpg",
-        "note": ""
+        "note": "Nicht im Onlineshop: Poncho SELVA – fragen Sie gerne in unserer Boutique nach."
       },
       {
         "file": "DSC00052.jpg",
-        "note": ""
+        "note": "Nicht im Onlineshop: Poncho SELVA – fragen Sie gerne in unserer Boutique nach."
       },
       {
         "file": "DSC00100.jpg",
@@ -352,8 +368,15 @@
     ],
     "products": [
       "pullover-selva",
-      "poncho-selva",
       "hose-fenja-5"
+    ],
+    "store_only_pieces": [
+      {
+        "title": "Poncho SELVA",
+        "color": "Dunkelgrün",
+        "file": "Poncho-SELVA_Dunkelgruen/Poncho-SELVA_Dunkelgruen_Preview_nur-im-Geschaeft.jpg",
+        "note": "Nur im Geschäft erhältlich"
+      }
     ]
   },
   {
@@ -386,7 +409,11 @@
       "rock-nalea",
       "jacke-nalea",
       "top-nalea"
-    ]
+    ],
+    "item_colors": {
+      "rock-nalea": "Türkis",
+      "top-nalea": "Türkis"
+    }
   },
   {
     "code": "O61",
@@ -439,7 +466,11 @@
       "blazer-conte",
       "pullover-aaron",
       "hose-tini"
-    ]
+    ],
+    "item_colors": {
+      "blazer-conte": "Marine",
+      "pullover-aaron": "Marine"
+    }
   },
   {
     "code": "O50",

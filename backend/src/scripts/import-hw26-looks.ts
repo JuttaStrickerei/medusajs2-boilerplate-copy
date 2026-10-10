@@ -23,6 +23,13 @@
  *   nicht noch einmal hochgeladen. FS26 sucht die Fotos eines Looks in
  *   _Look-Fotos_Kollektionsseite und _Look-Fotos_Shooting.
  * - Hinweise je Foto: look.metadata.photo_notes = { "<Bild-URL>": "<Text>" }.
+ * - Farbe je Teil (optional, Manifest "item_colors": { "<Handle>": "<Farbe>" }):
+ *   look.metadata.item_colors. Die Farbe muss es am Produkt geben, sonst
+ *   Warnung. Der Shop zeigt das Teil dann in dieser Farbe vorausgewählt.
+ * - Teile nur im Geschäft (optional, Manifest "store_only_pieces":
+ *   [{ title, color?, file, note? }], file relativ zum Look-Ordner):
+ *   Bild wie die Fotos hochladen, look.metadata.store_only_pieces =
+ *   [{ title, color?, image, note }], Quelle in <saison>_piece_sources.
  * - Teile: product_ids wird nur mitgeschickt, wenn sich die Liste samt
  *   Reihenfolge ändert, weil updateLookWorkflow sonst alle Teile neu anlegt.
  * - Beschreibung und Status werden nur beim Anlegen gesetzt und danach nicht
@@ -73,6 +80,8 @@ type SeasonConfig = {
   codeRe: RegExp
   // Schlüssel in look.metadata für Quelle und URL der Fotos
   sourcesKey: string
+  // dasselbe für die Bilder der Teile, die es nur im Geschäft gibt
+  pieceSourcesKey: string
   // Unterordner eines Look-Ordners, in denen die Fotos liegen
   photoSubdirs: string[]
 }
@@ -86,6 +95,7 @@ const SEASONS: Record<string, SeasonConfig> = {
       "/Volumes/OWC Envoy Pro FX/Work/Jutta/Jutta_HW26/HW26_Onlineshop_FINAL",
     codeRe: /^O\d{2}$/,
     sourcesKey: "hw26_photo_sources",
+    pieceSourcesKey: "hw26_piece_sources",
     photoSubdirs: ["_Look-Fotos_Kollektionsseite"],
   },
   fs26: {
@@ -96,6 +106,7 @@ const SEASONS: Record<string, SeasonConfig> = {
       "/Volumes/OWC Envoy Pro FX/Work/Jutta/Jutta_FS26/FS26_Onlineshop_FINAL",
     codeRe: /^F\d{2}$/,
     sourcesKey: "fs26_photo_sources",
+    pieceSourcesKey: "fs26_piece_sources",
     // Shooting = zweites Foto, wo die Kollektionsseite nur eines zeigt
     photoSubdirs: ["_Look-Fotos_Kollektionsseite", "_Look-Fotos_Shooting"],
   },
@@ -114,6 +125,10 @@ type LookStatus = "draft" | "published"
 
 type ManifestPhoto = { file: string; note: string }
 
+// Teil, das es nur im Geschäft gibt (z. B. Poncho SELVA): im Look nur
+// Vorschaubild mit Hinweis. file liegt relativ zum Look-Ordner.
+type ManifestStoreOnly = { title: string; color: string; file: string; note: string }
+
 type ManifestLook = {
   code: string
   handle: string
@@ -123,10 +138,17 @@ type ManifestLook = {
   folder: string
   photos: ManifestPhoto[]
   products: string[]
+  // Produkt-Handle → Farbe, in der das Teil im Look getragen wird
+  item_colors?: Record<string, string>
+  store_only_pieces?: ManifestStoreOnly[]
 }
+
+const STORE_ONLY_NOTE = "Nur im Geschäft erhältlich"
 
 // Ein Eintrag in look.metadata.<saison>_photo_sources
 type PhotoSource = { file: string; bytes: number; sha256: string; url: string }
+// Ein Eintrag in look.metadata.<saison>_piece_sources
+type PieceSource = { file: string; sha256: string; url: string }
 
 type ExistingLookItem = {
   id: string
@@ -150,7 +172,14 @@ type ExistingLook = {
   items?: (ExistingLookItem | null)[] | null
 }
 
-type ProductRow = { id: string; handle: string; status: string }
+type ProductRow = {
+  id: string
+  handle: string
+  status: string
+  options?: { title?: string | null; values?: { value: string }[] | null }[] | null
+}
+
+const COLOR_OPTION_TITLES = ["farbe", "farben", "color", "colour"]
 
 type Log = (line?: string) => void
 
@@ -278,6 +307,55 @@ function parseManifest(raw: unknown, codeRe: RegExp): ManifestLook[] {
       }
     }
 
+    let itemColors: Record<string, string> | undefined
+    if (e.item_colors !== undefined) {
+      if (!e.item_colors || typeof e.item_colors !== "object" || Array.isArray(e.item_colors)) {
+        problems.push(`${at}: item_colors muss ein Objekt { Handle: Farbe } sein`)
+      } else {
+        itemColors = {}
+        for (const [productHandle, color] of Object.entries(e.item_colors)) {
+          if (!products.includes(productHandle)) {
+            problems.push(`${at}: item_colors nennt ${productHandle}, das nicht in products steht`)
+          } else if (typeof color !== "string" || !color.trim()) {
+            problems.push(`${at}: item_colors.${productHandle} braucht eine Farbe`)
+          } else {
+            itemColors[productHandle] = color.trim()
+          }
+        }
+      }
+    }
+
+    let storeOnly: ManifestStoreOnly[] | undefined
+    if (e.store_only_pieces !== undefined) {
+      if (!Array.isArray(e.store_only_pieces)) {
+        problems.push(`${at}: store_only_pieces muss eine Liste sein`)
+      } else {
+        storeOnly = []
+        for (const piece of e.store_only_pieces as unknown[]) {
+          const q = (piece && typeof piece === "object" ? piece : {}) as Record<string, unknown>
+          const pieceTitle = typeof q.title === "string" ? q.title.trim() : ""
+          const file = typeof q.file === "string" ? q.file.trim() : ""
+          const segments = file.split("/")
+          if (!pieceTitle) problems.push(`${at}: store_only_pieces braucht title`)
+          if (
+            !file ||
+            path.isAbsolute(file) ||
+            segments.some((seg) => !seg || seg === "." || seg === "..") ||
+            !MIME_BY_EXT[path.extname(file).toLowerCase()]
+          ) {
+            problems.push(`${at}: store_only_pieces-Bild "${file}" ist ungültig`)
+            continue
+          }
+          storeOnly.push({
+            title: pieceTitle,
+            color: typeof q.color === "string" ? q.color.trim() : "",
+            file,
+            note: typeof q.note === "string" && q.note.trim() ? q.note.trim() : STORE_ONLY_NOTE,
+          })
+        }
+      }
+    }
+
     looks.push({
       code,
       handle,
@@ -287,6 +365,8 @@ function parseManifest(raw: unknown, codeRe: RegExp): ManifestLook[] {
       folder,
       photos,
       products,
+      ...(itemColors ? { item_colors: itemColors } : {}),
+      ...(storeOnly ? { store_only_pieces: storeOnly } : {}),
     })
   })
 
@@ -361,6 +441,36 @@ const storedSourcesOf = (
 
 const sourceKey = (source: { file: string; sha256: string }) =>
   `${source.file}|${source.sha256}`
+
+// Bild eines Teils, das es nur im Geschäft gibt: relativ zum Look-Ordner
+const piecePathOf = (dir: string, look: ManifestLook, piece: ManifestStoreOnly) =>
+  path.join(dir, "Looks", look.folder, piece.file)
+
+const storedPieceSourcesOf = (
+  look: ExistingLook | null,
+  key: string
+): PieceSource[] => {
+  const raw = look?.metadata?.[key]
+  if (!Array.isArray(raw)) return []
+  return raw.filter((value): value is PieceSource => {
+    if (!value || typeof value !== "object") return false
+    const v = value as Record<string, unknown>
+    return (
+      typeof v.file === "string" &&
+      typeof v.sha256 === "string" &&
+      typeof v.url === "string" &&
+      v.url.length > 0
+    )
+  })
+}
+
+// Farbwerte eines Produkts (Option "Farbe"), z. B. ["Türkis", "Bordeaux"]
+const colorValuesOf = (product: ProductRow): string[] => {
+  const option = (product.options ?? []).find((o) =>
+    COLOR_OPTION_TITLES.includes((o.title ?? "").trim().toLowerCase())
+  )
+  return (option?.values ?? []).map((v) => v.value)
+}
 
 const linkedProductId = (item: ExistingLookItem): string | null => {
   const link = Array.isArray(item.product_link)
@@ -441,6 +551,10 @@ export default async function importHw26Looks({ container }: ExecArgs) {
         )
       }
     }
+    for (const piece of look.store_only_pieces ?? []) {
+      const file = piecePathOf(sourceDir, look, piece)
+      if (!existsSync(file) || !statSync(file).isFile()) missing.push(file)
+    }
   }
   if (missing.length) {
     throw new Error(`Fotos fehlen:\n  - ${missing.join("\n  - ")}`)
@@ -452,7 +566,7 @@ export default async function importHw26Looks({ container }: ExecArgs) {
   const productHandles = [...new Set(looks.flatMap((look) => look.products))]
   const { data: productData } = await query.graph({
     entity: "product",
-    fields: ["id", "handle", "status"],
+    fields: ["id", "handle", "status", "options.title", "options.values.value"],
     filters: { handle: productHandles },
   })
   const productsByHandle = new Map(
@@ -513,6 +627,34 @@ export default async function importHw26Looks({ container }: ExecArgs) {
     uploadOriginalBytes: 0,
     uploadBytes: 0,
     reused: 0,
+  }
+
+  // Verkleinern (WebP ≤ 2000 px) und hochladen; im Probelauf nur den Namen
+  const uploadImage = async (buffer: Buffer, filename: string, ext: string) => {
+    const image = await shrinkImage(buffer, filename, MIME_BY_EXT[ext])
+    let url = `(neu) ${image.filename}`
+    if (apply) {
+      const { result } = await uploadFilesWorkflow(container).run({
+        input: {
+          files: [
+            {
+              filename: image.filename,
+              mimeType: image.mimeType,
+              content: image.buffer.toString("base64"),
+              access: "public",
+            },
+          ],
+        },
+      })
+      if (!result[0]?.url) {
+        throw new Error(`Upload von ${filename} lieferte keine URL`)
+      }
+      url = result[0].url
+    }
+    summary.uploads++
+    summary.uploadOriginalBytes += buffer.length
+    summary.uploadBytes += image.buffer.length
+    return { url, image }
   }
 
   for (const look of looks) {
@@ -617,34 +759,11 @@ export default async function importHw26Looks({ container }: ExecArgs) {
         } else {
           toUpload++
           const ext = path.extname(photo.file).toLowerCase()
-          const image = await shrinkImage(
+          const { url, image } = await uploadImage(
             buffer,
             `${uploadPrefix}_${n}${ext}`,
-            MIME_BY_EXT[ext]
+            ext
           )
-
-          let url = `(neu) ${image.filename}`
-          if (apply) {
-            const { result } = await uploadFilesWorkflow(container).run({
-              input: {
-                files: [
-                  {
-                    filename: image.filename,
-                    mimeType: image.mimeType,
-                    content: image.buffer.toString("base64"),
-                    access: "public",
-                  },
-                ],
-              },
-            })
-            if (!result[0]?.url) {
-              throw new Error(`Upload von ${photo.file} lieferte keine URL`)
-            }
-            url = result[0].url
-          }
-          summary.uploads++
-          summary.uploadOriginalBytes += buffer.length
-          summary.uploadBytes += image.buffer.length
 
           sources.push({ file: photo.file, bytes: buffer.length, sha256, url })
           photoLines.push(
@@ -657,16 +776,84 @@ export default async function importHw26Looks({ container }: ExecArgs) {
         if (photo.note) photoLines.push(`       Hinweis: ${photo.note}`)
       }
 
+      // Farbe, in der ein Teil im Look getragen wird: muss es am Produkt geben
+      let itemColors: Record<string, string> | undefined
+      const colorLines: string[] = []
+      if (look.item_colors) {
+        itemColors = {}
+        for (const [handle, color] of Object.entries(look.item_colors)) {
+          const product = productsByHandle.get(handle)
+          if (!product) continue // oben schon gewarnt
+          const colors = colorValuesOf(product)
+          if (!colors.includes(color)) {
+            warnings.push(
+              `item_colors: ${handle} hat keine Farbe "${color}" (vorhanden: ${colors.join(", ") || "–"}) – wird ausgelassen`
+            )
+            continue
+          }
+          itemColors[handle] = color
+          colorLines.push(`    ${handle} = ${color}`)
+        }
+      }
+
+      // Teile, die es nur im Geschäft gibt: Bild hochladen bzw. wiederverwenden
+      const reusablePieces = new Map(
+        storedPieceSourcesOf(existing, season.pieceSourcesKey).map((s) => [
+          sourceKey(s),
+          s.url,
+        ])
+      )
+      const pieceSources: PieceSource[] = []
+      const storeOnlyPieces: Record<string, string>[] = []
+      const pieceLines: string[] = []
+      for (const [i, piece] of (look.store_only_pieces ?? []).entries()) {
+        const buffer = readFileSync(piecePathOf(sourceDir, look, piece))
+        const sha256 = createHash("sha256").update(buffer).digest("hex")
+        let url = reusablePieces.get(sourceKey({ file: piece.file, sha256 }))
+        if (url) {
+          summary.reused++
+          pieceLines.push(`    ${piece.title}: ${path.basename(piece.file)} unverändert`)
+        } else {
+          const ext = path.extname(piece.file).toLowerCase()
+          const uploaded = await uploadImage(
+            buffer,
+            `${uploadPrefix}_nur-im-geschaeft_${i + 1}${ext}`,
+            ext
+          )
+          url = uploaded.url
+          pieceLines.push(
+            `    ${piece.title}: ${path.basename(piece.file)} ${size(buffer.length)} → ${size(
+              uploaded.image.buffer.length
+            )}  ${apply ? `hochgeladen: ${url}` : `neu: ${uploaded.image.filename}`}`
+          )
+        }
+        pieceSources.push({ file: piece.file, sha256, url })
+        storeOnlyPieces.push({
+          title: piece.title,
+          ...(piece.color ? { color: piece.color } : {}),
+          image: url,
+          note: piece.note,
+        })
+      }
+
       const images = sources.map((s) => s.url)
       const photoNotes: Record<string, string> = {}
       look.photos.forEach((photo, i) => {
         if (photo.note) photoNotes[sources[i].url] = photo.note
       })
-      // Nur diese zwei Schlüssel gehören dem Import; der Look-Service
-      // mischt metadata flach (mergeMetadata), andere Schlüssel bleiben.
-      const managedMetadata = {
+      // Nur diese Schlüssel gehören dem Import (Farben und Nur-im-Geschäft-
+      // Teile nur, wenn das Manifest sie nennt); der Look-Service mischt
+      // metadata flach (mergeMetadata), andere Schlüssel bleiben.
+      const managedMetadata: Record<string, unknown> = {
         [season.sourcesKey]: sources,
         photo_notes: photoNotes,
+        ...(itemColors ? { item_colors: itemColors } : {}),
+        ...(look.store_only_pieces
+          ? {
+              store_only_pieces: storeOnlyPieces,
+              [season.pieceSourcesKey]: pieceSources,
+            }
+          : {}),
       }
 
       let action: string
@@ -792,6 +979,14 @@ export default async function importHw26Looks({ container }: ExecArgs) {
       photoLines.forEach((line) => out(line))
       out(`  Teile: ${productIds.length} von ${look.products.length}`)
       productLines.forEach((line) => out(`    ${line}`))
+      if (colorLines.length) {
+        out("  Farben im Look:")
+        colorLines.forEach((line) => out(line))
+      }
+      if (pieceLines.length) {
+        out("  Nur im Geschäft:")
+        pieceLines.forEach((line) => out(line))
+      }
     } catch (error) {
       summary.failed++
       out(`  → FEHLER: ${error instanceof Error ? error.message : String(error)}`)

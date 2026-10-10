@@ -93,9 +93,15 @@ const variantAvailability = (
 /**
  * Optionsauswahl, gewählte Variante und Lagerstatus eines Produkts.
  * Wird von der Produktseite (ProductActions) und der Look-Seite genutzt.
+ * initialOptions: Vorauswahl beim ersten Rendern (Look-Seite: Farbe des Looks).
  */
-export function useVariantSelection(product: HttpTypes.StoreProduct) {
-  const [options, setOptions] = useState<Record<string, string | undefined>>({})
+export function useVariantSelection(
+  product: HttpTypes.StoreProduct,
+  initialOptions?: Record<string, string>
+) {
+  const [options, setOptions] = useState<Record<string, string | undefined>>(
+    () => initialOptions ?? {}
+  )
 
   // Preselect options: all options if only 1 variant, otherwise any option with only 1 available value
   useEffect(() => {
