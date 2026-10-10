@@ -408,8 +408,11 @@ export default async function syncHw26V8Products({ container }: ExecArgs) {
           const keep = new Map<string, DevVariant>()
           for (const colour of wanted.colours) {
             const ofColour = variants.filter((v) => valueOf(v, colourOption.id) === colour.name)
+            // schon umbenannte Variante zuerst (Lauf abgebrochen), dann M
             const chosen =
-              ofColour.find((v) => valueOf(v, sizeOption.id) === KEEP_SIZE) ?? ofColour[0]
+              ofColour.find((v) => valueOf(v, sizeOption.id) === data.one_size_value) ??
+              ofColour.find((v) => valueOf(v, sizeOption.id) === KEEP_SIZE) ??
+              ofColour[0]
             if (!chosen) throw new Error(`keine Variante in ${colour.name}`)
             keep.set(colour.name, chosen)
           }
@@ -456,7 +459,10 @@ export default async function syncHw26V8Products({ container }: ExecArgs) {
         )
         const newColours = wanted.colours.filter((c) => !devColours.has(c.name))
         if (newColours.length) {
-          const sizes = data.sizes.filter((s) => sizeValuesNow.includes(s))
+          // Schals: nur One Size (im Probelauf stehen dort noch die alten Größen)
+          const sizes = wanted.one_size
+            ? [data.one_size_value]
+            : data.sizes.filter((s) => sizeValuesNow.includes(s))
           const sample = variantsNow.find((v) => v.sku)?.sku ?? ""
           const prefix = sample.split("-").slice(0, 2).join("-")
           const fallbackPrice = wanted.colours.find((c) => devColours.has(c.name))?.price
