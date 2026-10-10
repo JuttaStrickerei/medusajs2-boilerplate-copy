@@ -16,6 +16,7 @@ import { useEffect } from "react"
 import { sdk } from "../../../lib/sdk"
 import { ImagesField } from "./images-field"
 import { ProductPicker } from "./product-picker"
+import { itemColorsFrom, itemColorsOf, toLookProduct } from "./colors"
 import type { AdminLook, LookFormValues } from "./types"
 
 type LookFormModalProps = {
@@ -25,17 +26,28 @@ type LookFormModalProps = {
   look: AdminLook | null
 }
 
-const toFormValues = (look: AdminLook | null): LookFormValues => ({
-  title: look?.title ?? "",
-  handle: look?.handle ?? "",
-  description: look?.description ?? "",
-  status: look?.status ?? "draft",
-  rank: look?.rank ?? 0,
-  images: look?.images ?? [],
-  products: (look?.items ?? [])
-    .map((item) => item.product)
-    .filter((p): p is NonNullable<typeof p> => !!p),
-})
+const toFormValues = (look: AdminLook | null): LookFormValues => {
+  const itemColors = itemColorsOf(look?.metadata)
+  return {
+    title: look?.title ?? "",
+    handle: look?.handle ?? "",
+    description: look?.description ?? "",
+    status: look?.status ?? "draft",
+    rank: look?.rank ?? 0,
+    images: look?.images ?? [],
+    products: (look?.items ?? [])
+      .map((item) => item.product)
+      .filter((p): p is NonNullable<typeof p> => !!p)
+      .map((p) => toLookProduct(p, p.handle ? itemColors[p.handle] : undefined)),
+  }
+}
+
+// Farben je Teil: als Ganzes ersetzen; "" löscht den Schlüssel (mergeMetadata)
+const itemColorsMetadata = (values: LookFormValues, isEdit: boolean) => {
+  const itemColors = itemColorsFrom(values.products)
+  if (Object.keys(itemColors).length) return { metadata: { item_colors: itemColors } }
+  return isEdit ? { metadata: { item_colors: "" } } : {}
+}
 
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Unbekannter Fehler"
@@ -71,6 +83,7 @@ export const LookFormModal = ({
             rank: Number(values.rank) || 0,
             images: values.images,
             product_ids: values.products.map((p) => p.id),
+            ...itemColorsMetadata(values, isEdit),
           },
         }
       ),

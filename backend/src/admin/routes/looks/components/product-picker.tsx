@@ -1,8 +1,9 @@
-import { Badge, Button, IconButton, Input, Text } from "@medusajs/ui"
+import { Badge, Button, IconButton, Input, Select, Text } from "@medusajs/ui"
 import { ArrowDownMini, ArrowUpMini, Trash } from "@medusajs/icons"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { sdk } from "../../../lib/sdk"
+import { toLookProduct } from "./colors"
 import type { LookProduct } from "./types"
 
 type ProductPickerProps = {
@@ -20,6 +21,9 @@ const useDebounced = (value: string, delay = 300) => {
 }
 
 const PAGE_SIZE = 20
+
+// Radix-Select erlaubt keinen leeren Wert
+const NO_COLOR = "__keine-farbe"
 
 const Thumb = ({ src }: { src?: string | null }) =>
   src ? (
@@ -44,7 +48,7 @@ export const ProductPicker = ({ value, onChange }: ProductPickerProps) => {
           limit: PAGE_SIZE,
           offset: pageParam,
           order: "title",
-          fields: "id,title,handle,thumbnail,status",
+          fields: "id,title,handle,thumbnail,status,options.title,options.values.value",
         }),
       initialPageParam: 0,
       getNextPageParam: (last, pages) => {
@@ -76,6 +80,13 @@ export const ProductPicker = ({ value, onChange }: ProductPickerProps) => {
     onChange(next)
   }
 
+  const setColor = (index: number, color: string) =>
+    onChange(
+      value.map((p, i) =>
+        i === index ? { ...p, color: color === NO_COLOR ? undefined : color } : p
+      )
+    )
+
   return (
     <div className="flex flex-col gap-4">
       {value.length > 0 ? (
@@ -91,6 +102,29 @@ export const ProductPicker = ({ value, onChange }: ProductPickerProps) => {
                   <Badge size="2xsmall" color="orange">
                     Nicht veröffentlicht – im Shop ausgeblendet
                   </Badge>
+                )}
+                {(product.colors?.length ?? 0) > 1 && (
+                  <div className="mt-1 w-56">
+                    <Select
+                      size="small"
+                      value={product.color ?? NO_COLOR}
+                      onValueChange={(color) => setColor(index, color)}
+                    >
+                      <Select.Trigger>
+                        <Select.Value />
+                      </Select.Trigger>
+                      <Select.Content>
+                        <Select.Item value={NO_COLOR}>
+                          Farbe im Look: nicht vorausgewählt
+                        </Select.Item>
+                        {product.colors!.map((color) => (
+                          <Select.Item key={color} value={color}>
+                            Farbe im Look: {color}
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select>
+                  </div>
                 )}
               </div>
               <IconButton
@@ -159,16 +193,7 @@ export const ProductPicker = ({ value, onChange }: ProductPickerProps) => {
                 type="button"
                 className="flex w-full items-center gap-3 p-2 text-left hover:bg-ui-bg-base-hover"
                 onClick={() => {
-                  onChange([
-                    ...value,
-                    {
-                      id: product.id,
-                      title: product.title,
-                      handle: product.handle,
-                      thumbnail: product.thumbnail,
-                      status: product.status,
-                    },
-                  ])
+                  onChange([...value, toLookProduct(product)])
                   // Suche leeren, damit das nächste Teil direkt gesucht werden kann
                   setSearch("")
                 }}
