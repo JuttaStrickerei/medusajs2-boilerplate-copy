@@ -211,6 +211,112 @@ export const LOOK_WORLDS: LookWorld[] = [
   },
 ]
 
+/**
+ * Farbwelten Frühjahr/Sommer 2026 (/looks/saison/fs-2026). LOOK_WORLDS oben
+ * bleiben die der aktuellen Saison (Startseite, /looks); die Übersicht nutzt
+ * ALL_LOOK_WORLDS und zeigt nur Welten mit Looks der angezeigten Saison.
+ */
+export const FS26_WORLDS: LookWorld[] = [
+  {
+    key: "rot-weiss",
+    name: "Rot & Weiß",
+    shortName: "Rot & Weiß",
+    tagline: "Rot, Weiß und Punkte – fröhlich und sommerlich.",
+    swatches: [yarnSwatch("Rot"), yarnSwatch("Weiß")],
+    handles: ["look-kleid-dot", "look-dottir", "look-reno", "look-maria-weiss"],
+    storeColors: ["rot", "weiß"],
+    theme: "light",
+    tokens: lightTokens({
+      bg: "#F4DEDC",
+      ink: "#A6131C",
+      accent: "#A6131C",
+      endBg: "#A6131C",
+      endInk: "#FFFFFF",
+    }),
+    chipTint: "#F4DEDC",
+  },
+  {
+    key: "sonne-sand",
+    name: "Sonne & Sand",
+    shortName: "Sonne & Sand",
+    tagline: "Gelb, Hellgelb und Beige – leicht und hell.",
+    swatches: [yarnSwatch("Gelb"), yarnSwatch("Beige")],
+    handles: ["look-extra", "look-renoff", "look-buttoni"],
+    storeColors: ["gelb", "beige"],
+    theme: "light",
+    tokens: lightTokens({
+      bg: "#F1E8CF",
+      ink: "#6B5A26",
+      accent: "#6B5A26",
+      endBg: "#6B5A26",
+      endInk: "#FFFFFF",
+    }),
+    chipTint: "#F1E8CF",
+  },
+  {
+    key: "braun-punkte",
+    name: "Braun & Punkte",
+    shortName: "Braun",
+    tagline: "Braun mit Punkten – Ton in Ton kombiniert.",
+    swatches: [yarnSwatch("Braun"), yarnSwatch("Schwarz")],
+    handles: [
+      "look-dot-ela",
+      "look-tunika-dot",
+      "look-kimo-ela",
+      "look-maria-braun",
+    ],
+    storeColors: ["braun"],
+    theme: "light",
+    tokens: lightTokens({
+      bg: "#E7DCD3",
+      ink: "#5A3A2C",
+      accent: "#5A3A2C",
+      endBg: "#5A3A2C",
+      endInk: "#FFFFFF",
+    }),
+    chipTint: "#E7DCD3",
+  },
+  {
+    key: "oliv-salbei",
+    name: "Oliv & Salbei",
+    shortName: "Oliv & Salbei",
+    tagline: "Oliv und Salbei – Grüntöne, die alles mitmachen.",
+    swatches: [yarnSwatch("Oliv"), yarnSwatch("Salbei")],
+    handles: ["look-lilie-lana", "look-ruth", "look-reno-runo"],
+    storeColors: ["grün"],
+    theme: "light",
+    tokens: lightTokens({
+      bg: "#DFE3D8",
+      ink: "#3F4A33",
+      accent: "#3F4A33",
+      endBg: "#3F4A33",
+      endInk: "#FFFFFF",
+    }),
+    chipTint: "#DFE3D8",
+  },
+  {
+    key: "schwarz-weiss",
+    name: "Schwarz & Weiß",
+    shortName: "Schwarz",
+    tagline: "Schwarz mit weißen Akzenten – grafisch und elegant.",
+    swatches: [yarnSwatch("Schwarz"), yarnSwatch("Weiß")],
+    handles: ["look-bernir", "look-max-dot"],
+    storeColors: ["schwarz"],
+    theme: "dark",
+    tokens: darkTokens({
+      bg: "#2E2E33",
+      ink: "#F5F5F4",
+      accent: "#2E2E33",
+      endBg: "#E0DDDA",
+      endInk: "#2E2E33",
+    }),
+    chipTint: "#E0DDDA",
+  },
+]
+
+/** Alle Farbwelten aller Saisons, für die Zuordnung in der Übersicht */
+export const ALL_LOOK_WORLDS: LookWorld[] = [...LOOK_WORLDS, ...FS26_WORLDS]
+
 /** Sammelband für Looks ohne Farbwelt (und neutraler Band bei wenigen Looks) */
 export const FALLBACK_WORLD: LookWorld = {
   key: "weitere",
