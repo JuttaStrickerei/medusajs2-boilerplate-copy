@@ -56,7 +56,11 @@ export default async function backfill({ container }: ExecArgs) {
     // internal ones would be search hits that lead to a 404)
     const [categories] = await productModuleService.listAndCountProductCategories(
       { is_active: true, is_internal: false },
-      { take: 100 }
+      {
+        take: 100,
+        // Without select, categories come back with only their id
+        select: ['id', 'name', 'description', 'handle', 'metadata', 'parent_category_id', 'rank'],
+      }
     );
 
     logger.info(`📡 Found ${categories.length} categories in database`);
