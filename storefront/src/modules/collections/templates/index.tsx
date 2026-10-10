@@ -5,7 +5,8 @@ import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import { HttpTypes } from "@medusajs/types"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import PageHeader from "@modules/common/components/page-header"
 import MobileFilterDrawer from "@modules/store/components/mobile-filter-drawer"
 import { ProductFilters } from "@modules/store/templates"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
@@ -30,35 +31,20 @@ export default function CollectionTemplate({
 
   return (
     <div className="bg-stone-50 min-h-screen">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-stone-200">
-        <div className="content-container py-3 small:py-4">
-          <nav className="flex items-center gap-2 text-xs small:text-sm text-stone-500">
-            <LocalizedClientLink
-              href="/"
-              className="hover:text-stone-800 transition-colors"
-            >
-              Home
-            </LocalizedClientLink>
-            <span>/</span>
-            <LocalizedClientLink
-              href="/collections"
-              className="hover:text-stone-800 transition-colors"
-            >
-              Kollektionen
-            </LocalizedClientLink>
-            <span>/</span>
-            <span className="text-stone-800">{collection.title}</span>
-          </nav>
-        </div>
-      </div>
+      <PageBreadcrumb
+        items={[
+          { label: "Alle Produkte", href: "/store" },
+          { label: collection.title },
+        ]}
+      />
+      <PageHeader title={collection.title} />
 
       {/* Main Content */}
-      <div className="content-container pt-6 small:pt-8 pb-12 small:pb-16">
-        <div className="flex flex-col small:flex-row gap-6 small:gap-8">
-          {/* Filters Sidebar - Desktop/Tablet */}
-          <aside className="hidden small:block w-56 medium:w-64 flex-shrink-0">
-            <div className="sticky top-24 space-y-6 bg-white rounded-xl border border-stone-200 p-4 medium:p-5">
+      <div className="content-container pb-12 small:pb-16">
+        <div className="flex flex-col gap-6 small:flex-row small:gap-8">
+          {/* Filter-Spalte ab 1024px */}
+          <aside className="hidden w-56 flex-shrink-0 small:block medium:w-64">
+            <div className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-6 overflow-y-auto rounded border border-stone-200 bg-white p-4 medium:p-5">
               <RefinementList
                 sortBy={sort}
                 filters={filters}
@@ -69,21 +55,9 @@ export default function CollectionTemplate({
           </aside>
 
           {/* Products Grid */}
-          <main className="flex-1">
-            {/* Page Header */}
-            <div className="mb-6 small:mb-8">
-              <h1 className="font-serif text-2xl small:text-3xl medium:text-4xl font-medium text-stone-800">
-                {collection.title}
-              </h1>
-              {collection.description && (
-                <p className="mt-2 text-sm small:text-base text-stone-600">
-                  {collection.description}
-                </p>
-              )}
-            </div>
-
+          <main className="min-w-0 flex-1">
             {/* Mobile/Tablet Filter Bar */}
-            <div className="small:hidden mb-4">
+            <div className="mb-4 small:hidden">
               <div className="flex items-center gap-3">
                 <MobileFilterDrawer
                   sortBy={sort}

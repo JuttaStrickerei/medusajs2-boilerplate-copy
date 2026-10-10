@@ -13,6 +13,7 @@ import {
   CreateShippingOptionDTO
 } from "@medusajs/framework/types"
 import { SendcloudClient } from "./client"
+import { PUBLIC_BACKEND_URL } from "../../lib/constants"
 import {
   SendcloudOptions,
   SendcloudCreateParcelRequest,
@@ -844,9 +845,9 @@ async createReturnFulfillment(
     const createdParcel = response.parcel;
 
     // Use FULL URL for label download
-    // Use /labels/ endpoint (public, no auth required)
+    // Use /labels/ endpoint (admin login required)
     // Note: For returns, the label is requested later by the subscriber
-    const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+    const backendUrl = PUBLIC_BACKEND_URL
     const proxyLabelUrl = `${backendUrl}/labels/${createdParcel.id}`
     
     return {
@@ -973,8 +974,8 @@ async createReturnFulfillment(
       const response = await this.client_.createParcel(parcelData);
 
       // Use FULL URL for label download
-      // Use /labels/ endpoint (public, no auth required)
-      const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+      // Use /labels/ endpoint (admin login required)
+      const backendUrl = PUBLIC_BACKEND_URL
       const proxyLabelUrl = `${backendUrl}/labels/${response.parcel.id}`
       
       return {

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 const BACKEND_URL = process.env.MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
-const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
+const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "at"
 
 const regionMapCache = {
   regionMap: new Map<string, HttpTypes.StoreRegion>(),
@@ -104,32 +104,38 @@ async function getCountryCode(
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
-  let redirectUrl = request.nextUrl.href
-
-  let response = NextResponse.redirect(redirectUrl, 307)
-
-  let cacheIdCookie = request.cookies.get("_medusa_cache_id")
-
-  let cacheId = cacheIdCookie?.value || crypto.randomUUID()
+  const cacheIdCookie = request.cookies.get("_medusa_cache_id")
+  const cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
   const regionMap = await getRegionMap(cacheId)
 
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
+  const firstSegment = request.nextUrl.pathname.split("/")[1] ?? ""
+  // Exact match on the first path segment (a substring check would treat
+  // "/categories" as containing "at").
   const urlHasCountryCode =
-    countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
+    !!countryCode && firstSegment.toLowerCase() === countryCode
 
-  // if one of the country codes is in the url and the cache id is set, return next
-  if (urlHasCountryCode && cacheIdCookie) {
-    return NextResponse.next()
-  }
+  if (urlHasCountryCode) {
+    // Normalise "/AT/store" -> "/at/store" so there is only one URL per page.
+    if (firstSegment !== countryCode) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/${countryCode}${request.nextUrl.pathname.slice(
+        firstSegment.length + 1
+      )}`
+      return NextResponse.redirect(url, 308)
+    }
 
-  // if one of the country codes is in the url and the cache id is not set, set the cache id and redirect
-  if (urlHasCountryCode && !cacheIdCookie) {
-    response.cookies.set("_medusa_cache_id", cacheId, {
-      maxAge: 60 * 60 * 24,
-    })
-
+    // Set the cache id cookie on the pass-through response instead of
+    // redirecting to the same URL, which loops for clients without cookies
+    // (crawlers, curl).
+    const response = NextResponse.next()
+    if (!cacheIdCookie) {
+      response.cookies.set("_medusa_cache_id", cacheId, {
+        maxAge: 60 * 60 * 24,
+      })
+    }
     return response
   }
 
@@ -138,16 +144,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const redirectPath =
-    request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
-
-  const queryString = request.nextUrl.search ? request.nextUrl.search : ""
-
-  // If no country code is set, we redirect to the relevant region.
-  if (!urlHasCountryCode && countryCode) {
-    redirectUrl = `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`
-    response = NextResponse.redirect(`${redirectUrl}`, 307)
-  } else if (!urlHasCountryCode && !countryCode) {
+  if (!countryCode) {
     // Handle case where no valid country code exists (empty regions)
     return new NextResponse(
       "No valid regions configured. Please set up regions with countries in your Medusa Admin.",
@@ -155,11 +152,21 @@ export async function middleware(request: NextRequest) {
     )
   }
 
+  // No country code in the URL: redirect to the relevant region.
+  const redirectPath =
+    request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
+  const queryString = request.nextUrl.search ? request.nextUrl.search : ""
+  const redirectUrl = `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`
+
+  const response = NextResponse.redirect(redirectUrl, 307)
+  response.cookies.set("_medusa_cache_id", cacheId, {
+    maxAge: 60 * 60 * 24,
+  })
   return response
 }
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|images|videos|assets|png|svg|jpg|jpeg|gif|webp).*)",
   ],
 }

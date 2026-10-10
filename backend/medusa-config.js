@@ -91,6 +91,10 @@ const medusaConfig = {
     },
     {resolve: './src/modules/wishlist',
     },
+    {resolve: './src/modules/look',
+    },
+    {resolve: './src/modules/revocation',
+    },
     ...(SENDCLOUD_PUBLIC_KEY && SENDCLOUD_SECRET_KEY ? [{
       resolve: './src/modules/sendcloud-shipment',
     }] : []),
@@ -253,8 +257,8 @@ const medusaConfig = {
           // ========================================
           // CATEGORIES - Product Categories Index
           // ========================================
-          product_categories: {
-            indexName: 'categories',  // Use 'categories' as the index name in MeiliSearch
+          // The key IS the MeiliSearch index name (plugin 0.2.1 has no 'indexName' option)
+          categories: {
             indexSettings: {
               searchableAttributes: [
                 'name',         // Priorität 1: Category name
@@ -279,8 +283,8 @@ const medusaConfig = {
           // ========================================
           // COLLECTIONS - Product Collections Index
           // ========================================
-          product_collections: {
-            indexName: 'collections',  // Use 'collections' as the index name in MeiliSearch
+          // The key IS the MeiliSearch index name (plugin 0.2.1 has no 'indexName' option)
+          collections: {
             indexSettings: {
               searchableAttributes: [
                 'title',        // Priorität 1: Collection title
@@ -305,7 +309,5 @@ const medusaConfig = {
   ],
   plugins: []
 };
-
-console.log(JSON.stringify(medusaConfig, null, 2));
 
 export default /** @type {import('@medusajs/types').MedusaConfig} */ (defineConfig(medusaConfig))

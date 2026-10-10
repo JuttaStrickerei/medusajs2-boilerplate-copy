@@ -13,6 +13,12 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const parcel_id = req.params.parcel_id
   const format = (req.query.format as string)?.toLowerCase() || "a6" // Default to A6
 
+  // Sendcloud parcel IDs are numeric; anything else (e.g. "../") must not
+  // end up in the Sendcloud URL that is called with the shop's credentials
+  if (!/^\d+$/.test(parcel_id)) {
+    return res.status(400).json({ message: "Invalid parcel_id" })
+  }
+
   console.log("[SendcloudLabel] Downloading label for parcel:", parcel_id, "format:", format)
 
   try {

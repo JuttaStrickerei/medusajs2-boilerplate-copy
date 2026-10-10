@@ -1,14 +1,13 @@
-import { listCategories } from "@lib/data/categories"
-import { listCollections } from "@lib/data/collections"
+import { listNavCategories } from "@lib/data/categories"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { Instagram, Facebook, Mail, Phone, MapPin } from "@components/icons"
+import { Instagram, Mail, Phone, MapPin } from "@components/icons"
 import { CookieSettingsButton } from "@components/cookie-consent/CookieSettingsButton"
+import RevocationButton from "@modules/revocation/components/revocation-button"
 
 export default async function Footer() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  })
-  const productCategories = await listCategories()
+  // Gleiche (zusammengefasste) Abfrage wie die Navigation: nur oberste
+  // Kategorien, nach Rang
+  const productCategories = await listNavCategories()
 
   const currentYear = new Date().getFullYear()
 
@@ -54,7 +53,7 @@ export default async function Footer() {
               </a>
               <div className="flex items-start gap-3 text-sm text-stone-400">
                 <MapPin size={16} className="flex-shrink-0 mt-0.5" />
-                <span>Draßburg, Österreich</span>
+                <span>Wiener Neustädterstraße 47<br />7021 Draßburg, Österreich</span>
               </div>
             </div>
           </div>
@@ -65,6 +64,15 @@ export default async function Footer() {
               Shop
             </h4>
             <ul className="space-y-3">
+              {/* Reihenfolge wie die Navigation */}
+              <li>
+                <LocalizedClientLink
+                  href="/looks"
+                  className="text-sm text-stone-400 hover:text-white transition-colors"
+                >
+                  Shop the Look
+                </LocalizedClientLink>
+              </li>
               <li>
                 <LocalizedClientLink
                   href="/store"
@@ -73,16 +81,6 @@ export default async function Footer() {
                   Alle Produkte
                 </LocalizedClientLink>
               </li>
-              {collections?.slice(0, 5).map((collection) => (
-                <li key={collection.id}>
-                  <LocalizedClientLink
-                    href={`/collections/${collection.handle}`}
-                    className="text-sm text-stone-400 hover:text-white transition-colors"
-                  >
-                    {collection.title}
-                  </LocalizedClientLink>
-                </li>
-              ))}
             </ul>
           </div>
 
@@ -93,19 +91,16 @@ export default async function Footer() {
                 Kategorien
               </h4>
               <ul className="space-y-3">
-                {productCategories
-                  .filter((c) => !c.parent_category)
-                  .slice(0, 6)
-                  .map((category) => (
-                    <li key={category.id}>
-                      <LocalizedClientLink
-                        href={`/categories/${category.handle}`}
-                        className="text-sm text-stone-400 hover:text-white transition-colors"
-                      >
-                        {category.name}
-                      </LocalizedClientLink>
-                    </li>
-                  ))}
+                {productCategories.map((category) => (
+                  <li key={category.id}>
+                    <LocalizedClientLink
+                      href={`/categories/${category.handle}`}
+                      className="text-sm text-stone-400 hover:text-white transition-colors"
+                    >
+                      {category.name}
+                    </LocalizedClientLink>
+                  </li>
+                ))}
               </ul>
             </div>
           )}
@@ -181,7 +176,7 @@ export default async function Footer() {
             {/* Social Links */}
             <div className="flex items-center gap-4">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/strickereijutta/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-stone-500 hover:text-white transition-colors"
@@ -189,19 +184,10 @@ export default async function Footer() {
               >
                 <Instagram size={20} />
               </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-stone-500 hover:text-white transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook size={20} />
-              </a>
             </div>
 
             {/* Legal Links */}
-            <div className="flex items-center gap-6 text-sm text-stone-500">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-stone-500">
               <CookieSettingsButton />
               <LocalizedClientLink
                 href="/privacy"
@@ -221,6 +207,8 @@ export default async function Footer() {
               >
                 Impressum
               </LocalizedClientLink>
+              {/* Online withdrawal (§ 13a FAGG) – must stay permanently visible and highlighted */}
+              <RevocationButton variant="subtle" />
             </div>
           </div>
         </div>

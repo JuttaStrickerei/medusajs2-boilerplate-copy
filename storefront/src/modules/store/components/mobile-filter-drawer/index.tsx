@@ -4,6 +4,15 @@ import { Fragment, useState } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 import { X, Filter, ChevronDown } from "@components/icons"
 import { cn } from "@lib/utils"
+import {
+  PILL,
+  PILL_ACTIVE,
+  PILL_IDLE,
+  PILL_MD,
+  SWATCH,
+  SWATCH_ACTIVE,
+  SWATCH_IDLE,
+} from "../refinement-list/pill-styles"
 import { SortOptions } from "../refinement-list/sort-products"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
 import { useProductFilters, FilterState } from "@lib/hooks/use-product-filters"
@@ -58,8 +67,13 @@ function FilterSection({
       </button>
       <div
         className={cn(
-          "overflow-hidden transition-all duration-300 ease-in-out",
-          isOpen ? "max-h-[600px] pb-4" : "max-h-0"
+          // -mx-1 -mt-1 px-1 pt-1: Platz für Farbring und Fokusrahmen am
+          // linken und oberen Rand, sonst schneidet overflow-hidden sie ab.
+          // Oben nur im offenen Zustand: zugeklappt bliebe sonst ein 4px-
+          // Streifen offen, in dem die Farbringe sichtbar wären. invisible
+          // nimmt die verdeckten Knöpfe auch aus der Tab-Reihenfolge.
+          "-mx-1 overflow-hidden px-1 transition-all duration-300 ease-in-out",
+          isOpen ? "-mt-1 max-h-[600px] pb-4 pt-1" : "invisible max-h-0"
         )}
       >
         <div className={cn(scrollable && "max-h-56 overflow-y-auto pr-1")}>
@@ -100,8 +114,9 @@ export default function MobileFilterDrawer({
     <>
       {/* Trigger Button */}
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-stone-300 rounded-lg text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors relative"
+        className={cn(PILL, PILL_MD, PILL_IDLE, "relative")}
       >
         <Filter size={18} />
         <span>Filter</span>
@@ -141,8 +156,9 @@ export default function MobileFilterDrawer({
             <Dialog.Panel className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
-                <Dialog.Title className="text-lg font-medium text-stone-800">
-                  Filter & Sortieren
+                {/* gleicher Stil wie die Überschrift der Filterspalte */}
+                <Dialog.Title className="font-sans text-xs font-medium uppercase tracking-[0.15em] text-stone-500">
+                  Filter
                 </Dialog.Title>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -172,7 +188,7 @@ export default function MobileFilterDrawer({
                       {filters.category && (
                         <button
                           onClick={() => setCategory(filters.category)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
+                          className={cn(PILL, PILL_MD, PILL_ACTIVE)}
                         >
                           {getCategoryLabel(filters.category)}
                           <X size={14} />
@@ -181,7 +197,7 @@ export default function MobileFilterDrawer({
                       {filters.collection && (
                         <button
                           onClick={() => setCollection(filters.collection)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
+                          className={cn(PILL, PILL_MD, PILL_ACTIVE)}
                         >
                           {getCollectionLabel(filters.collection)}
                           <X size={14} />
@@ -191,7 +207,7 @@ export default function MobileFilterDrawer({
                         <button
                           key={color}
                           onClick={() => toggleColor(color)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
+                          className={cn(PILL, PILL_MD, PILL_ACTIVE)}
                         >
                           {filterOptions.colors.find((c) => c.value === color)
                             ?.label || color}
@@ -202,7 +218,7 @@ export default function MobileFilterDrawer({
                         <button
                           key={size}
                           onClick={() => toggleSize(size)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
+                          className={cn(PILL, PILL_MD, PILL_ACTIVE)}
                         >
                           {filterOptions.sizes.find((s) => s.value === size)
                             ?.label || size.toUpperCase()}
@@ -212,7 +228,7 @@ export default function MobileFilterDrawer({
                       {filters.priceRange && (
                         <button
                           onClick={() => setPriceRange(filters.priceRange)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-stone-800 text-white rounded-full"
+                          className={cn(PILL, PILL_MD, PILL_ACTIVE)}
                         >
                           {
                             filterOptions.priceRanges.find(
@@ -286,12 +302,13 @@ export default function MobileFilterDrawer({
                         <button
                           key={color.value}
                           onClick={() => toggleColor(color.value)}
+                          aria-pressed={filters.colors.includes(color.value)}
                           className={cn(
-                            "w-9 h-9 rounded-full border-2 transition-all",
+                            "h-9 w-9",
+                            SWATCH,
                             filters.colors.includes(color.value)
-                              ? "border-stone-800 ring-2 ring-stone-300 ring-offset-1"
-                              : "border-stone-200",
-                            color.value === "weiß" && "shadow-sm"
+                              ? SWATCH_ACTIVE
+                              : SWATCH_IDLE
                           )}
                           style={{ backgroundColor: color.hex }}
                           aria-label={color.label}
@@ -309,11 +326,13 @@ export default function MobileFilterDrawer({
                         <button
                           key={size.value}
                           onClick={() => toggleSize(size.value)}
+                          aria-pressed={filters.sizes.includes(size.value)}
                           className={cn(
-                            "px-4 py-2 text-sm font-medium rounded-lg border transition-colors",
+                            PILL,
+                            PILL_MD,
                             filters.sizes.includes(size.value)
-                              ? "bg-stone-800 text-white border-stone-800"
-                              : "bg-white text-stone-700 border-stone-300"
+                              ? PILL_ACTIVE
+                              : PILL_IDLE
                           )}
                         >
                           {size.label}
@@ -357,7 +376,7 @@ export default function MobileFilterDrawer({
               <div className="px-5 py-4 border-t border-stone-200 bg-white">
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-full py-3 bg-stone-800 text-white font-medium rounded-lg hover:bg-stone-700 transition-colors"
+                  className="w-full py-3 bg-stone-800 text-white font-medium rounded-full hover:bg-stone-700 transition-colors"
                 >
                   Ergebnisse anzeigen
                 </button>

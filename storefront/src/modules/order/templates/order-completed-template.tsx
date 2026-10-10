@@ -8,6 +8,8 @@ import OrderDetails from "@modules/order/components/order-details"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import PaymentDetails from "@modules/order/components/payment-details"
 import ClearCartOnMount from "@modules/order/components/clear-cart-on-mount"
+import { Purchase } from "@modules/common/components/analytics"
+import { gaCurrency, lineItemToItem } from "@lib/util/analytics"
 import { HttpTypes } from "@medusajs/types"
 import { CheckCircle } from "@components/icons"
 
@@ -26,6 +28,14 @@ export default async function OrderCompletedTemplate({
     <div className="py-12 min-h-[calc(100vh-64px)] bg-stone-50">
       {/* Clear cart state on client side after successful order */}
       <ClearCartOnMount />
+      <Purchase
+        transactionId={order.id}
+        currency={gaCurrency(order.currency_code)}
+        value={order.total ?? 0}
+        tax={order.tax_total ?? 0}
+        shipping={order.shipping_total ?? 0}
+        items={(order.items ?? []).map(lineItemToItem)}
+      />
       
       <div className="content-container flex flex-col justify-center items-center gap-y-10 max-w-4xl h-full w-full">
         {isOnboarding && <OnboardingCta orderId={order.id} />}

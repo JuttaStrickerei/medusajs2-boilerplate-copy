@@ -2,14 +2,24 @@
 
 import { Fragment, useState } from "react"
 import useToggleState from "@lib/hooks/use-toggle-state"
-import { useRouter, useParams } from "next/navigation"
+import { useRouter, useParams, usePathname } from "next/navigation"
 import { Dialog, Transition } from "@headlessui/react"
 import { HttpTypes } from "@medusajs/types"
+import { cn } from "@lib/utils"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "@modules/layout/components/country-select"
 import {
+  ABOUT_LINK,
+  isExact,
+  isSectionActive,
+  stripCountry,
+  type NavLink,
+  type NavSection,
+} from "@modules/layout/lib/nav-model"
+import {
   Menu,
   Close,
+  ChevronDown,
   ChevronRight,
   Search,
   User,
@@ -18,15 +28,19 @@ import {
 
 interface SideMenuProps {
   regions: HttpTypes.StoreRegion[] | null
-  collections?: HttpTypes.StoreCollection[]
+  /** dieselben Bereiche wie die Desktop-Navigation */
+  sections: NavSection[]
 }
 
-export default function SideMenu({ regions, collections }: SideMenuProps) {
+const CONTACT_LINK: NavLink = { label: "Kontakt", href: "/contact" }
+
+export default function SideMenu({ regions, sections }: SideMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const countryToggle = useToggleState()
   const router = useRouter()
   const { countryCode } = useParams()
+  const path = stripCountry(usePathname() ?? "/")
 
   const openMenu = () => setIsOpen(true)
   const closeMenu = () => setIsOpen(false)
@@ -39,13 +53,6 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
       setSearchQuery("")
     }
   }
-
-  const navigationLinks = [
-    { href: "/store", label: "Alle Produkte" },
-    { href: "/categories", label: "Kategorien" },
-    { href: "/about", label: "Über uns" },
-    { href: "/contact", label: "Kontakt" },
-  ]
 
   const accountLinks = [
     { href: "/account", label: "Mein Konto", icon: <User size={20} /> },
@@ -140,69 +147,38 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
 
                       {/* Navigation */}
                       <div className="flex-1 overflow-y-auto py-4">
-                        {/* Main Navigation */}
-                        <nav className="px-6">
-                          <p className="text-xs text-stone-400 uppercase tracking-wider mb-3">
-                            Shop
-                          </p>
+                        {/* Main Navigation: wie die Desktop-Navigation */}
+                        <nav aria-label="Hauptmenü" className="px-6">
                           <ul className="space-y-1">
-                            {navigationLinks.map((link) => (
-                              <li key={link.href}>
-                                <LocalizedClientLink
-                                  href={link.href}
-                                  onClick={closeMenu}
-                                  className="flex items-center justify-between py-3 text-stone-700 hover:text-stone-900 transition-colors group"
-                                >
-                                  <span className="font-medium">
-                                    {link.label}
-                                  </span>
-                                  <ChevronRight
-                                    size={18}
-                                    className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all"
+                            {sections.map((section) => (
+                              <li key={section.key}>
+                                {section.links.length ? (
+                                  <MenuAccordion
+                                    section={section}
+                                    path={path}
+                                    onNavigate={closeMenu}
                                   />
-                                </LocalizedClientLink>
+                                ) : (
+                                  <MenuLinkRow
+                                    link={{
+                                      label: section.label,
+                                      href: section.href,
+                                    }}
+                                    path={path}
+                                    onNavigate={closeMenu}
+                                  />
+                                )}
                               </li>
                             ))}
-
-                            {/* Collections Section */}
-                            {collections && collections.length > 0 && (
-                              <>
-                                <li>
-                                  <LocalizedClientLink
-                                    href="/collections"
-                                    onClick={closeMenu}
-                                    className="flex items-center justify-between py-3 text-stone-700 hover:text-stone-900 transition-colors group"
-                                  >
-                                    <span className="font-medium">
-                                      Kollektionen
-                                    </span>
-                                    <ChevronRight
-                                      size={18}
-                                      className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all"
-                                    />
-                                  </LocalizedClientLink>
-                                </li>
-                                <li className="pl-4">
-                                  <ul className="space-y-1 border-l border-stone-200 pl-4">
-                                    {collections.map((collection) => (
-                                      <li key={collection.id}>
-                                        <LocalizedClientLink
-                                          href={`/collections/${collection.handle}`}
-                                          onClick={closeMenu}
-                                          className="flex items-center justify-between py-2 text-sm text-stone-600 hover:text-stone-900 transition-colors group"
-                                        >
-                                          <span>{collection.title}</span>
-                                          <ChevronRight
-                                            size={16}
-                                            className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all"
-                                          />
-                                        </LocalizedClientLink>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </li>
-                              </>
-                            )}
+                            {[ABOUT_LINK, CONTACT_LINK].map((link) => (
+                              <li key={link.href}>
+                                <MenuLinkRow
+                                  link={link}
+                                  path={path}
+                                  onNavigate={closeMenu}
+                                />
+                              </li>
+                            ))}
                           </ul>
                         </nav>
 
@@ -249,13 +225,6 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
                         )}
                         <div className="flex items-center justify-center gap-6 text-sm text-stone-500">
                           <LocalizedClientLink
-                            href="/help"
-                            onClick={closeMenu}
-                            className="hover:text-stone-800 transition-colors"
-                          >
-                            Hilfe
-                          </LocalizedClientLink>
-                          <LocalizedClientLink
                             href="/faq"
                             onClick={closeMenu}
                             className="hover:text-stone-800 transition-colors"
@@ -279,6 +248,122 @@ export default function SideMenu({ regions, collections }: SideMenuProps) {
           </div>
         </Dialog>
       </Transition>
+    </>
+  )
+}
+
+type MenuRowProps = {
+  path: string
+  onNavigate: () => void
+}
+
+/** Hauptzeile mit Pfeil nach rechts (Über uns, Kontakt) */
+function MenuLinkRow({
+  link,
+  path,
+  onNavigate,
+}: MenuRowProps & { link: NavLink }) {
+  const isCurrent = isExact(link.href, path)
+  return (
+    <LocalizedClientLink
+      href={link.href}
+      onClick={onNavigate}
+      aria-current={isCurrent ? "page" : undefined}
+      className="flex items-center justify-between py-3 text-stone-700 hover:text-stone-900 transition-colors group"
+    >
+      <span className={cn("font-medium", isCurrent && "text-stone-900")}>
+        {link.label}
+      </span>
+      <ChevronRight
+        size={18}
+        className="text-stone-400 group-hover:text-stone-600 group-hover:translate-x-1 transition-all"
+      />
+    </LocalizedClientLink>
+  )
+}
+
+/**
+ * Aufklappbarer Bereich (Shop the Look, Shop). Die ganze Zeile klappt nur
+ * auf, sie führt nirgends hin: Der erste Link darunter ist die Übersicht.
+ * Offen startet der Bereich der aktuellen Seite; das Menü wird bei jedem
+ * Öffnen neu aufgebaut. Zugeklappte Links sind `inert` und `invisible`,
+ * also nicht per Tab erreichbar.
+ */
+function MenuAccordion({
+  section,
+  path,
+  onNavigate,
+}: MenuRowProps & { section: NavSection }) {
+  const [isExpanded, setIsExpanded] = useState(() =>
+    isSectionActive(section.key, path)
+  )
+  const panelId = `menu-panel-${section.key}`
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-expanded={isExpanded}
+        aria-controls={panelId}
+        onClick={() => setIsExpanded((open) => !open)}
+        className="flex w-full min-h-12 items-center justify-between py-3 text-left text-stone-700 hover:text-stone-900 transition-colors"
+      >
+        <span className="font-medium">{section.label}</span>
+        <ChevronDown
+          size={18}
+          aria-hidden
+          className={cn(
+            "text-stone-400 transition-transform duration-200 motion-reduce:transition-none",
+            isExpanded && "rotate-180"
+          )}
+        />
+      </button>
+      {/* grid-rows 0fr → 1fr: weiches Auf- und Zuklappen ohne feste Höhe.
+          Beim Aufklappen springt die Sichtbarkeit sofort um, beim Zuklappen
+          bleibt sie bis zum Ende; `inert` nimmt die Links aber sofort aus
+          der Tab-Reihenfolge. */}
+      <div
+        id={panelId}
+        inert={!isExpanded}
+        className={cn(
+          "grid duration-300 ease-in-out motion-reduce:transition-none",
+          isExpanded
+            ? "grid-rows-[1fr] transition-[grid-template-rows]"
+            : "invisible grid-rows-[0fr] transition-[grid-template-rows,visibility]"
+        )}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <ul className="mb-2 ml-1 border-l border-stone-200 pl-4">
+            {section.links.map((link, i) => {
+              const isCurrent = isExact(link.href, path)
+              const isLead = section.leadIsOverview && i === 0
+              return (
+                <li key={link.href}>
+                  <LocalizedClientLink
+                    href={link.href}
+                    onClick={onNavigate}
+                    aria-current={isCurrent ? "page" : undefined}
+                    className={cn(
+                      "flex min-h-11 items-center justify-between gap-4 text-[15px] transition-colors hover:text-stone-900",
+                      isCurrent
+                        ? "font-medium text-stone-900"
+                        : "text-stone-600",
+                      isLead && "font-medium"
+                    )}
+                  >
+                    {link.label}
+                    {link.meta && (
+                      <span className="text-xs font-normal tabular-nums text-stone-500">
+                        {link.meta}
+                      </span>
+                    )}
+                  </LocalizedClientLink>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      </div>
     </>
   )
 }

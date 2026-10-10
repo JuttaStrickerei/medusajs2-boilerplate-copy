@@ -26,6 +26,30 @@ cd storefront && pnpm dev
 - `pnpm ib` in backend runs migrations + seed.
 - Turbopack is **disabled** on master (left on the `main` branch by mistake). Don't re-enable it without asking.
 
+## Browser testing (Claude in Chrome extension)
+
+The user has the Claude in Chrome extension. When a storefront or admin change needs checking in a real browser (buttons, option/size selection, links, add-to-cart, cart page, admin forms), load the `claude-in-chrome` skill and click through it yourself instead of stopping at `curl`.
+
+If no `mcp__claude-in-chrome__*` tools or `claude-in-chrome` skill are available in the session, the extension isn't connected. Ask the user to run `/chrome` (or start Claude Code with `claude --chrome`); don't fall back to other browser automation.
+
+- **Local servers only.** Only open `http://localhost:8000/…` (storefront) and `http://localhost:9000/app` (admin). **Never** drive the live shop (`shop.strickerei-jutta.at`), prod/dev Railway URLs or any other site with the extension.
+- **Spin them up first:**
+  1. Start the Railway **dev** Postgres. Add Bucket only if uploads are tested. The dev env ID is used because its name has a trailing space:
+     ```
+     railway redeploy --service Postgres -e 1d2ce3bd-a769-4de5-813a-ea2a1072ce0d -p 164701c8-68c1-49f6-bce4-fe718dfad057 -y --from-source
+     ```
+  2. Run `cd backend && pnpm dev`, then `cd storefront && pnpm dev`.
+  3. Wait for `Server is ready on port: 9000` and `Ready in`.
+  4. Stop the dev services again when testing is done.
+- **What to cover:**
+  - every new or changed button and link;
+  - variant/size/colour selection, including sold-out and low-stock states;
+  - add-to-cart, with the cart count updating and the item showing on `/at/cart` at the right price and quantity;
+  - no errors in the browser console.
+- **Stop before payment.** Adding to the cart and opening checkout are fine. Never submit a payment, never enter real card or customer data, and never complete an order.
+- **Clean up afterwards:** remove the test items from the cart. Delete test data you created in the admin, but only data you created yourself.
+- The admin needs a login. If the browser isn't logged in, ask the user to log in; never guess or reset credentials.
+
 ## Relevant Skills (use proactively)
 
 - `medusa-dev:building-with-medusa` — any backend module / API route / workflow work
@@ -114,6 +138,36 @@ railway variables --service Bucket --json | jq 'keys'   # variable NAMES only
 - Analysis is always allowed: object listings, size breakdowns, duplicate and orphan detection (cross-check against product images in Postgres).
 - Take credentials from `railway variables --service Bucket --json` and export them as env vars for the session only (e.g. `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` for `aws s3 --endpoint-url …` or `mc alias set`). Never write them into repo files, scripts or command history.
 - **Destructive bucket operations** (delete, overwrite, bulk conversion) require explicit approval **per batch** and must always start with a dry run listing exactly what would be affected.
+
+### Starting and stopping the dev environment (do this every session)
+
+The dev environment costs RAM-minutes while its containers run, so it is normally **shut down** (all services show `REMOVED`). Nothing in dev works while Postgres is down: the local backend (`DATABASE_URL` points at the dev Postgres TCP proxy) and the Railway dev Backend both fail with `ECONNRESET` / `Connection terminated unexpectedly`.
+
+Run from `backend/` (linked). `DEV` is the dev environment ID (its name has a trailing space, so `-e dev` does not work), `P` the project ID.
+
+```bash
+DEV=1d2ce3bd-a769-4de5-813a-ea2a1072ce0d; P=164701c8-68c1-49f6-bce4-fe718dfad057
+
+# status of every dev service (SUCCESS = running, REMOVED = stopped)
+for s in Postgres Redis MeiliSearch Bucket Backend Storefront Console; do
+  printf '%-12s ' $s; railway deployment list --service $s -e $DEV -p $P | sed -n 2p
+done
+
+# START (order matters: data services first). `--from-source` is required once a
+# deployment is REMOVED; plain `railway redeploy` then says "No deployment found".
+for s in Postgres Redis MeiliSearch Bucket Backend Storefront; do
+  railway redeploy --service $s -e $DEV -p $P -y --from-source
+done
+# Only local testing? Postgres alone is enough for `cd backend && pnpm dev`
+# (Redis/MeiliSearch fall back locally, Bucket only matters for uploads).
+
+# STOP when you are done testing (removes the latest deployment; volumes/data stay)
+for s in Storefront Backend Bucket MeiliSearch Redis Postgres; do
+  railway down --service $s -e $DEV -p $P -y
+done
+```
+
+Rules: start only what the current task needs, and stop dev again at the end of a testing session unless the user says to leave it running. The `Console` service is a helper shell and is never needed for testing. Never run any of this against `prod`.
 
 ### Cost optimization context
 

@@ -94,12 +94,9 @@ export class ResendNotificationService extends AbstractNotificationProviderServi
     }
 
     // Send the email via Resend
+    let result: Awaited<ReturnType<Resend['emails']['send']>>
     try {
-      await this.resend.emails.send(message)
-      this.logger_.log(
-        `Successfully sent "${notification.template}" email to ${notification.to} via Resend`
-      )
-      return {} // Return an empty object on success
+      result = await this.resend.emails.send(message)
     } catch (error) {
       const errorCode = error.code
       const responseError = error.response?.body?.errors?.[0]
@@ -108,5 +105,20 @@ export class ResendNotificationService extends AbstractNotificationProviderServi
         `Failed to send "${notification.template}" email to ${notification.to} via Resend: ${errorCode} - ${responseError?.message ?? 'unknown error'}`
       )
     }
+
+    // The Resend SDK (v4) does not throw on API or network errors; it returns
+    // them as { error }. Without this check a rejected email was logged and
+    // stored as sent.
+    if (result?.error) {
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Failed to send "${notification.template}" email to ${notification.to} via Resend: ${result.error.name} - ${result.error.message}`
+      )
+    }
+
+    this.logger_.log(
+      `Successfully sent "${notification.template}" email to ${notification.to} via Resend`
+    )
+    return {} // Return an empty object on success
   }
 }

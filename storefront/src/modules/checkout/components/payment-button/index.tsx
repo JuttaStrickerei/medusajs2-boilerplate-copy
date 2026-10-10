@@ -8,6 +8,7 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import { useParams } from "next/navigation"
 import React, { useEffect, useState, useCallback } from "react"
 import ErrorMessage from "../error-message"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 /**
  * @name PaymentButton
@@ -20,7 +21,14 @@ const PaymentButton: React.FC<{
   "data-testid": string
   onPlacingOrder?: () => void
   onPaymentError?: () => void
-}> = ({ cart, "data-testid": dataTestId, onPlacingOrder, onPaymentError }) => {
+  onOrderFailed?: () => void
+}> = ({
+  cart,
+  "data-testid": dataTestId,
+  onPlacingOrder,
+  onPaymentError,
+  onOrderFailed,
+}) => {
   // Determine if the checkout is ready for payment submission.
   const notReady =
     !cart ||
@@ -38,7 +46,7 @@ const PaymentButton: React.FC<{
         notReady={notReady}
         cart={cart}
         onPlacingOrder={onPlacingOrder}
-        onPaymentError={onPaymentError}
+        onOrderFailed={onOrderFailed}
         data-testid={dataTestId}
       />
     )
@@ -75,13 +83,13 @@ const StripePaymentButton = ({
   cart,
   notReady,
   onPlacingOrder,
-  onPaymentError,
+  onOrderFailed,
   "data-testid": dataTestId,
 }: {
   cart: HttpTypes.StoreCart
   notReady: boolean
   onPlacingOrder?: () => void
-  onPaymentError?: () => void
+  onOrderFailed?: () => void
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
@@ -93,26 +101,25 @@ const StripePaymentButton = ({
   const paymentSession = cart.payment_collection?.payment_sessions?.[0]
 
   // A memoized function to handle order completion.
+  // It only runs after Stripe has taken the payment (capture: true), so a
+  // failure here means "charged, but no order yet". Review shows the message
+  // and the retry, because this button is already unmounted by its overlay.
   const onPaymentCompleted = useCallback(async () => {
     try {
-      await placeOrder()
+      const result = await placeOrder()
+      if (result?.error) {
+        console.error("Order could not be placed after payment:", result.error)
+        onOrderFailed?.()
+      }
     } catch (err: unknown) {
       // NEXT_REDIRECT: keep loading until redirect completes
-      if (
-        err &&
-        typeof err === "object" &&
-        (err as { digest?: string }).digest === "NEXT_REDIRECT"
-      ) {
+      if (isRedirectError(err)) {
         return
       }
-      setErrorMessage(
-        err instanceof Error ? err.message : "Ein Fehler ist aufgetreten"
-      )
-      setSubmitting(false)
-      // Reset the parent's full-page overlay so the user sees the error and can retry.
-      onPaymentError?.()
+      console.error("Order could not be placed after payment:", err)
+      onOrderFailed?.()
     }
-  }, [onPaymentError])
+  }, [onOrderFailed])
 
   /**
    * @description Handles the payment submission process. This function is triggered
@@ -219,13 +226,14 @@ const ManualTestPaymentButton = ({
 
   const onPaymentCompleted = async () => {
     try {
-      await placeOrder()
+      const result = await placeOrder()
+      if (result?.error) {
+        setErrorMessage(result.error)
+        setSubmitting(false)
+        onPaymentError?.()
+      }
     } catch (err: unknown) {
-      if (
-        err &&
-        typeof err === "object" &&
-        (err as { digest?: string }).digest === "NEXT_REDIRECT"
-      ) {
+      if (isRedirectError(err)) {
         return
       }
       setErrorMessage(

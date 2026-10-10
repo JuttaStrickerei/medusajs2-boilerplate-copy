@@ -19,12 +19,37 @@ const nextConfig = {
       {
         source: "/:countryCode/agb",
         destination: "/:countryCode/terms",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/:countryCode/impressum",
         destination: "/:countryCode/imprint",
+        permanent: true,
+      },
+      {
+        source: "/:countryCode/datenschutz",
+        destination: "/:countryCode/privacy",
+        permanent: true,
+      },
+      {
+        source: "/:countryCode/widerruf",
+        destination: "/:countryCode/vertrag-widerrufen",
         permanent: false,
+      },
+    ]
+  },
+  async headers() {
+    return [
+      {
+        // Videos haben versionierte Dateinamen (…-v2-…), daher 1 Jahr Cache
+        // statt des Next-Standards max-age=0 für public/.
+        source: "/videos/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
       },
     ]
   },
@@ -40,6 +65,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    // AVIF first (smaller), WebP fallback; cache optimised images for 30 days
+    // instead of the 60 s default so they are not re-encoded on every visit.
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: "http",

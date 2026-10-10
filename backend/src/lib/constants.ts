@@ -15,6 +15,21 @@ export const IS_DEV = process.env.NODE_ENV === 'development'
 export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ?? 'http://localhost:9000'
 
 /**
+ * Base for backend links stored in the database (Sendcloud label_url):
+ * MEDUSA_BACKEND_URL if set, otherwise BACKEND_URL (prod sets neither
+ * MEDUSA_BACKEND_URL nor BACKEND_PUBLIC_URL, only RAILWAY_PUBLIC_DOMAIN_VALUE).
+ * Empty values fall through (unlike BACKEND_URL's ??), and a bare domain
+ * gets https:// so stored links are absolute.
+ */
+const LINK_BASE_URL = (
+  process.env.MEDUSA_BACKEND_URL ||
+  process.env.BACKEND_PUBLIC_URL ||
+  process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ||
+  'http://localhost:9000'
+).replace(/\/+$/, '')
+export const PUBLIC_BACKEND_URL = /^https?:\/\//.test(LINK_BASE_URL) ? LINK_BASE_URL : `https://${LINK_BASE_URL}`
+
+/**
  * Database URL for Postgres instance used by the backend
  */
 export const DATABASE_URL = assertValue(

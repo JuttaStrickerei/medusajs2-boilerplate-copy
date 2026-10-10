@@ -1,11 +1,13 @@
 import { Metadata } from "next"
 import Image from "next/image"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import PageHeader from "@modules/common/components/page-header"
 import { Ruler } from "@components/icons"
 
 export const metadata: Metadata = {
   title: "Größenberatung",
-  description: "Finden Sie Ihre perfekte Größe mit unserer Maßtabelle und Messanleitung.",
+  description:
+    "Finden Sie Ihre perfekte Größe mit unserer Maßtabelle und Messanleitung.",
 }
 
 /** Unter der zweiten Kopfzeile nur XS–XXL; 3XL sitzt im ersten Kopf mit rowSpan. */
@@ -33,35 +35,16 @@ const measureRows: { label: string; values: string[] }[] = [
 export default function SizeGuidePage() {
   return (
     <div className="bg-stone-50">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-stone-200">
-        <div className="content-container py-3">
-          <nav className="flex text-sm text-stone-500">
-            <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
-              Home
-            </LocalizedClientLink>
-            <span className="mx-2">/</span>
-            <span className="text-stone-800">Größenberatung</span>
-          </nav>
-        </div>
-      </div>
+      <PageBreadcrumb items={[{ label: "Größenberatung" }]} />
+      <PageHeader
+        centered
+        title="Größenberatung"
+        meta="Finden Sie Ihre perfekte Größe mit unserer Maßtabelle und Messanleitung."
+      />
 
-      <div className="py-12 small:py-20">
+      <div className="pb-12 small:pb-20">
         <div className="content-container">
           <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-12">
-              <p className="text-stone-500 uppercase tracking-[0.15em] text-sm mb-2">
-                Hilfe
-              </p>
-              <h1 className="font-serif text-3xl small:text-4xl font-medium text-stone-800 mb-4">
-                Größenberatung
-              </h1>
-              <p className="text-stone-600 max-w-xl mx-auto">
-                Finden Sie Ihre perfekte Größe mit unserer Maßtabelle und Messanleitung.
-              </p>
-            </div>
-
             {/* Messanleitung – Bild */}
             <div className="bg-white rounded-2xl border border-stone-200 p-8 mb-8">
               <h2 className="font-serif text-xl font-medium text-stone-800 mb-6 flex items-center gap-3">
@@ -156,9 +139,15 @@ export default function SizeGuidePage() {
             <div className="bg-stone-100 rounded-2xl p-8">
               <h3 className="font-medium text-stone-800 mb-4">Unsere Tipps</h3>
               <ul className="text-stone-600 text-sm space-y-2">
-                <li>• Strickwaren dehnen sich leicht – wählen Sie im Zweifel die kleinere Größe</li>
+                <li>
+                  • Strickwaren dehnen sich leicht – wählen Sie im Zweifel die
+                  kleinere Größe
+                </li>
                 <li>• Für einen lockeren Sitz wählen Sie eine Größe größer</li>
-                <li>• Bei Fragen kontaktieren Sie unseren Kundenservice für persönliche Beratung</li>
+                <li>
+                  • Bei Fragen kontaktieren Sie unseren Kundenservice für
+                  persönliche Beratung
+                </li>
               </ul>
             </div>
           </div>

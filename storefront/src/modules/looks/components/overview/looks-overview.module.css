@@ -1,0 +1,41 @@
+/* Looks-Übersicht: was Tailwind nicht abdeckt. Seitenweite Regeln hängen an
+   .root, damit sie nur auf dieser Seite gelten. */
+
+/* Sprungziele (Chips, Tastatur-Fokus) landen genau unter Navigation
+   (64px / 80px) und Chip-Leiste (52px / 56px plus 2px Rahmen), damit kein
+   Streifen der vorigen Welt durchblitzt. Kein scroll-mt an den Abschnitten,
+   sonst addieren sich beide Abstände. */
+:global(html):has(.root) {
+  scroll-padding-top: 7.375rem;
+}
+
+@media (min-width: 768px) {
+  :global(html):has(.root) {
+    scroll-padding-top: 7.625rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :global(html):has(.root) {
+    scroll-padding-top: 8.625rem;
+  }
+}
+
+/* Sanftes Einblenden beim Scrollen, nur per CSS. Browser ohne
+   Scroll-Timelines zeigen die Seite einfach statisch. */
+@keyframes rise {
+  from {
+    opacity: 0.001;
+    transform: translateY(16px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}

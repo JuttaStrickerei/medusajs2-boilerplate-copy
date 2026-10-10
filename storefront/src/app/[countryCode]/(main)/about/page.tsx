@@ -1,6 +1,8 @@
 import { Metadata } from "next"
 import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import PageHeader from "@modules/common/components/page-header"
 import { Button } from "@components/ui"
 
 export const metadata: Metadata = {
@@ -50,39 +52,21 @@ function CircleMarker() {
 
 export default function AboutPage() {
   return (
-    <div className="bg-stone-50">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-stone-200">
-        <div className="content-container py-3">
-          <nav className="flex text-sm text-stone-500">
-            <LocalizedClientLink href="/" className="hover:text-stone-800 transition-colors">
-              Home
-            </LocalizedClientLink>
-            <span className="mx-2">/</span>
-            <span className="text-stone-800">Über uns</span>
-          </nav>
-        </div>
-      </div>
+    // weiß statt stone-50: Kopf und Geschichte liegen auf derselben Fläche,
+    // sonst stünde der Kopf als graues Band über dem weißen Story-Abschnitt
+    <div className="bg-white">
+      <PageBreadcrumb items={[{ label: "Über uns" }]} />
+      <PageHeader
+        centered
+        title="Unsere Geschichte"
+        meta="Von der ersten Strickmaschine zur digitalen Boutique"
+      />
 
-      {/* Hero Section */}
-      <section className="relative bg-stone-800 text-white py-24 small:py-32">
-        <div className="content-container">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="font-serif text-3xl small:text-4xl medium:text-5xl font-medium leading-tight">
-              <span className="block">Unsere Geschichte:</span>
-              <span className="block mt-3 small:mt-4">
-                Von der ersten Strickmaschine zur digitalen Boutique
-              </span>
-            </h1>
-          </div>
-        </div>
-      </section>
-
-      {/* Story — vertikale Timeline */}
-      <section className="py-16 small:py-24 bg-white">
+      {/* Story — vertikale Timeline; oben knapp, damit sie direkt an den
+          Seitenkopf anschließt */}
+      <section className="pb-16 pt-4 small:pb-24 small:pt-8 bg-white">
         <div className="content-container">
           <div className="max-w-5xl mx-auto">
-
             {/* Mobile: Einfache Liste mit Bildern */}
             <div className="small:hidden space-y-12">
               {storySections.map((block) => (
@@ -103,7 +87,8 @@ export default function AboutPage() {
                 </div>
               ))}
               <p className="text-center text-lg text-stone-600 pt-4">
-                Wir freuen uns, dass Sie uns auf diesem Weg begleiten und Teil unserer Geschichte sind.
+                Wir freuen uns, dass Sie uns auf diesem Weg begleiten und Teil
+                unserer Geschichte sind.
               </p>
             </div>
 
@@ -144,7 +129,9 @@ export default function AboutPage() {
                                 <h2 className="font-serif text-2xl medium:text-3xl font-medium text-stone-800 mb-4">
                                   {block.title}
                                 </h2>
-                                <p className="text-stone-600 leading-relaxed">{block.body}</p>
+                                <p className="text-stone-600 leading-relaxed">
+                                  {block.body}
+                                </p>
                               </div>
                             ) : (
                               /* Bild links */
@@ -179,7 +166,9 @@ export default function AboutPage() {
                                 <h2 className="font-serif text-2xl medium:text-3xl font-medium text-stone-800 mb-4">
                                   {block.title}
                                 </h2>
-                                <p className="text-stone-600 leading-relaxed">{block.body}</p>
+                                <p className="text-stone-600 leading-relaxed">
+                                  {block.body}
+                                </p>
                               </div>
                             )}
                           </div>
@@ -192,13 +181,12 @@ export default function AboutPage() {
                 {/* Abschlusstext */}
                 <div className="text-center mt-16 max-w-2xl mx-auto">
                   <p className="text-lg text-stone-600">
-                    Wir freuen uns, dass Sie uns auf diesem Weg begleiten und Teil unserer Geschichte
-                    sind.
+                    Wir freuen uns, dass Sie uns auf diesem Weg begleiten und
+                    Teil unserer Geschichte sind.
                   </p>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -211,8 +199,8 @@ export default function AboutPage() {
               Erleben Sie österreichische Handwerkskunst
             </h2>
             <p className="text-xl text-stone-300 mb-8">
-              Entdecken Sie unsere aktuellen Kollektionen und überzeugen Sie sich von Qualität und
-              Tradition.
+              Entdecken Sie unsere aktuellen Kollektionen und überzeugen Sie
+              sich von Qualität und Tradition.
             </p>
             <div className="flex flex-col small:flex-row gap-4 justify-center">
               <LocalizedClientLink href="/store">

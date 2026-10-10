@@ -6,10 +6,13 @@ import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
+import { BeginCheckout } from "@modules/common/components/analytics"
+import { gaCurrency, lineItemToItem } from "@lib/util/analytics"
 
 export const metadata: Metadata = {
-  title: "Checkout | Strickerei Jutta",
+  title: "Kasse",
   description: "Sicher und einfach bestellen",
+  robots: { index: false, follow: false },
 }
 
 export default async function Checkout({
@@ -63,6 +66,12 @@ export default async function Checkout({
       <div className="grid grid-cols-1 large:grid-cols-[1fr_420px] gap-8 large:gap-12">
         {/* Left Column - Checkout Form */}
         <div>
+          <BeginCheckout
+            cartId={cart.id}
+            currency={gaCurrency(cart.currency_code)}
+            value={cart.total ?? 0}
+            items={(cart.items ?? []).map(lineItemToItem)}
+          />
           <PaymentWrapper cart={cart}>
             <CheckoutForm cart={cart} customer={customer} />
           </PaymentWrapper>

@@ -1,15 +1,16 @@
 import type { SubscriberArgs, SubscriberConfig } from '@medusajs/framework';
 import { IProductModuleService, Logger } from '@medusajs/framework/types';
-import { Modules } from '@medusajs/framework/utils';
+import { Modules, ProductCategoryWorkflowEvents } from '@medusajs/framework/utils';
 import { MeiliSearchService } from '@rokmohar/medusa-plugin-meilisearch';
 
 /**
- * Category event names (using string literals since no exported constants exist)
+ * Category event names as emitted by Medusa's category workflows
+ * ('product-category.created' etc., one event per category with payload { id })
  */
 const CATEGORY_EVENTS = {
-  CREATED: 'product_category.created',
-  UPDATED: 'product_category.updated',
-  DELETED: 'product_category.deleted',
+  CREATED: ProductCategoryWorkflowEvents.CREATED,
+  UPDATED: ProductCategoryWorkflowEvents.UPDATED,
+  DELETED: ProductCategoryWorkflowEvents.DELETED,
 } as const;
 
 /**
@@ -58,6 +59,14 @@ async function handleCategoryUpsert(
 
     if (!category) {
       logger.warn(`[CategorySync] Category not found: ${categoryId}`);
+      return;
+    }
+
+    // The Store API hides inactive and internal categories, so a search hit
+    // for them would link to a 404: keep them out of the public index.
+    if (!category.is_active || category.is_internal) {
+      await meiliSearchService.deleteDocument('categories', categoryId);
+      logger.info(`[CategorySync] Category ${categoryId} is inactive or internal, removed from index`);
       return;
     }
 

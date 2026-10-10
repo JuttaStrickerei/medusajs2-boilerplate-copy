@@ -10,6 +10,8 @@ import { NewsletterConfirmationTemplate, NEWSLETTER_CONFIRMATION, isNewsletterCo
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationTemplateData } from "./admin-order-notification"
 import { PickupReadyTemplate, PICKUP_READY, isPickupReadyTemplateData } from './pickup-ready'
 import { PickupCompletedTemplate, PICKUP_COMPLETED, isPickupCompletedTemplateData } from './pickup-completed'
+import { RevocationConfirmationTemplate, REVOCATION_CONFIRMATION, isRevocationConfirmationTemplateData } from './revocation-confirmation'
+import { RevocationAdminTemplate, REVOCATION_ADMIN, isRevocationAdminTemplateData } from './revocation-admin'
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -22,6 +24,8 @@ export const EmailTemplates = {
   ADMIN_ORDER_NOTIFICATION,
   PICKUP_READY,
   PICKUP_COMPLETED,
+  REVOCATION_CONFIRMATION,
+  REVOCATION_ADMIN,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -118,6 +122,24 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <PickupCompletedTemplate {...data} />
 
+    case EmailTemplates.REVOCATION_CONFIRMATION:
+      if (!isRevocationConfirmationTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.REVOCATION_CONFIRMATION}"`
+        )
+      }
+      return <RevocationConfirmationTemplate {...data} />
+
+    case EmailTemplates.REVOCATION_ADMIN:
+      if (!isRevocationAdminTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.REVOCATION_ADMIN}"`
+        )
+      }
+      return <RevocationAdminTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -137,4 +159,6 @@ export {
   AdminOrderNotificationTemplate,
   PickupReadyTemplate,
   PickupCompletedTemplate,
+  RevocationConfirmationTemplate,
+  RevocationAdminTemplate,
 }

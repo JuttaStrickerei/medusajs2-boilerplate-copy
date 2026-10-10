@@ -1,4 +1,5 @@
 import repeat from "@lib/util/repeat"
+import { PRODUCT_GRID_WIDE } from "@modules/products/components/product-preview/card-styles"
 import SkeletonProductPreview from "@modules/skeletons/components/skeleton-product-preview"
 
 const SkeletonRelatedProducts = () => {
@@ -11,7 +12,7 @@ const SkeletonRelatedProducts = () => {
           <div className="w-48 h-10 animate-pulse bg-gray-100"></div>
         </div>
       </div>
-      <ul className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8 flex-1">
+      <ul className={`${PRODUCT_GRID_WIDE} flex-1`}>
         {repeat(3).map((index) => (
           <li key={index}>
             <SkeletonProductPreview />

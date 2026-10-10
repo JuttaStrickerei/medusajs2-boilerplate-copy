@@ -5,6 +5,7 @@ import {
 import { Modules, OrderWorkflowEvents } from "@medusajs/framework/utils"
 import { SendcloudClient } from "../modules/sendcloud/client"
 import { SENDCLOUD_SHIPMENT_MODULE } from "../modules/sendcloud-shipment"
+import { PUBLIC_BACKEND_URL } from "../lib/constants"
 
 /**
  * Subscriber that enriches return fulfillments with order data
@@ -28,7 +29,7 @@ export default async function returnFulfillmentEnricher({
     const fulfillmentService = container.resolve(Modules.FULFILLMENT)
 
     // Get backend URL for constructing full label URLs
-    const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+    const backendUrl = PUBLIC_BACKEND_URL
 
     // Wait for fulfillment to be created and linked by the workflow
     console.log("[ReturnEnricher] Waiting 3s for workflow to complete...")
@@ -219,7 +220,7 @@ export default async function returnFulfillmentEnricher({
         const trackingUrl = updatedParcel.tracking_url || ""
         
         // Use FULL URL for label so admin panel can download directly
-        // Use /labels/ endpoint (public, no auth required)
+        // Use /labels/ endpoint (admin login required)
         const proxyLabelUrl = `${backendUrl}/labels/${parcelId}`
         
         // Also store direct Sendcloud URL as backup

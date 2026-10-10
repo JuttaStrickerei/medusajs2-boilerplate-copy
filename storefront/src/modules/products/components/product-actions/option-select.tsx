@@ -1,6 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import React from "react"
+import type { OptionValueAvailability } from "@modules/products/hooks/use-variant-selection"
 
 type OptionSelectProps = {
   option: HttpTypes.StoreProductOption
@@ -9,6 +10,8 @@ type OptionSelectProps = {
   title: string
   disabled: boolean
   "data-testid"?: string
+  // Optional: Lagerstatus je Wert anzeigen (ausverkauft, nur noch X, …)
+  availability?: Record<string, OptionValueAvailability>
 }
 
 const SIZE_ORDER: Record<string, number> = {
@@ -34,7 +37,7 @@ const SIZE_ORDER: Record<string, number> = {
 const normalizeSizeValue = (value: string) =>
   value.trim().toUpperCase().replace(/\s+/g, "")
 
-const getSizeRank = (value: string): number => {
+export const getSizeRank = (value: string): number => {
   const normalized = normalizeSizeValue(value)
 
   if (normalized in SIZE_ORDER) {
@@ -48,7 +51,7 @@ const getSizeRank = (value: string): number => {
   return Number.POSITIVE_INFINITY
 }
 
-const isSizeOption = (title: string) => {
+export const isSizeOption = (title: string) => {
   const normalizedTitle = title.trim().toLowerCase()
   return (
     normalizedTitle.includes("size") ||
@@ -64,6 +67,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   title,
   "data-testid": dataTestId,
   disabled,
+  availability,
 }) => {
   const optionValues = (option.values ?? []).map((v) => v.value)
   // FIX: Analysis result - storefront rendered API option order as-is; enforce deterministic size ordering in frontend.
@@ -88,6 +92,19 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
         data-testid={dataTestId}
       >
         {filteredOptions.map((v) => {
+          if (availability) {
+            return (
+              <AvailabilityOptionButton
+                key={v}
+                value={v}
+                selected={v === current}
+                availability={availability[v]}
+                disabled={disabled}
+                onSelect={() => updateOption(option.id, v)}
+              />
+            )
+          }
+
           return (
             <button
               onClick={() => updateOption(option.id, v)}
@@ -108,6 +125,64 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
           )
         })}
       </div>
+    </div>
+  )
+}
+
+const AvailabilityOptionButton = ({
+  value,
+  selected,
+  availability,
+  disabled,
+  onSelect,
+}: {
+  value: string
+  selected: boolean
+  availability?: OptionValueAvailability
+  disabled: boolean
+  onSelect: () => void
+}) => {
+  const status = availability?.status ?? "available"
+  const isSoldOut = status === "soldout"
+  const isUnavailable = status === "unavailable"
+  const statusLabel = isUnavailable
+    ? "nicht verfügbar"
+    : isSoldOut
+    ? "ausverkauft"
+    : status === "low"
+    ? `nur noch ${availability?.quantity}`
+    : undefined
+
+  return (
+    <div className="flex flex-1 flex-col items-center gap-1">
+      <button
+        type="button"
+        onClick={onSelect}
+        className={clx(
+          "border text-small-regular h-10 w-full rounded-rounded p-2",
+          selected
+            ? "border-ui-border-interactive"
+            : "border-ui-border-base",
+          isSoldOut || isUnavailable
+            ? "bg-stone-50 text-stone-400 line-through"
+            : "bg-ui-bg-subtle",
+          !selected &&
+            !isUnavailable &&
+            "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150",
+          isUnavailable && "cursor-not-allowed"
+        )}
+        disabled={disabled || isUnavailable}
+        aria-pressed={selected}
+        aria-label={statusLabel ? `${value} (${statusLabel})` : value}
+        data-testid="option-button"
+      >
+        {value}
+      </button>
+      {status === "low" && (
+        <span className="text-[11px] leading-none text-amber-700">
+          Nur noch {availability?.quantity}
+        </span>
+      )}
     </div>
   )
 }

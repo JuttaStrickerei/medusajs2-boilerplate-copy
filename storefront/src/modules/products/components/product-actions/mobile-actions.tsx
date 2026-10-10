@@ -10,6 +10,7 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
 import { HttpTypes } from "@medusajs/types"
 import { isSimpleProduct } from "@lib/util/product"
+import { sortProductOptions } from "@modules/products/hooks/use-variant-selection"
 
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
@@ -19,6 +20,7 @@ type MobileActionsProps = {
   inStock?: boolean
   handleAddToCart: () => void
   isAdding?: boolean
+  error?: string | null
   show: boolean
   optionsDisabled: boolean
 }
@@ -31,6 +33,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   inStock,
   handleAddToCart,
   isAdding,
+  error,
   show,
   optionsDisabled,
 }) => {
@@ -130,6 +133,9 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   : "In den Warenkorb"}
               </Button>
             </div>
+            {error && (
+              <p className="text-sm text-red-600 text-center">{error}</p>
+            )}
           </div>
         </Transition>
       </div>
@@ -174,7 +180,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   <div className="bg-white px-6 py-12">
                     {(product.variants?.length ?? 0) > 1 && (
                       <div className="flex flex-col gap-y-6">
-                        {(product.options || []).map((option) => {
+                        {sortProductOptions(product.options).map((option) => {
                           return (
                             <div key={option.id}>
                               <OptionSelect

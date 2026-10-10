@@ -5,6 +5,7 @@ import {
 import { Modules } from "@medusajs/framework/utils"
 import { Logger } from "@medusajs/framework/types"
 import { SENDCLOUD_SHIPMENT_MODULE } from "../modules/sendcloud-shipment"
+import { PUBLIC_BACKEND_URL } from "../lib/constants"
 
 type FulfillmentCreatedPayload = {
   order_id: string
@@ -68,10 +69,7 @@ export default async function syncSendcloudShipment({
     const addr = fulfillment.delivery_address || {}
     const isReturn = ffData.is_return === true
 
-    const publicDomain = process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
-      || process.env.MEDUSA_BACKEND_URL
-      || "http://localhost:9000"
-    const backendUrl = publicDomain.startsWith("http") ? publicDomain : `https://${publicDomain}`
+    const backendUrl = PUBLIC_BACKEND_URL
 
     const labelUrl = ffData.label_url
       || `${backendUrl}/labels/${parcelId}`

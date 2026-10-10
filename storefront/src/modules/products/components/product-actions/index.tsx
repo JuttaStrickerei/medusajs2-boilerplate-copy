@@ -6,10 +6,10 @@ import { HttpTypes } from "@medusajs/types"
 import { cn } from "@lib/utils"
 import { Button } from "@components/ui"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
-import { isEqual } from "lodash"
 import { useParams } from "next/navigation"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import ProductPrice from "../product-price"
+import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import MobileActions from "./mobile-actions"
 import {
   ShoppingBag,
@@ -22,6 +22,10 @@ import {
 } from "@components/icons"
 import { triggerCartRefresh } from "@lib/context/cart-context"
 import { useWishlist } from "@lib/context/wishlist-context"
+import {
+  translateOptionTitle,
+  useVariantSelection,
+} from "@modules/products/hooks/use-variant-selection"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -29,100 +33,30 @@ type ProductActionsProps = {
   disabled?: boolean
 }
 
-const optionsAsKeymap = (
-  variantOptions: HttpTypes.StoreProductVariant["options"]
-) => {
-  return variantOptions?.reduce((acc: Record<string, string>, varopt: any) => {
-    acc[varopt.option_id] = varopt.value
-    return acc
-  }, {})
-}
-
 export default function ProductActions({
   product,
   disabled,
 }: ProductActionsProps) {
-  const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
   const countryCode = useParams().countryCode as string
 
   // Wishlist hook - consume items directly for reliable reactivity
   const { items: wishlistItems, toggleWishlist } = useWishlist()
   const isWishlisted = wishlistItems.some((item) => item.id === product.id)
 
-  // Preselect options: all options if only 1 variant, otherwise any option with only 1 available value
-  useEffect(() => {
-    if (product.variants?.length === 1) {
-      const variantOptions = optionsAsKeymap(product.variants[0].options)
-      setOptions(variantOptions ?? {})
-    } else {
-      const preselectMap: Record<string, string> = {}
-      for (const option of product.options ?? []) {
-        const uniqueValues = [
-          ...new Set((option.values ?? []).map((v) => v.value)),
-        ]
-        if (uniqueValues.length === 1) {
-          preselectMap[option.id] = uniqueValues[0]
-        }
-      }
-      if (Object.keys(preselectMap).length > 0) {
-        setOptions(preselectMap)
-      }
-    }
-  }, [product.variants, product.options])
-
-  const selectedVariant = useMemo(() => {
-    if (!product.variants || product.variants.length === 0) {
-      return
-    }
-
-    return product.variants.find((v) => {
-      const variantOptions = optionsAsKeymap(v.options)
-      return isEqual(variantOptions, options)
-    })
-  }, [product.variants, options])
-
-  // update the options when a variant is selected
-  const setOptionValue = (optionId: string, value: string) => {
-    setOptions((prev) => ({
-      ...prev,
-      [optionId]: value,
-    }))
-  }
-
-  //check if the selected options produce a valid variant
-  const isValidVariant = useMemo(() => {
-    return product.variants?.some((v) => {
-      const variantOptions = optionsAsKeymap(v.options)
-      return isEqual(variantOptions, options)
-    })
-  }, [product.variants, options])
-
-  // check if the selected variant is in stock
-  const inStock = useMemo(() => {
-    // If we don't manage inventory, we can always add to cart
-    if (selectedVariant && !selectedVariant.manage_inventory) {
-      return true
-    }
-
-    // If we allow back orders on the variant, we can add to cart
-    if (selectedVariant?.allow_backorder) {
-      return true
-    }
-
-    // If there is inventory available, we can add to cart
-    if (
-      selectedVariant?.manage_inventory &&
-      (selectedVariant?.inventory_quantity || 0) > 0
-    ) {
-      return true
-    }
-
-    // Otherwise, we can't add to cart
-    return false
-  }, [selectedVariant])
+  const {
+    orderedOptions,
+    options,
+    setOptionValue,
+    selectedVariant,
+    isValidVariant,
+    inStock,
+    missingOptions,
+    allOptionsSelected,
+  } = useVariantSelection(product)
 
   const actionsRef = useRef<HTMLDivElement>(null)
   const inView = useIntersection(actionsRef, "0px")
@@ -132,21 +66,37 @@ export default function ProductActions({
     if (!selectedVariant?.id) return null
 
     setIsAdding(true)
+    setAddError(null)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: quantity,
-      countryCode,
-    })
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: quantity,
+        countryCode,
+      })
 
-    // Trigger instant cart update
-    triggerCartRefresh()
+      // Trigger instant cart update
+      triggerCartRefresh()
 
-    setIsAdding(false)
-    setAddedToCart(true)
+      const item = productToItem(product, selectedVariant, quantity)
+      trackEvent("add_to_cart", {
+        currency: gaCurrency(selectedVariant.calculated_price?.currency_code),
+        value: (item.price ?? 0) * quantity,
+        items: [item],
+      })
 
-    // Reset the "added" state after 2 seconds
-    setTimeout(() => setAddedToCart(false), 2000)
+      setAddedToCart(true)
+
+      // Reset the "added" state after 2 seconds
+      setTimeout(() => setAddedToCart(false), 2000)
+    } catch (e) {
+      console.error("Add to cart failed:", e)
+      setAddError(
+        "Der Artikel konnte nicht in den Warenkorb gelegt werden. Bitte versuchen Sie es erneut."
+      )
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   // Handle wishlist toggle
@@ -161,26 +111,6 @@ export default function ProductActions({
 
   const handleQuantityChange = (delta: number) => {
     setQuantity((prev) => Math.max(1, Math.min(10, prev + delta)))
-  }
-
-  const missingOptions = useMemo(() => {
-    if (!product.options || product.options.length === 0) return []
-    return product.options.filter((opt) => !options[opt.id])
-  }, [product.options, options])
-
-  const allOptionsSelected = missingOptions.length === 0
-
-  const translateOptionTitle = (title: string): string => {
-    const map: Record<string, string> = {
-      color: "Farbe",
-      colour: "Farbe",
-      size: "Größe",
-      material: "Material",
-      style: "Stil",
-      length: "Länge",
-      width: "Breite",
-    }
-    return map[title.trim().toLowerCase()] ?? title
   }
 
   const getButtonText = () => {
@@ -208,7 +138,7 @@ export default function ProductActions({
         {/* Options */}
         {(product.variants?.length ?? 0) > 1 && (
           <div className="space-y-6">
-            {(product.options || []).map((option) => (
+            {orderedOptions.map((option) => (
               <div key={option.id}>
                 <OptionSelect
                   option={option}
@@ -302,6 +232,12 @@ export default function ProductActions({
             {getButtonText()}
           </Button>
 
+          {addError && (
+            <p className="text-sm text-red-600" role="alert">
+              {addError}
+            </p>
+          )}
+
           {/* Secondary Actions — drei gleich breite Felder, Gesamtbreite wie „Bitte … wählen“-Button */}
           <div className="grid grid-cols-3 gap-3">
             <Button
@@ -371,6 +307,7 @@ export default function ProductActions({
           inStock={inStock}
           handleAddToCart={handleAddToCart}
           isAdding={isAdding}
+          error={addError}
           show={!inView}
           optionsDisabled={!!disabled || isAdding}
         />

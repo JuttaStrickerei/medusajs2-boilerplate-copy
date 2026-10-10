@@ -1,8 +1,10 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
+import { PRODUCT_LIST_FIELDS } from "@lib/constants/product-fields"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
+import { buildMetaDescription, seoOverride } from "@lib/util/seo"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -68,12 +70,29 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  // Title and description are built from Medusa data on every request;
+  // `metadata.seo_title` / `metadata.seo_description` override them if set.
+  const override = seoOverride(product.metadata)
+  const subtitle = product.subtitle?.trim()
+  const title =
+    override.title ?? (subtitle ? `${product.title} – ${subtitle}` : product.title)
+  const description =
+    override.description ??
+    buildMetaDescription([
+      subtitle,
+      product.description,
+      `${product.title} – handgefertigt in Österreich von der Strickerei Jutta.`,
+    ])
+
   return {
-    title: `${product.title} | Medusa Store`,
-    description: `${product.title}`,
+    title,
+    description,
+    alternates: {
+      canonical: `/${params.countryCode}/products/${product.handle}`,
+    },
     openGraph: {
-      title: `${product.title} | Medusa Store`,
-      description: `${product.title}`,
+      title,
+      description,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
   }
@@ -89,7 +108,11 @@ export default async function ProductPage(props: Props) {
 
   const pricedProduct = await listProducts({
     countryCode: params.countryCode,
-    queryParams: { handle: params.handle },
+    // Kategorie für den Brotkrümel „Alle Produkte / Pullover / …“
+    queryParams: {
+      handle: params.handle,
+      fields: `${PRODUCT_LIST_FIELDS},*categories`,
+    },
   }).then(({ response }) => response.products[0])
 
   if (!pricedProduct) {

@@ -1,0 +1,581 @@
+[
+  {
+    "code": "O18",
+    "handle": "rouga",
+    "title": "Look ROUGA",
+    "rank": 10,
+    "status": "published",
+    "folder": "Look-O18_ROUGA",
+    "photos": [
+      {
+        "file": "DSC08200.jpg",
+        "note": "Nicht im Onlineshop: Punkte-Oberteil und Hose NAVIA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC08158.jpg",
+        "note": "Nicht im Onlineshop: Punkte-Oberteil und Hose NAVIA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC08229.jpg",
+        "note": "Nicht im Onlineshop: Punkte-Oberteil und Hose NAVIA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC08258.jpg",
+        "note": "Nicht im Onlineshop: Punkte-Oberteil und Hose NAVIA – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "mantel-rouga"
+    ]
+  },
+  {
+    "code": "O03",
+    "handle": "neva",
+    "title": "Look NEVA",
+    "rank": 20,
+    "status": "published",
+    "folder": "Look-O03_NEVA",
+    "photos": [
+      {
+        "file": "DSC06617.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC06581.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "rock-neva",
+      "pullover-neva"
+    ]
+  },
+  {
+    "code": "O02",
+    "handle": "viola",
+    "title": "Look VIOLA",
+    "rank": 30,
+    "status": "published",
+    "folder": "Look-O02_VIOLA",
+    "photos": [
+      {
+        "file": "DSC06502.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC06466.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC06463.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC06424.jpg",
+        "note": "Nicht im Onlineshop: lila Tunika mit JC-Logo und schwarze Hose (links im Bild) – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-viola",
+      "rock-viola",
+      "schal-viola"
+    ]
+  },
+  {
+    "code": "O17",
+    "handle": "tesso",
+    "title": "Look TESSO",
+    "rank": 40,
+    "status": "published",
+    "folder": "Look-O17_TESSO",
+    "photos": [
+      {
+        "file": "DSC08113.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC08106.jpg",
+        "note": "Nicht im Onlineshop: Hose RIVO – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC08141.jpg",
+        "note": "Nicht im Onlineshop: Hose RIVO – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-tesso"
+    ]
+  },
+  {
+    "code": "O27",
+    "handle": "rosana",
+    "title": "Look ROSANA",
+    "rank": 50,
+    "status": "published",
+    "folder": "Look-O27_ROSANA",
+    "photos": [
+      {
+        "file": "DSC09889.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC09897.jpg",
+        "note": "Nicht im Onlineshop: schwarze Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC09936.jpg",
+        "note": "Nicht im Onlineshop: schwarze Hose – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "jacke-rosana",
+      "schal-rosana"
+    ]
+  },
+  {
+    "code": "O30",
+    "handle": "norva",
+    "title": "Look NORVA",
+    "rank": 60,
+    "status": "published",
+    "folder": "Look-O30_NORVA",
+    "photos": [
+      {
+        "file": "DSC00249.jpg",
+        "note": "Nicht im Onlineshop: gestreifte Bluse und beige Hose – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00256.jpg",
+        "note": "Nicht im Onlineshop: gestreifte Bluse und beige Hose – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-norva"
+    ]
+  },
+  {
+    "code": "O32",
+    "handle": "melva",
+    "title": "Look MELVA",
+    "rank": 70,
+    "status": "published",
+    "folder": "Look-O32_MELVA",
+    "photos": [
+      {
+        "file": "DSC00402.jpg",
+        "note": "Nicht im Onlineshop: Schal mit Blumenmuster – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00386.jpg",
+        "note": "Nicht im Onlineshop: Schal mit Blumenmuster – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00427.jpg",
+        "note": "Nicht im Onlineshop: Schal mit Blumenmuster – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00395.jpg",
+        "note": "Nicht im Onlineshop: Schal mit Blumenmuster – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "tunika-melva",
+      "hose-melva"
+    ]
+  },
+  {
+    "code": "O05",
+    "handle": "cora-mila",
+    "title": "Look CORA & MILA",
+    "rank": 80,
+    "status": "published",
+    "folder": "Look-O05_CORA-MILA",
+    "photos": [
+      {
+        "file": "DSC06782.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC06741.jpg",
+        "note": "Nicht im Onlineshop: Hose MILA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC06881.jpg",
+        "note": "Nicht im Onlineshop: Hose MILA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC06872.jpg",
+        "note": "Nicht im Onlineshop: Hose MILA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC06931.jpg",
+        "note": "Nicht im Onlineshop: Hose MILA – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "jacke-cora",
+      "pullover-mila"
+    ]
+  },
+  {
+    "code": "O35",
+    "handle": "glena-bruna",
+    "title": "Look GLENA & BRUNA",
+    "rank": 90,
+    "status": "published",
+    "folder": "Look-O35_GLENA-BRUNA",
+    "photos": [
+      {
+        "file": "DSC00722.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00686.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "hose-glena",
+      "mantel-bruna"
+    ]
+  },
+  {
+    "code": "O52",
+    "handle": "tavia",
+    "title": "Look TAVIA",
+    "rank": 100,
+    "status": "draft",
+    "folder": "Look-O52_TAVIA",
+    "photos": [
+      {
+        "file": "DSC02464.jpg",
+        "note": "Nicht im Onlineshop: Hose TAVIA und gemustertes Tuch – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC02467.jpg",
+        "note": "Nicht im Onlineshop: gemustertes Tuch – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC02504.jpg",
+        "note": "Nicht im Onlineshop: Hose TAVIA und gemustertes Tuch – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "mantel-tavia"
+    ]
+  },
+  {
+    "code": "O57",
+    "handle": "senna",
+    "title": "Look SENNA",
+    "rank": 110,
+    "status": "published",
+    "folder": "Look-O57_SENNA",
+    "photos": [
+      {
+        "file": "DSC02933.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC02977.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC02936.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "poncho-senna",
+      "hose-senna"
+    ]
+  },
+  {
+    "code": "O42",
+    "handle": "solara",
+    "title": "Look SOLARA",
+    "rank": 120,
+    "status": "published",
+    "folder": "Look-O42_SOLARA",
+    "photos": [
+      {
+        "file": "DSC01341.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC01413.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC01437.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC01451.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "poncho-solara",
+      "pullover-solara",
+      "hose-solara"
+    ]
+  },
+  {
+    "code": "O28",
+    "handle": "selva-fenja",
+    "title": "Look SELVA & FENJA",
+    "rank": 130,
+    "status": "published",
+    "folder": "Look-O28_SELVA-Fenja",
+    "photos": [
+      {
+        "file": "DSC00039.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00052.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00100.jpg",
+        "note": "Nicht im Onlineshop: grüner Schal mit Herzmuster – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00153.jpg",
+        "note": "Nicht im Onlineshop: grüner Schal mit Herzmuster – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00115.jpg",
+        "note": "Nicht im Onlineshop: grüner Schal mit Herzmuster – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "pullover-selva",
+      "poncho-selva",
+      "hose-fenja-5"
+    ]
+  },
+  {
+    "code": "O33",
+    "handle": "talvo-nalea",
+    "title": "Look TALVO & NALEA",
+    "rank": 140,
+    "status": "published",
+    "folder": "Look-O33_TALVO-NALEA",
+    "photos": [
+      {
+        "file": "DSC00497.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00459.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00544.jpg",
+        "note": "Nicht im Onlineshop: Mantel TALVO – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC00524.jpg",
+        "note": "Nicht im Onlineshop: Mantel TALVO – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "weste-talvo",
+      "rock-nalea",
+      "jacke-nalea",
+      "top-nalea"
+    ]
+  },
+  {
+    "code": "O61",
+    "handle": "iris-hilda",
+    "title": "Look IRIS & HILDA",
+    "rank": 150,
+    "status": "published",
+    "folder": "Look-O61_IRIS-Hilda",
+    "photos": [
+      {
+        "file": "DSC03184.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC03161.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "pullover-iris",
+      "hose-hilda"
+    ]
+  },
+  {
+    "code": "O58",
+    "handle": "conte-aaron-tini",
+    "title": "Look CONTE, AARON & TINI",
+    "rank": 160,
+    "status": "published",
+    "folder": "Look-O58_CONTE-Aaron-Tini",
+    "photos": [
+      {
+        "file": "DSC03026.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC02997.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC03045.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC03056.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "blazer-conte",
+      "pullover-aaron",
+      "hose-tini"
+    ]
+  },
+  {
+    "code": "O50",
+    "handle": "vita",
+    "title": "Look VITA",
+    "rank": 170,
+    "status": "published",
+    "folder": "Look-O50_VITA",
+    "photos": [
+      {
+        "file": "DSC02319.jpg",
+        "note": "Nicht im Onlineshop: Mantel VITA und Hose VITA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC02295.jpg",
+        "note": "Nicht im Onlineshop: Mantel VITA und Hose VITA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC02304.jpg",
+        "note": "Nicht im Onlineshop: Mantel VITA und Hose VITA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC02344.jpg",
+        "note": "Nicht im Onlineshop: Mantel VITA und Hose VITA – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "top-vita"
+    ]
+  },
+  {
+    "code": "O34",
+    "handle": "grisol",
+    "title": "Look GRISOL",
+    "rank": 180,
+    "status": "published",
+    "folder": "Look-O34_GRISOL",
+    "photos": [
+      {
+        "file": "DSC00619.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC00641.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "jacke-grisol",
+      "rock-grisol"
+    ]
+  },
+  {
+    "code": "O11",
+    "handle": "ray-dorli-floka",
+    "title": "Look RAY, DORLI & FLOKA",
+    "rank": 190,
+    "status": "published",
+    "folder": "Look-O11_Ray-Dorli-FLOKA",
+    "photos": [
+      {
+        "file": "DSC07439.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC07392.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC07404.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC07385.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC07338.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC07347.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "pullover-ray",
+      "rock-dorli",
+      "jacke-floka"
+    ]
+  },
+  {
+    "code": "O43",
+    "handle": "velara",
+    "title": "Look VELARA",
+    "rank": 200,
+    "status": "published",
+    "folder": "Look-O43_VELARA",
+    "photos": [
+      {
+        "file": "DSC01453.jpg",
+        "note": "Nicht im Onlineshop: Hose VELARA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC01532.jpg",
+        "note": "Nicht im Onlineshop: Hose VELARA – fragen Sie gerne in unserer Boutique nach."
+      },
+      {
+        "file": "DSC01519.jpg",
+        "note": "Nicht im Onlineshop: Hose VELARA – fragen Sie gerne in unserer Boutique nach."
+      }
+    ],
+    "products": [
+      "mantel-velara",
+      "schal-velara"
+    ]
+  },
+  {
+    "code": "O04",
+    "handle": "polly",
+    "title": "Look POLLY",
+    "rank": 210,
+    "status": "published",
+    "folder": "Look-O04_POLLY",
+    "photos": [
+      {
+        "file": "DSC06654.jpg",
+        "note": ""
+      },
+      {
+        "file": "DSC06669.jpg",
+        "note": ""
+      }
+    ],
+    "products": [
+      "kleid-polly"
+    ]
+  }
+]

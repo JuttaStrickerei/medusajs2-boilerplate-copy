@@ -22,7 +22,7 @@ const StripeWrapper: React.FC<StripeWrapperProps> = ({
     appearance: {
       theme: "stripe",
       variables: {
-        colorPlaceholder: "#d6d3d1",
+        colorTextPlaceholder: "#d6d3d1",
       },
     },
     loader: "auto",
