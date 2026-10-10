@@ -26,9 +26,6 @@
  *   Vorschaubild je Variante und Produkt setzen. Dateiname wie beim
  *   Bulk-Upload (<Look>_<handle>_<farbe>_<n-ansicht>) plus Prüfsumme, damit ein
  *   zweiter Lauf erkennt, dass nichts zu tun ist.
- * - KI-Hinweis: metadata.ai_images = true, weil die v8-Fotos KI-Darstellungen
- *   aus echten Fotos sind (README v8); der Shop zeigt dazu einen Hinweis unter
- *   den Produktbildern.
  * Material, Gewicht und Preise stimmen laut Abgleich schon; Abweichungen stehen
  * nur in der Ausgabe.
  *
@@ -105,7 +102,6 @@ type DevProduct = {
   material?: string | null
   weight?: number | string | null
   thumbnail?: string | null
-  metadata?: Record<string, unknown> | null
   options?: DevOption[] | null
   variants?: DevVariant[] | null
   images?: DevImage[] | null
@@ -119,8 +115,6 @@ type PlannedImage = {
 }
 
 const COLOUR_TITLES = ["farbe", "farben", "color", "colour"]
-// Schalter für den KI-Hinweis im Shop (storefront lib/util/ai-images.ts)
-const AI_IMAGES_KEY = "ai_images"
 const SIZE_TITLES = ["größe", "groesse", "size"]
 const KEEP_SIZE = "M"
 const CURRENCY = "eur"
@@ -226,7 +220,6 @@ const PRODUCT_FIELDS = [
   "material",
   "weight",
   "thumbnail",
-  "metadata",
   "options.id",
   "options.title",
   "options.values.id",
@@ -577,20 +570,6 @@ export default async function syncHw26V8Products({ container }: ExecArgs) {
           } else {
             summary.uploads += planned.length
           }
-        }
-      }
-
-      // 6. KI-Hinweis (Text "true" aus dem Admin zählt auch)
-      const aiFlag = dev?.metadata?.[AI_IMAGES_KEY]
-      if (dev && !wanted.retired && !wanted.store_only && aiFlag !== true && aiFlag !== "true") {
-        steps.push("ki-hinweis")
-        lines.push(`  KI-Hinweis: metadata.${AI_IMAGES_KEY} → true`)
-        if (apply) {
-          await updateProductsWorkflow(container).run({
-            input: {
-              products: [{ id: dev.id, metadata: { ...(dev.metadata ?? {}), [AI_IMAGES_KEY]: true } }],
-            },
-          })
         }
       }
 
