@@ -56,7 +56,11 @@ export default async function backfill({ container }: ExecArgs) {
     // internal ones would be search hits that lead to a 404)
     const [categories] = await productModuleService.listAndCountProductCategories(
       { is_active: true, is_internal: false },
-      { take: 100 }
+      {
+        take: 100,
+        // Without select, categories come back with only their id
+        select: ['id', 'name', 'description', 'handle', 'metadata', 'parent_category_id', 'rank'],
+      }
     );
 
     logger.info(`📡 Found ${categories.length} categories in database`);
@@ -77,7 +81,7 @@ export default async function backfill({ container }: ExecArgs) {
 
       // Insert into MeiliSearch
       const index = meiliClient.index('categories');
-      const result = await index.addDocuments(categoryDocs);
+      const result = await index.addDocuments(categoryDocs, { primaryKey: 'id' });
       await meiliClient.waitForTask(result.taskUid);
 
       logger.info(`✅ Backfilled ${categoryDocs.length} categories`);
@@ -117,7 +121,7 @@ export default async function backfill({ container }: ExecArgs) {
 
       // Insert into MeiliSearch
       const index = meiliClient.index('collections');
-      const result = await index.addDocuments(collectionDocs);
+      const result = await index.addDocuments(collectionDocs, { primaryKey: 'id' });
       await meiliClient.waitForTask(result.taskUid);
 
       logger.info(`✅ Backfilled ${collectionDocs.length} collections`);

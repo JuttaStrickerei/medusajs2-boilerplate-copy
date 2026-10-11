@@ -57,6 +57,23 @@ type LookItemCardProps = {
   attention?: boolean
   // „Einzeln in den Warenkorb“ (nur bei Looks mit mehreren Teilen)
   showSingleAdd?: boolean
+  // Farbe, in der das Teil im Look getragen wird (vorgewählt)
+  preferredColor?: string
+}
+
+// Vorauswahl { Options-ID: Farbe } für die Farbe des Looks, sofern das
+// Produkt sie hat (auch für die Hilfszeile vor dem ersten Melden der Karte)
+export const lookColorPreset = (
+  product: HttpTypes.StoreProduct,
+  color?: string
+): Record<string, string> | undefined => {
+  if (!color) return undefined
+  const option = product.options?.find((o) =>
+    COLOR_OPTION_TITLES.includes((o.title ?? "").trim().toLowerCase())
+  )
+  return option?.values?.some((v) => v.value === color)
+    ? { [option.id]: color }
+    : undefined
 }
 
 export default function LookItemCard({
@@ -66,6 +83,7 @@ export default function LookItemCard({
   bulkSize,
   attention,
   showSingleAdd,
+  preferredColor,
 }: LookItemCardProps) {
   const countryCode = useParams().countryCode as string
   const rowRef = useRef<HTMLElement>(null)
@@ -75,6 +93,13 @@ export default function LookItemCard({
   const [ownAttention, setOwnAttention] = useState(false)
   const [sizeNote, setSizeNote] = useState<string | null>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
+
+  // Farbe des Looks vorwählen, wenn das Produkt sie hat – so zeigen Bild,
+  // Bildvorschau und Größen schon beim ersten Rendern die richtige Farbe
+  const initialOptions = useMemo(
+    () => lookColorPreset(product, preferredColor),
+    [product, preferredColor]
+  )
 
   const {
     orderedOptions,
@@ -86,7 +111,7 @@ export default function LookItemCard({
     availability,
     isPurchasable,
     previewImage,
-  } = useVariantSelection(product)
+  } = useVariantSelection(product, initialOptions)
 
   const [lightboxOpen, setLightboxOpen] = useState(false)
 

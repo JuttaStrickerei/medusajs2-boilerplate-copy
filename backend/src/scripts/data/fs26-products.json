@@ -156,7 +156,20 @@
         "https://bucket-prod-1f4b.up.railway.app/medusa-media/Gemini_Generated_Image_wd5jdwd5jdwd5jdw-01KQDCYF2PQR7FRNYHCAA5E8DX.webp",
         "https://bucket-prod-1f4b.up.railway.app/medusa-media/Gemini_Generated_Image_r4cv5ur4cv5ur4cv-01KQDCYF2SMCWKNZ8JVFVNYW4Y.webp",
         "https://bucket-prod-1f4b.up.railway.app/medusa-media/Gemini_Generated_Image_fgyq7gfgyq7gfgyq (1)-01KQDCYF2WME977XCTVF5K2XSX.webp"
-      ]
+      ],
+      "colour_images": {
+        "Braun": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "Weiß": [
+          5,
+          6,
+          7
+        ]
+      }
     },
     {
       "handle": "pullover-max",
@@ -178,7 +191,20 @@
         "https://bucket-prod-1f4b.up.railway.app/medusa-media/detail_optimized (3) (1)-01KPXKPE8DY27R09EY7AQAEV65.webp",
         "https://bucket-prod-1f4b.up.railway.app/medusa-media/back_optimized (4) (1)-01KPXKPE8EB607K5BW0F4QD0B1.webp",
         "https://bucket-prod-1f4b.up.railway.app/medusa-media/DSC05137_optimized-01KPXKPE8FCRHZ18WQNPTVD9RX.webp"
-      ]
+      ],
+      "colour_images": {
+        "Rot": [
+          1,
+          2,
+          3
+        ],
+        "Salbei": [
+          4,
+          5,
+          6,
+          7
+        ]
+      }
     },
     {
       "handle": "pullover-renoff",

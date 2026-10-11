@@ -68,7 +68,10 @@
     ],
     "products": [
       "pullover-reno"
-    ]
+    ],
+    "item_colors": {
+      "pullover-reno": "Rot"
+    }
   },
   {
     "code": "F04",
@@ -97,7 +100,10 @@
     ],
     "products": [
       "pullover-maria"
-    ]
+    ],
+    "item_colors": {
+      "pullover-maria": "Weiß"
+    }
   },
   {
     "code": "F05",
@@ -186,7 +192,10 @@
     "products": [
       "pullover-max",
       "hose-dot"
-    ]
+    ],
+    "item_colors": {
+      "hose-dot": "Schwarz"
+    }
   },
   {
     "code": "F09",
@@ -228,7 +237,10 @@
     ],
     "products": [
       "pullover-maria"
-    ]
+    ],
+    "item_colors": {
+      "pullover-maria": "Braun"
+    }
   },
   {
     "code": "F11",
@@ -317,7 +329,10 @@
     "products": [
       "pullover-reno",
       "hose-runo"
-    ]
+    ],
+    "item_colors": {
+      "pullover-reno": "Salbei"
+    }
   },
   {
     "code": "F15",

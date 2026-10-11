@@ -22,6 +22,9 @@ export const ADMIN_LOOK_FIELDS = [
   "items.product.handle",
   "items.product.thumbnail",
   "items.product.status",
+  // Farbwerte für die Auswahl "Farbe im Look"
+  "items.product.options.title",
+  "items.product.options.values.value",
 ]
 
 type LookItemRow = { rank?: number | null; product?: unknown } & Record<
