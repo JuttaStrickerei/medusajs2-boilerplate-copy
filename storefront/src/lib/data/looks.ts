@@ -96,8 +96,10 @@ export const getLookWithProducts = async (
 // Nur was Übersicht und Preissumme brauchen (~300 KB statt ~1 MB für 42
 // Produkte, bleibt so unter dem 2-MB-Limit des Next-Caches). Nicht weiter auf
 // calculated_amount kürzen: dann fehlen Währung und Originalpreis.
+// variants.thumbnail und variants.options.value: Vorschaubild in der Farbe des
+// Looks (metadata.item_colors)
 const OVERVIEW_PRODUCT_FIELDS =
-  "id,title,handle,thumbnail,variants.id,*variants.calculated_price,options.title,options.values.value"
+  "id,title,handle,thumbnail,variants.id,variants.thumbnail,variants.options.value,*variants.calculated_price,options.title,options.values.value"
 // Über dieser Menge in parallele Teilabfragen aufteilen
 const OVERVIEW_BATCH_SIZE = 100
 const OVERVIEW_SINGLE_REQUEST_MAX = 200

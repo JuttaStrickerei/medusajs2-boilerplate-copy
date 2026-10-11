@@ -21,7 +21,12 @@
  *   das Vorschaubild. Sie ersetzen die bisherigen Fotos des Produkts (deren
  *   URLs stehen in der Ausgabe). Passen die Dateinamen schon, passiert nichts.
  * - Material: wird nur gesetzt, wenn es auf DEV leer ist.
- * - Texte, Varianten, Größen und Preise bleiben unverändert.
+ * - Farben (optional, "colour_images": { "<Farbe>": [<Foto-Nummern>] }):
+ *   verknüpft die Fotos <handle>_<n> mit den Varianten dieser Farbe und setzt
+ *   deren Vorschaubild auf das erste davon. So zeigt ein Look das Teil in der
+ *   getragenen Farbe (metadata.item_colors) und der Warenkorb das passende
+ *   Bild. Optionen und Größen bleiben, wie sie sind.
+ * - Texte, Größen und Preise bleiben unverändert.
  *
  * Wiederholbar: Ein zweiter Probelauf nach APPLY=1 meldet 0 Änderungen.
  * Sicherheit: dieselbe DEV-Prüfung wie der Look-Import
@@ -32,8 +37,10 @@ import path from "path"
 import { ExecArgs } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import {
+  batchVariantImagesWorkflow,
   createCollectionsWorkflow,
   updateProductsWorkflow,
+  updateProductVariantsWorkflow,
   uploadFilesWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { assertDevEnvironment } from "../lib/assert-dev-environment"
@@ -50,7 +57,33 @@ const MIME_BY_EXT: Record<string, string> = {
 
 type Log = (line?: string) => void
 
-type SyncProduct = { handle: string; material: string; images: string[] }
+type SyncProduct = {
+  handle: string
+  material: string
+  images: string[]
+  // Farbe → Nummern der Fotos (1 = <handle>_1), die diese Farbe zeigen
+  colour_images?: Record<string, number[]>
+}
+
+// Stand eines Produkts für die Farbzuordnung der Fotos
+type ColourState = {
+  options?: { id: string; title: string; values?: { value: string }[] }[]
+  variants?: {
+    id: string
+    thumbnail?: string | null
+    options?: { option_id?: string | null; value: string }[]
+  }[]
+  images?: { id: string; url: string; variants?: { id: string }[] | null }[]
+}
+
+type ColourStep = {
+  variantId: string
+  add: string[]
+  remove: string[]
+  thumbnail?: string
+}
+
+const COLOUR_TITLES = ["farbe", "farben", "color", "colour"]
 
 type DevProduct = {
   id: string
@@ -149,6 +182,77 @@ async function copyImage(
   })
   if (!result[0]?.url) throw new Error(`Upload von ${name} lieferte keine URL`)
   return { url: result[0].url, bytes: image.buffer.length }
+}
+
+// Was sich an den Varianten ändern muss, damit jede Farbe ihre Fotos und ihr
+// Vorschaubild hat. Leere Liste = alles schon richtig.
+async function planColourImages(
+  container: ExecArgs["container"],
+  productId: string,
+  wanted: SyncProduct,
+  lines: string[]
+): Promise<ColourStep[]> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const { data: rows } = await query.graph({
+    entity: "product",
+    fields: [
+      "options.id",
+      "options.title",
+      "options.values.value",
+      "variants.id",
+      "variants.thumbnail",
+      "variants.options.option_id",
+      "variants.options.value",
+      "images.id",
+      "images.url",
+      // echte Verknüpfungen (variants.images enthält auch alle unverknüpften)
+      "images.variants.id",
+    ],
+    filters: { id: productId },
+  })
+  const product = (rows as unknown as ColourState[])[0]
+  const option = product?.options?.find((o) =>
+    COLOUR_TITLES.includes(o.title.trim().toLowerCase())
+  )
+  if (!option) throw new Error("hat keine Option Farbe")
+  const values = (option.values ?? []).map((v) => v.value)
+  const images = product.images ?? []
+  const byStem = new Map(images.map((img) => [uploadedStemOf(img.url), img]))
+
+  const steps: ColourStep[] = []
+  for (const [colour, numbers] of Object.entries(wanted.colour_images ?? {})) {
+    if (!values.includes(colour)) {
+      throw new Error(`Farbe "${colour}" gibt es nicht (vorhanden: ${values.join(", ")})`)
+    }
+    const own = numbers.map((n) => {
+      const img = byStem.get(`${wanted.handle}_${n}`)
+      if (!img) throw new Error(`Foto ${wanted.handle}_${n} für ${colour} fehlt`)
+      return img
+    })
+    const ownIds = own.map((img) => img.id)
+    const variants = (product.variants ?? []).filter((v) =>
+      v.options?.some((o) => o.option_id === option.id && o.value === colour)
+    )
+    let changed = 0
+    for (const v of variants) {
+      const linked = images
+        .filter((img) => img.variants?.some((x) => x.id === v.id))
+        .map((img) => img.id)
+      const add = ownIds.filter((id) => !linked.includes(id))
+      const remove = linked.filter((id) => !ownIds.includes(id))
+      const thumbnail = v.thumbnail !== own[0].url ? own[0].url : undefined
+      if (add.length || remove.length || thumbnail) {
+        steps.push({ variantId: v.id, add, remove, thumbnail })
+        changed++
+      }
+    }
+    lines.push(
+      `  Farbe ${colour}: Fotos ${numbers.join(", ")} → ${variants.length} Variante(n)${
+        changed ? `, ${changed} anzupassen` : " (unverändert)"
+      }`
+    )
+  }
+  return steps
 }
 
 async function ensureCollection(
@@ -308,17 +412,44 @@ export default async function syncFs26Products({ container }: ExecArgs) {
         fields.push("images", "thumbnail")
       }
 
+      // Fotos je Farbe an die Varianten hängen (erst wenn die Fotos stehen)
+      let colourSteps: ColourStep[] = []
+      if (wanted.colour_images) {
+        if (!imagesDone) {
+          lines.push("  Farben: erst nach dem Foto-Upload – beim nächsten Lauf")
+        } else {
+          colourSteps = await planColourImages(container, dev.id, wanted, lines)
+          if (colourSteps.length) fields.push("variant_images")
+        }
+      }
+
       if (!fields.length) {
         summary.skip++
         out("  → SKIP (alles aktuell)")
       } else {
         summary.update++
         out(`  → UPDATE (${fields.join(", ")})  [${dev.id}]`)
-        if (apply) {
+        if (apply && Object.keys(update).length) {
           await updateProductsWorkflow(container).run({
             input: { products: [{ id: dev.id, ...update }] },
           })
           lines.push(`    gespeichert: ${dev.id}`)
+        }
+        if (apply && colourSteps.length) {
+          for (const step of colourSteps) {
+            await batchVariantImagesWorkflow(container).run({
+              input: { variant_id: step.variantId, add: step.add, remove: step.remove },
+            })
+          }
+          const thumbs = colourSteps
+            .filter((step) => step.thumbnail)
+            .map((step) => ({ id: step.variantId, thumbnail: step.thumbnail as string }))
+          if (thumbs.length) {
+            await updateProductVariantsWorkflow(container).run({
+              input: { product_variants: thumbs },
+            })
+          }
+          lines.push(`    Varianten verknüpft: ${colourSteps.length}`)
         }
       }
       lines.forEach((line) => out(line))
