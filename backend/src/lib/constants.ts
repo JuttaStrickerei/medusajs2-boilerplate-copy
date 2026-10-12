@@ -118,6 +118,16 @@ export const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 /**
+ * (optional) Meta Conversions API: purchases reported from the server.
+ * Only the access token (Events Manager → Einstellungen → Conversions API)
+ * is needed; the pixel id is public and the storefront's default.
+ * META_CAPI_TEST_EVENT_CODE (dev only) puts the events under "Events testen".
+ */
+export const META_PIXEL_ID = process.env.META_PIXEL_ID || '2014480182477964';
+export const META_CAPI_ACCESS_TOKEN = process.env.META_CAPI_ACCESS_TOKEN;
+export const META_CAPI_TEST_EVENT_CODE = process.env.META_CAPI_TEST_EVENT_CODE;
+
+/**
  * (optional) Meilisearch configuration
  */
 export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;

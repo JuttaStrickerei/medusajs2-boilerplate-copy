@@ -6,18 +6,25 @@ import { META_PIXEL_ID } from "./meta-pixel-id"
 export const CONSENT_REVISION = META_PIXEL_ID ? 1 : 0
 
 // vanilla-cookieconsent v3 keeps its state as URI-encoded JSON in the
-// "cc_cookie" cookie ({ categories: ["necessary", "analytics"], revision, ... })
-export function hasConsentFor(category: string): boolean {
+// "cc_cookie" cookie ({ categories: ["necessary", "analytics"], revision, ... }).
+// Takes the raw value (browser) or the decoded one (Next's cookies() on the
+// server), so both check consent the same way.
+export function consentCategoriesFrom(value: string | undefined): string[] {
+  if (!value) return []
   try {
-    const match = document.cookie.match(/(?:^|;)\s*cc_cookie=([^;]+)/)
-    if (!match) return false
-    const state = JSON.parse(decodeURIComponent(match[1]))
-    return (
-      (state?.revision ?? 0) === CONSENT_REVISION &&
-      Array.isArray(state?.categories) &&
-      state.categories.includes(category)
-    )
+    const json = value.trimStart().startsWith("{")
+      ? value
+      : decodeURIComponent(value)
+    const state = JSON.parse(json)
+    if ((state?.revision ?? 0) !== CONSENT_REVISION) return []
+    return Array.isArray(state?.categories) ? state.categories : []
   } catch {
-    return false
+    return []
   }
+}
+
+export function hasConsentFor(category: string): boolean {
+  if (typeof document === "undefined") return false
+  const match = document.cookie.match(/(?:^|;)\s*cc_cookie=([^;]+)/)
+  return consentCategoriesFrom(match?.[1]).includes(category)
 }
