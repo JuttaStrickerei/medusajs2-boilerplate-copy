@@ -3,8 +3,51 @@
 import { useEffect } from "react"
 import "vanilla-cookieconsent/dist/cookieconsent.css"
 import type { CookieConsentConfig } from "vanilla-cookieconsent"
+import { CONSENT_REVISION } from "@lib/util/consent"
+import {
+  disableMetaPixel,
+  enableMetaPixel,
+  MARKETING_CATEGORY,
+} from "@lib/util/meta-pixel"
+import { META_PIXEL_ID } from "@lib/util/meta-pixel-id"
+
+// Die Kategorie „Marketing“ gibt es nur, wenn ein Meta-Pixel eingerichtet ist
+const hasMarketing = !!META_PIXEL_ID
+
+const marketingSection = {
+  title: "Marketing-Cookies",
+  description:
+    "Mit dem Meta-Pixel messen wir, wie gut unsere Werbung auf Facebook und Instagram wirkt, und können Ihnen dort passende Anzeigen zeigen. Dazu übermittelt Ihr Browser Angaben zu Ihrem Besuch (z. B. angesehene Produkte, Warenkorb und Kauf) an Meta Platforms Ireland Ltd. Meta kann diese Daten auch in den USA verarbeiten und mit Ihrem Facebook- oder Instagram-Konto verknüpfen. Das geschieht nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie jederzeit widerrufen können.",
+  linkedCategory: MARKETING_CATEGORY,
+  cookieTable: {
+    caption: "Marketing-Cookies",
+    headers: {
+      name: "Name",
+      domain: "Domain",
+      desc: "Beschreibung",
+      exp: "Ablauf",
+    },
+    body: [
+      {
+        name: "_fbp",
+        domain: "strickerei-jutta.at",
+        desc: "Meta-Pixel – Wiedererkennung des Browsers",
+        exp: "3 Monate",
+      },
+      {
+        name: "_fbc",
+        domain: "strickerei-jutta.at",
+        desc: "Meta-Pixel – Klick auf eine Anzeige (nur nach einem solchen Klick)",
+        exp: "3 Monate",
+      },
+    ],
+  },
+}
 
 const config: CookieConsentConfig = {
+  // Neue Kategorie = neue Einwilligung: Das Banner erscheint dann noch einmal
+  revision: CONSENT_REVISION,
+
   categories: {
     necessary: {
       enabled: true,
@@ -21,11 +64,26 @@ const config: CookieConsentConfig = {
         ],
       },
     },
+    ...(hasMarketing
+      ? {
+          [MARKETING_CATEGORY]: {
+            enabled: false,
+            // Neu laden, damit das Pixel-Skript nach dem Widerruf weg ist
+            autoClear: {
+              cookies: [{ name: "_fbp" }, { name: "_fbc" }],
+              reloadPage: true,
+            },
+          },
+        }
+      : {}),
   },
 
   onConsent: ({ cookie }) => {
     if (cookie.categories.includes("analytics")) {
       gtag("consent", "update", { analytics_storage: "granted" })
+    }
+    if (cookie.categories.includes(MARKETING_CATEGORY)) {
+      enableMetaPixel()
     }
   },
 
@@ -36,6 +94,13 @@ const config: CookieConsentConfig = {
           ? "granted"
           : "denied",
       })
+    }
+    if (changedCategories.includes(MARKETING_CATEGORY)) {
+      if (cookie.categories.includes(MARKETING_CATEGORY)) {
+        enableMetaPixel()
+      } else {
+        disableMetaPixel()
+      }
     }
   },
 
@@ -60,7 +125,11 @@ const config: CookieConsentConfig = {
         consentModal: {
           title: "Wir verwenden Cookies",
           description:
-            'Wir verwenden Cookies und ähnliche Technologien. Einige sind technisch notwendig (z.\u00a0B. Warenkorb, Session), andere helfen uns, unsere Website zu verbessern. Sie können Ihre Auswahl jederzeit in den <button type="button" data-cc="show-preferencesModal" class="cc__link">Einstellungen</button> anpassen. Weitere Informationen finden Sie in unserer <a href="/at/privacy" class="cc__link">Datenschutzerklärung</a>.',
+            `Wir verwenden Cookies und ähnliche Technologien. Einige sind technisch notwendig (z.\u00a0B. Warenkorb, Session), andere helfen uns, unsere Website zu verbessern${
+            hasMarketing
+              ? " und die Wirkung unserer Werbung auf Facebook und Instagram zu messen"
+              : ""
+          }. Sie können Ihre Auswahl jederzeit in den <button type="button" data-cc="show-preferencesModal" class="cc__link">Einstellungen</button> anpassen. Weitere Informationen finden Sie in unserer <a href="/at/privacy" class="cc__link">Datenschutzerklärung</a>.`,
           acceptAllBtn: "Alle akzeptieren",
           acceptNecessaryBtn: "Nur notwendige",
           showPreferencesBtn: "Einstellungen",
@@ -113,6 +182,7 @@ const config: CookieConsentConfig = {
                 ],
               },
             },
+            ...(hasMarketing ? [marketingSection] : []),
             {
               title: "Weitere Informationen",
               description:

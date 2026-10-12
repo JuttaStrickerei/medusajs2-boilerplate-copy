@@ -10,6 +10,8 @@ import CookieConsent from "@components/cookie-consent"
 import WishlistMergePrompt from "@modules/wishlist/components/wishlist-merge-prompt"
 import { isAuthenticated } from "@lib/data/cookies"
 import JsonLd from "@modules/common/components/json-ld"
+import MetaPageView from "@modules/common/components/analytics/meta-page-view"
+import { META_PIXEL_ID } from "@lib/util/meta-pixel-id"
 
 const GA_ID = "G-VQG5PFKSXB"
 
@@ -133,6 +135,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           </WishlistProvider>
         </CartProvider>
         <CookieConsent />
+        {/* Meta Pixel: lädt erst nach Zustimmung zu „Marketing“ (lib/util/meta-pixel.ts) */}
+        {META_PIXEL_ID && <MetaPageView />}
         <JsonLd data={localBusinessSchema} />
       </body>
     </html>

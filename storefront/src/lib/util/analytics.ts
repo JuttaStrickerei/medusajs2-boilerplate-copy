@@ -1,5 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
+import { hasConsentFor } from "./consent"
 import { getProductPrice } from "./get-product-price"
+import { trackMetaEvent } from "./meta-pixel"
 
 /**
  * GA4 e-commerce helpers. `gtag` is defined inline in app/layout.tsx.
@@ -7,6 +9,8 @@ import { getProductPrice } from "./get-product-price"
  * in the cookie banner: Consent Mode alone would still send cookieless
  * pings (incl. order ids and values) before consent, which the privacy
  * page rules out.
+ * trackEvent also hands the shop events to the Meta Pixel (meta-pixel.ts),
+ * which checks its own "marketing" consent.
  * Amounts in Medusa v2 are already in currency units (110 = € 110,00).
  */
 
@@ -25,26 +29,13 @@ export type GaItem = {
   index?: number
 }
 
-// vanilla-cookieconsent v3 keeps its state as URI-encoded JSON in the
-// "cc_cookie" cookie ({ categories: ["necessary", "analytics"], ... })
-function hasAnalyticsConsent(): boolean {
-  try {
-    const match = document.cookie.match(/(?:^|;)\s*cc_cookie=([^;]+)/)
-    if (!match) return false
-    const state = JSON.parse(decodeURIComponent(match[1]))
-    return (
-      Array.isArray(state?.categories) && state.categories.includes("analytics")
-    )
-  } catch {
-    return false
-  }
-}
-
 export function trackEvent(name: string, params: Record<string, unknown>) {
-  if (typeof window === "undefined" || typeof gtag !== "function") {
+  if (typeof window === "undefined") {
     return
   }
-  if (!hasAnalyticsConsent()) {
+  // The Meta Pixel has its own consent category ("marketing")
+  trackMetaEvent(name, params)
+  if (typeof gtag !== "function" || !hasConsentFor("analytics")) {
     return
   }
   gtag("event", name, params)
