@@ -40,9 +40,12 @@ type Address = {
   phone?: string | null
 } | null
 
+// Medusa hands amounts and quantities over as BigNumber objects: Number()
+type Numeric = number | { valueOf(): number }
+
 type OrderItem = {
-  quantity: number
-  unit_price: number
+  quantity: Numeric
+  unit_price: Numeric
   variant_sku?: string | null
   variant_id?: string | null
   product_id?: string | null
@@ -53,7 +56,7 @@ export type PurchaseOrder = {
   id: string
   email?: string | null
   currency_code: string
-  total: number
+  total: Numeric
   created_at: string | Date
   customer_id?: string | null
   items: OrderItem[]
@@ -182,10 +185,10 @@ export function buildPurchaseEvent(
       content_ids: items.map(contentId),
       contents: items.map((item) => ({
         id: contentId(item),
-        quantity: item.quantity,
+        quantity: Number(item.quantity),
         item_price: Number(item.unit_price),
       })),
-      num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      num_items: items.reduce((sum, item) => sum + Number(item.quantity), 0),
     },
   }
 }

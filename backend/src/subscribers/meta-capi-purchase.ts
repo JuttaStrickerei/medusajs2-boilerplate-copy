@@ -9,7 +9,9 @@ import {
 } from "../modules/meta-capi/purchase-event"
 import { clearMetaAttributionWorkflow } from "../workflows/clear-meta-attribution"
 
-// Never traverse shipping_methods.shipping_option.* here (kills the query)
+// "total" is only computed with full items and shipping methods (as in the
+// invoice workflow). Never traverse shipping_methods.shipping_option.* here
+// (kills the query)
 const ORDER_FIELDS = [
   "id",
   "email",
@@ -19,12 +21,8 @@ const ORDER_FIELDS = [
   "customer_id",
   "metadata",
   "cart.id",
-  "items.quantity",
-  "items.unit_price",
-  "items.variant_sku",
-  "items.variant_id",
-  "items.product_id",
-  "items.title",
+  "items.*",
+  "shipping_methods.*",
   "billing_address.*",
   "shipping_address.*",
 ]
