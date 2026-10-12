@@ -22,7 +22,9 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
+      // The product feed lives under /api/ but Google Merchant Center and the
+      // Meta catalog must be able to fetch it (longest match wins)
+      allow: ["/", "/api/feeds/"],
       // Keep crawl budget on catalog pages, not on transactional/private surfaces.
       disallow: [
         "/api/",
