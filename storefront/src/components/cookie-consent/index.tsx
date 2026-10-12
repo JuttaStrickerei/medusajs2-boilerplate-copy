@@ -32,7 +32,7 @@ const pixelCookies = (domain = pixelCookieDomain()) =>
 const marketingSection = {
   title: "Marketing-Cookies",
   description:
-    "Mit dem Meta-Pixel messen wir, wie gut unsere Werbung auf Facebook und Instagram wirkt, und können Ihnen dort passende Anzeigen zeigen. Dazu übermittelt Ihr Browser Angaben zu Ihrem Besuch (z. B. angesehene Produkte, Warenkorb und Kauf) an Meta Platforms Ireland Ltd. Einen Kauf meldet zusätzlich unser Server an Meta, mit Ihrer E-Mail-Adresse in pseudonymisierter Form (als Hashwert). Meta kann diese Daten auch in den USA verarbeiten und mit Ihrem Facebook- oder Instagram-Konto verknüpfen. Das geschieht nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie jederzeit widerrufen können.",
+    "Mit dem Meta-Pixel messen wir, wie gut unsere Werbung auf Facebook und Instagram wirkt, und können Ihnen dort passende Anzeigen zeigen. Dazu übermittelt Ihr Browser Angaben zu Ihrem Besuch (z. B. angesehene Produkte, Warenkorb und Kauf) an Meta Platforms Ireland Ltd. Kontaktdaten, die Sie bei uns eingeben (E-Mail-Adresse, Telefonnummer, Name, Ort, Postleitzahl und Land), gehen dabei nur in pseudonymisierter Form (als Hashwert) an Meta. Einen Kauf meldet zusätzlich unser Server an Meta. Meta kann diese Daten auch in den USA verarbeiten und mit Ihrem Facebook- oder Instagram-Konto verknüpfen. Das geschieht nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie jederzeit widerrufen können.",
   linkedCategory: MARKETING_CATEGORY,
   cookieTable: {
     caption: "Marketing-Cookies",

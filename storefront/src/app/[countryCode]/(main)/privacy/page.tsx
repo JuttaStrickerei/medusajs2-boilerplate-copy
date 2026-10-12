@@ -400,7 +400,15 @@ export default function PrivacyPage() {
                       Hinzufügen zum Warenkorb, Beginn des Bestellvorgangs und
                       abgeschlossener Kauf – jeweils mit Artikelnummer, Menge,
                       Preis und Währung, beim Kauf zusätzlich mit Bestellkennung
-                      und Bestellwert. Übermittlung durch unseren Server
+                      und Bestellwert. Erweiterter Abgleich: Geben Sie auf unserer
+                      Website Kontaktdaten ein (z. B. im Bestellvorgang),
+                      übermittelt der Meta-Pixel diese in pseudonymisierter Form
+                      (als sogenannter Hashwert nach dem Verfahren SHA-256) an
+                      Meta, und zwar E-Mail-Adresse, Telefonnummer, Vor- und
+                      Nachname, Ort, Bundesland, Postleitzahl und Land. Meta nutzt
+                      die Hashwerte, um die Ereignisse Ihrem Facebook- oder
+                      Instagram-Konto zuzuordnen, falls Sie dort mit diesen
+                      Angaben registriert sind. Übermittlung durch unseren Server
                       (Conversions API): Einen abgeschlossenen Kauf meldet
                       zusätzlich unser Server direkt an Meta, damit er auch dann
                       gezählt wird, wenn Ihr Browser die Bestellbestätigung nicht
@@ -409,14 +417,12 @@ export default function PrivacyPage() {
                       denselben Kauf handelt, und zählt ihn nur einmal. Dabei
                       übermitteln wir die oben genannten Angaben zum Kauf, Ihre
                       IP-Adresse, Angaben zu Ihrem Browser, die Kennungen der
-                      Cookies _fbp und _fbc sowie Ihre E-Mail-Adresse in
-                      pseudonymisierter Form (als sogenannter Hashwert nach dem
-                      Verfahren SHA-256). Meta nutzt den Hashwert, um den Kauf
-                      Ihrem Facebook- oder Instagram-Konto zuzuordnen, falls Sie
-                      dort mit dieser E-Mail-Adresse registriert sind. Ihren
-                      Namen, Ihre Telefonnummer oder Ihre Anschrift übermitteln
-                      wir nicht. Sind Sie bei Facebook oder Instagram angemeldet,
-                      kann Meta Ihren Besuch Ihrem
+                      Cookies _fbp und _fbc sowie aus Ihrer Bestellung
+                      E-Mail-Adresse, Telefonnummer, Vor- und Nachname, Ort,
+                      Bundesland, Postleitzahl, Land und Ihre Kundennummer,
+                      ebenfalls nur als Hashwert. Straße und Hausnummer
+                      übermitteln wir nicht. Sind Sie bei Facebook oder Instagram
+                      angemeldet, kann Meta Ihren Besuch Ihrem
                       Nutzerkonto zuordnen. Gemeinsame Verantwortlichkeit: Für
                       die Erhebung der Daten auf unserer Website und ihre
                       Übermittlung an Meta sind wir gemeinsam mit Meta
