@@ -2,6 +2,7 @@
 
 import { isStripe, isManual } from "@lib/constants"
 import { placeOrder } from "@lib/data/cart"
+import { saveMetaAttribution } from "@lib/data/meta-attribution"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
@@ -9,6 +10,16 @@ import { useParams } from "next/navigation"
 import React, { useEffect, useState, useCallback } from "react"
 import ErrorMessage from "../error-message"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
+
+// Meta attribution (lib/data/meta-attribution.ts) is saved right before the
+// payment; the payment never waits longer than this for it
+const ATTRIBUTION_TIMEOUT_MS = 2000
+
+const saveAttributionBriefly = () =>
+  Promise.race([
+    saveMetaAttribution(),
+    new Promise<void>((resolve) => setTimeout(resolve, ATTRIBUTION_TIMEOUT_MS)),
+  ])
 
 /**
  * @name PaymentButton
@@ -151,6 +162,10 @@ const StripePaymentButton = ({
       return
     }
 
+    // Before a possible redirect (Klarna, PayPal, EPS): afterwards only the
+    // backend can report the purchase to Meta
+    await saveAttributionBriefly()
+
     const { error } = await stripe.confirmPayment({
       elements,
       clientSecret,
@@ -245,10 +260,11 @@ const ManualTestPaymentButton = ({
     }
   }
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setSubmitting(true)
     // Notify parent immediately so it can lock the UI against stale re-renders.
     onPlacingOrder?.()
+    await saveAttributionBriefly()
     onPaymentCompleted()
   }
 

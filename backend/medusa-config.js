@@ -33,6 +33,9 @@ import {
   PAYPAL_AUTH_WEBHOOK_ID,
   PAYPAL_CLIENT_ID,
   PAYPAL_CLIENT_SECRET,
+  META_PIXEL_ID,
+  META_CAPI_ACCESS_TOKEN,
+  META_CAPI_TEST_EVENT_CODE,
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -97,6 +100,15 @@ const medusaConfig = {
     },
     ...(SENDCLOUD_PUBLIC_KEY && SENDCLOUD_SECRET_KEY ? [{
       resolve: './src/modules/sendcloud-shipment',
+    }] : []),
+    // Meta Conversions API (Purchase vom Server, nur mit Marketing-Zustimmung)
+    ...(META_CAPI_ACCESS_TOKEN ? [{
+      resolve: './src/modules/meta-capi',
+      options: {
+        pixelId: META_PIXEL_ID,
+        accessToken: META_CAPI_ACCESS_TOKEN,
+        testEventCode: META_CAPI_TEST_EVENT_CODE,
+      },
     }] : []),
     {
       key: Modules.FILE,
