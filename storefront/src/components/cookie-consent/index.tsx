@@ -3,8 +3,66 @@
 import { useEffect } from "react"
 import "vanilla-cookieconsent/dist/cookieconsent.css"
 import type { CookieConsentConfig } from "vanilla-cookieconsent"
+import { CONSENT_REVISION } from "@lib/util/consent"
+import { loadGoogleAnalytics } from "@lib/util/google-analytics"
+import {
+  disableMetaPixel,
+  enableMetaPixel,
+  MARKETING_CATEGORY,
+} from "@lib/util/meta-pixel"
+import { META_PIXEL_ID } from "@lib/util/meta-pixel-id"
+
+// Die Kategorie „Marketing“ gibt es nur, wenn ein Meta-Pixel eingerichtet ist
+const hasMarketing = !!META_PIXEL_ID
+
+// fbevents.js legt _fbp/_fbc auf der Hauptdomain an (.strickerei-jutta.at statt
+// shop.strickerei-jutta.at). Gelöscht wird daher dort und auf dem Host selbst.
+const pixelCookieDomain = (): string | undefined => {
+  if (typeof window === "undefined") return undefined
+  const parts = window.location.hostname.split(".")
+  return parts.length > 2 ? `.${parts.slice(-2).join(".")}` : undefined
+}
+
+const pixelCookies = (domain = pixelCookieDomain()) =>
+  ["_fbp", "_fbc"].flatMap((name) => [
+    { name },
+    ...(domain ? [{ name, domain }] : []),
+  ])
+
+const marketingSection = {
+  title: "Marketing-Cookies",
+  description:
+    "Mit dem Meta-Pixel messen wir, wie gut unsere Werbung auf Facebook und Instagram wirkt, und können Ihnen dort passende Anzeigen zeigen. Dazu übermittelt Ihr Browser Angaben zu Ihrem Besuch (z. B. angesehene Produkte, Warenkorb und Kauf) an Meta Platforms Ireland Ltd. Kontaktdaten, die Sie bei uns eingeben (E-Mail-Adresse, Telefonnummer, Name, Ort, Postleitzahl und Land), gehen dabei nur in pseudonymisierter Form (als Hashwert) an Meta. Einen Kauf meldet zusätzlich unser Server an Meta. Meta kann diese Daten auch in den USA verarbeiten und mit Ihrem Facebook- oder Instagram-Konto verknüpfen. Das geschieht nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie jederzeit widerrufen können.",
+  linkedCategory: MARKETING_CATEGORY,
+  cookieTable: {
+    caption: "Marketing-Cookies",
+    headers: {
+      name: "Name",
+      domain: "Domain",
+      desc: "Beschreibung",
+      exp: "Ablauf",
+    },
+    body: [
+      {
+        name: "_fbp",
+        domain: "strickerei-jutta.at",
+        desc: "Meta-Pixel – Wiedererkennung des Browsers",
+        exp: "3 Monate",
+      },
+      {
+        name: "_fbc",
+        domain: "strickerei-jutta.at",
+        desc: "Meta-Pixel – Klick auf eine Anzeige (nur nach einem solchen Klick)",
+        exp: "3 Monate",
+      },
+    ],
+  },
+}
 
 const config: CookieConsentConfig = {
+  // Neue Kategorie = neue Einwilligung: Das Banner erscheint dann noch einmal
+  revision: CONSENT_REVISION,
+
   categories: {
     necessary: {
       enabled: true,
@@ -12,6 +70,7 @@ const config: CookieConsentConfig = {
     },
     analytics: {
       enabled: false,
+      // Neu laden, damit gtag.js nach dem Widerruf weg ist
       autoClear: {
         cookies: [
           { name: /^_ga/ },
@@ -19,23 +78,46 @@ const config: CookieConsentConfig = {
           { name: "_gat" },
           { name: /^_gac_/ },
         ],
+        reloadPage: true,
       },
     },
+    ...(hasMarketing
+      ? {
+          [MARKETING_CATEGORY]: {
+            enabled: false,
+            // Neu laden, damit das Pixel-Skript nach dem Widerruf weg ist
+            autoClear: {
+              cookies: pixelCookies(),
+              reloadPage: true,
+            },
+          },
+        }
+      : {}),
   },
 
   onConsent: ({ cookie }) => {
     if (cookie.categories.includes("analytics")) {
-      gtag("consent", "update", { analytics_storage: "granted" })
+      loadGoogleAnalytics()
+    }
+    if (cookie.categories.includes(MARKETING_CATEGORY)) {
+      enableMetaPixel()
     }
   },
 
   onChange: ({ cookie, changedCategories }) => {
     if (changedCategories.includes("analytics")) {
-      gtag("consent", "update", {
-        analytics_storage: cookie.categories.includes("analytics")
-          ? "granted"
-          : "denied",
-      })
+      if (cookie.categories.includes("analytics")) {
+        loadGoogleAnalytics()
+      } else {
+        gtag("consent", "update", { analytics_storage: "denied" })
+      }
+    }
+    if (changedCategories.includes(MARKETING_CATEGORY)) {
+      if (cookie.categories.includes(MARKETING_CATEGORY)) {
+        enableMetaPixel()
+      } else {
+        disableMetaPixel()
+      }
     }
   },
 
@@ -60,7 +142,11 @@ const config: CookieConsentConfig = {
         consentModal: {
           title: "Wir verwenden Cookies",
           description:
-            'Wir verwenden Cookies und ähnliche Technologien. Einige sind technisch notwendig (z.\u00a0B. Warenkorb, Session), andere helfen uns, unsere Website zu verbessern. Sie können Ihre Auswahl jederzeit in den <button type="button" data-cc="show-preferencesModal" class="cc__link">Einstellungen</button> anpassen. Weitere Informationen finden Sie in unserer <a href="/at/privacy" class="cc__link">Datenschutzerklärung</a>.',
+            `Wir verwenden Cookies und ähnliche Technologien. Einige sind technisch notwendig (z.\u00a0B. Warenkorb, Session), andere helfen uns, unsere Website zu verbessern${
+            hasMarketing
+              ? " und die Wirkung unserer Werbung auf Facebook und Instagram zu messen"
+              : ""
+          }. Sie können Ihre Auswahl jederzeit in den <button type="button" data-cc="show-preferencesModal" class="cc__link">Einstellungen</button> anpassen. Weitere Informationen finden Sie in unserer <a href="/at/privacy" class="cc__link">Datenschutzerklärung</a>.`,
           acceptAllBtn: "Alle akzeptieren",
           acceptNecessaryBtn: "Nur notwendige",
           showPreferencesBtn: "Einstellungen",
@@ -113,6 +199,7 @@ const config: CookieConsentConfig = {
                 ],
               },
             },
+            ...(hasMarketing ? [marketingSection] : []),
             {
               title: "Weitere Informationen",
               description:

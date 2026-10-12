@@ -1,7 +1,6 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import localFont from "next/font/local"
-import Script from "next/script"
 import "styles/globals.css"
 import { ToastProvider } from "@components/ui"
 import { WishlistProvider } from "@lib/context/wishlist-context"
@@ -10,8 +9,8 @@ import CookieConsent from "@components/cookie-consent"
 import WishlistMergePrompt from "@modules/wishlist/components/wishlist-merge-prompt"
 import { isAuthenticated } from "@lib/data/cookies"
 import JsonLd from "@modules/common/components/json-ld"
-
-const GA_ID = "G-VQG5PFKSXB"
+import MetaPageView from "@modules/common/components/analytics/meta-page-view"
+import { META_PIXEL_ID } from "@lib/util/meta-pixel-id"
 
 // Schriften liegen im Projekt (src/fonts, Google-Fonts-Subset "latin"), damit
 // der Build nicht von fonts.googleapis.com abhängt. Der Familienname bleibt
@@ -113,17 +112,12 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
                 ad_personalization:'denied',
                 wait_for_update:500
               });
-              gtag('js',new Date());
-              gtag('config','${GA_ID}');
             `,
           }}
         />
       </head>
       <body className="font-sans antialiased bg-stone-50 text-stone-800">
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-          strategy="afterInteractive"
-        />
+        {/* Google Analytics: gtag.js lädt erst nach Zustimmung zu „Analyse“ (lib/util/google-analytics.ts) */}
         <CartProvider>
           <WishlistProvider initialAuthenticated={authed}>
             <ToastProvider>
@@ -133,6 +127,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           </WishlistProvider>
         </CartProvider>
         <CookieConsent />
+        {/* Meta Pixel: lädt erst nach Zustimmung zu „Marketing“ (lib/util/meta-pixel.ts) */}
+        {META_PIXEL_ID && <MetaPageView />}
         <JsonLd data={localBusinessSchema} />
       </body>
     </html>

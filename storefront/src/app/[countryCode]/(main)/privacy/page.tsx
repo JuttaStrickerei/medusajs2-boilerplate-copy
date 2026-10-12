@@ -1,5 +1,11 @@
 import { Metadata } from "next"
 import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
+import { META_PIXEL_ID } from "@lib/util/meta-pixel-id"
+
+// Abschnitt zum Meta-Pixel nur, solange das Pixel eingerichtet ist
+const hasMetaPixel = !!META_PIXEL_ID
+const LINK_CLASS =
+  "text-stone-800 underline underline-offset-2 hover:text-stone-600 break-all"
 
 export const metadata: Metadata = {
   title: "Datenschutzerklärung",
@@ -33,7 +39,7 @@ export default function PrivacyPage() {
                   Zwecke und die Rechtsgrundlagen der Datenverarbeitung im
                   Rahmen unseres Webshops auf.
                 </p>
-                <p className="text-stone-600 mb-6">Stand: April 2026</p>
+                <p className="text-stone-600 mb-6">Stand: Oktober 2026</p>
 
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
                   1. Identität und Kontaktdaten des Verantwortlichen
@@ -294,8 +300,8 @@ export default function PrivacyPage() {
                   Kontrolle. Sie können Ihre initial getroffenen
                   Cookie-Einstellungen jederzeit anpassen und einmal erteilte
                   Einwilligungen für die Zukunft widerrufen, indem Sie unser
-                  Cookie-Banner über den Link „Datenschutzeinstellungen“ (zu
-                  finden am unteren Rand der Website) erneut aufrufen.
+                  Cookie-Banner über den Link „Cookie-Einstellungen“ (zu finden
+                  am unteren Rand der Website) erneut aufrufen.
                 </p>
 
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
@@ -364,8 +370,123 @@ export default function PrivacyPage() {
                   .
                 </p>
 
+                {hasMetaPixel && (
+                  <>
+                    <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
+                      8. Werbung und Erfolgsmessung mit dem Meta-Pixel und der
+                      Conversions API (Facebook und Instagram)
+                    </h2>
+                    <p className="text-stone-600 mb-4">
+                      Ausschließlich dann, wenn Sie uns hierzu im Cookie-Banner
+                      unter „Marketing“ Ihre aktive Einwilligung erteilt haben
+                      (Art. 6 Abs. 1 lit. a DSGVO in Verbindung mit § 165 Abs. 3
+                      TKG 2021), setzen wir auf unserer Website den „Meta-Pixel“
+                      und die „Conversions API“ der Meta Platforms Ireland
+                      Limited, Merrion Road, Dublin 4, D04 X2K5, Irland („Meta“)
+                      ein. Ohne Ihre Einwilligung wird der Meta-Pixel nicht
+                      geladen und es werden keine Daten an Meta übermittelt, weder
+                      von Ihrem Browser noch von unserem Server. Zweck der
+                      Verarbeitung: Damit messen wir, wie wirksam unsere
+                      Werbeanzeigen auf Facebook und Instagram sind
+                      (Conversion-Messung), und können Besucherinnen und Besuchern
+                      unserer Website dort Anzeigen zu unseren Produkten zeigen
+                      (Remarketing über sogenannte Custom Audiences). Verarbeitete
+                      Daten: Beim Aufruf unserer Seiten übermittelt Ihr Browser
+                      insbesondere die aufgerufene Seite samt der zuvor besuchten
+                      Seite, Datum und Uhrzeit, Ihre IP-Adresse, Angaben zu
+                      Browser und Gerät sowie die Kennungen der Cookies _fbp und
+                      _fbc an Meta. Zusätzlich übermitteln wir folgende
+                      Ereignisse: Aufruf einer Seite, Ansicht eines Produkts,
+                      Hinzufügen zum Warenkorb, Beginn des Bestellvorgangs und
+                      abgeschlossener Kauf – jeweils mit Artikelnummer, Menge,
+                      Preis und Währung, beim Kauf zusätzlich mit Bestellkennung
+                      und Bestellwert. Erweiterter Abgleich: Geben Sie auf unserer
+                      Website Kontaktdaten ein (z. B. im Bestellvorgang),
+                      übermittelt der Meta-Pixel diese in pseudonymisierter Form
+                      (als sogenannter Hashwert nach dem Verfahren SHA-256) an
+                      Meta, und zwar E-Mail-Adresse, Telefonnummer, Vor- und
+                      Nachname, Ort, Bundesland, Postleitzahl und Land. Meta nutzt
+                      die Hashwerte, um die Ereignisse Ihrem Facebook- oder
+                      Instagram-Konto zuzuordnen, falls Sie dort mit diesen
+                      Angaben registriert sind. Übermittlung durch unseren Server
+                      (Conversions API): Einen abgeschlossenen Kauf meldet
+                      zusätzlich unser Server direkt an Meta, damit er auch dann
+                      gezählt wird, wenn Ihr Browser die Bestellbestätigung nicht
+                      erreicht (z. B. nach einer Zahlung über Klarna oder PayPal).
+                      Anhand der Bestellkennung erkennt Meta, dass es sich um
+                      denselben Kauf handelt, und zählt ihn nur einmal. Dabei
+                      übermitteln wir die oben genannten Angaben zum Kauf, Ihre
+                      IP-Adresse, Angaben zu Ihrem Browser, die Kennungen der
+                      Cookies _fbp und _fbc sowie aus Ihrer Bestellung
+                      E-Mail-Adresse, Telefonnummer, Vor- und Nachname, Ort,
+                      Bundesland, Postleitzahl, Land und Ihre Kundennummer,
+                      ebenfalls nur als Hashwert. Straße und Hausnummer
+                      übermitteln wir nicht. Sind Sie bei Facebook oder Instagram
+                      angemeldet, kann Meta Ihren Besuch Ihrem
+                      Nutzerkonto zuordnen. Gemeinsame Verantwortlichkeit: Für
+                      die Erhebung der Daten auf unserer Website und ihre
+                      Übermittlung an Meta sind wir gemeinsam mit Meta
+                      verantwortlich (Art. 26 DSGVO). Die Einzelheiten regelt
+                      die Vereinbarung von Meta über die gemeinsame
+                      Verantwortlichkeit („Controller Addendum“):{" "}
+                      <a
+                        href="https://www.facebook.com/legal/controller_addendum"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={LINK_CLASS}
+                      >
+                        https://www.facebook.com/legal/controller_addendum
+                      </a>
+                      . Danach ist Meta dafür zuständig, Ihnen Auskunft über die
+                      bei Meta gespeicherten Daten zu geben und Ihre weiteren
+                      Rechte nach Art. 15 bis 20 DSGVO zu erfüllen. Die
+                      anschließende Verarbeitung der Daten durch Meta erfolgt in
+                      alleiniger Verantwortung von Meta; nähere Informationen
+                      finden Sie in der Datenschutzrichtlinie von Meta:{" "}
+                      <a
+                        href="https://www.facebook.com/privacy/policy/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={LINK_CLASS}
+                      >
+                        https://www.facebook.com/privacy/policy/
+                      </a>
+                      . Drittlandübermittlung in die USA und DPF: Meta kann die
+                      Daten auch an die Meta Platforms, Inc. in den USA
+                      übermitteln. Die Meta Platforms, Inc. ist nach dem EU-US
+                      Data Privacy Framework (DPF) zertifiziert; die
+                      Übermittlung erfolgt daher auf Grundlage des
+                      Angemessenheitsbeschlusses der Europäischen Kommission
+                      (Art. 45 DSGVO). Speicherdauer: Die Cookies _fbp und _fbc
+                      werden nach 3 Monaten gelöscht. Die Angaben für die
+                      Übermittlung durch unseren Server (IP-Adresse, Angaben zum
+                      Browser, Kennungen der Cookies _fbp und _fbc) speichern wir
+                      zu Ihrer Bestellung nur, bis der Kauf an Meta gemeldet ist,
+                      und löschen sie danach. Zielgruppen aus
+                      Besucherinnen und Besuchern unserer Website legen wir bei
+                      Meta mit einer Laufzeit von höchstens 180 Tagen an.
+                      Widerrufsmöglichkeit: Sie können Ihre Einwilligung
+                      jederzeit mit Wirkung für die Zukunft widerrufen, indem Sie
+                      in den Cookie-Einstellungen (Link am unteren Rand der
+                      Website) die Kategorie „Marketing“ abwählen; die Cookies
+                      _fbp und _fbc werden dann gelöscht. Ihre
+                      Werbeeinstellungen bei Meta können Sie außerdem unter{" "}
+                      <a
+                        href="https://accountscenter.facebook.com/ad_preferences"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={LINK_CLASS}
+                      >
+                        https://accountscenter.facebook.com/ad_preferences
+                      </a>{" "}
+                      anpassen.
+                    </p>
+                  </>
+                )}
+
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
-                  8. Ihre weitreichenden Rechte als betroffene Person
+                  {hasMetaPixel ? 9 : 8}. Ihre weitreichenden Rechte als
+                  betroffene Person
                 </h2>
                 <p className="text-stone-600 mb-4">
                   Der europäische Gesetzgeber räumt Ihnen durch die DSGVO
@@ -475,8 +596,11 @@ export default function PrivacyPage() {
                         </td>
                         <td className="p-3 small:p-4 border-l border-stone-200 align-top">
                           Sie können eine uns einmal erteilte
-                          datenschutzrechtliche Einwilligung (z. B. für
-                          Analyse-Cookies oder den Newsletter) jederzeit, ohne
+                          datenschutzrechtliche Einwilligung (z. B. für{" "}
+                          {hasMetaPixel
+                            ? "Analyse- und Marketing-Cookies"
+                            : "Analyse-Cookies"}{" "}
+                          oder den Newsletter) jederzeit, ohne
                           Angabe von Gründen, mit Wirkung für die Zukunft
                           widerrufen.
                         </td>
