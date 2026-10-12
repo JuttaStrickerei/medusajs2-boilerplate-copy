@@ -14,6 +14,20 @@ import { META_PIXEL_ID } from "@lib/util/meta-pixel-id"
 // Die Kategorie „Marketing“ gibt es nur, wenn ein Meta-Pixel eingerichtet ist
 const hasMarketing = !!META_PIXEL_ID
 
+// fbevents.js legt _fbp/_fbc auf der Hauptdomain an (.strickerei-jutta.at statt
+// shop.strickerei-jutta.at). Gelöscht wird daher dort und auf dem Host selbst.
+const pixelCookieDomain = (): string | undefined => {
+  if (typeof window === "undefined") return undefined
+  const parts = window.location.hostname.split(".")
+  return parts.length > 2 ? `.${parts.slice(-2).join(".")}` : undefined
+}
+
+const pixelCookies = (domain = pixelCookieDomain()) =>
+  ["_fbp", "_fbc"].flatMap((name) => [
+    { name },
+    ...(domain ? [{ name, domain }] : []),
+  ])
+
 const marketingSection = {
   title: "Marketing-Cookies",
   description:
@@ -70,7 +84,7 @@ const config: CookieConsentConfig = {
             enabled: false,
             // Neu laden, damit das Pixel-Skript nach dem Widerruf weg ist
             autoClear: {
-              cookies: [{ name: "_fbp" }, { name: "_fbc" }],
+              cookies: pixelCookies(),
               reloadPage: true,
             },
           },
