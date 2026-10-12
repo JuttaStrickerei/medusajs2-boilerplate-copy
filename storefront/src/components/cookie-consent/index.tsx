@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import "vanilla-cookieconsent/dist/cookieconsent.css"
 import type { CookieConsentConfig } from "vanilla-cookieconsent"
 import { CONSENT_REVISION } from "@lib/util/consent"
+import { loadGoogleAnalytics } from "@lib/util/google-analytics"
 import {
   disableMetaPixel,
   enableMetaPixel,
@@ -31,7 +32,7 @@ const pixelCookies = (domain = pixelCookieDomain()) =>
 const marketingSection = {
   title: "Marketing-Cookies",
   description:
-    "Mit dem Meta-Pixel messen wir, wie gut unsere Werbung auf Facebook und Instagram wirkt, und können Ihnen dort passende Anzeigen zeigen. Dazu übermittelt Ihr Browser Angaben zu Ihrem Besuch (z. B. angesehene Produkte, Warenkorb und Kauf) an Meta Platforms Ireland Ltd. Meta kann diese Daten auch in den USA verarbeiten und mit Ihrem Facebook- oder Instagram-Konto verknüpfen. Das geschieht nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie jederzeit widerrufen können.",
+    "Mit dem Meta-Pixel messen wir, wie gut unsere Werbung auf Facebook und Instagram wirkt, und können Ihnen dort passende Anzeigen zeigen. Dazu übermittelt Ihr Browser Angaben zu Ihrem Besuch (z. B. angesehene Produkte, Warenkorb und Kauf) an Meta Platforms Ireland Ltd. Einen Kauf meldet zusätzlich unser Server an Meta, mit Ihrer E-Mail-Adresse in pseudonymisierter Form (als Hashwert). Meta kann diese Daten auch in den USA verarbeiten und mit Ihrem Facebook- oder Instagram-Konto verknüpfen. Das geschieht nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie jederzeit widerrufen können.",
   linkedCategory: MARKETING_CATEGORY,
   cookieTable: {
     caption: "Marketing-Cookies",
@@ -69,6 +70,7 @@ const config: CookieConsentConfig = {
     },
     analytics: {
       enabled: false,
+      // Neu laden, damit gtag.js nach dem Widerruf weg ist
       autoClear: {
         cookies: [
           { name: /^_ga/ },
@@ -76,6 +78,7 @@ const config: CookieConsentConfig = {
           { name: "_gat" },
           { name: /^_gac_/ },
         ],
+        reloadPage: true,
       },
     },
     ...(hasMarketing
@@ -94,7 +97,7 @@ const config: CookieConsentConfig = {
 
   onConsent: ({ cookie }) => {
     if (cookie.categories.includes("analytics")) {
-      gtag("consent", "update", { analytics_storage: "granted" })
+      loadGoogleAnalytics()
     }
     if (cookie.categories.includes(MARKETING_CATEGORY)) {
       enableMetaPixel()
@@ -103,11 +106,11 @@ const config: CookieConsentConfig = {
 
   onChange: ({ cookie, changedCategories }) => {
     if (changedCategories.includes("analytics")) {
-      gtag("consent", "update", {
-        analytics_storage: cookie.categories.includes("analytics")
-          ? "granted"
-          : "denied",
-      })
+      if (cookie.categories.includes("analytics")) {
+        loadGoogleAnalytics()
+      } else {
+        gtag("consent", "update", { analytics_storage: "denied" })
+      }
     }
     if (changedCategories.includes(MARKETING_CATEGORY)) {
       if (cookie.categories.includes(MARKETING_CATEGORY)) {

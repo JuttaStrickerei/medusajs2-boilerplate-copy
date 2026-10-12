@@ -112,6 +112,22 @@ type MetaEvent = {
   eventId?: string
 }
 
+// Content fields as the product feed will have them: a variant (SKU, else
+// variant id) is a "product", the product it belongs to a "product_group"
+function contentFields(items: GaItem[], level: "product" | "product_group") {
+  const idOf = (item: GaItem) =>
+    level === "product_group" ? item.item_group_id ?? item.item_id : item.item_id
+  return {
+    content_type: level,
+    content_ids: items.map(idOf),
+    contents: items.map((item) => ({
+      id: idOf(item),
+      quantity: item.quantity ?? 1,
+      ...(typeof item.price === "number" ? { item_price: item.price } : {}),
+    })),
+  }
+}
+
 // GA4 e-commerce event → Meta standard event (others are not sent to Meta)
 function toMetaEvent(
   gaName: string,
@@ -119,23 +135,19 @@ function toMetaEvent(
 ): MetaEvent | null {
   const items = Array.isArray(params.items) ? (params.items as GaItem[]) : []
   const numItems = items.reduce((sum, item) => sum + (item.quantity ?? 1), 0)
-  const shared = {
-    content_type: "product",
-    content_ids: items.map((item) => item.item_id),
-    contents: items.map((item) => ({
-      id: item.item_id,
-      quantity: item.quantity ?? 1,
-      ...(typeof item.price === "number" ? { item_price: item.price } : {}),
-    })),
-    currency: params.currency,
-    value: params.value,
-  }
+  const money = { currency: params.currency, value: params.value }
+  const shared = { ...contentFields(items, "product"), ...money }
 
   switch (gaName) {
     case "view_item":
+      // The product page shows the product before a size or colour is picked
       return {
         name: "ViewContent",
-        data: { ...shared, content_name: items[0]?.item_name },
+        data: {
+          ...contentFields(items, "product_group"),
+          ...money,
+          content_name: items[0]?.item_name,
+        },
       }
     case "add_to_cart":
       return { name: "AddToCart", data: shared }
