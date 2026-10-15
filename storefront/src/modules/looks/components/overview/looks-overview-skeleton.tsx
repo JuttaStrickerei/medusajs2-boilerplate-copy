@@ -5,11 +5,11 @@ import { RAIL_ITEM } from "@modules/looks/components/overview/look-tile"
 const PLACEHOLDER_TILES = 5
 
 /**
- * Platzhalter der Looks-Übersicht: gleiche Abstände wie Kopf, Chip-Leiste
- * und erste Farbwelt, damit beim Laden nichts springt. Liegt in der
- * Routengruppe (overview), erscheint also nie vor einer Look-Seite.
+ * Platzhalter der Looks-Übersicht, solange die Teile laden: gleiche Abstände
+ * wie Kopf, Chip-Leiste und erste Farbwelt, damit beim Laden nichts springt.
+ * Bewusst kein loading.tsx: Unbekannte Saisons kämen sonst mit 200 statt 404.
  */
-export default function LooksOverviewLoading() {
+export default function LooksOverviewSkeleton() {
   return (
     <div className="bg-stone-50">
       <p role="status" className="sr-only">
