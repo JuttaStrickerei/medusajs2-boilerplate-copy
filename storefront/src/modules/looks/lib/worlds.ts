@@ -220,15 +220,14 @@ export const LOOK_WORLDS: LookWorld[] = [
  * den FS26-Garnen gemessen (das Rot ist heller als das HW26-Rot, das Braun
  * wärmer), Abschlusskacheln in Garnfarbe und kein dunkles Band. Reihenfolge
  * von Rot über Gelb und Grün zu Braun und Schwarz-Weiß; die Tupfen ziehen
- * sich als Motiv durch Mohn, Zimt und Tinte.
+ * sich als Motiv durch Rot & Weiß, Zimt & Tupfen und Schwarz & Weiß.
  */
 export const FS26_WORLDS: LookWorld[] = [
   {
-    key: "mohn-kreide",
-    name: "Mohn & Kreide",
-    shortName: "Mohn",
-    tagline:
-      "Mohnrot und Weiß, dazu viele Tupfen – fröhlich wie ein Sommertag.",
+    key: "rot-weiss",
+    name: "Rot & Weiß",
+    shortName: "Rot & Weiß",
+    tagline: "Rot und Weiß, dazu viele Tupfen – fröhlich wie ein Sommertag.",
     // FS26-Rot aus den Fotos von DOT, DOTTIR und RENO
     swatches: [{ name: "Rot", hex: "#C0142A" }, yarnSwatch("Weiß")],
     handles: ["look-kleid-dot", "look-dottir", "look-maria-weiss", "look-reno"],
@@ -244,10 +243,10 @@ export const FS26_WORLDS: LookWorld[] = [
     chipTint: "#FBEAE6",
   },
   {
-    key: "sonnengelb-leinen",
-    name: "Sonnengelb & Leinen",
-    shortName: "Sonnengelb",
-    tagline: "Sonnengelb, Creme und Sand – hell und leicht.",
+    key: "gelb-beige",
+    name: "Gelb & Beige",
+    shortName: "Gelb & Beige",
+    tagline: "Gelb, Creme und Beige – hell und leicht.",
     // Gelb der Leinenjacke EXTRA
     swatches: [{ name: "Gelb", hex: "#F0C93B" }, yarnSwatch("Beige")],
     handles: ["look-extra", "look-buttoni", "look-renoff"],
@@ -307,10 +306,10 @@ export const FS26_WORLDS: LookWorld[] = [
     chipTint: "#F4E7DC",
   },
   {
-    key: "tinte-papier",
-    name: "Tinte & Papier",
-    shortName: "Tinte",
-    tagline: "Schwarz mit weißen Akzenten – klar wie Tinte auf Papier.",
+    key: "schwarz-weiss",
+    name: "Schwarz & Weiß",
+    shortName: "Schwarz & Weiß",
+    tagline: "Schwarz mit weißen Akzenten – klar und elegant.",
     swatches: [yarnSwatch("Schwarz"), yarnSwatch("Weiß")],
     handles: ["look-max-dot", "look-bernir"],
     storeColors: ["schwarz"],
