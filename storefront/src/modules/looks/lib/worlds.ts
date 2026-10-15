@@ -215,50 +215,80 @@ export const LOOK_WORLDS: LookWorld[] = [
  * Farbwelten Frühjahr/Sommer 2026 (/looks/saison/fs-2026). LOOK_WORLDS oben
  * bleiben die der aktuellen Saison (Startseite, /looks); die Übersicht nutzt
  * ALL_LOOK_WORLDS und zeigt nur Welten mit Looks der angezeigten Saison.
+ *
+ * Eigene Sommerpalette statt der HW26-Töne: helle Hintergründe, Farben aus
+ * den FS26-Garnen gemessen (das Rot ist heller als das HW26-Rot, das Braun
+ * wärmer), Abschlusskacheln in Garnfarbe und kein dunkles Band. Reihenfolge
+ * von Rot über Gelb und Grün zu Braun und Schwarz-Weiß; die Tupfen ziehen
+ * sich als Motiv durch Mohn, Zimt und Tinte.
  */
 export const FS26_WORLDS: LookWorld[] = [
   {
-    key: "rot-weiss",
-    name: "Rot & Weiß",
-    shortName: "Rot & Weiß",
-    tagline: "Rot, Weiß und Punkte – fröhlich und sommerlich.",
-    swatches: [yarnSwatch("Rot"), yarnSwatch("Weiß")],
-    handles: ["look-kleid-dot", "look-dottir", "look-reno", "look-maria-weiss"],
+    key: "mohn-kreide",
+    name: "Mohn & Kreide",
+    shortName: "Mohn",
+    tagline:
+      "Mohnrot und Weiß, dazu viele Tupfen – fröhlich wie ein Sommertag.",
+    // FS26-Rot aus den Fotos von DOT, DOTTIR und RENO
+    swatches: [{ name: "Rot", hex: "#C0142A" }, yarnSwatch("Weiß")],
+    handles: ["look-kleid-dot", "look-dottir", "look-maria-weiss", "look-reno"],
     storeColors: ["rot", "weiß"],
     theme: "light",
     tokens: lightTokens({
-      bg: "#F4DEDC",
-      ink: "#A6131C",
-      accent: "#A6131C",
-      endBg: "#A6131C",
+      bg: "#FBEAE6",
+      ink: "#C0142A",
+      accent: "#C0142A",
+      endBg: "#C0142A",
       endInk: "#FFFFFF",
     }),
-    chipTint: "#F4DEDC",
+    chipTint: "#FBEAE6",
   },
   {
-    key: "sonne-sand",
-    name: "Sonne & Sand",
-    shortName: "Sonne & Sand",
-    tagline: "Gelb, Hellgelb und Beige – leicht und hell.",
-    swatches: [yarnSwatch("Gelb"), yarnSwatch("Beige")],
-    handles: ["look-extra", "look-renoff", "look-buttoni"],
+    key: "sonnengelb-leinen",
+    name: "Sonnengelb & Leinen",
+    shortName: "Sonnengelb",
+    tagline: "Sonnengelb, Creme und Sand – hell und leicht.",
+    // Gelb der Leinenjacke EXTRA
+    swatches: [{ name: "Gelb", hex: "#F0C93B" }, yarnSwatch("Beige")],
+    handles: ["look-extra", "look-buttoni", "look-renoff"],
     storeColors: ["gelb", "beige"],
     theme: "light",
     tokens: lightTokens({
-      bg: "#F1E8CF",
-      ink: "#6B5A26",
-      accent: "#6B5A26",
-      endBg: "#6B5A26",
-      endInk: "#FFFFFF",
+      bg: "#FBF3D6",
+      ink: "#5C4405",
+      accent: "#5C4405",
+      endBg: "#F0C93B",
+      endInk: "#2A2208",
+      // Heller Grund: Die Studiofotos brauchen einen Rand
+      matRing: "rgba(0,0,0,.10)",
     }),
-    chipTint: "#F1E8CF",
+    chipTint: "#FBF3D6",
   },
   {
-    key: "braun-punkte",
-    name: "Braun & Punkte",
-    shortName: "Braun",
-    tagline: "Braun mit Punkten – Ton in Ton kombiniert.",
-    swatches: [yarnSwatch("Braun"), yarnSwatch("Schwarz")],
+    key: "salbei-olive",
+    name: "Salbei & Olive",
+    shortName: "Salbei",
+    tagline: "Salbei und Oliv – kühles Grün für warme Tage.",
+    swatches: [yarnSwatch("Salbei"), yarnSwatch("Oliv")],
+    handles: ["look-reno-runo", "look-lilie-lana", "look-ruth"],
+    storeColors: ["grün"],
+    theme: "light",
+    tokens: lightTokens({
+      bg: "#E6EEEA",
+      ink: "#3E4733",
+      accent: "#3E4733",
+      endBg: "#7C908A",
+      endInk: "#14201B",
+    }),
+    chipTint: "#E6EEEA",
+  },
+  {
+    key: "zimt-tupfen",
+    name: "Zimt & Tupfen",
+    shortName: "Zimt",
+    tagline: "Zimtbraun mit schwarzen Tupfen – Ton in Ton kombiniert.",
+    // FS26-Braun aus den Fotos von KIMO und Rock DOT
+    swatches: [{ name: "Braun", hex: "#643F31" }, yarnSwatch("Schwarz")],
     handles: [
       "look-dot-ela",
       "look-tunika-dot",
@@ -268,49 +298,32 @@ export const FS26_WORLDS: LookWorld[] = [
     storeColors: ["braun"],
     theme: "light",
     tokens: lightTokens({
-      bg: "#E7DCD3",
-      ink: "#5A3A2C",
-      accent: "#5A3A2C",
-      endBg: "#5A3A2C",
+      bg: "#F4E7DC",
+      ink: "#643F31",
+      accent: "#643F31",
+      endBg: "#643F31",
       endInk: "#FFFFFF",
     }),
-    chipTint: "#E7DCD3",
+    chipTint: "#F4E7DC",
   },
   {
-    key: "oliv-salbei",
-    name: "Oliv & Salbei",
-    shortName: "Oliv & Salbei",
-    tagline: "Oliv und Salbei – Grüntöne, die alles mitmachen.",
-    swatches: [yarnSwatch("Oliv"), yarnSwatch("Salbei")],
-    handles: ["look-lilie-lana", "look-ruth", "look-reno-runo"],
-    storeColors: ["grün"],
+    key: "tinte-papier",
+    name: "Tinte & Papier",
+    shortName: "Tinte",
+    tagline: "Schwarz mit weißen Akzenten – klar wie Tinte auf Papier.",
+    swatches: [yarnSwatch("Schwarz"), yarnSwatch("Weiß")],
+    handles: ["look-max-dot", "look-bernir"],
+    storeColors: ["schwarz"],
     theme: "light",
     tokens: lightTokens({
-      bg: "#DFE3D8",
-      ink: "#3F4A33",
-      accent: "#3F4A33",
-      endBg: "#3F4A33",
+      bg: "#F3F1EC",
+      ink: "#1B1A1C",
+      accent: "#1B1A1C",
+      endBg: "#1B1A1C",
       endInk: "#FFFFFF",
+      matRing: "rgba(0,0,0,.10)",
     }),
-    chipTint: "#DFE3D8",
-  },
-  {
-    key: "schwarz-weiss",
-    name: "Schwarz & Weiß",
-    shortName: "Schwarz",
-    tagline: "Schwarz mit weißen Akzenten – grafisch und elegant.",
-    swatches: [yarnSwatch("Schwarz"), yarnSwatch("Weiß")],
-    handles: ["look-bernir", "look-max-dot"],
-    storeColors: ["schwarz"],
-    theme: "dark",
-    tokens: darkTokens({
-      bg: "#2E2E33",
-      ink: "#F5F5F4",
-      accent: "#2E2E33",
-      endBg: "#E0DDDA",
-      endInk: "#2E2E33",
-    }),
-    chipTint: "#E0DDDA",
+    chipTint: "#F3F1EC",
   },
 ]
 
@@ -383,6 +396,20 @@ export const LOOK_ART: Record<string, LookArt> = {
     mood: "Hellgrau und Schwarz – Pullover, Rock und Jacke für kalte Tage.",
   },
   "look-tesso": { coverIndex: 1 },
+  // FS26: Stimmungszeilen der Aufmacher
+  "look-kleid-dot": {
+    mood: "Rotes Kleid mit weißen Tupfen – leicht und sommerlich.",
+  },
+  "look-extra": { mood: "Jacke EXTRA aus Leinen in sonnigem Gelb." },
+  "look-reno-runo": {
+    mood: "Pullover RENO und Hose RUNO in Salbei – Ton in Ton.",
+  },
+  "look-dot-ela": {
+    mood: "Jacke und Rock DOT mit schwarzen Tupfen, dazu das Top ELA.",
+  },
+  "look-max-dot": {
+    mood: "Pullover MAX in Schwarz zur Hose DOT mit weißen Tupfen.",
+  },
 }
 
 /** Teile-Arten, wie sie am Anfang der Produkttitel stehen („Hose Fenja 5“) */
