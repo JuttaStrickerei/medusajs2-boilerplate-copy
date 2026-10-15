@@ -33,7 +33,7 @@ const faqs = [
     questions: [
       {
         q: "Wie lange dauert die Lieferung?",
-        a: "Wir liefern nur nach Österreich. Mit einer Lieferzeit von etwa 2 Wochen ab Versand können Sie rechnen.",
+        a: "Wir liefern nur nach Österreich. Mit einer Lieferzeit von 2 Wochen ab Versand können Sie rechnen.",
       },
       {
         q: "Kann ich meine Sendung verfolgen?",

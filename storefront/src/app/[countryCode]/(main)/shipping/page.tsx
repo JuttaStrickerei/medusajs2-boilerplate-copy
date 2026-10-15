@@ -7,7 +7,7 @@ import { Truck, RefreshCw, Package, Clock, Shield } from "@components/icons"
 export const metadata: Metadata = {
   title: "Versand & Rückgabe",
   description:
-    "Versand und Lieferzeit (ca. 2 Wochen innerhalb Österreichs) sowie Widerruf und Rückgabe bei Strickerei Jutta.",
+    "Versand und Lieferzeit (2 Wochen innerhalb Österreichs) sowie Widerruf und Rückgabe bei Strickerei Jutta.",
 }
 
 export default function ShippingPage() {
@@ -52,7 +52,7 @@ export default function ShippingPage() {
                         Lieferzeit
                       </h3>
                       <p className="text-stone-600 text-sm">
-                        Mit einer Lieferzeit von etwa{" "}
+                        Mit einer Lieferzeit von{" "}
                         <span className="font-medium text-stone-700">
                           2 Wochen
                         </span>{" "}
