@@ -31,7 +31,7 @@ export default async function Footer() {
             
             <p className="text-sm text-stone-400 leading-relaxed mb-6 max-w-xs">
               Österreichische Handwerkskunst in dritter Generation. 
-              Feinste Strickwaren aus Naturfasern, gefertigt mit 
+              Feine Strickwaren aus sorgfältig ausgewählten Garnen, gefertigt mit 
               traditionellen Techniken und zeitlosem Design.
             </p>
             

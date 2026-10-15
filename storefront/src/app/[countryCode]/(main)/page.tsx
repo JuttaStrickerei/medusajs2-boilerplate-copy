@@ -21,7 +21,7 @@ export const metadata: Metadata = {
       "Strickerei Jutta | Österreichische Handwerkskunst in 3. Generation",
   },
   description:
-    "Entdecken Sie handgefertigte Strickwaren aus feinsten Naturfasern. Kaschmir, Merinowolle und Alpaka - 60 Jahre Tradition und Qualität aus Österreich.",
+    "Entdecken Sie handgefertigte Strickwaren aus sorgfältig ausgewählten Garnen. Über 60 Jahre Tradition und Qualität aus Österreich.",
 }
 
 export default async function Home(props: {
@@ -92,8 +92,8 @@ export default async function Home(props: {
               <div className="space-y-4 text-stone-600 leading-relaxed">
                 <p>
                   Unsere Philosophie ist einfach: Qualität ohne Kompromisse. Wir
-                  verwenden ausschließlich feinste Naturfasern und fertigen
-                  jedes Stück mit der Präzision und Sorgfalt, die unsere Kunden
+                  wählen jedes Garn sorgfältig aus und fertigen jedes Stück
+                  mit der Präzision und Sorgfalt, die unsere Kunden
                   seit Jahrzehnten schätzen.
                 </p>
               </div>

@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     template: "%s | Strickerei Jutta",
   },
   description:
-    "Entdecken Sie handgefertigte Strickwaren aus feinsten Naturfasern. 60 Jahre Tradition, Qualität und österreichische Handwerkskunst.",
+    "Entdecken Sie handgefertigte Strickwaren aus sorgfältig ausgewählten Garnen. 60 Jahre Tradition, Qualität und österreichische Handwerkskunst.",
   authors: [{ name: "Strickerei Jutta" }],
   creator: "Strickerei Jutta",
   icons: {

@@ -67,7 +67,7 @@ export default function StoreTemplate({
       <PageBreadcrumb items={[{ label: "Alle Produkte" }]} />
       <PageHeader
         title="Alle Produkte"
-        meta="Handgefertigte Strickwaren aus feinsten Naturfasern."
+        meta="Handgefertigte Strickwaren aus Österreich."
       />
 
       {/* Main Content */}

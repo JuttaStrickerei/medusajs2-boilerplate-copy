@@ -340,7 +340,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               <div className="px-6 py-8">
                 <p className="text-sm text-stone-500 mb-4">Beliebte Suchen</p>
                 <div className="flex flex-wrap gap-2">
-                  {["Pullover", "Kaschmir", "Schal", "Merinowolle"].map((term) => (
+                  {["Pullover", "Mantel", "Schal", "Merinowolle"].map((term) => (
                     <button
                       key={term}
                       onClick={() => setQuery(term)}
