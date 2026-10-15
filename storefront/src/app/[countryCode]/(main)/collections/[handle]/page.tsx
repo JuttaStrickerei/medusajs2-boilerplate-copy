@@ -81,7 +81,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     title: override.title ?? collection.title,
     description:
       override.description ??
-      `Kollektion ${collection.title} – handgefertigte Strickwaren aus feinsten Naturfasern von der Strickerei Jutta.`,
+      `Kollektion ${collection.title} – handgefertigte Strickwaren von der Strickerei Jutta.`,
     alternates: {
       canonical: `/${params.countryCode}/collections/${collection.handle}`,
     },

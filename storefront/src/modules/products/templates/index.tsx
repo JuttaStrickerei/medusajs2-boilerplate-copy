@@ -252,7 +252,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                 />
                 <TrustBadgeSmall
                   icon={<Shield size={16} />}
-                  text="100% Naturfasern"
+                  text="Familienbetrieb in 3. Generation"
                 />
                 <TrustBadgeSmall
                   icon={<RefreshCw size={16} />}

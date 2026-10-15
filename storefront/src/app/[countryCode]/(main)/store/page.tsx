@@ -7,7 +7,7 @@ import { getProductFilterOptions } from "@lib/data/filter-options"
 export const metadata: Metadata = {
   title: "Alle Produkte",
   description:
-    "Entdecken Sie alle handgefertigten Strickwaren der Strickerei Jutta – aus feinsten Naturfasern, hergestellt in Österreich.",
+    "Entdecken Sie alle handgefertigten Strickwaren der Strickerei Jutta – hergestellt in Österreich.",
 }
 
 type Params = {
