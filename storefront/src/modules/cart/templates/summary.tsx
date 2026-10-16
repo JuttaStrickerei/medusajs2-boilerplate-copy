@@ -47,7 +47,7 @@ const Summary = ({ cart, isAuthenticated = false }: SummaryProps) => {
       />
 
       <p className="text-xs text-stone-500 leading-relaxed">
-        Lieferung innerhalb Österreichs: voraussichtlich ca. 2 Wochen ab Versand.
+        Lieferung innerhalb Österreichs: voraussichtlich 2 Wochen ab Versand.
       </p>
 
       {/* Checkout Button */}

@@ -4,9 +4,8 @@ import LooksSeasonPage, {
   looksSeasonMetadata,
 } from "@modules/looks/templates/looks-season-page"
 
-// Wie /looks immer dynamisch. Liegt in (overview), teilt also dessen
-// loading.tsx. Kein redirect() für die aktuelle Saison: Hinter dem
-// Lade-Platzhalter käme er nur als Meta-Refresh an, daher Canonical /looks.
+// Wie /looks immer dynamisch. Für die aktuelle Saison zeigt das Canonical
+// auf /looks (statt eines redirect()).
 export const dynamic = "force-dynamic"
 
 type Params = {

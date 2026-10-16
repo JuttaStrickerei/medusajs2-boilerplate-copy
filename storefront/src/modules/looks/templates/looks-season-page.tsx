@@ -1,8 +1,10 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { Suspense } from "react"
 
 import { getLookSeasonIndex } from "@lib/data/look-seasons"
-import { listLooksForOverview } from "@lib/data/looks"
+import { listLooksForOverview, type StoreLook } from "@lib/data/looks"
+import LooksOverviewSkeleton from "@modules/looks/components/overview/looks-overview-skeleton"
 import { buildMetaDescription } from "@lib/util/seo"
 import {
   buildOverview,
@@ -115,6 +117,9 @@ export default async function LooksSeasonPage({
   countryCode,
   seasonHandle,
 }: LooksSeasonPageProps) {
+  // Vor dem Platzhalter prüfen (teilt sich die Abfrage mit der Navigation),
+  // damit unbekannte Saisons einen echten 404 bekommen: Nach dem Start der
+  // Antwort steht der Status auf 200
   const { looks, index } = await getLookSeasonIndex()
   const season = resolveSeason(index, seasonHandle)
 
@@ -122,10 +127,30 @@ export default async function LooksSeasonPage({
     notFound()
   }
 
-  const seasonLooks = looksOfSeason(looks, index, season?.handle ?? null)
-  const { products } = await listLooksForOverview(countryCode, seasonLooks)
+  return (
+    <Suspense fallback={<LooksOverviewSkeleton />}>
+      <SeasonOverview
+        looks={looksOfSeason(looks, index, season?.handle ?? null)}
+        season={season}
+        countryCode={countryCode}
+      />
+    </Suspense>
+  )
+}
+
+// Teile samt Preisen laden dauert; bis dahin zeigt die Seite den Platzhalter
+async function SeasonOverview({
+  looks,
+  season,
+  countryCode,
+}: {
+  looks: StoreLook[]
+  season: LookSeason | null
+  countryCode: string
+}) {
+  const { products } = await listLooksForOverview(countryCode, looks)
   const overview = buildOverview({
-    looks: seasonLooks,
+    looks,
     products,
     minioHost: minioHostFrom(process.env.NEXT_PUBLIC_MINIO_ENDPOINT),
   })

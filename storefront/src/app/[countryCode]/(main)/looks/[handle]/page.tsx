@@ -1,10 +1,12 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { Suspense } from "react"
 
 import { getLookByHandle, getLookWithProducts, listLooks } from "@lib/data/looks"
 import { listRegions } from "@lib/data/regions"
 import { buildMetaDescription, seoOverride } from "@lib/util/seo"
 import { StoreRegion } from "@medusajs/types"
+import LookPageSkeleton from "@modules/looks/components/look-page-skeleton"
 import LookTemplate from "@modules/looks/templates/look-template"
 
 type Props = {
@@ -68,9 +70,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 }
 
-export default async function LookPage(props: Props) {
-  const params = await props.params
-  const result = await getLookWithProducts(params.handle, params.countryCode)
+// Teile samt Preisen laden dauert; bis dahin zeigt die Seite den Platzhalter
+async function LookContent({
+  handle,
+  countryCode,
+}: {
+  handle: string
+  countryCode: string
+}) {
+  const result = await getLookWithProducts(handle, countryCode)
 
   if (!result) {
     notFound()
@@ -80,7 +88,24 @@ export default async function LookPage(props: Props) {
     <LookTemplate
       look={result.look}
       products={result.products}
-      countryCode={params.countryCode}
+      countryCode={countryCode}
     />
+  )
+}
+
+export default async function LookPage(props: Props) {
+  const params = await props.params
+  // Vor dem Platzhalter prüfen (gecacht, kurz), damit unbekannte Looks einen
+  // echten 404 bekommen: Nach dem Start der Antwort steht der Status auf 200
+  const look = await getLookByHandle(params.handle)
+
+  if (!look) {
+    notFound()
+  }
+
+  return (
+    <Suspense fallback={<LookPageSkeleton />}>
+      <LookContent handle={params.handle} countryCode={params.countryCode} />
+    </Suspense>
   )
 }

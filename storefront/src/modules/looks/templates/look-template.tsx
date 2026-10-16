@@ -164,7 +164,7 @@ export default function LookTemplate({
                 aria-hidden
                 className="mt-[3px] shrink-0 text-stone-400"
               />
-              Lieferung in etwa 2 Wochen – Versand innerhalb Österreichs
+              Lieferung in 2 Wochen – Versand innerhalb Österreichs
             </li>
             <li className="flex gap-2">
               <RefreshCw

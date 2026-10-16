@@ -3,12 +3,13 @@ import { Skeleton } from "@components/ui"
 const PLACEHOLDER_PIECES = 3
 
 /**
- * Platzhalter der Look-Seite (die Route ist dynamisch und brauchte ohne ihn
- * rund eine Sekunde ohne Rückmeldung). Brotkrümel-Leiste, Spalten und
- * Fotobreite wie in look-template.tsx / look-gallery.tsx, damit die echte
- * Seite nicht springt.
+ * Platzhalter der Look-Seite, solange die Teile laden (die Route ist dynamisch
+ * und brauchte ohne ihn rund eine Sekunde ohne Rückmeldung). Brotkrümel-Leiste,
+ * Spalten und Fotobreite wie in look-template.tsx / look-gallery.tsx, damit die
+ * echte Seite nicht springt. Bewusst kein loading.tsx: Das schickte die Antwort
+ * schon vor der Prüfung los, unbekannte Looks kämen dann mit 200 statt 404.
  */
-export default function LookLoading() {
+export default function LookPageSkeleton() {
   return (
     <div className="bg-stone-50 min-h-screen">
       <p role="status" className="sr-only">
