@@ -1,6 +1,19 @@
 // GA4 measurement ID. Public anyway (it is in every page).
 export const GA_ID = "G-VQG5PFKSXB"
 
+// GA4 only counts on the live shop: the dev storefront on Railway, localhost
+// and previews share the same code and would otherwise mix test traffic and
+// test orders into the real property. NEXT_PUBLIC_GA_HOSTS (comma-separated)
+// overrides the list, e.g. to test GA4 on dev on purpose.
+const GA_HOSTS = (process.env.NEXT_PUBLIC_GA_HOSTS || "shop.strickerei-jutta.at")
+  .split(",")
+  .map((h) => h.trim())
+  .filter(Boolean)
+
+export function gaAllowedHere(): boolean {
+  return typeof window !== "undefined" && GA_HOSTS.includes(window.location.hostname)
+}
+
 let gaLoaded = false
 let scriptLoaded = false
 
@@ -28,7 +41,7 @@ export function loadGtagScript(id: string): void {
  * banner), so the script is gone again afterwards.
  */
 export function loadGoogleAnalytics(): void {
-  if (typeof window === "undefined" || gaLoaded) return
+  if (typeof window === "undefined" || gaLoaded || !gaAllowedHere()) return
   gaLoaded = true
   // Consent first, then config: the first page_view already counts as granted
   gtag("consent", "update", { analytics_storage: "granted" })
