@@ -1,6 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { hasConsentFor } from "./consent"
 import { getProductPrice } from "./get-product-price"
+import { trackGoogleAdsPurchase } from "./google-ads"
 import { loadGoogleAnalytics } from "./google-analytics"
 import { trackMetaEvent } from "./meta-pixel"
 
@@ -40,6 +41,8 @@ export function trackEvent(name: string, params: Record<string, unknown>) {
   }
   // The Meta Pixel has its own consent category ("marketing")
   trackMetaEvent(name, params)
+  // Google Ads also counts purchases with "marketing" consent only
+  if (name === "purchase") trackGoogleAdsPurchase(params)
   if (typeof gtag !== "function" || !hasConsentFor("analytics")) {
     return
   }

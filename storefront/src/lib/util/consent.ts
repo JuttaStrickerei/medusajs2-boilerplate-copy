@@ -1,9 +1,8 @@
-import { META_PIXEL_ID } from "./meta-pixel-id"
-
-// Bumped when the banner asks for something new (the Meta Pixel's
-// "marketing" category): vanilla-cookieconsent then shows the banner again
+// Bumped when the banner asks for something new (1: the Meta Pixel's
+// "marketing" category, 2: Google's ad signals in the same category, GA4 is
+// linked with Google Ads): vanilla-cookieconsent then shows the banner again
 // and a saved choice from before does not count any more
-export const CONSENT_REVISION = META_PIXEL_ID ? 1 : 0
+export const CONSENT_REVISION = 2
 
 // vanilla-cookieconsent v3 keeps its state as URI-encoded JSON in the
 // "cc_cookie" cookie ({ categories: ["necessary", "analytics"], revision, ... }).
