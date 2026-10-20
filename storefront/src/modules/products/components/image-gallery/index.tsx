@@ -39,7 +39,7 @@ const ImageGallery = ({
 
   if (!images || images.length === 0) {
     return (
-      <div className="aspect-square bg-stone-100 rounded-2xl flex items-center justify-center">
+      <div className="mx-auto aspect-[2/3] w-full max-w-[calc(80vh*2/3)] bg-stone-100 rounded-2xl flex items-center justify-center">
         <span className="text-stone-400">Kein Bild verfügbar</span>
       </div>
     )
@@ -50,7 +50,8 @@ const ImageGallery = ({
       {/* Main Image */}
       <div
         className={cn(
-          "group relative aspect-square bg-stone-100 rounded-2xl overflow-hidden",
+          // 2:3 wie die Packshots, nie höher als 80 % des Bildschirms; Fotos ganz zeigen (alte Kollektion 1:1, Details 4:5)
+          "group relative mx-auto aspect-[2/3] w-full max-w-[calc(80vh*2/3)] bg-stone-100 rounded-2xl overflow-hidden",
           "cursor-zoom-in transition-shadow duration-300",
           "hover:shadow-lg"
         )}
@@ -66,7 +67,7 @@ const ImageGallery = ({
             priority={selectedIndex === 0}
             sizes="(max-width: 768px) 100vw, 50vw"
             className={cn(
-              "object-cover transition-transform duration-300",
+              "object-contain mix-blend-multiply transition-transform duration-300",
               isZoomed && "scale-150"
             )}
             style={
@@ -137,7 +138,7 @@ const ImageGallery = ({
               key={image.id}
               onClick={() => setSelectedIndex(index)}
               className={cn(
-                "relative flex-shrink-0 w-[72px] h-[88px] rounded-lg overflow-hidden",
+                "relative flex-shrink-0 w-[72px] h-[88px] rounded-lg overflow-hidden bg-stone-100",
                 "transition-all duration-200 border-2",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-stone-400",
                 selectedIndex === index
@@ -151,7 +152,7 @@ const ImageGallery = ({
                   alt={`${title} – Vorschau ${index + 1}`}
                   fill
                   sizes="72px"
-                  className="object-cover"
+                  className="object-contain mix-blend-multiply"
                 />
               )}
             </button>

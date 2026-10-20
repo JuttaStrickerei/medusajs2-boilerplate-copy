@@ -356,7 +356,7 @@ export default function LookItemCard({
             alt={product.title}
             fill
             sizes="72px"
-            className="object-cover"
+            className="object-contain mix-blend-multiply"
           />
         ) : null}
       </button>
