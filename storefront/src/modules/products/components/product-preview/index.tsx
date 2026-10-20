@@ -152,7 +152,7 @@ export default function ProductPreview({
               fill
               sizes={CARD_SIZES}
               priority={isFeatured}
-              className="object-cover mix-blend-multiply"
+              className="object-contain mix-blend-multiply"
             />
           ) : (
             <span className="absolute inset-0 flex items-center justify-center text-stone-300">
@@ -171,7 +171,7 @@ export default function ProductPreview({
                 width={HOVER_IMAGE_WIDTH}
                 height={HOVER_IMAGE_HEIGHT}
                 loading="lazy"
-                className="h-full w-full object-cover mix-blend-multiply"
+                className="h-full w-full object-contain mix-blend-multiply"
               />
             </span>
           )}
