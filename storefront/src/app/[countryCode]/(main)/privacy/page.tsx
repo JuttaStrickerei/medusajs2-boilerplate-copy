@@ -485,7 +485,67 @@ export default function PrivacyPage() {
                 )}
 
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
-                  {hasMetaPixel ? 9 : 8}. Ihre weitreichenden Rechte als
+                  {hasMetaPixel ? 9 : 8}. Werbung und Erfolgsmessung mit Google
+                  Ads
+                </h2>
+                <p className="text-stone-600 mb-4">
+                  Ausschließlich dann, wenn Sie uns hierzu im Cookie-Banner unter
+                  „Marketing“ Ihre aktive Einwilligung erteilt haben (Art. 6 Abs.
+                  1 lit. a DSGVO in Verbindung mit § 165 Abs. 3 TKG 2021),
+                  nutzen wir Google Ads der Google Ireland Limited, Gordon House,
+                  Barrow Street, Dublin 4, Irland („Google“). Zweck der
+                  Verarbeitung: Wir messen, welche Käufe über unsere Anzeigen bei
+                  Google zustande kommen (Conversion-Messung), und können
+                  Besucherinnen und Besuchern unserer Website bei Google
+                  passende Anzeigen zu unseren Produkten zeigen (Remarketing).
+                  Funktionsweise: Wir verwenden den Einwilligungsmodus von Google
+                  („Consent Mode“). Ohne Ihre Einwilligung bleiben die
+                  Werbesignale gesperrt. Mit Ihrer Einwilligung dürfen Google
+                  Analytics (siehe Abschnitt 7, nur mit Ihrer Einwilligung zur
+                  Analyse) und das Google-Ads-Tag Daten zu Ihrem Besuch für
+                  Werbezwecke verwenden und mit unserem Google-Ads-Konto teilen.
+                  Verarbeitete Daten: aufgerufene Seiten, Datum und Uhrzeit,
+                  Ihre IP-Adresse, Angaben zu Browser und Gerät, die Kennung
+                  eines Anzeigenklicks sowie die Kennungen der Cookies _gcl_au
+                  und _gcl_aw, beim Kauf zusätzlich Bestellnummer und
+                  Bestellwert. Sind Sie bei Google angemeldet, kann Google Ihren
+                  Besuch Ihrem Google-Konto zuordnen. Drittlandübermittlung in
+                  die USA und DPF: Google kann die Daten auch an die Google LLC
+                  in den USA übermitteln. Die Google LLC ist nach dem EU-US Data
+                  Privacy Framework (DPF) zertifiziert; die Übermittlung erfolgt
+                  daher auf Grundlage des Angemessenheitsbeschlusses der
+                  Europäischen Kommission (Art. 45 DSGVO). Speicherdauer: Die
+                  Cookies _gcl_au und _gcl_aw werden nach 3 Monaten gelöscht.
+                  Zielgruppen aus Besucherinnen und Besuchern unserer Website
+                  legen wir bei Google mit einer Laufzeit von höchstens 180 Tagen
+                  an. Weitere Informationen finden Sie in der
+                  Datenschutzerklärung von Google:{" "}
+                  <a
+                    href="https://policies.google.com/privacy?hl=de"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={LINK_CLASS}
+                  >
+                    https://policies.google.com/privacy
+                  </a>
+                  . Widerrufsmöglichkeit: Sie können Ihre Einwilligung jederzeit
+                  mit Wirkung für die Zukunft widerrufen, indem Sie in den
+                  Cookie-Einstellungen (Link am unteren Rand der Website) die
+                  Kategorie „Marketing“ abwählen. Ihre Werbeeinstellungen bei
+                  Google können Sie außerdem unter{" "}
+                  <a
+                    href="https://myadcenter.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={LINK_CLASS}
+                  >
+                    https://myadcenter.google.com/
+                  </a>{" "}
+                  anpassen.
+                </p>
+
+                <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
+                  {hasMetaPixel ? 10 : 9}. Ihre weitreichenden Rechte als
                   betroffene Person
                 </h2>
                 <p className="text-stone-600 mb-4">
@@ -597,9 +657,7 @@ export default function PrivacyPage() {
                         <td className="p-3 small:p-4 border-l border-stone-200 align-top">
                           Sie können eine uns einmal erteilte
                           datenschutzrechtliche Einwilligung (z. B. für{" "}
-                          {hasMetaPixel
-                            ? "Analyse- und Marketing-Cookies"
-                            : "Analyse-Cookies"}{" "}
+                          Analyse- und Marketing-Cookies{" "}
                           oder den Newsletter) jederzeit, ohne
                           Angabe von Gründen, mit Wirkung für die Zukunft
                           widerrufen.
