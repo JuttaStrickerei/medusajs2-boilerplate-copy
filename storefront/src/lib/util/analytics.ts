@@ -83,8 +83,14 @@ export function productToItem(
     price = undefined
   }
 
+  // Without a picked variant (lists, product page before a size is chosen) the
+  // first variant stands in, so GA4 sends the same item_id as add_to_cart,
+  // purchase and the product feed (variant SKU) instead of the product id
+  const representative =
+    variant ?? product.variants?.find((v) => !!v?.sku) ?? product.variants?.[0]
+
   return {
-    item_id: variant?.sku || variant?.id || product.id,
+    item_id: representative?.sku || representative?.id || product.id,
     item_group_id: product.id,
     item_name: product.title,
     item_brand: BRAND,
