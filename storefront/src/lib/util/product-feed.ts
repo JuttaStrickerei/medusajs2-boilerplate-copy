@@ -22,6 +22,16 @@ const MAX_ADDITIONAL_IMAGES = 5
 const MAX_DESCRIPTION_LENGTH = 5000
 const MAX_MATERIAL_LENGTH = 200
 const MAX_TITLE_LENGTH = 150
+// Abbreviations used in the Medusa material texts
+const FIBRE_NAMES: Record<string, string> = {
+  pes: "Polyester",
+  pa: "Polyamid",
+  pan: "Polyacryl",
+  ea: "Elastan",
+  co: "Baumwolle",
+  wo: "Wolle",
+  cv: "Viskose",
+}
 
 // custom_label_0: the collection as a short season code, for campaigns and
 // product sets per season (Google Shopping, Meta catalog)
@@ -82,6 +92,22 @@ function optionValue(
 // Only the shop's own wording: "Strick" when the description says so, the
 // fibre only when the piece is made of one ("100% Merinowolle")
 const isKnitted = (description: string) => /strick/i.test(description)
+
+// "68% PES, 26% Viskose, 6% Elastan" -> "Polyester/Viskose/Elastan": Merchant
+// Center wants up to three material names separated by "/", without
+// percentages (the product page keeps the full composition). From Andi's
+// docs/google/01-feed-gender-title-material.patch
+function feedMaterial(material: string): string {
+  const names = material
+    .split(/[,\/;+]|\bund\b/i)
+    .map((part) => part.replace(/\d+([.,]\d+)?\s*%/g, "").trim())
+    .filter(Boolean)
+    .map((name) => FIBRE_NAMES[name.toLowerCase()] ?? name)
+  return Array.from(new Set(names))
+    .slice(0, 3)
+    .join("/")
+    .slice(0, MAX_MATERIAL_LENGTH)
+}
 
 function singleFibre(material?: string | null): string | undefined {
   const match = (material ?? "").trim().match(/^100\s*%\s*([A-Za-zÄÖÜäöüß -]+)$/)
@@ -210,7 +236,7 @@ function variantToFeedItem(
     ...(color ? { "g:color": color } : {}),
     ...(size ? { "g:size": size, "g:size_system": "EU" } : {}),
     ...(product.material
-      ? { "g:material": product.material.slice(0, MAX_MATERIAL_LENGTH) }
+      ? { "g:material": feedMaterial(product.material) }
       : {}),
     "g:google_product_category": googleCategory(product.title, categories),
     ...(categories[0] ? { "g:product_type": categories[0] } : {}),
