@@ -9,6 +9,8 @@ import { getPricesForVariant } from "./get-product-price"
  * product id. Only what the shop sells: the Store API already leaves out
  * drafts (sold-out and store-only pieces), and a variant is "out_of_stock"
  * exactly when the product page shows "Ausverkauft".
+ * Feed titles are written for search ("Damen Strickmantel ROUGA aus
+ * Merinowolle – Marine, L"); the shop itself keeps its own product names.
  */
 
 export type FeedItem = Record<string, string | string[]>
@@ -19,6 +21,21 @@ const SIZE_OPTIONS = ["größe", "groesse", "size"]
 const MAX_ADDITIONAL_IMAGES = 5
 const MAX_DESCRIPTION_LENGTH = 5000
 const MAX_MATERIAL_LENGTH = 200
+const MAX_TITLE_LENGTH = 150
+
+// custom_label_0: the collection as a short season code, for campaigns and
+// product sets per season (Google Shopping, Meta catalog)
+const SEASON_LABELS: Record<string, string> = {
+  "herbst/winter 2026": "HW26",
+  "frühjahr/sommer 2026": "FS26",
+}
+
+// custom_label_1: price band, to bid on cheap and expensive pieces separately
+const PRICE_BANDS: [number, string][] = [
+  [100, "unter 100"],
+  [150, "100 bis 149"],
+]
+const TOP_PRICE_BAND = "ab 150"
 
 // Google product categories as English paths (Google and Meta accept them).
 // Checked against "title + category" in this order, first match wins.
@@ -61,6 +78,41 @@ function optionValue(
   })
   return match?.value || undefined
 }
+
+// Only the shop's own wording: "Strick" when the description says so, the
+// fibre only when the piece is made of one ("100% Merinowolle")
+const isKnitted = (description: string) => /strick/i.test(description)
+
+function singleFibre(material?: string | null): string | undefined {
+  const match = (material ?? "").trim().match(/^100\s*%\s*([A-Za-zÄÖÜäöüß -]+)$/)
+  return match?.[1].trim() || undefined
+}
+
+function feedTitle(
+  product: HttpTypes.StoreProduct,
+  description: string,
+  color?: string,
+  size?: string
+): string {
+  // "Mantel ROUGA": the first word is the garment type, the rest its name
+  const [type, ...name] = product.title.split(" ")
+  const garment = isKnitted(description) ? `Strick${type.toLowerCase()}` : type
+  const fibre = singleFibre(product.material)
+  const base = ["Damen", garment, ...name, fibre ? `aus ${fibre}` : ""]
+    .filter(Boolean)
+    .join(" ")
+  const variant = [color, size].filter(Boolean).join(", ")
+  return (variant ? `${base} – ${variant}` : base).slice(0, MAX_TITLE_LENGTH)
+}
+
+function seasonLabel(product: HttpTypes.StoreProduct): string | undefined {
+  const collection = product.collection?.title?.trim()
+  if (!collection) return undefined
+  return SEASON_LABELS[collection.toLowerCase()] ?? collection
+}
+
+const priceBand = (amount: number) =>
+  PRICE_BANDS.find(([limit]) => amount < limit)?.[1] ?? TOP_PRICE_BAND
 
 function googleCategory(title: string, categories: string[]): string {
   const text = [title, ...categories].join(" ")
@@ -120,19 +172,18 @@ function variantToFeedItem(
   const onSale =
     prices.price_type === "sale" &&
     prices.original_price_number > prices.calculated_price_number
-  const title = [product.title, [color, size].filter(Boolean).join(", ")]
-    .filter(Boolean)
-    .join(" – ")
+  const description = (
+    plainText(product.description) ||
+    product.subtitle ||
+    product.title
+  ).slice(0, MAX_DESCRIPTION_LENGTH)
+  const season = seasonLabel(product)
 
   return {
     "g:id": variant.sku || variant.id,
     "g:item_group_id": product.id,
-    title,
-    description: (
-      plainText(product.description) ||
-      product.subtitle ||
-      product.title
-    ).slice(0, MAX_DESCRIPTION_LENGTH),
+    title: feedTitle(product, description, color, size),
+    description,
     link: `${baseUrl}/${countryCode}/products/${product.handle}`,
     "g:image_link": main,
     "g:additional_image_link": additional,
@@ -154,13 +205,17 @@ function variantToFeedItem(
     // Own manufacture, no GTIN
     "g:identifier_exists": "no",
     "g:age_group": "adult",
+    // Strickerei Jutta only sells women's clothing
+    "g:gender": "female",
     ...(color ? { "g:color": color } : {}),
-    ...(size ? { "g:size": size } : {}),
+    ...(size ? { "g:size": size, "g:size_system": "EU" } : {}),
     ...(product.material
       ? { "g:material": product.material.slice(0, MAX_MATERIAL_LENGTH) }
       : {}),
     "g:google_product_category": googleCategory(product.title, categories),
     ...(categories[0] ? { "g:product_type": categories[0] } : {}),
+    ...(season ? { "g:custom_label_0": season } : {}),
+    "g:custom_label_1": priceBand(prices.calculated_price_number),
   }
 }
 
