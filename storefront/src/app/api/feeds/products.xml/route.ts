@@ -8,16 +8,20 @@ import { feedXml, productToFeedItems } from "@lib/util/product-feed"
  * Product feed for the Meta catalog (Commerce Manager) and Google Merchant
  * Center: https://shop.strickerei-jutta.at/api/feeds/products.xml
  * Both fetch it on a schedule; robots.ts allows /api/feeds/.
+ * ?collection=herbst_winter_2026 limits it to collections (handles,
+ * comma-separated), e.g. to advertise only the current season.
  */
 
 const COUNTRY_CODE = process.env.NEXT_PUBLIC_DEFAULT_REGION || "at"
-const PAGE_SIZE = 100
+// Each page stays under the 2 MB limit of the Next.js data cache
+const PAGE_SIZE = 40
 const CACHE_SECONDS = 3600
 const FEED_FIELDS = [
   PRODUCT_LIST_FIELDS,
   "+material",
   "+subtitle",
   "*categories",
+  "*collection",
   "*options",
   "*variants.options",
   "+variants.thumbnail",
@@ -41,10 +45,23 @@ async function allProducts(): Promise<HttpTypes.StoreProduct[]> {
   return products
 }
 
-export async function GET() {
+function collectionFilter(request: Request): string[] {
+  return (new URL(request.url).searchParams.get("collection") ?? "")
+    .split(",")
+    .map((handle) => handle.trim().toLowerCase())
+    .filter(Boolean)
+}
+
+export async function GET(request: Request) {
   try {
     const baseUrl = getBaseURL()
-    const items = (await allProducts()).flatMap((product) =>
+    const collections = collectionFilter(request)
+    const products = (await allProducts()).filter(
+      (product) =>
+        !collections.length ||
+        collections.includes(product.collection?.handle?.toLowerCase() ?? "")
+    )
+    const items = products.flatMap((product) =>
       productToFeedItems(product, baseUrl, COUNTRY_CODE)
     )
     if (!items.length) throw new Error("no products with price and image")
