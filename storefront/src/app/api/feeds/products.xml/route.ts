@@ -15,7 +15,7 @@ import {
  * ?collection=herbst_winter_2026 limits it to collections (handles,
  * comma-separated), e.g. to advertise only the current season.
  * ?channel=google is the Merchant Center's copy: its image links carry the
- * "edited with AI" note (api/feeds/image). The Meta catalog stays without it.
+ * "created with AI" note (api/feeds/image). The Meta catalog stays without it.
  */
 
 const COUNTRY_CODE = process.env.NEXT_PUBLIC_DEFAULT_REGION || "at"

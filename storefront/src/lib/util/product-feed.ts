@@ -128,7 +128,7 @@ const plainText = (html?: string | null) =>
   (html ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 
 // The bucket holds WebP, the Meta catalog only takes JPEG/PNG. Google's links
-// always go through the route, which adds the "edited with AI" note.
+// always go through the route, which adds the "created with AI" note.
 const feedImageUrl = (url: string, baseUrl: string, channel: FeedChannel) =>
   channel || /\.(webp|avif)(\?|$)/i.test(url)
     ? `${baseUrl}/api/feeds/image?src=${encodeURIComponent(url)}${

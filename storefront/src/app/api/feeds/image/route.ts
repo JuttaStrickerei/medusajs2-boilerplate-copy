@@ -5,7 +5,7 @@ import sharp from "sharp"
  * WebP (backend shrink-image.ts), which the Meta catalog does not take.
  * Only images from the shop's own bucket are converted, so this is no open
  * image proxy. Meta and Google download each image once and then cache it.
- * ?channel=google adds the IPTC note "edited with AI" to the file, for the
+ * ?channel=google adds the IPTC note "created with AI" to the file, for the
  * Merchant Center only. Shop pages and the Meta catalog get images without it.
  */
 
@@ -16,12 +16,13 @@ const MAX_SOURCE_BYTES = 15 * 1024 * 1024
 const FETCH_TIMEOUT_MS = 10_000
 const CACHE_SECONDS = 60 * 60 * 24 * 7
 
-// IPTC value for real photos retouched with AI (not fully AI-generated ones)
-const AI_EDITED_XMP = `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+// The value Google requires for AI-generated images: the product photos are
+// redrawn by an image model from real photos. Merchant Center help 14572008
+const AI_GENERATED_XMP = `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <rdf:Description rdf:about="" xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/">
-      <Iptc4xmpExt:DigitalSourceType>http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia</Iptc4xmpExt:DigitalSourceType>
+      <Iptc4xmpExt:DigitalSourceType>http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia</Iptc4xmpExt:DigitalSourceType>
     </rdf:Description>
   </rdf:RDF>
 </x:xmpmeta>
@@ -78,7 +79,7 @@ export async function GET(request: Request) {
       .flatten({ background: "#ffffff" })
       .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
     const forGoogle = new URL(request.url).searchParams.get("channel") === "google"
-    const jpeg = await (forGoogle ? image.withXmp(AI_EDITED_XMP) : image).toBuffer()
+    const jpeg = await (forGoogle ? image.withXmp(AI_GENERATED_XMP) : image).toBuffer()
 
     return new Response(new Uint8Array(jpeg), {
       headers: {
