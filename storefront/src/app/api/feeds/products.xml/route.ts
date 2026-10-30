@@ -2,7 +2,11 @@ import { HttpTypes } from "@medusajs/types"
 import { PRODUCT_LIST_FIELDS } from "@lib/constants/product-fields"
 import { listProducts } from "@lib/data/products"
 import { getBaseURL } from "@lib/util/env"
-import { feedXml, productToFeedItems } from "@lib/util/product-feed"
+import {
+  FeedChannel,
+  feedXml,
+  productToFeedItems,
+} from "@lib/util/product-feed"
 
 /**
  * Product feed for the Meta catalog (Commerce Manager) and Google Merchant
@@ -10,6 +14,8 @@ import { feedXml, productToFeedItems } from "@lib/util/product-feed"
  * Both fetch it on a schedule; robots.ts allows /api/feeds/.
  * ?collection=herbst_winter_2026 limits it to collections (handles,
  * comma-separated), e.g. to advertise only the current season.
+ * ?channel=google is the Merchant Center's copy: its image links carry the
+ * "edited with AI" note (api/feeds/image). The Meta catalog stays without it.
  */
 
 const COUNTRY_CODE = process.env.NEXT_PUBLIC_DEFAULT_REGION || "at"
@@ -52,9 +58,16 @@ function collectionFilter(request: Request): string[] {
     .filter(Boolean)
 }
 
+function feedChannel(request: Request): FeedChannel {
+  return new URL(request.url).searchParams.get("channel") === "google"
+    ? "google"
+    : undefined
+}
+
 export async function GET(request: Request) {
   try {
     const baseUrl = getBaseURL()
+    const channel = feedChannel(request)
     const collections = collectionFilter(request)
     const products = (await allProducts()).filter(
       (product) =>
@@ -62,7 +75,7 @@ export async function GET(request: Request) {
         collections.includes(product.collection?.handle?.toLowerCase() ?? "")
     )
     const items = products.flatMap((product) =>
-      productToFeedItems(product, baseUrl, COUNTRY_CODE)
+      productToFeedItems(product, baseUrl, COUNTRY_CODE, channel)
     )
     if (!items.length) throw new Error("no products with price and image")
     return new Response(feedXml(items, baseUrl), {

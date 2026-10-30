@@ -14,6 +14,8 @@ import { getPricesForVariant } from "./get-product-price"
  */
 
 export type FeedItem = Record<string, string | string[]>
+// "google": image links for the Merchant Center, see feedImageUrl
+export type FeedChannel = "google" | undefined
 
 const COLOR_OPTIONS = ["farbe", "farben", "color", "colour"]
 const SIZE_OPTIONS = ["größe", "groesse", "size"]
@@ -125,10 +127,13 @@ function googleCategory(title: string, categories: string[]): string {
 const plainText = (html?: string | null) =>
   (html ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 
-// The bucket holds WebP, the Meta catalog only takes JPEG/PNG
-const feedImageUrl = (url: string, baseUrl: string) =>
-  /\.(webp|avif)(\?|$)/i.test(url)
-    ? `${baseUrl}/api/feeds/image?src=${encodeURIComponent(url)}`
+// The bucket holds WebP, the Meta catalog only takes JPEG/PNG. Google's links
+// always go through the route, which adds the "edited with AI" note.
+const feedImageUrl = (url: string, baseUrl: string, channel: FeedChannel) =>
+  channel || /\.(webp|avif)(\?|$)/i.test(url)
+    ? `${baseUrl}/api/feeds/image?src=${encodeURIComponent(url)}${
+        channel ? `&channel=${channel}` : ""
+      }`
     : url
 
 const formatPrice = (amount: number, currencyCode: string) =>
@@ -137,7 +142,8 @@ const formatPrice = (amount: number, currencyCode: string) =>
 function images(
   product: HttpTypes.StoreProduct,
   variant: HttpTypes.StoreProductVariant,
-  baseUrl: string
+  baseUrl: string,
+  channel: FeedChannel
 ): { main?: string; additional: string[] } {
   const main =
     variant.thumbnail ||
@@ -151,8 +157,8 @@ function images(
     .filter((url): url is string => !!url && url !== main)
     .slice(0, MAX_ADDITIONAL_IMAGES)
   return {
-    main: main && feedImageUrl(main, baseUrl),
-    additional: additional.map((url) => feedImageUrl(url, baseUrl)),
+    main: main && feedImageUrl(main, baseUrl, channel),
+    additional: additional.map((url) => feedImageUrl(url, baseUrl, channel)),
   }
 }
 
@@ -160,10 +166,11 @@ function variantToFeedItem(
   product: HttpTypes.StoreProduct,
   variant: HttpTypes.StoreProductVariant,
   baseUrl: string,
-  countryCode: string
+  countryCode: string,
+  channel: FeedChannel
 ): FeedItem | null {
   const prices = getPricesForVariant(variant)
-  const { main, additional } = images(product, variant, baseUrl)
+  const { main, additional } = images(product, variant, baseUrl, channel)
   if (!prices || !main) return null
 
   const color = optionValue(product, variant, COLOR_OPTIONS)
@@ -223,10 +230,13 @@ function variantToFeedItem(
 export function productToFeedItems(
   product: HttpTypes.StoreProduct,
   baseUrl: string,
-  countryCode: string
+  countryCode: string,
+  channel?: FeedChannel
 ): FeedItem[] {
   return (product.variants ?? [])
-    .map((variant) => variantToFeedItem(product, variant, baseUrl, countryCode))
+    .map((variant) =>
+      variantToFeedItem(product, variant, baseUrl, countryCode, channel)
+    )
     .filter((item): item is FeedItem => !!item)
 }
 

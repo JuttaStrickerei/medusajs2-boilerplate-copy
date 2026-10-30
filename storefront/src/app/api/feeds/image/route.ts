@@ -5,6 +5,8 @@ import sharp from "sharp"
  * WebP (backend shrink-image.ts), which the Meta catalog does not take.
  * Only images from the shop's own bucket are converted, so this is no open
  * image proxy. Meta and Google download each image once and then cache it.
+ * ?channel=google adds the IPTC note "edited with AI" to the file, for the
+ * Merchant Center only. Shop pages and the Meta catalog get images without it.
  */
 
 // Meta recommends at least 1024 px; smaller is also faster to convert
@@ -13,6 +15,17 @@ const JPEG_QUALITY = 85
 const MAX_SOURCE_BYTES = 15 * 1024 * 1024
 const FETCH_TIMEOUT_MS = 10_000
 const CACHE_SECONDS = 60 * 60 * 24 * 7
+
+// IPTC value for real photos retouched with AI (not fully AI-generated ones)
+const AI_EDITED_XMP = `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about="" xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/">
+      <Iptc4xmpExt:DigitalSourceType>http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia</Iptc4xmpExt:DigitalSourceType>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`
 
 const hostOf = (value?: string) =>
   value?.replace(/^https?:\/\//, "").split("/")[0] || undefined
@@ -54,7 +67,7 @@ export async function GET(request: Request) {
       return new Response("Bild zu groß", { status: 413 })
     }
 
-    const jpeg = await sharp(input)
+    const image = sharp(input)
       .rotate()
       .resize({
         width: MAX_EDGE,
@@ -64,7 +77,8 @@ export async function GET(request: Request) {
       })
       .flatten({ background: "#ffffff" })
       .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
-      .toBuffer()
+    const forGoogle = new URL(request.url).searchParams.get("channel") === "google"
+    const jpeg = await (forGoogle ? image.withXmp(AI_EDITED_XMP) : image).toBuffer()
 
     return new Response(new Uint8Array(jpeg), {
       headers: {
