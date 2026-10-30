@@ -11,6 +11,7 @@ import { useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import MobileActions from "./mobile-actions"
+import FertigungHinweis from "./fertigung-hinweis"
 import {
   ShoppingBag,
   Heart,
@@ -134,6 +135,11 @@ export default function ProductActions({
         <div className="pb-4 border-b border-stone-200">
           <ProductPrice product={product} variant={selectedVariant} />
         </div>
+
+        <FertigungHinweis
+          product={product}
+          soldOut={!!selectedVariant && !inStock}
+        />
 
         {/* Options */}
         {(product.variants?.length ?? 0) > 1 && (

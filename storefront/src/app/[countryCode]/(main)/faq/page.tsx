@@ -33,7 +33,7 @@ const faqs = [
     questions: [
       {
         q: "Wie lange dauert die Lieferung?",
-        a: "Wir liefern nur nach Österreich. Mit einer Lieferzeit von 2 Wochen ab Versand können Sie rechnen.",
+        a: "Wir liefern nur nach Österreich. Viele Stücke stricken wir erst nach Ihrer Bestellung. Bis zur Lieferung dauert es 2 Wochen.",
       },
       {
         q: "Kann ich meine Sendung verfolgen?",
@@ -51,6 +51,10 @@ const faqs = [
       {
         q: "Wie lange habe ich Zeit für einen Widerruf?",
         a: "Sie können Ihren Vertrag binnen 14 Tagen ab Erhalt der Ware ohne Angabe von Gründen widerrufen. Zur Wahrung der Frist genügt es, dass Sie den Widerruf rechtzeitig absenden.",
+      },
+      {
+        q: "Kann ich auch Stücke widerrufen, die erst nach meiner Bestellung gestrickt werden?",
+        a: "Ja. Auch Stücke in unseren festen Größen, die wir erst nach Ihrer Bestellung stricken, können Sie binnen 14 Tagen widerrufen.",
       },
       {
         q: "Wie kann ich meinen Vertrag widerrufen?",

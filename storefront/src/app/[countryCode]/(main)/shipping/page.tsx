@@ -52,11 +52,12 @@ export default function ShippingPage() {
                         Lieferzeit
                       </h3>
                       <p className="text-stone-600 text-sm">
-                        Mit einer Lieferzeit von{" "}
+                        Viele Stücke stricken wir erst nach Ihrer Bestellung.
+                        Bis zur Lieferung dauert es{" "}
                         <span className="font-medium text-stone-700">
                           2 Wochen
-                        </span>{" "}
-                        ab Versand Ihrer Bestellung können Sie rechnen.
+                        </span>
+                        .
                       </p>
                     </div>
                   </div>

@@ -14,6 +14,8 @@ import { getPricesForVariant } from "./get-product-price"
  */
 
 export type FeedItem = Record<string, string | string[]>
+// "google": image links for the Merchant Center, see feedImageUrl
+export type FeedChannel = "google" | undefined
 
 const COLOR_OPTIONS = ["farbe", "farben", "color", "colour"]
 const SIZE_OPTIONS = ["größe", "groesse", "size"]
@@ -22,6 +24,16 @@ const MAX_ADDITIONAL_IMAGES = 5
 const MAX_DESCRIPTION_LENGTH = 5000
 const MAX_MATERIAL_LENGTH = 200
 const MAX_TITLE_LENGTH = 150
+// Abbreviations used in the Medusa material texts
+const FIBRE_NAMES: Record<string, string> = {
+  pes: "Polyester",
+  pa: "Polyamid",
+  pan: "Polyacryl",
+  ea: "Elastan",
+  co: "Baumwolle",
+  wo: "Wolle",
+  cv: "Viskose",
+}
 
 // custom_label_0: the collection as a short season code, for campaigns and
 // product sets per season (Google Shopping, Meta catalog)
@@ -83,6 +95,22 @@ function optionValue(
 // fibre only when the piece is made of one ("100% Merinowolle")
 const isKnitted = (description: string) => /strick/i.test(description)
 
+// "68% PES, 26% Viskose, 6% Elastan" -> "Polyester/Viskose/Elastan": Merchant
+// Center wants up to three material names separated by "/", without
+// percentages (the product page keeps the full composition). From Andi's
+// docs/google/01-feed-gender-title-material.patch
+function feedMaterial(material: string): string {
+  const names = material
+    .split(/[,\/;+]|\bund\b/i)
+    .map((part) => part.replace(/\d+([.,]\d+)?\s*%/g, "").trim())
+    .filter(Boolean)
+    .map((name) => FIBRE_NAMES[name.toLowerCase()] ?? name)
+  return Array.from(new Set(names))
+    .slice(0, 3)
+    .join("/")
+    .slice(0, MAX_MATERIAL_LENGTH)
+}
+
 function singleFibre(material?: string | null): string | undefined {
   const match = (material ?? "").trim().match(/^100\s*%\s*([A-Za-zÄÖÜäöüß -]+)$/)
   return match?.[1].trim() || undefined
@@ -125,10 +153,13 @@ function googleCategory(title: string, categories: string[]): string {
 const plainText = (html?: string | null) =>
   (html ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 
-// The bucket holds WebP, the Meta catalog only takes JPEG/PNG
-const feedImageUrl = (url: string, baseUrl: string) =>
-  /\.(webp|avif)(\?|$)/i.test(url)
-    ? `${baseUrl}/api/feeds/image?src=${encodeURIComponent(url)}`
+// The bucket holds WebP, the Meta catalog only takes JPEG/PNG. Google's links
+// always go through the route, which adds the "created with AI" note.
+const feedImageUrl = (url: string, baseUrl: string, channel: FeedChannel) =>
+  channel || /\.(webp|avif)(\?|$)/i.test(url)
+    ? `${baseUrl}/api/feeds/image?src=${encodeURIComponent(url)}${
+        channel ? `&channel=${channel}` : ""
+      }`
     : url
 
 const formatPrice = (amount: number, currencyCode: string) =>
@@ -137,7 +168,8 @@ const formatPrice = (amount: number, currencyCode: string) =>
 function images(
   product: HttpTypes.StoreProduct,
   variant: HttpTypes.StoreProductVariant,
-  baseUrl: string
+  baseUrl: string,
+  channel: FeedChannel
 ): { main?: string; additional: string[] } {
   const main =
     variant.thumbnail ||
@@ -151,8 +183,8 @@ function images(
     .filter((url): url is string => !!url && url !== main)
     .slice(0, MAX_ADDITIONAL_IMAGES)
   return {
-    main: main && feedImageUrl(main, baseUrl),
-    additional: additional.map((url) => feedImageUrl(url, baseUrl)),
+    main: main && feedImageUrl(main, baseUrl, channel),
+    additional: additional.map((url) => feedImageUrl(url, baseUrl, channel)),
   }
 }
 
@@ -160,10 +192,11 @@ function variantToFeedItem(
   product: HttpTypes.StoreProduct,
   variant: HttpTypes.StoreProductVariant,
   baseUrl: string,
-  countryCode: string
+  countryCode: string,
+  channel: FeedChannel
 ): FeedItem | null {
   const prices = getPricesForVariant(variant)
-  const { main, additional } = images(product, variant, baseUrl)
+  const { main, additional } = images(product, variant, baseUrl, channel)
   if (!prices || !main) return null
 
   const color = optionValue(product, variant, COLOR_OPTIONS)
@@ -210,7 +243,7 @@ function variantToFeedItem(
     ...(color ? { "g:color": color } : {}),
     ...(size ? { "g:size": size, "g:size_system": "EU" } : {}),
     ...(product.material
-      ? { "g:material": product.material.slice(0, MAX_MATERIAL_LENGTH) }
+      ? { "g:material": feedMaterial(product.material) }
       : {}),
     "g:google_product_category": googleCategory(product.title, categories),
     ...(categories[0] ? { "g:product_type": categories[0] } : {}),
@@ -223,10 +256,13 @@ function variantToFeedItem(
 export function productToFeedItems(
   product: HttpTypes.StoreProduct,
   baseUrl: string,
-  countryCode: string
+  countryCode: string,
+  channel?: FeedChannel
 ): FeedItem[] {
   return (product.variants ?? [])
-    .map((variant) => variantToFeedItem(product, variant, baseUrl, countryCode))
+    .map((variant) =>
+      variantToFeedItem(product, variant, baseUrl, countryCode, channel)
+    )
     .filter((item): item is FeedItem => !!item)
 }
 
