@@ -1,3 +1,6 @@
+import { hasConsentFor } from "./consent"
+import { MARKETING_CATEGORY } from "./meta-pixel"
+
 // GA4 measurement ID. Public anyway (it is in every page).
 export const GA_ID = "G-VQG5PFKSXB"
 
@@ -43,8 +46,19 @@ export function loadGtagScript(id: string): void {
 export function loadGoogleAnalytics(): void {
   if (typeof window === "undefined" || gaLoaded || !gaAllowedHere()) return
   gaLoaded = true
-  // Consent first, then config: the first page_view already counts as granted
-  gtag("consent", "update", { analytics_storage: "granted" })
+  // Consent first, then config: the first page_view already counts as granted.
+  // With "marketing" accepted the ad signals come along, otherwise page_view
+  // and view_item would reach Google Ads as "ad consent denied" on every page.
+  gtag("consent", "update", {
+    analytics_storage: "granted",
+    ...(hasConsentFor(MARKETING_CATEGORY)
+      ? {
+          ad_storage: "granted",
+          ad_user_data: "granted",
+          ad_personalization: "granted",
+        }
+      : {}),
+  })
   loadGtagScript(GA_ID)
   gtag("config", GA_ID)
 }
