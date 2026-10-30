@@ -99,7 +99,11 @@ const ProductTabs = ({ product, showDetails = true }: ProductTabsProps) => {
             <ShippingItem
               icon={<FastDelivery />}
               title="Lieferung"
-              description="2 Wochen — Versand innerhalb Österreichs, bequem zu Ihnen nach Hause."
+              description={
+                product.metadata?.fertigung === "sofort_lieferbar"
+                  ? "Versand innerhalb Österreichs, bequem zu Ihnen nach Hause."
+                  : "2 Wochen — Versand innerhalb Österreichs, bequem zu Ihnen nach Hause."
+              }
             />
             <ShippingItem
               icon={<Refresh />}

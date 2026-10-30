@@ -2,7 +2,7 @@ import { HttpTypes } from "@medusajs/types"
 
 // Admin: Produkt → Metadaten → Schlüssel "fertigung". Ohne Eintrag kein Hinweis.
 const HINWEISE: Record<string, string> = {
-  auf_bestellung: "Wird für Sie gestrickt · ca. 2 Wochen",
+  auf_bestellung: "Wird nach Ihrer Bestellung frisch gestrickt · 2 Wochen · 14 Tage Widerrufsrecht",
   sofort_lieferbar: "Sofort lieferbar",
 }
 
