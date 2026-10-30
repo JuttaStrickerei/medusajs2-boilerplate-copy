@@ -53,7 +53,7 @@ export default function ShippingPage() {
                       </h3>
                       <p className="text-stone-600 text-sm">
                         Viele Stücke stricken wir erst nach Ihrer Bestellung.
-                        Bis zur Lieferung dauert es etwa{" "}
+                        Bis zur Lieferung dauert es{" "}
                         <span className="font-medium text-stone-700">
                           2 Wochen
                         </span>
