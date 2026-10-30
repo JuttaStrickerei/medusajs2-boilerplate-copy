@@ -5,6 +5,7 @@ import Help from "@modules/order/components/help"
 import Items from "@modules/order/components/items"
 import OnboardingCta from "@modules/order/components/onboarding-cta"
 import OrderDetails from "@modules/order/components/order-details"
+import OrderSourceSurvey from "@modules/order/components/order-source-survey"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import PaymentDetails from "@modules/order/components/payment-details"
 import ClearCartOnMount from "@modules/order/components/clear-cart-on-mount"
@@ -58,7 +59,9 @@ export default async function OrderCompletedTemplate({
               Voraussichtliche Lieferzeit: 2 Wochen ab Versand (Lieferung nur innerhalb Österreichs).
             </p>
           </div>
-          
+
+          <OrderSourceSurvey orderId={order.id} />
+
           <OrderDetails order={order} />
           
           <div className="pt-6 border-t border-stone-200">
