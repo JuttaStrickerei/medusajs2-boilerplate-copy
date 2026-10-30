@@ -200,7 +200,7 @@ const Shipping: React.FC<ShippingProps> = ({
                 Wie soll Ihre Bestellung geliefert werden?
               </p>
               <p className="text-xs text-stone-500 leading-relaxed">
-                Lieferzeit in Österreich: voraussichtlich 2 Wochen ab Versand.
+                Lieferung in Österreich: etwa 2 Wochen nach Ihrer Bestellung.
               </p>
             </div>
 
