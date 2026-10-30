@@ -13,42 +13,6 @@ export const metadata: Metadata = {
 /** Dieselben Bezeichnungen wie die Größen-Auswahl auf der Produktseite */
 const sizeColumns = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"] as const
 
-/**
- * Was nur Jutta weiß. Solange ein Wert null ist, zeigt die Seite lokal einen
- * gelben Platzhalter; im Live-Betrieb fällt der Satz einfach weg.
- */
-const juttaAngaben = {
-  // Zeigt die Tabelle Körpermaße oder die Maße des fertigen Stücks?
-  tabelleZeigt: null as "koerper" | "stueck" | null,
-  // Zwischen zwei Größen: zur kleineren oder zur größeren?
-  zwischenZweiGroessen: null as "kleiner" | "groesser" | null,
-  // Ein Satz, wie die Stücke ausfallen, z. B. "Unsere Stücke fallen …"
-  passform: null as string | null,
-  // Ein Satz zu den Zahlengrößen, z. B. "Größe 36 entspricht …"
-  zahlengroessen: null as string | null,
-}
-
-const tabelleZeigtText = {
-  koerper:
-    "Messen Sie sich wie unten gezeigt und wählen Sie die Größe, die zu Ihrem Brustumfang passt.",
-  stueck:
-    "Die Tabelle zeigt die Maße des fertigen Stücks. Vergleichen Sie sie am besten mit einem Stück, das Ihnen gut passt.",
-}
-
-const zwischenZweiGroessenText = {
-  kleiner: "Liegen Sie zwischen zwei Größen, nehmen Sie die kleinere.",
-  groesser: "Liegen Sie zwischen zwei Größen, nehmen Sie die größere.",
-}
-
-function OffenFuerJutta({ frage }: { frage: string }) {
-  if (process.env.NODE_ENV === "production") return null
-  return (
-    <span className="inline-block rounded bg-amber-100 px-2 py-1 text-xs text-amber-900">
-      Offen für Jutta: {frage}
-    </span>
-  )
-}
-
 const measureRows: { label: string; values: string[] }[] = [
   {
     label: "A – Brustumfang (cm)",
@@ -87,30 +51,25 @@ export default function SizeGuidePage() {
                 Unsere Empfehlung
               </h2>
               <div className="text-stone-600 space-y-3">
-                {juttaAngaben.tabelleZeigt ? (
-                  <p>{tabelleZeigtText[juttaAngaben.tabelleZeigt]}</p>
-                ) : (
-                  <OffenFuerJutta frage="Zeigt die Tabelle Körpermaße oder die Maße des fertigen Stücks?" />
-                )}
-                {juttaAngaben.zwischenZweiGroessen ? (
-                  <p>
-                    {zwischenZweiGroessenText[juttaAngaben.zwischenZweiGroessen]}
-                  </p>
-                ) : (
-                  <OffenFuerJutta frage="Zwischen zwei Größen: zur kleineren oder zur größeren?" />
-                )}
-                {juttaAngaben.passform ? (
-                  <p>{juttaAngaben.passform}</p>
-                ) : (
-                  <OffenFuerJutta frage="Wie fallen die Stücke aus (normal, weit, je nach Stück)?" />
-                )}
-                {juttaAngaben.zahlengroessen ? (
-                  <p>{juttaAngaben.zahlengroessen}</p>
-                ) : (
-                  <OffenFuerJutta frage="Welche Zahlengröße entspricht welcher Buchstabengröße (Jacke FLOKA: 36, 42, 46)?" />
-                )}
                 <p>
-                  Sie sind unsicher? Rufen Sie uns an unter{" "}
+                  Legen Sie ein Stück, das Ihnen gut passt, flach hin. Messen Sie
+                  die Breite auf Brusthöhe und nehmen Sie den Wert mal zwei: Das
+                  ist der Brustumfang. Wählen Sie die Größe, deren Wert in der
+                  Tabelle am nächsten liegt.
+                </p>
+                <p>
+                  Liegen Sie zwischen zwei Größen, nehmen Sie bei Strick die
+                  kleinere, denn Strick gibt leicht nach. Mögen Sie es locker,
+                  nehmen Sie die größere.
+                </p>
+                <p>
+                  Wie weit ein Stück geschnitten ist, lesen Sie in seiner
+                  Beschreibung. Die Maße sind Richtwerte und können je nach
+                  Schnitt etwas abweichen.
+                </p>
+                <p>
+                  Für Stücke mit Zahlengrößen wie die Jacke FLOKA und bei allen
+                  anderen Fragen rufen Sie uns an unter{" "}
                   <a
                     href="tel:+4326862259"
                     className="text-stone-800 underline underline-offset-2 hover:text-stone-600"
@@ -131,10 +90,14 @@ export default function SizeGuidePage() {
 
             {/* Messanleitung – Bild */}
             <div className="bg-white rounded-2xl border border-stone-200 p-8 mb-8">
-              <h2 className="font-serif text-xl font-medium text-stone-800 mb-6 flex items-center gap-3">
+              <h2 className="font-serif text-xl font-medium text-stone-800 mb-3 flex items-center gap-3">
                 <Ruler size={24} />
-                So messen Sie richtig
+                Wo gemessen wird
               </h2>
+              <p className="text-stone-600 mb-6">
+                Die Buchstaben zeigen, welches Maß in der Tabelle gemeint ist. Die
+                Tabelle nennt die Maße des fertigen Stücks, nicht Ihre Körpermaße.
+              </p>
               <div className="relative w-full max-w-xl mx-auto aspect-[550/780]">
                 <Image
                   src="/images/size-guide/maßtabelle_damen.webp"
@@ -150,15 +113,8 @@ export default function SizeGuidePage() {
             {/* Maßtabelle */}
             <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-8">
               <h2 className="font-serif text-lg font-medium text-stone-800 px-6 py-4 bg-stone-50 border-b border-stone-200">
-                Maßtabelle
-                {juttaAngaben.tabelleZeigt === "koerper" && " (Körpermaße)"}
-                {juttaAngaben.tabelleZeigt === "stueck" &&
-                  " (Maße des fertigen Stücks)"}
+                Maßtabelle (Maße des fertigen Stücks)
               </h2>
-              <div className="px-6 pt-4 empty:hidden">
-                {/* Entfernen, sobald Jutta die Werte bestätigt hat */}
-                <OffenFuerJutta frage="Stimmen diese Werte, und gelten sie für alle Stücke (Mantel, Pullover, Hose)?" />
-              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
                   <thead className="bg-stone-50">
