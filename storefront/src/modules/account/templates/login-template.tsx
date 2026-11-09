@@ -3,10 +3,12 @@
 import { useState } from "react"
 import Register from "@modules/account/components/register"
 import Login from "@modules/account/components/login"
+import ForgotPassword from "@modules/account/components/forgot-password"
 
 export enum LOGIN_VIEW {
   SIGN_IN = "sign-in",
   REGISTER = "register",
+  FORGOT_PASSWORD = "forgot-password",
 }
 
 type LoginTemplateProps = {
@@ -20,7 +22,9 @@ const LoginTemplate = ({ redirectUrl }: LoginTemplateProps) => {
   return (
     <div className="flex items-center justify-center py-12 px-4 bg-stone-50 min-h-[60vh]">
       <div className="w-full max-w-md">
-        {currentView === "sign-in" ? (
+        {currentView === LOGIN_VIEW.FORGOT_PASSWORD ? (
+          <ForgotPassword onBack={() => setCurrentView(LOGIN_VIEW.SIGN_IN)} />
+        ) : currentView === "sign-in" ? (
           <Login setCurrentView={setCurrentView} redirectUrl={redirectUrl} />
         ) : (
           <Register setCurrentView={setCurrentView} />

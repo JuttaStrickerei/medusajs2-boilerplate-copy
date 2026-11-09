@@ -4,7 +4,7 @@ import { useState } from "react"
 import { HttpTypes } from "@medusajs/types"
 import { convertToLocale } from "@lib/util/money"
 import { updateLineItem, deleteLineItem } from "@lib/data/cart"
-import { triggerCartRefresh } from "@lib/context/cart-context"
+import { triggerCartRefresh, useCart } from "@lib/context/cart-context"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@components/ui"
 import Thumbnail from "@modules/products/components/thumbnail"
@@ -22,7 +22,8 @@ export default function CartDropdown({ cart, isOpen }: CartDropdownProps) {
   
   const totalItems = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0
   const isEmpty = !cart || totalItems === 0
-  const isAuthenticated = !!cart?.customer_id
+  // Login-Status aus dem Cookie (siehe CartProvider), nicht aus cart.customer_id
+  const { isAuthenticated } = useCart()
   const currencyCode = cart?.currency_code || "EUR"
 
   // Helper function for consistent price formatting

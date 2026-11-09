@@ -118,7 +118,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased bg-stone-50 text-stone-800">
         {/* Google Analytics: gtag.js lädt erst nach Zustimmung zu „Analyse“ (lib/util/google-analytics.ts) */}
-        <CartProvider>
+        <CartProvider isAuthenticated={authed}>
           <WishlistProvider initialAuthenticated={authed}>
             <ToastProvider>
               <main className="relative min-h-screen">{props.children}</main>

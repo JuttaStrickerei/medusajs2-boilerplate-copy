@@ -7,6 +7,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { signup } from "@lib/data/customer"
+import { AUTH_ERRORS } from "@lib/util/auth-errors"
 import { UserPlus } from "@components/icons"
 
 type Props = {
@@ -14,7 +15,9 @@ type Props = {
 }
 
 const Register = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useActionState(signup, null)
+  const [state, formAction] = useActionState(signup, null)
+  // Nach einem Fehler die Eingaben wieder einsetzen (Passwort ausgenommen)
+  const values = state?.values ?? {}
 
   return (
     <div
@@ -42,6 +45,7 @@ const Register = ({ setCurrentView }: Props) => {
             name="first_name"
             required
             autoComplete="given-name"
+            defaultValue={values.first_name}
             data-testid="first-name-input"
           />
           <Input
@@ -49,6 +53,7 @@ const Register = ({ setCurrentView }: Props) => {
             name="last_name"
             required
             autoComplete="family-name"
+            defaultValue={values.last_name}
             data-testid="last-name-input"
           />
         </div>
@@ -59,6 +64,7 @@ const Register = ({ setCurrentView }: Props) => {
           required
           type="email"
           autoComplete="email"
+          defaultValue={values.email}
           data-testid="email-input"
         />
         
@@ -67,6 +73,7 @@ const Register = ({ setCurrentView }: Props) => {
           name="phone"
           type="tel"
           autoComplete="tel"
+          defaultValue={values.phone}
           data-testid="phone-input"
         />
         
@@ -79,7 +86,27 @@ const Register = ({ setCurrentView }: Props) => {
           data-testid="password-input"
         />
 
-        <ErrorMessage error={message} data-testid="register-error" />
+        <ErrorMessage error={state?.error} data-testid="register-error" />
+        {state?.error === AUTH_ERRORS.EMAIL_EXISTS && (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <button
+              type="button"
+              onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
+              className="font-medium text-stone-800 underline underline-offset-2"
+              data-testid="register-error-sign-in"
+            >
+              Zur Anmeldung
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentView(LOGIN_VIEW.FORGOT_PASSWORD)}
+              className="font-medium text-stone-800 underline underline-offset-2"
+              data-testid="register-error-forgot-password"
+            >
+              Passwort zurücksetzen
+            </button>
+          </div>
+        )}
 
         {/* Terms */}
         <p className="text-xs text-stone-500 text-center">
