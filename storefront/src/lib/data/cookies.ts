@@ -1,30 +1,60 @@
 import "server-only"
 import { cookies as nextCookies } from "next/headers"
 
-export const getAuthHeaders = async (): Promise<
-  { authorization: string } | {}
-> => {
+// Login-Cookie höchstens 7 Tage
+const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+
+// Ablaufzeit (ms) aus dem Medusa-Login-Token (JWT, Feld „exp“). Nur gelesen,
+// nicht geprüft: Ob das Token echt ist, entscheidet das Backend.
+// undefined = Token ohne Ablaufzeit, null = kein lesbares Token
+const tokenExpiresAt = (token: string): number | null | undefined => {
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split(".")[1], "base64url").toString("utf8")
+    )
+    return typeof payload.exp === "number" ? payload.exp * 1000 : undefined
+  } catch {
+    return null
+  }
+}
+
+// Medusa meldet Kundinnen nach Ablauf des Tokens ab (Standard: 1 Tag), das
+// Cookie lebte aber 7 Tage. Dazwischen hielt der Shop sie für angemeldet.
+// Ein abgelaufenes Token zählt darum hier wie kein Token.
+const getValidAuthToken = async (): Promise<string | null> => {
   try {
     const cookies = await nextCookies()
     const token = cookies.get("_medusa_jwt")?.value
 
     if (!token) {
-      return {}
+      return null
     }
 
-    return { authorization: `Bearer ${token}` }
+    const expiresAt = tokenExpiresAt(token)
+    if (expiresAt === null || (expiresAt && expiresAt <= Date.now())) {
+      return null
+    }
+
+    return token
   } catch {
-    return {}
+    return null
   }
 }
 
-export const isAuthenticated = async (): Promise<boolean> => {
-  try {
-    const cookies = await nextCookies()
-    return Boolean(cookies.get("_medusa_jwt")?.value)
-  } catch {
-    return false
+export const getAuthHeaders = async (): Promise<
+  { authorization: string } | {}
+> => {
+  const token = await getValidAuthToken()
+
+  if (!token) {
+    return {}
   }
+
+  return { authorization: `Bearer ${token}` }
+}
+
+export const isAuthenticated = async (): Promise<boolean> => {
+  return Boolean(await getValidAuthToken())
 }
 
 export const getCacheTag = async (tag: string): Promise<string> => {
@@ -60,8 +90,16 @@ export const getCacheOptions = async (
 
 export const setAuthToken = async (token: string) => {
   const cookies = await nextCookies()
+  // Cookie läuft mit dem Token ab (nie länger als 7 Tage)
+  const expiresAt = tokenExpiresAt(token)
+  const maxAge = expiresAt
+    ? Math.max(
+        0,
+        Math.min(AUTH_COOKIE_MAX_AGE, Math.floor((expiresAt - Date.now()) / 1000))
+      )
+    : AUTH_COOKIE_MAX_AGE
   cookies.set("_medusa_jwt", token, {
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge,
     httpOnly: true,
     sameSite: "strict",
     secure: process.env.NODE_ENV === "production",

@@ -12,7 +12,7 @@ type Props = {
 }
 
 const Login = ({ setCurrentView, redirectUrl }: Props) => {
-  const [message, formAction] = useActionState(login, null)
+  const [state, formAction] = useActionState(login, null)
 
   return (
     <div
@@ -45,6 +45,7 @@ const Login = ({ setCurrentView, redirectUrl }: Props) => {
             title="Geben Sie eine gültige E-Mail Adresse ein"
             autoComplete="email"
             required
+            defaultValue={state?.values.email}
             data-testid="email-input"
           />
           <Input
@@ -68,7 +69,7 @@ const Login = ({ setCurrentView, redirectUrl }: Props) => {
           </button>
         </div>
 
-        <ErrorMessage error={message} data-testid="login-error-message" />
+        <ErrorMessage error={state?.error} data-testid="login-error-message" />
 
         <SubmitButton 
           data-testid="sign-in-button" 

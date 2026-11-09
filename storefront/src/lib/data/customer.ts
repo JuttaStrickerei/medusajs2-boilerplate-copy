@@ -3,6 +3,7 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { AUTH_ERRORS, authErrorMessage } from "@lib/util/auth-errors"
+import { SHOP_ERRORS } from "@lib/util/shop-errors"
 import { HttpTypes } from "@medusajs/types"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
@@ -24,7 +25,10 @@ export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
     const authHeaders = await getAuthHeaders()
 
-    if (!authHeaders) return null
+    // Ohne (gültiges) Login gar nicht erst beim Backend fragen. Vorher war
+    // die Prüfung wirkungslos ({} ist „wahr“), Gäste lösten je Seite einen
+    // abgelehnten Aufruf aus.
+    if (!("authorization" in authHeaders)) return null
 
     const headers = {
       ...authHeaders,
@@ -64,7 +68,18 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   return updateRes
 }
 
-export async function signup(_currentState: unknown, formData: FormData) {
+// Fehler plus die Eingaben: React leert ein Formular nach jeder Server-Action.
+// Die Formulare setzen die Werte als defaultValue wieder ein, damit die
+// Kundin nach einem Fehler nicht alles neu tippen muss (Passwort ausgenommen).
+export type AuthFormState = {
+  error: string
+  values: Record<string, string>
+} | null
+
+export async function signup(
+  _currentState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
   const password = formData.get("password") as string
   const customerForm = {
     email: formData.get("email") as string,
@@ -89,11 +104,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
       ...(await getAuthHeaders()),
     }
 
-    const { customer: createdCustomer } = await sdk.store.customer.create(
-      customerForm,
-      {},
-      headers
-    )
+    await sdk.store.customer.create(customerForm, {}, headers)
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
       email: customerForm.email,
@@ -113,17 +124,21 @@ export async function signup(_currentState: unknown, formData: FormData) {
     // so no banner — prompt runs the merge silently.
     await setWishlistMergePending("auto")
 
-    return createdCustomer
+    // Erfolg: Das Layout zeigt jetzt das Konto
+    return null
   } catch (error: any) {
     if (tokenSet) {
       await removeAuthToken()
     }
     // Medusa meldet sich auf Englisch („Identity with email already exists“)
-    return authErrorMessage(error)
+    return { error: authErrorMessage(error), values: customerForm }
   }
 }
 
-export async function login(_currentState: unknown, formData: FormData) {
+export async function login(
+  _currentState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
   const redirectUrl = formData.get("redirect_url") as string | null
@@ -139,13 +154,13 @@ export async function login(_currentState: unknown, formData: FormData) {
       })
   } catch (error: any) {
     // z. B. „Invalid email or password“ → deutscher Satz
-    return authErrorMessage(error)
+    return { error: authErrorMessage(error), values: { email } }
   }
 
   try {
     await transferCart()
   } catch (error: any) {
-    return authErrorMessage(error)
+    return { error: authErrorMessage(error), values: { email } }
   }
 
   // Flag guest-wishlist merge prompt for the client. Login may happen on a
@@ -162,6 +177,8 @@ export async function login(_currentState: unknown, formData: FormData) {
   ) {
     redirect(redirectUrl)
   }
+
+  return null
 }
 
 export async function signout(countryCode: string) {
@@ -311,7 +328,8 @@ export const addCustomerAddress = async (
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      console.error("[customerAddress]", err?.message)
+      return { success: false, error: SHOP_ERRORS.ADDRESS_FAILED }
     })
 }
 
@@ -330,7 +348,8 @@ export const deleteCustomerAddress = async (
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      console.error("[customerAddress]", err?.message)
+      return { success: false, error: SHOP_ERRORS.ADDRESS_DELETE_FAILED }
     })
 }
 
@@ -342,7 +361,7 @@ export const updateCustomerAddress = async (
     (currentState.addressId as string) || (formData.get("addressId") as string)
 
   if (!addressId) {
-    return { success: false, error: "Address ID is required" }
+    return { success: false, error: SHOP_ERRORS.ADDRESS_FAILED }
   }
 
   const address = {
@@ -375,6 +394,7 @@ export const updateCustomerAddress = async (
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      console.error("[customerAddress]", err?.message)
+      return { success: false, error: SHOP_ERRORS.ADDRESS_FAILED }
     })
 }
