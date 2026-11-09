@@ -18,7 +18,8 @@ const tokenExpiresAt = (token: string): number | null | undefined => {
   }
 }
 
-// Medusa meldet Kundinnen nach Ablauf des Tokens ab (Standard: 1 Tag), das
+// Medusa meldet Kundinnen nach Ablauf des Tokens ab (bei uns 7 Tage, siehe
+// backend/medusa-config.js jwtExpiresIn; Medusa-Standard wäre 1 Tag), das
 // Cookie lebte aber 7 Tage. Dazwischen hielt der Shop sie für angemeldet.
 // Ein abgelaufenes Token zählt darum hier wie kein Token.
 const getValidAuthToken = async (): Promise<string | null> => {
