@@ -99,6 +99,42 @@ export const removeCartId = async () => {
   })
 }
 
+// Passwort-Link aus der E-Mail.
+// /api/reset-password legt das Token hier ab und leitet auf eine Seite ohne
+// Token in der Adresse weiter. So landet es nie in Seitenaufrufen, die
+// Google Analytics oder der Meta-Pixel mitschicken. „lax“, weil der Klick aus
+// dem Mailprogramm von außen kommt (bei „strict“ fehlte das Cookie nach der
+// Weiterleitung). Gültig 15 Minuten wie das Token selbst.
+const RESET_TOKEN_COOKIE = "_jutta_reset_token"
+
+export const setResetPasswordToken = async (token: string) => {
+  const cookies = await nextCookies()
+  cookies.set(RESET_TOKEN_COOKIE, token, {
+    path: "/",
+    maxAge: 60 * 15,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  })
+}
+
+export const getResetPasswordToken = async (): Promise<string | null> => {
+  try {
+    const cookies = await nextCookies()
+    return cookies.get(RESET_TOKEN_COOKIE)?.value || null
+  } catch {
+    return null
+  }
+}
+
+export const removeResetPasswordToken = async () => {
+  const cookies = await nextCookies()
+  cookies.set(RESET_TOKEN_COOKIE, "", {
+    path: "/",
+    maxAge: -1,
+  })
+}
+
 // Wishlist merge-pending flag.
 // Set by login()/signup() after auth success; read + cleared by the
 // client-side merge prompt once the user has made a decision.

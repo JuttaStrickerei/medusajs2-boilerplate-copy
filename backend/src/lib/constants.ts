@@ -30,6 +30,16 @@ const LINK_BASE_URL = (
 export const PUBLIC_BACKEND_URL = /^https?:\/\//.test(LINK_BASE_URL) ? LINK_BASE_URL : `https://${LINK_BASE_URL}`
 
 /**
+ * Public URL of the shop (storefront), for links in customer emails
+ * (password reset). STOREFRONT_URL if set (dev: the dev storefront),
+ * otherwise the live shop. A bare domain gets https://.
+ */
+const STOREFRONT_BASE_URL = (
+  process.env.STOREFRONT_URL || 'https://shop.strickerei-jutta.at'
+).replace(/\/+$/, '')
+export const STOREFRONT_URL = /^https?:\/\//.test(STOREFRONT_BASE_URL) ? STOREFRONT_BASE_URL : `https://${STOREFRONT_BASE_URL}`
+
+/**
  * Database URL for Postgres instance used by the backend
  */
 export const DATABASE_URL = assertValue(

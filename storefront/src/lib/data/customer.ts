@@ -2,6 +2,7 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
+import { AUTH_ERRORS, authErrorMessage } from "@lib/util/auth-errors"
 import { HttpTypes } from "@medusajs/types"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
@@ -11,8 +12,10 @@ import {
   getCacheOptions,
   getCacheTag,
   getCartId,
+  getResetPasswordToken,
   removeAuthToken,
   removeCartId,
+  removeResetPasswordToken,
   setAuthToken,
   setWishlistMergePending,
 } from "./cookies"
@@ -69,6 +72,9 @@ export async function signup(_currentState: unknown, formData: FormData) {
     last_name: formData.get("last_name") as string,
     phone: formData.get("phone") as string,
   }
+  // Nur ein Token, das dieser Versuch gesetzt hat, wird bei Fehlern wieder
+  // entfernt (sonst hinge ein halbes Konto ohne Kundendaten im Cookie)
+  let tokenSet = false
 
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
@@ -77,6 +83,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     })
 
     await setAuthToken(token as string)
+    tokenSet = true
 
     const headers = {
       ...(await getAuthHeaders()),
@@ -108,7 +115,11 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     return createdCustomer
   } catch (error: any) {
-    return error.toString()
+    if (tokenSet) {
+      await removeAuthToken()
+    }
+    // Medusa meldet sich auf Englisch („Identity with email already exists“)
+    return authErrorMessage(error)
   }
 }
 
@@ -127,13 +138,14 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidatePath("/", "layout")
       })
   } catch (error: any) {
-    return error.toString()
+    // z. B. „Invalid email or password“ → deutscher Satz
+    return authErrorMessage(error)
   }
 
   try {
     await transferCart()
   } catch (error: any) {
-    return error.toString()
+    return authErrorMessage(error)
   }
 
   // Flag guest-wishlist merge prompt for the client. Login may happen on a
@@ -188,6 +200,81 @@ export async function transferCart() {
 
   const cartCacheTag = await getCacheTag("cart")
   revalidateTag(cartCacheTag)
+}
+
+// ---------------------------------------------------------------------------
+// Passwort vergessen (Medusa-Standard)
+// 1. requestPasswordReset: Medusa erzeugt ein Token (15 Minuten gültig) und
+//    löst „auth.password_reset“ aus; der Subscriber im Backend schickt die Mail.
+// 2. Der Link führt über /api/reset-password (Token ins Cookie) auf
+//    /<land>/reset-password.
+// 3. resetPassword: setzt das neue Passwort mit diesem Token.
+// ---------------------------------------------------------------------------
+
+export type PasswordFormState = {
+  success: boolean
+  error: string | null
+}
+
+export async function requestPasswordReset(
+  _currentState: PasswordFormState,
+  formData: FormData
+): Promise<PasswordFormState> {
+  const email = ((formData.get("email") as string) || "").trim()
+
+  if (!email) {
+    return { success: false, error: "Bitte geben Sie Ihre E-Mail-Adresse ein." }
+  }
+
+  try {
+    // Medusa antwortet immer mit Erfolg, auch wenn es kein Konto gibt. So
+    // verrät das Formular nicht, welche Adressen bei uns ein Konto haben.
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+  } catch (error) {
+    return { success: false, error: authErrorMessage(error) }
+  }
+
+  return { success: true, error: null }
+}
+
+export async function resetPassword(
+  _currentState: PasswordFormState,
+  formData: FormData
+): Promise<PasswordFormState> {
+  const password = (formData.get("password") as string) || ""
+  const passwordConfirm = (formData.get("password_confirm") as string) || ""
+
+  // Ein leeres Passwort nimmt Medusa ohne Fehler hin und ändert nichts
+  if (!password.trim()) {
+    return { success: false, error: "Bitte geben Sie ein neues Passwort ein." }
+  }
+
+  if (password !== passwordConfirm) {
+    return { success: false, error: AUTH_ERRORS.PASSWORDS_DIFFER }
+  }
+
+  const token = await getResetPasswordToken()
+
+  if (!token) {
+    return { success: false, error: AUTH_ERRORS.RESET_LINK_INVALID }
+  }
+
+  try {
+    await sdk.auth.updateProvider("customer", "emailpass", { password }, token)
+  } catch (error: any) {
+    // 401: Token abgelaufen oder ungültig
+    if (error?.status === 401) {
+      await removeResetPasswordToken()
+      return { success: false, error: AUTH_ERRORS.RESET_LINK_INVALID }
+    }
+    return { success: false, error: authErrorMessage(error) }
+  }
+
+  await removeResetPasswordToken()
+
+  return { success: true, error: null }
 }
 
 export const addCustomerAddress = async (

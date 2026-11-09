@@ -7,6 +7,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { signup } from "@lib/data/customer"
+import { AUTH_ERRORS } from "@lib/util/auth-errors"
 import { UserPlus } from "@components/icons"
 
 type Props = {
@@ -79,7 +80,31 @@ const Register = ({ setCurrentView }: Props) => {
           data-testid="password-input"
         />
 
-        <ErrorMessage error={message} data-testid="register-error" />
+        {/* signup liefert bei Erfolg die Kundin, bei Fehler einen deutschen Satz */}
+        <ErrorMessage
+          error={typeof message === "string" ? message : null}
+          data-testid="register-error"
+        />
+        {message === AUTH_ERRORS.EMAIL_EXISTS && (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <button
+              type="button"
+              onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
+              className="font-medium text-stone-800 underline underline-offset-2"
+              data-testid="register-error-sign-in"
+            >
+              Zur Anmeldung
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentView(LOGIN_VIEW.FORGOT_PASSWORD)}
+              className="font-medium text-stone-800 underline underline-offset-2"
+              data-testid="register-error-forgot-password"
+            >
+              Passwort zurücksetzen
+            </button>
+          </div>
+        )}
 
         {/* Terms */}
         <p className="text-xs text-stone-500 text-center">

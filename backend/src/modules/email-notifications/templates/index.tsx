@@ -12,6 +12,7 @@ import { PickupReadyTemplate, PICKUP_READY, isPickupReadyTemplateData } from './
 import { PickupCompletedTemplate, PICKUP_COMPLETED, isPickupCompletedTemplateData } from './pickup-completed'
 import { RevocationConfirmationTemplate, REVOCATION_CONFIRMATION, isRevocationConfirmationTemplateData } from './revocation-confirmation'
 import { RevocationAdminTemplate, REVOCATION_ADMIN, isRevocationAdminTemplateData } from './revocation-admin'
+import { PasswordResetTemplate, PASSWORD_RESET, isPasswordResetTemplateData } from './password-reset'
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -26,6 +27,7 @@ export const EmailTemplates = {
   PICKUP_COMPLETED,
   REVOCATION_CONFIRMATION,
   REVOCATION_ADMIN,
+  PASSWORD_RESET,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -140,6 +142,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <RevocationAdminTemplate {...data} />
 
+    case EmailTemplates.PASSWORD_RESET:
+      if (!isPasswordResetTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.PASSWORD_RESET}"`
+        )
+      }
+      return <PasswordResetTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -161,4 +172,5 @@ export {
   PickupCompletedTemplate,
   RevocationConfirmationTemplate,
   RevocationAdminTemplate,
+  PasswordResetTemplate,
 }
