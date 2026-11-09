@@ -52,6 +52,10 @@ const medusaConfig = {
       authCors: AUTH_CORS,
       storeCors: STORE_CORS,
       jwtSecret: JWT_SECRET,
+      // Login bleibt 7 Tage gültig (Medusa-Standard: 1 Tag). Das Login-Cookie
+      // im Shop läuft mit dem Token ab. Der Link „Passwort vergessen“ bleibt
+      // bei 15 Minuten (fest im Medusa-Ablauf).
+      jwtExpiresIn: '7d',
       cookieSecret: COOKIE_SECRET
     }
   },
