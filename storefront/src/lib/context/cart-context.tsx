@@ -10,6 +10,10 @@ type CartContextType = {
   refreshCart: () => Promise<void>
   clearCart: () => void
   itemCount: number
+  // Angemeldet ja/nein, aus dem Login-Cookie (Root-Layout), nicht aus dem
+  // Warenkorb: cart.customer_id fehlt bei einem vor dem Login geladenen
+  // Warenkorb und ist auch bei Gästen gesetzt, sobald sie eine E-Mail angeben.
+  isAuthenticated: boolean
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -17,10 +21,16 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 // Debounce delay for focus event (ms)
 const FOCUS_DEBOUNCE_MS = 1000
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({
+  isAuthenticated = false,
+  children,
+}: {
+  isAuthenticated?: boolean
+  children: React.ReactNode
+}) {
   const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  
+
   // Request deduplication: track if a refresh is in progress
   const refreshInProgressRef = useRef(false)
   // Track pending refresh request during in-flight request
@@ -66,6 +76,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refreshCart()
   }, [refreshCart])
+
+  // Login/Logout: Das Layout liefert den neuen Status, der Provider bleibt
+  // aber bestehen (keine neue Seite). Login hängt den Warenkorb an das Konto,
+  // Logout entfernt ihn – darum den Warenkorb hier neu laden, sonst zeigt das
+  // Popup bis zum Neuladen den alten Stand.
+  const lastAuthRef = useRef(isAuthenticated)
+  useEffect(() => {
+    if (lastAuthRef.current === isAuthenticated) return
+    lastAuthRef.current = isAuthenticated
+    refreshCart()
+  }, [isAuthenticated, refreshCart])
 
   // Listen for cart update events (from addToCart actions)
   useEffect(() => {
@@ -119,6 +140,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         refreshCart,
         clearCart,
         itemCount,
+        isAuthenticated,
       }}
     >
       {children}

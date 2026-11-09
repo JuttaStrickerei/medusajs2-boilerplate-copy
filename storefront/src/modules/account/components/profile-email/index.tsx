@@ -1,74 +1,46 @@
 "use client"
 
-import React, { useEffect, useActionState } from "react";
-
-import Input from "@modules/common/components/input"
-
-import AccountInfo from "../account-info"
+import React from "react"
 import { HttpTypes } from "@medusajs/types"
-// import { updateCustomer } from "@lib/data/customer"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
 }
 
+// Die E-Mail-Adresse ist die Anmeldung. Medusa lässt Kundinnen sie im Shop
+// nicht selbst ändern. Früher gab es hier „Bearbeiten“, das Speichern war aber
+// abgeschaltet: Die Kundin sah „erfolgreich aktualisiert“, geändert wurde
+// nichts. Jetzt nur Anzeige mit Hinweis, wie es trotzdem geht.
 const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
-  const [successState, setSuccessState] = React.useState(false)
-
-  // TODO: It seems we don't support updating emails now?
-  const updateCustomerEmail = (
-    _currentState: Record<string, unknown>,
-    formData: FormData
-  ) => {
-    const customer = {
-      email: formData.get("email") as string,
-    }
-
-    try {
-      // await updateCustomer(customer)
-      return { success: true, error: null }
-    } catch (error: any) {
-      return { success: false, error: error.toString() }
-    }
-  }
-
-  const [state, formAction] = useActionState(updateCustomerEmail, {
-    error: false,
-    success: false,
-  })
-
-  const clearState = () => {
-    setSuccessState(false)
-  }
-
-  useEffect(() => {
-    setSuccessState(state.success)
-  }, [state])
-
   return (
-    <form action={formAction} className="w-full">
-      <AccountInfo
-        label="E-Mail"
-        currentInfo={`${customer.email}`}
-        isSuccess={successState}
-        isError={!!state.error}
-        errorMessage={state.error}
-        clearState={clearState}
-        data-testid="account-email-editor"
-      >
-        <div className="grid grid-cols-1 gap-y-2">
-          <Input
-            label="E-Mail"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            defaultValue={customer.email}
-            data-testid="email-input"
-          />
-        </div>
-      </AccountInfo>
-    </form>
+    <div className="text-sm" data-testid="account-email-editor">
+      <span className="text-xs text-stone-500 uppercase tracking-wider">
+        E-Mail
+      </span>
+      <div className="mt-1">
+        <span className="font-medium text-stone-800" data-testid="current-info">
+          {customer.email}
+        </span>
+      </div>
+      <p className="mt-2 text-stone-600" data-testid="email-change-hint">
+        Mit dieser Adresse melden Sie sich an. Möchten Sie sie ändern? Rufen
+        Sie uns an unter{" "}
+        <a
+          href="tel:+4326862259"
+          className="text-stone-800 underline underline-offset-2"
+        >
+          +43 2686 2259
+        </a>{" "}
+        oder schreiben Sie an{" "}
+        <a
+          href="mailto:office@strickerei-jutta.at"
+          className="text-stone-800 underline underline-offset-2"
+        >
+          office@strickerei-jutta.at
+        </a>
+        .
+      </p>
+    </div>
   )
 }
 

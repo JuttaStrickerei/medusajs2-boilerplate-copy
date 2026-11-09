@@ -4,6 +4,7 @@ import React from "react"
 
 import { applyPromotions } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
+import { SHOP_ERRORS } from "@lib/util/shop-errors"
 import { HttpTypes } from "@medusajs/types"
 import ErrorMessage from "../error-message"
 import { SubmitButton } from "../submit-button"
@@ -46,8 +47,10 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
 
     try {
       await applyPromotions(codes)
-    } catch (e: any) {
-      setErrorMessage(e.message)
+    } catch {
+      // Im Produktions-Build kommt hier nur ein allgemeiner englischer Text an;
+      // häufigste Ursache ist ein falscher oder abgelaufener Code
+      setErrorMessage(SHOP_ERRORS.PROMO_INVALID)
     }
 
     if (input) {

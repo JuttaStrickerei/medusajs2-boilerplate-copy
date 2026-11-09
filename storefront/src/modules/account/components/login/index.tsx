@@ -12,7 +12,7 @@ type Props = {
 }
 
 const Login = ({ setCurrentView, redirectUrl }: Props) => {
-  const [message, formAction] = useActionState(login, null)
+  const [state, formAction] = useActionState(login, null)
 
   return (
     <div
@@ -45,6 +45,7 @@ const Login = ({ setCurrentView, redirectUrl }: Props) => {
             title="Geben Sie eine gültige E-Mail Adresse ein"
             autoComplete="email"
             required
+            defaultValue={state?.values.email}
             data-testid="email-input"
           />
           <Input
@@ -57,7 +58,18 @@ const Login = ({ setCurrentView, redirectUrl }: Props) => {
           />
         </div>
 
-        <ErrorMessage error={message} data-testid="login-error-message" />
+        <div className="flex justify-end -mt-1">
+          <button
+            type="button"
+            onClick={() => setCurrentView(LOGIN_VIEW.FORGOT_PASSWORD)}
+            className="text-sm text-stone-600 hover:text-stone-800 underline underline-offset-2"
+            data-testid="forgot-password-button"
+          >
+            Passwort vergessen?
+          </button>
+        </div>
+
+        <ErrorMessage error={state?.error} data-testid="login-error-message" />
 
         <SubmitButton 
           data-testid="sign-in-button" 

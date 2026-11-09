@@ -2,6 +2,8 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
+import { AUTH_ERRORS, authErrorMessage } from "@lib/util/auth-errors"
+import { SHOP_ERRORS } from "@lib/util/shop-errors"
 import { HttpTypes } from "@medusajs/types"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
@@ -11,8 +13,10 @@ import {
   getCacheOptions,
   getCacheTag,
   getCartId,
+  getResetPasswordToken,
   removeAuthToken,
   removeCartId,
+  removeResetPasswordToken,
   setAuthToken,
   setWishlistMergePending,
 } from "./cookies"
@@ -21,7 +25,10 @@ export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
     const authHeaders = await getAuthHeaders()
 
-    if (!authHeaders) return null
+    // Ohne (gültiges) Login gar nicht erst beim Backend fragen. Vorher war
+    // die Prüfung wirkungslos ({} ist „wahr“), Gäste lösten je Seite einen
+    // abgelehnten Aufruf aus.
+    if (!("authorization" in authHeaders)) return null
 
     const headers = {
       ...authHeaders,
@@ -61,7 +68,18 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   return updateRes
 }
 
-export async function signup(_currentState: unknown, formData: FormData) {
+// Fehler plus die Eingaben: React leert ein Formular nach jeder Server-Action.
+// Die Formulare setzen die Werte als defaultValue wieder ein, damit die
+// Kundin nach einem Fehler nicht alles neu tippen muss (Passwort ausgenommen).
+export type AuthFormState = {
+  error: string
+  values: Record<string, string>
+} | null
+
+export async function signup(
+  _currentState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
   const password = formData.get("password") as string
   const customerForm = {
     email: formData.get("email") as string,
@@ -69,6 +87,9 @@ export async function signup(_currentState: unknown, formData: FormData) {
     last_name: formData.get("last_name") as string,
     phone: formData.get("phone") as string,
   }
+  // Nur ein Token, das dieser Versuch gesetzt hat, wird bei Fehlern wieder
+  // entfernt (sonst hinge ein halbes Konto ohne Kundendaten im Cookie)
+  let tokenSet = false
 
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
@@ -77,16 +98,13 @@ export async function signup(_currentState: unknown, formData: FormData) {
     })
 
     await setAuthToken(token as string)
+    tokenSet = true
 
     const headers = {
       ...(await getAuthHeaders()),
     }
 
-    const { customer: createdCustomer } = await sdk.store.customer.create(
-      customerForm,
-      {},
-      headers
-    )
+    await sdk.store.customer.create(customerForm, {}, headers)
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
       email: customerForm.email,
@@ -106,13 +124,21 @@ export async function signup(_currentState: unknown, formData: FormData) {
     // so no banner — prompt runs the merge silently.
     await setWishlistMergePending("auto")
 
-    return createdCustomer
+    // Erfolg: Das Layout zeigt jetzt das Konto
+    return null
   } catch (error: any) {
-    return error.toString()
+    if (tokenSet) {
+      await removeAuthToken()
+    }
+    // Medusa meldet sich auf Englisch („Identity with email already exists“)
+    return { error: authErrorMessage(error), values: customerForm }
   }
 }
 
-export async function login(_currentState: unknown, formData: FormData) {
+export async function login(
+  _currentState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
   const redirectUrl = formData.get("redirect_url") as string | null
@@ -127,13 +153,14 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidatePath("/", "layout")
       })
   } catch (error: any) {
-    return error.toString()
+    // z. B. „Invalid email or password“ → deutscher Satz
+    return { error: authErrorMessage(error), values: { email } }
   }
 
   try {
     await transferCart()
   } catch (error: any) {
-    return error.toString()
+    return { error: authErrorMessage(error), values: { email } }
   }
 
   // Flag guest-wishlist merge prompt for the client. Login may happen on a
@@ -150,6 +177,8 @@ export async function login(_currentState: unknown, formData: FormData) {
   ) {
     redirect(redirectUrl)
   }
+
+  return null
 }
 
 export async function signout(countryCode: string) {
@@ -190,6 +219,81 @@ export async function transferCart() {
   revalidateTag(cartCacheTag)
 }
 
+// ---------------------------------------------------------------------------
+// Passwort vergessen (Medusa-Standard)
+// 1. requestPasswordReset: Medusa erzeugt ein Token (15 Minuten gültig) und
+//    löst „auth.password_reset“ aus; der Subscriber im Backend schickt die Mail.
+// 2. Der Link führt über /api/reset-password (Token ins Cookie) auf
+//    /<land>/reset-password.
+// 3. resetPassword: setzt das neue Passwort mit diesem Token.
+// ---------------------------------------------------------------------------
+
+export type PasswordFormState = {
+  success: boolean
+  error: string | null
+}
+
+export async function requestPasswordReset(
+  _currentState: PasswordFormState,
+  formData: FormData
+): Promise<PasswordFormState> {
+  const email = ((formData.get("email") as string) || "").trim()
+
+  if (!email) {
+    return { success: false, error: "Bitte geben Sie Ihre E-Mail-Adresse ein." }
+  }
+
+  try {
+    // Medusa antwortet immer mit Erfolg, auch wenn es kein Konto gibt. So
+    // verrät das Formular nicht, welche Adressen bei uns ein Konto haben.
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+  } catch (error) {
+    return { success: false, error: authErrorMessage(error) }
+  }
+
+  return { success: true, error: null }
+}
+
+export async function resetPassword(
+  _currentState: PasswordFormState,
+  formData: FormData
+): Promise<PasswordFormState> {
+  const password = (formData.get("password") as string) || ""
+  const passwordConfirm = (formData.get("password_confirm") as string) || ""
+
+  // Ein leeres Passwort nimmt Medusa ohne Fehler hin und ändert nichts
+  if (!password.trim()) {
+    return { success: false, error: "Bitte geben Sie ein neues Passwort ein." }
+  }
+
+  if (password !== passwordConfirm) {
+    return { success: false, error: AUTH_ERRORS.PASSWORDS_DIFFER }
+  }
+
+  const token = await getResetPasswordToken()
+
+  if (!token) {
+    return { success: false, error: AUTH_ERRORS.RESET_LINK_INVALID }
+  }
+
+  try {
+    await sdk.auth.updateProvider("customer", "emailpass", { password }, token)
+  } catch (error: any) {
+    // 401: Token abgelaufen oder ungültig
+    if (error?.status === 401) {
+      await removeResetPasswordToken()
+      return { success: false, error: AUTH_ERRORS.RESET_LINK_INVALID }
+    }
+    return { success: false, error: authErrorMessage(error) }
+  }
+
+  await removeResetPasswordToken()
+
+  return { success: true, error: null }
+}
+
 export const addCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData
@@ -224,7 +328,8 @@ export const addCustomerAddress = async (
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      console.error("[customerAddress]", err?.message)
+      return { success: false, error: SHOP_ERRORS.ADDRESS_FAILED }
     })
 }
 
@@ -243,7 +348,8 @@ export const deleteCustomerAddress = async (
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      console.error("[customerAddress]", err?.message)
+      return { success: false, error: SHOP_ERRORS.ADDRESS_DELETE_FAILED }
     })
 }
 
@@ -255,7 +361,7 @@ export const updateCustomerAddress = async (
     (currentState.addressId as string) || (formData.get("addressId") as string)
 
   if (!addressId) {
-    return { success: false, error: "Address ID is required" }
+    return { success: false, error: SHOP_ERRORS.ADDRESS_FAILED }
   }
 
   const address = {
@@ -288,6 +394,7 @@ export const updateCustomerAddress = async (
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      console.error("[customerAddress]", err?.message)
+      return { success: false, error: SHOP_ERRORS.ADDRESS_FAILED }
     })
 }

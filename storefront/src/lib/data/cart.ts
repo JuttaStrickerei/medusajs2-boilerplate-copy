@@ -2,6 +2,11 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
+import {
+  SHOP_ERRORS,
+  addressErrorMessage,
+  orderErrorMessage,
+} from "@lib/util/shop-errors"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
@@ -330,7 +335,8 @@ export async function submitPromotionForm(
   try {
     await applyPromotions([code])
   } catch (e: any) {
-    return e.message
+    console.error("[submitPromotionForm]", e?.message)
+    return SHOP_ERRORS.PROMO_INVALID
   }
 }
 
@@ -379,7 +385,9 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       }
     await updateCart(data)
   } catch (e: any) {
-    return e.message
+    // Medusa-Text ins Protokoll, deutscher Satz an die Kundin
+    console.error("[setAddresses]", e?.message)
+    return addressErrorMessage(e)
   }
 
   redirect(
@@ -398,7 +406,7 @@ export async function placeOrder(cartId?: string) {
   const id = cartId || (await getCartId())
 
   if (!id) {
-    return { error: "No existing cart found when placing an order" }
+    return { error: SHOP_ERRORS.CART_MISSING }
   }
 
   const headers = {
@@ -416,7 +424,8 @@ export async function placeOrder(cartId?: string) {
       })
       .catch(medusaError)
   } catch (e: any) {
-    return { error: e?.message || "Cart completion failed" }
+    console.error("[placeOrder]", e?.message)
+    return { error: orderErrorMessage(e) }
   }
 
   if (cartRes?.type === "order") {
@@ -431,10 +440,11 @@ export async function placeOrder(cartId?: string) {
     redirect(`/${countryCode}/order/${cartRes?.order.id}/confirmed`)
   }
 
-  const message =
-    (cartRes as any)?.error?.message ||
-    "Die Zahlung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
-  return { error: message }
+  const originalMessage = (cartRes as any)?.error?.message
+  if (originalMessage) {
+    console.error("[placeOrder]", originalMessage)
+  }
+  return { error: orderErrorMessage(originalMessage) }
 }
 
 /**
