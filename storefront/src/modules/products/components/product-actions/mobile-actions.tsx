@@ -128,9 +128,11 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   <ChevronDown />
                 </div>
               </Button>}
+              {/* Fehlt noch eine Auswahl (meist die Größe), öffnet der Knopf sie.
+                  Ausgegraut war er eine Sackgasse: Tippen bewirkte nichts. */}
               <Button
-                onClick={handleAddToCart}
-                disabled={!inStock || !variant}
+                onClick={variant ? handleAddToCart : open}
+                disabled={!!variant && !inStock}
                 className="w-full"
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
@@ -206,6 +208,25 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                         })}
                       </div>
                     )}
+                    {/* Kaufen direkt aus der Auswahl, ohne sie erst zu schließen */}
+                    <Button
+                      onClick={() => {
+                        close()
+                        handleAddToCart()
+                      }}
+                      disabled={!variant || !inStock}
+                      className="mt-8 h-12 w-full text-base"
+                      isLoading={isAdding}
+                      data-testid="mobile-modal-cart-button"
+                    >
+                      {!variant
+                        ? missingOption
+                          ? `Bitte ${translateOptionTitle(missingOption.title ?? "Option")} wählen`
+                          : "Kombination nicht verfügbar"
+                        : !inStock
+                        ? "Ausverkauft"
+                        : "In den Warenkorb"}
+                    </Button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

@@ -116,14 +116,14 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               onClick={() => updateOption(option.id, v)}
               key={v}
               className={clx(
-                "border-ui-border-base bg-ui-bg-subtle border text-small-regular h-10 rounded-rounded p-2 flex-1 ",
-                {
-                  "border-ui-border-interactive": v === current,
-                  "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
-                    v !== current,
-                }
+                // 44 px hoch: gut zu treffen. Die gewählte Größe ist gefüllt, nicht nur umrandet.
+                "border text-small-regular h-11 min-w-11 rounded-rounded p-2 flex-1 transition-colors duration-150",
+                v === current
+                  ? "border-stone-800 bg-stone-800 text-white"
+                  : "border-ui-border-base bg-ui-bg-subtle hover:border-stone-400"
               )}
               disabled={disabled}
+              aria-pressed={v === current}
               data-testid="option-button"
             >
               {v}
@@ -165,16 +165,15 @@ const AvailabilityOptionButton = ({
         type="button"
         onClick={onSelect}
         className={clx(
-          "border text-small-regular h-10 w-full rounded-rounded p-2",
-          selected
-            ? "border-ui-border-interactive"
+          "border text-small-regular h-11 w-full rounded-rounded p-2 transition-colors duration-150",
+          selected && !isSoldOut && !isUnavailable
+            ? "border-stone-800 bg-stone-800 text-white"
+            : selected
+            ? "border-stone-800"
             : "border-ui-border-base",
           isSoldOut || isUnavailable
             ? "bg-stone-50 text-stone-400 line-through"
-            : "bg-ui-bg-subtle",
-          !selected &&
-            !isUnavailable &&
-            "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150",
+            : !selected && "bg-ui-bg-subtle hover:border-stone-400",
           isUnavailable && "cursor-not-allowed"
         )}
         disabled={disabled || isUnavailable}
