@@ -9,14 +9,10 @@ type OrderWithSummary = OrderDTO & {
   display_id?: string | number
   summary?: { raw_current_order_total?: { value?: number } }
   shipping_total?: number
+  original_shipping_total?: number
+  discount_total?: number
   tax_total?: number
   billing_address?: OrderAddressDTO | null
-  payment_collections?: Array<{
-    payment_sessions?: Array<{
-      is_selected?: boolean
-      provider_id?: string
-    }>
-  }>
 }
 
 export interface AdminOrderNotificationTemplateProps {
@@ -67,14 +63,6 @@ const formatAddress = (address?: OrderAddressDTO | null) => {
   return lines.join(", ")
 }
 
-const getPaymentMethod = (order: OrderWithSummary) => {
-  const selectedSession = order.payment_collections
-    ?.flatMap((collection) => collection.payment_sessions || [])
-    .find((session) => session.is_selected)
-
-  return selectedSession?.provider_id || "Nicht verfugbar"
-}
-
 export const AdminOrderNotificationTemplate: React.FC<
   AdminOrderNotificationTemplateProps
 > = ({
@@ -87,8 +75,12 @@ export const AdminOrderNotificationTemplate: React.FC<
   const displayId = order.display_id ?? order.id
   const createdAt = new Date(order.created_at).toLocaleString("de-AT")
   const customerAddress = shippingAddress || order.billing_address || null
-  const paymentMethod = getPaymentMethod(order)
-  const shippingTotal = Number(order.shipping_total || 0)
+  // Wie in der Mail an die Kundin: Produkte (vor Abzug) − Rabatt + Versand = Gesamtbetrag.
+  // Versand vor Abzug, weil discount_total jeden Rabatt enthält, auch einen auf den Versand.
+  const shippingTotal = Number(
+    order.original_shipping_total ?? order.shipping_total ?? 0
+  )
+  const discountTotal = Number(order.discount_total || 0)
   const taxTotal = Number(order.tax_total || 0)
   const grandTotal =
     Number(order.summary?.raw_current_order_total?.value ?? order.total ?? 0)
@@ -127,7 +119,7 @@ export const AdminOrderNotificationTemplate: React.FC<
       <Section>
         <Text style={{ fontWeight: "600", marginBottom: "8px" }}>Produkte</Text>
         {(order.items || []).map((item) => {
-          const lineTotal = Number(item.total ?? Number(item.unit_price || 0) * Number(item.quantity || 1))
+          const lineTotal = Number(item.original_total ?? Number(item.unit_price || 0) * Number(item.quantity || 1))
           return (
             <Text key={item.id} style={{ margin: "0 0 8px 0", fontSize: "14px" }}>
               {item.product_title || item.title} ({item.title || "Variante"}) x{item.quantity} -{" "}
@@ -140,10 +132,15 @@ export const AdminOrderNotificationTemplate: React.FC<
       <Hr />
 
       <Section>
+        {discountTotal > 0 && (
+          <Text><strong>Rabatt:</strong> −{formatCurrency(discountTotal, currencyCode)}</Text>
+        )}
         <Text><strong>Versand:</strong> {formatCurrency(shippingTotal, currencyCode)}</Text>
         <Text><strong>Steuern:</strong> {formatCurrency(taxTotal, currencyCode)}</Text>
         <Text><strong>Gesamtbetrag:</strong> {formatCurrency(grandTotal, currencyCode)}</Text>
-        <Text><strong>Zahlungsmethode:</strong> {paymentMethod}</Text>
+        {/* Keine Zeile „Zahlungsmethode“: Alle Zahlungen laufen über Stripe, und Medusa
+            speichert nur die erlaubten Arten (Karte, EPS, Klarna, Link, PayPal), nicht
+            die tatsächlich gewählte. Die steht im Stripe-Dashboard. */}
       </Section>
 
       <Hr />

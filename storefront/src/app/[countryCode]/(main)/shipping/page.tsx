@@ -3,6 +3,9 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import PageHeader from "@modules/common/components/page-header"
 import { Truck, RefreshCw, Package, Clock, Shield } from "@components/icons"
+import { formatPrice } from "@lib/utils"
+import { SHIPPING_FLAT_EUR, SHOP_PHONE, SHOP_PHONE_HREF } from "@lib/util/shop-facts"
+import PaymentMethods from "@modules/common/components/payment-methods"
 
 export const metadata: Metadata = {
   title: "Versand & Rückgabe",
@@ -36,9 +39,29 @@ export default function ShippingPage() {
                     Lieferung innerhalb Österreichs
                   </h3>
                   <p className="text-stone-600 text-sm">
-                    Wir versenden per Post ausschließlich an Adressen in
-                    Österreich. Ein Versand ins Ausland ist nicht möglich.
+                    Wir versenden ausschließlich an Adressen in Österreich.
+                    Ein Versand ins Ausland ist nicht möglich.
                   </p>
+                </div>
+
+                <div className="p-4 bg-stone-50 rounded-xl">
+                  <h3 className="font-medium text-stone-800 mb-2">
+                    Versandkosten
+                  </h3>
+                  <p className="text-stone-600 text-sm">
+                    Der Versand kostet{" "}
+                    <span className="font-medium text-stone-700">
+                      {formatPrice(SHIPPING_FLAT_EUR, "eur")} pro Bestellung
+                    </span>
+                    . Der Betrag steht schon im Warenkorb in der Gesamtsumme.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-stone-50 rounded-xl">
+                  <h3 className="font-medium text-stone-800 mb-2">
+                    Zahlungsarten
+                  </h3>
+                  <PaymentMethods label="Sie zahlen sicher mit" large className="text-sm" />
                 </div>
 
                 <div className="border-t border-stone-200 pt-6">
@@ -160,6 +183,10 @@ export default function ShippingPage() {
                   className="text-stone-800 hover:underline"
                 >
                   office@strickerei-jutta.at
+                </a>{" "}
+                oder rufen Sie uns an:{" "}
+                <a href={SHOP_PHONE_HREF} className="text-stone-800 hover:underline">
+                  {SHOP_PHONE}
                 </a>
               </p>
             </div>

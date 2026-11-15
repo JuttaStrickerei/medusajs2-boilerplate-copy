@@ -52,7 +52,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       <div className="flex gap-4 py-4" data-testid="product-row">
         <LocalizedClientLink
           href={`/products/${item.product_handle}`}
-          className="w-16 h-16 flex-shrink-0 bg-stone-100 rounded-lg overflow-hidden border border-stone-200"
+          className="w-14 aspect-[2/3] self-start flex-shrink-0 bg-white rounded-lg overflow-hidden border border-stone-200"
         >
           <Thumbnail
             thumbnail={item.thumbnail}
@@ -79,17 +79,19 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
 
   // Full layout (for cart page)
   return (
-    <div className="p-6" data-testid="product-row">
+    <div className="p-4 small:p-6" data-testid="product-row">
       {/* Mobile Layout */}
       <div className="small:hidden flex gap-4">
         <LocalizedClientLink
           href={`/products/${item.product_handle}`}
-          className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-stone-100"
+          className="w-[72px] aspect-[2/3] flex-shrink-0 overflow-hidden rounded-lg bg-white border border-stone-200"
         >
           <Thumbnail
             thumbnail={item.thumbnail}
             images={item.variant?.product?.images}
             size="square"
+            // ganzes Foto zeigen: Die Produktfotos sind hochkant (2:3) auf Weiß
+            className="w-full h-full object-contain"
           />
         </LocalizedClientLink>
         
@@ -105,7 +107,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           
           <LineItemOptions variant={item.variant} data-testid="product-variant" />
           
-          <div className="flex items-center justify-between mt-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-3">
             {/* Quantity Controls */}
             <div className="flex items-center border border-stone-300 rounded-lg">
               <button
@@ -140,12 +142,13 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         <div className="flex gap-4 items-center">
           <LocalizedClientLink
             href={`/products/${item.product_handle}`}
-            className="w-20 h-20 flex-shrink-0 overflow-hidden rounded-lg bg-stone-100"
+            className="w-16 aspect-[2/3] flex-shrink-0 overflow-hidden rounded-lg bg-white border border-stone-200"
           >
             <Thumbnail
               thumbnail={item.thumbnail}
               images={item.variant?.product?.images}
               size="square"
+              className="w-full h-full object-contain"
             />
           </LocalizedClientLink>
           

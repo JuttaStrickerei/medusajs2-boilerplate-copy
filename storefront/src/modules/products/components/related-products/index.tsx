@@ -3,6 +3,7 @@ import { getRegion } from "@lib/data/regions"
 import { HttpTypes } from "@medusajs/types"
 import Product from "../product-preview"
 import { PRODUCT_GRID_WIDE } from "../product-preview/card-styles"
+import { cardSlides, withoutVariantImages } from "../product-preview/card-slides"
 
 type RelatedProductsProps = {
   product: HttpTypes.StoreProduct
@@ -51,7 +52,11 @@ export default async function RelatedProducts({
     <ul className={PRODUCT_GRID_WIDE}>
       {products.map((product) => (
         <li key={product.id}>
-          <Product region={region} product={product} />
+          <Product
+            region={region}
+            product={withoutVariantImages(product)}
+            slides={cardSlides(product)}
+          />
         </li>
       ))}
     </ul>

@@ -94,13 +94,20 @@ const variantAvailability = (
  * Optionsauswahl, gewählte Variante und Lagerstatus eines Produkts.
  * Wird von der Produktseite (ProductActions) und der Look-Seite genutzt.
  * initialOptions: Vorauswahl beim ersten Rendern (Look-Seite: Farbe des Looks).
+ * fixedOptions: von außen bestimmte Werte, die Vorrang haben (Produktseite:
+ * die Farbe, die auch die Galerie steuert). Das Objekt muss stabil sein (useMemo).
  */
 export function useVariantSelection(
   product: HttpTypes.StoreProduct,
-  initialOptions?: Record<string, string>
+  initialOptions?: Record<string, string>,
+  fixedOptions?: Record<string, string>
 ) {
-  const [options, setOptions] = useState<Record<string, string | undefined>>(
+  const [ownOptions, setOptions] = useState<Record<string, string | undefined>>(
     () => initialOptions ?? {}
+  )
+  const options = useMemo(
+    () => (fixedOptions ? { ...ownOptions, ...fixedOptions } : ownOptions),
+    [ownOptions, fixedOptions]
   )
 
   // Preselect options: all options if only 1 variant, otherwise any option with only 1 available value

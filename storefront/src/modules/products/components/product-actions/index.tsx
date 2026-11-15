@@ -5,13 +5,19 @@ import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { cn } from "@lib/utils"
 import { Button } from "@components/ui"
-import OptionSelect from "@modules/products/components/product-actions/option-select"
-import { useParams } from "next/navigation"
-import { useRef, useState } from "react"
+import OptionSelect, {
+  isSizeOption,
+} from "@modules/products/components/product-actions/option-select"
+import { useParams, useRouter } from "next/navigation"
+import { useCallback, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
+import { findColorOption } from "@lib/util/product-colors"
+import { cartPathAfterAdd, currentBackPath } from "@lib/util/added-to-cart"
+import { useProductColor } from "./product-color-context"
 import MobileActions from "./mobile-actions"
 import FertigungHinweis from "./fertigung-hinweis"
+import PurchaseInfo from "../purchase-info"
 import {
   ShoppingBag,
   Heart,
@@ -43,10 +49,20 @@ export default function ProductActions({
   const [addedToCart, setAddedToCart] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const countryCode = useParams().countryCode as string
+  const router = useRouter()
 
   // Wishlist hook - consume items directly for reliable reactivity
   const { items: wishlistItems, toggleWishlist } = useWishlist()
   const isWishlisted = wishlistItems.some((item) => item.id === product.id)
+
+  // Bei mehreren Farben ist immer eine gewählt (aus der Adresse, sonst die des
+  // ersten Galeriebilds). Sie gehört der Seite, weil auch die Galerie ihr folgt.
+  const { color, selectColor } = useProductColor()
+  const colorOptionId = findColorOption(product)?.id
+  const colorSelection = useMemo(
+    () => (color && colorOptionId ? { [colorOptionId]: color } : undefined),
+    [color, colorOptionId]
+  )
 
   const {
     orderedOptions,
@@ -57,7 +73,19 @@ export default function ProductActions({
     inStock,
     missingOptions,
     allOptionsSelected,
-  } = useVariantSelection(product)
+  } = useVariantSelection(product, undefined, colorSelection)
+
+  // Farbwechsel geht an die Seite (Galerie und Adresse), alles andere bleibt hier
+  const updateOption = useCallback(
+    (optionId: string, value: string) => {
+      if (colorSelection && optionId === colorOptionId) {
+        selectColor(value)
+      } else {
+        setOptionValue(optionId, value)
+      }
+    },
+    [colorSelection, colorOptionId, selectColor, setOptionValue]
+  )
 
   const actionsRef = useRef<HTMLDivElement>(null)
   const inView = useIntersection(actionsRef, "0px")
@@ -90,6 +118,15 @@ export default function ProductActions({
 
       // Reset the "added" state after 2 seconds
       setTimeout(() => setAddedToCart(false), 2000)
+
+      // Direkt in den Warenkorb: Dort stehen das Stück, die Summe und „Zur Kasse“.
+      // Ohne diesen Schritt blieb die Kundin nach dem grünen Knopf auf der Seite stehen.
+      router.push(
+        `/${countryCode}${cartPathAfterAdd(
+          [selectedVariant.id],
+          currentBackPath(countryCode)
+        )}`
+      )
     } catch (e) {
       console.error("Add to cart failed:", e)
       setAddError(
@@ -149,10 +186,24 @@ export default function ProductActions({
                 <OptionSelect
                   option={option}
                   current={options[option.id]}
-                  updateOption={setOptionValue}
+                  updateOption={updateOption}
                   title={option.title ?? ""}
                   data-testid="product-options"
                   disabled={!!disabled || isAdding}
+                  labelAction={
+                    isSizeOption(option.title ?? "") ? (
+                      <a
+                        href={`/${countryCode}/size-guide`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm text-stone-600 underline underline-offset-2 hover:text-stone-900"
+                        data-testid="size-guide-link"
+                      >
+                        <Ruler size={15} />
+                        Größenberatung
+                      </a>
+                    ) : undefined
+                  }
                 />
               </div>
             ))}
@@ -244,8 +295,11 @@ export default function ProductActions({
             </p>
           )}
 
-          {/* Secondary Actions — drei gleich breite Felder, Gesamtbreite wie „Bitte … wählen“-Button */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Lieferdatum, Versandkosten, Zahlungsarten, Telefon: direkt am Kaufknopf */}
+          <PurchaseInfo />
+
+          {/* Secondary Actions — zwei gleich breite Felder. Die Größenberatung steht bei der Größenwahl. */}
+          <div className="grid grid-cols-2 gap-3">
             <Button
               variant="secondary"
               onClick={handleWishlistToggle}
@@ -280,27 +334,6 @@ export default function ProductActions({
             >
               Teilen
             </Button>
-            <a
-              href={`/${countryCode}/size-guide`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                "inline-flex items-center justify-center font-medium w-full min-w-0",
-                "transition-all duration-200 ease-out",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2",
-                "active:scale-[0.98]",
-                "bg-transparent text-stone-800 border border-stone-300",
-                "hover:bg-stone-50 hover:border-stone-400",
-                "active:bg-stone-100",
-                "h-10 px-2 sm:px-3 text-xs sm:text-sm rounded-lg gap-2",
-                "text-center"
-              )}
-            >
-              <span className="flex-shrink-0" aria-hidden>
-                <Ruler size={18} />
-              </span>
-              <span className="leading-tight">Größenberatung</span>
-            </a>
           </div>
         </div>
 
@@ -309,7 +342,7 @@ export default function ProductActions({
           product={product}
           variant={selectedVariant}
           options={options}
-          updateOptions={setOptionValue}
+          updateOptions={updateOption}
           inStock={inStock}
           handleAddToCart={handleAddToCart}
           isAdding={isAdding}

@@ -2,6 +2,10 @@ import { listProductsWithSort } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import ProductPreview from "@modules/products/components/product-preview"
 import { PRODUCT_GRID } from "@modules/products/components/product-preview/card-styles"
+import {
+  cardSlides,
+  withoutVariantImages,
+} from "@modules/products/components/product-preview/card-slides"
 import { ViewItemList } from "@modules/common/components/analytics"
 import { productToItem } from "@lib/util/analytics"
 import { Pagination } from "@modules/store/components/pagination"
@@ -10,6 +14,7 @@ import { HttpTypes } from "@medusajs/types"
 import { ProductFilters } from "./index"
 import { DynamicFilterOptions } from "@lib/data/filter-options"
 import { getProductMinVariantPriceForFilter } from "@lib/util/variant-price-for-filter"
+import { productColors } from "@lib/util/product-colors"
 import {
   COLOR_OPTION_TITLES,
   SIZE_OPTION_TITLES,
@@ -60,6 +65,23 @@ function matchesColorFilter(
   // "rosa" would match "Jacke ROSANA" in magenta.
   const productTitle = product.title?.toLowerCase() || ""
   return colors.some((color) => productTitle.includes(color.toLowerCase()))
+}
+
+/**
+ * The product's colour that the colour filter selected (same loose matching
+ * as matchesColorFilter), so the card can start on that colour and link to it.
+ */
+function filteredColor(
+  product: HttpTypes.StoreProduct,
+  colors: string[] | undefined
+): string | undefined {
+  if (!colors || colors.length === 0) return undefined
+
+  const selectedGroups = new Set(colors.flatMap((c) => getColorGroupKeys(c)))
+
+  return productColors(product).find((color) =>
+    getColorGroupKeys(color).some((key) => selectedGroups.has(key))
+  )
 }
 
 function matchesSizeFilter(
@@ -309,7 +331,9 @@ export default async function PaginatedProducts({
           return (
             <li key={p.id}>
               <ProductPreview
-                product={p}
+                // slides are computed here; the variants' image ids stay out of the HTML
+                product={withoutVariantImages(p)}
+                slides={cardSlides(p, filteredColor(p, filters?.colors))}
                 region={region}
                 isFeatured={index < PRIORITY_CARDS}
               />

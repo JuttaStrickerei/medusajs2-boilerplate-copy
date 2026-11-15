@@ -3,6 +3,8 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { Instagram, Mail, Phone, MapPin } from "@components/icons"
 import { CookieSettingsButton } from "@components/cookie-consent/CookieSettingsButton"
 import RevocationButton from "@modules/revocation/components/revocation-button"
+import FooterPayments from "@modules/layout/components/footer-payments"
+import NewsletterForm from "@modules/layout/components/newsletter-form"
 
 export default async function Footer() {
   // Gleiche (zusammengefasste) Abfrage wie die Navigation: nur oberste
@@ -164,9 +166,15 @@ export default async function Footer() {
         </div>
       </div>
 
+      {/* Newsletter-Anmeldung auf jeder Seite (außer der Startseite, dort steht der große Abschnitt) */}
+      <NewsletterForm />
+
       {/* Bottom Bar */}
       <div className="border-t border-stone-700">
         <div className="content-container py-6">
+          {/* Zahlungsarten auf jeder Seite sichtbar */}
+          <FooterPayments />
+
           <div className="flex flex-col small:flex-row items-center justify-between gap-4">
             {/* Copyright */}
             <p className="text-sm text-stone-500 text-center small:text-left">

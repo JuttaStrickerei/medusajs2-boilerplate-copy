@@ -134,6 +134,8 @@ const ShippingAddress = ({
           />
         </Container>
       )}
+      {/* Am Handy stehen Adresse, Firma, E-Mail und Telefon über die ganze Breite: In einem
+          halben Feld (rund 135 px) hat eine Straße oder E-Mail-Adresse keinen Platz. */}
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="Vorname"
@@ -153,23 +155,27 @@ const ShippingAddress = ({
           required
           data-testid="shipping-last-name-input"
         />
-        <Input
-          label="Adresse"
-          name="shipping_address.address_1"
-          autoComplete="address-line1"
-          value={formData["shipping_address.address_1"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-address-input"
-        />
-        <Input
-          label="Firma (optional)"
-          name="shipping_address.company"
-          value={formData["shipping_address.company"]}
-          onChange={handleChange}
-          autoComplete="organization"
-          data-testid="shipping-company-input"
-        />
+        <div className="col-span-2 xsmall:col-span-1">
+          <Input
+            label="Adresse"
+            name="shipping_address.address_1"
+            autoComplete="address-line1"
+            value={formData["shipping_address.address_1"]}
+            onChange={handleChange}
+            required
+            data-testid="shipping-address-input"
+          />
+        </div>
+        <div className="col-span-2 xsmall:col-span-1">
+          <Input
+            label="Firma (optional)"
+            name="shipping_address.company"
+            value={formData["shipping_address.company"]}
+            onChange={handleChange}
+            autoComplete="organization"
+            data-testid="shipping-company-input"
+          />
+        </div>
         <Input
           label="PLZ"
           name="shipping_address.postal_code"
@@ -216,25 +222,29 @@ const ShippingAddress = ({
         />
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <Input
-          label="E-Mail"
-          name="email"
-          type="email"
-          title="Bitte geben Sie eine gültige E-Mail-Adresse ein."
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          data-testid="shipping-email-input"
-        />
-        <Input
-          label="Telefon"
-          name="shipping_address.phone"
-          autoComplete="tel"
-          value={formData["shipping_address.phone"]}
-          onChange={handleChange}
-          data-testid="shipping-phone-input"
-        />
+        <div className="col-span-2 xsmall:col-span-1">
+          <Input
+            label="E-Mail"
+            name="email"
+            type="email"
+            title="Bitte geben Sie eine gültige E-Mail-Adresse ein."
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            data-testid="shipping-email-input"
+          />
+        </div>
+        <div className="col-span-2 xsmall:col-span-1">
+          <Input
+            label="Telefon"
+            name="shipping_address.phone"
+            autoComplete="tel"
+            value={formData["shipping_address.phone"]}
+            onChange={handleChange}
+            data-testid="shipping-phone-input"
+          />
+        </div>
       </div>
     </>
   )

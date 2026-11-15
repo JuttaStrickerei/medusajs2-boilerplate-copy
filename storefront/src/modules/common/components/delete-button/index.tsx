@@ -40,6 +40,9 @@ const DeleteButton = ({
       <button
         className="flex gap-x-1 text-ui-fg-subtle hover:text-ui-fg-base cursor-pointer"
         onClick={() => handleDelete(id)}
+        // ohne Text ist der Knopf nur ein Symbol: Name für Vorlesehilfen
+        aria-label={children ? undefined : "Artikel entfernen"}
+        data-testid="product-delete-button"
       >
         {isDeleting ? <Spinner className="animate-spin" /> : <Trash />}
         <span>{children}</span>

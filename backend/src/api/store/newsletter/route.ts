@@ -1,8 +1,20 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Modules, MedusaError } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules, MedusaError } from "@medusajs/framework/utils"
 import { INotificationModuleService } from "@medusajs/framework/types"
 import { z } from "zod"
 import { EmailTemplates } from "../../../modules/email-notifications/templates"
+import { STOREFRONT_URL } from "../../../lib/constants"
+import {
+  createWelcomePromotionWorkflow,
+  WELCOME_DISCOUNT_PERCENT,
+} from "../../../workflows/create-welcome-promotion"
+
+// Stücke, die die Willkommens-Mail zeigt (Bild, Name, Link, ohne Preise), in dieser Reihenfolge
+const WELCOME_MAIL_PRODUCT_HANDLES = ["mantel-rouga", "mantel-bruna", "mantel-nera"]
+const SHOP_PRODUCT_URL = `${STOREFRONT_URL}/at/products`
+// Zwei Looks mit Foto vom Shooting für die Willkommens-Mail (Reihenfolge = Anzeige)
+const WELCOME_MAIL_LOOK_HANDLES = ["look-rouga", "look-viola"]
+const SHOP_LOOK_URL = `${STOREFRONT_URL}/at/looks`
 
 export const newsletterSignupSchema = z.object({
   email: z.string().email(),
@@ -56,7 +68,70 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
-    // 3. Neue Anmeldung: Bestätigungs-E-Mail senden
+    // 3. Neue Anmeldung: eigenen Willkommens-Code anlegen (10 %, einmal gültig, 30 Tage).
+    // Der Code steht nur in der Bestätigungs-E-Mail. Wer sich nicht anmeldet, kennt keinen.
+    // Schlägt das Anlegen fehl, bleibt die Anmeldung gültig und die E-Mail geht ohne Code hinaus.
+    let welcomeCode: { code: string; ends_at: string } | null = null
+    try {
+      const { result } = await createWelcomePromotionWorkflow(req.scope).run()
+      welcomeCode = result
+    } catch (promotionError) {
+      logger.warn(
+        `[Newsletter API] Welcome code could not be created: ${
+          promotionError instanceof Error ? promotionError.message : "unknown error"
+        }`
+      )
+    }
+
+    // Stücke für die E-Mail nachschlagen (nur lesen). Scheitert das, geht die E-Mail ohne sie hinaus.
+    let welcomeProducts: { title: string; url: string; image: string }[] = []
+    try {
+      const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+      const { data: products } = await query.graph({
+        entity: "product",
+        fields: ["handle", "title", "thumbnail"],
+        filters: { handle: WELCOME_MAIL_PRODUCT_HANDLES, status: "published" },
+      })
+      welcomeProducts = WELCOME_MAIL_PRODUCT_HANDLES.flatMap((handle) => {
+        const product = products.find((p) => p.handle === handle)
+        return product?.thumbnail
+          ? [{ title: product.title, url: `${SHOP_PRODUCT_URL}/${handle}`, image: product.thumbnail }]
+          : []
+      })
+    } catch (productsError) {
+      logger.warn(
+        `[Newsletter API] Products for the welcome mail could not be loaded: ${
+          productsError instanceof Error ? productsError.message : "unknown error"
+        }`
+      )
+    }
+
+    // Looks für die E-Mail nachschlagen (nur lesen). Scheitert das, geht die E-Mail ohne sie hinaus.
+    let welcomeLooks: { title: string; url: string; image: string }[] = []
+    try {
+      const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+      const { data: looks } = await query.graph({
+        entity: "look",
+        fields: ["handle", "title", "images"],
+        filters: { handle: WELCOME_MAIL_LOOK_HANDLES, status: "published" },
+      })
+      welcomeLooks = WELCOME_MAIL_LOOK_HANDLES.flatMap((handle) => {
+        const look = looks.find((l) => l.handle === handle)
+        // das erste Bild ist das Hero-Bild des Looks
+        const image = Array.isArray(look?.images) ? look.images[0] : undefined
+        return look && typeof image === "string"
+          ? [{ title: look.title, url: `${SHOP_LOOK_URL}/${handle}`, image }]
+          : []
+      })
+    } catch (looksError) {
+      logger.warn(
+        `[Newsletter API] Looks for the welcome mail could not be loaded: ${
+          looksError instanceof Error ? looksError.message : "unknown error"
+        }`
+      )
+    }
+
+    // 4. Bestätigungs-E-Mail senden
     logger.debug(`[Newsletter API] New subscriber - sending confirmation email`)
     
     // Wrap in try-catch - email failure should not fail the subscription
@@ -71,20 +146,42 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           },
           firstName: first_name || undefined,
           email: email,
-          preview: "Willkommen in unserem Newsletter!",
+          preview: welcomeCode
+            ? `Ihr Gutscheincode: ${WELCOME_DISCOUNT_PERCENT} % auf Ihre erste Bestellung`
+            : "Willkommen in unserem Newsletter!",
+          ...(welcomeCode
+            ? {
+                discountCode: welcomeCode.code,
+                discountPercent: WELCOME_DISCOUNT_PERCENT,
+                discountValidUntil: new Intl.DateTimeFormat("de-AT", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  timeZone: "Europe/Vienna",
+                }).format(new Date(welcomeCode.ends_at)),
+              }
+            : {}),
+          products: welcomeProducts,
+          looks: welcomeLooks,
+          shopUrl: STOREFRONT_URL,
         },
       })
     } catch (emailError) {
       // Log but don't fail - the subscription was successful
       logger.warn(`[Newsletter API] Confirmation email failed, but subscription succeeded`)
+      // Ohne E-Mail hat die Kundin den Code nicht bekommen
+      welcomeCode = null
     }
 
     logger.info(`[Newsletter API] Subscription completed successfully`)
 
     return res.status(200).json({
       success: true,
-      message: "Vielen Dank für Ihre Anmeldung! Sie erhalten in Kürze eine Bestätigungs-E-Mail.",
+      message: welcomeCode
+        ? "Vielen Dank für Ihre Anmeldung! Ihren Gutscheincode finden Sie gleich in der Bestätigungs-E-Mail."
+        : "Vielen Dank für Ihre Anmeldung! Sie erhalten in Kürze eine Bestätigungs-E-Mail.",
       alreadySubscribed: false,
+      welcomeCodeSent: !!welcomeCode,
     })
 
   } catch (error: unknown) {
