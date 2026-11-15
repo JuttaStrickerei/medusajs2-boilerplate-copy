@@ -11,6 +11,7 @@ import ErrorMessage from "../error-message"
 import { SubmitButton } from "../submit-button"
 import { Tag, Trash, ChevronDown } from "@components/icons"
 import { cn } from "@lib/utils"
+import { triggerCartRefresh } from "@lib/context/cart-context"
 
 type DiscountCodeProps = {
   cart: HttpTypes.StoreCart & {
@@ -42,6 +43,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
           setIsOpen(true)
           setErrorMessage(SHOP_ERRORS.PROMO_NOT_APPLIED)
         }
+        triggerCartRefresh()
       })
       .catch(() => {
         setIsOpen(true)
@@ -56,6 +58,8 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
     await applyPromotions(
       validPromotions.filter((p) => p.code !== undefined).map((p) => p.code!)
     )
+    // Warenkorb im Browser neu laden: Zähler im Kopf und Abgleich der Seite (cart-freshness)
+    triggerCartRefresh()
   }
 
   const addPromotionCode = async (formData: FormData) => {
@@ -78,6 +82,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
       ) {
         setErrorMessage(SHOP_ERRORS.PROMO_NOT_APPLIED)
       }
+      triggerCartRefresh()
     } catch {
       // Im Produktions-Build kommt hier nur ein allgemeiner englischer Text an;
       // häufigste Ursache ist ein falscher oder abgelaufener Code

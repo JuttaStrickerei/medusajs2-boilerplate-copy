@@ -9,6 +9,8 @@ import PageHeader from "@modules/common/components/page-header"
 import CheckoutButton from "@modules/checkout/components/checkout-button"
 import StickyCheckoutBar from "../components/sticky-checkout-bar"
 import AddedNotice from "../components/added-notice"
+import CartFreshness from "../components/cart-freshness"
+import { cartSignature } from "@lib/util/cart-signature"
 import { convertToLocale } from "@lib/util/money"
 import type { ShippingPreview } from "@lib/data/fulfillment"
 
@@ -33,6 +35,8 @@ const CartTemplate = ({
 
   return (
     <div className="bg-stone-50 min-h-screen">
+      {/* gleicht die Seite mit dem echten Warenkorb ab, falls sie nach einer Änderung stehen bleibt */}
+      <CartFreshness signature={cartSignature(cart)} />
       <PageBreadcrumb items={[{ label: "Warenkorb" }]} />
       {hasItems && cart && added && added.variantIds.length > 0 && (
         <AddedNotice
