@@ -25,6 +25,11 @@ type InjectedDependencies = {
   logger: Logger
 }
 
+// Markierung (Tag) in Mailchimp für Anmeldungen aus dem Online-Shop. Die Website
+// markiert ihre Anmeldungen in derselben Liste mit "homepage"; so bleiben beide Wege
+// unterscheidbar (Segmente, spätere Abläufe). Mailchimp legt den Tag beim ersten Mal an.
+const SHOP_SIGNUP_TAG = "Online Shop"
+
 class MailchimpNotificationProviderService extends AbstractNotificationProviderService {
   static identifier = "mailchimp"
   protected options: Options
@@ -85,6 +90,7 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
             FNAME: data?.first_name,
             LNAME: data?.last_name,
           },
+          tags: [SHOP_SIGNUP_TAG],
         }
       )
 
