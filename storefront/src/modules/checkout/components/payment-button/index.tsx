@@ -273,6 +273,7 @@ const StripePaymentButton = ({
         disabled={notReady}
         onClick={handlePayment}
         size="large"
+        className="w-full h-12 text-base"
         isLoading={submitting}
         data-testid={dataTestId}
       >

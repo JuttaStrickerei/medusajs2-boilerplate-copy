@@ -243,7 +243,21 @@ const Shipping: React.FC<ShippingProps> = ({
                         <span className="font-medium text-stone-800">Abholung</span>
                       </div>
                     </div>
-                    <span className="text-stone-600">-</span>
+                    {/* Preis der Abholung schon hier, nicht erst nach dem Antippen */}
+                    <span className="text-stone-600">
+                      {(() => {
+                        const amount = _pickupMethods.find(
+                          (option) => !option.insufficient_inventory
+                        )?.amount
+                        if (typeof amount !== "number") return "-"
+                        return amount === 0
+                          ? "kostenlos"
+                          : convertToLocale({
+                              amount,
+                              currency_code: cart?.currency_code,
+                            })
+                      })()}
+                    </span>
                   </Radio>
                 </RadioGroup>
               )}
