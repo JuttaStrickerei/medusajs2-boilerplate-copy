@@ -1,104 +1,82 @@
 "use client"
 
-import { subscribeToNewsletter } from "@lib/data/newsletter"
-import { SubmitButton } from "@modules/checkout/components/submit-button"
-import Input from "@modules/common/components/input"
-import { useState } from "react"
-import { toast } from "@medusajs/ui"
+import { useNewsletterSignup } from "@lib/hooks/use-newsletter-signup"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { cn } from "@lib/utils"
+import { useParams, usePathname } from "next/navigation"
 
+/**
+ * Newsletter-Anmeldung in der Fußzeile, bewusst schmal. Auf der Startseite steht
+ * stattdessen der große Abschnitt (modules/home/components/newsletter-form), im
+ * Warenkorb und im Konto lenkt sie nur ab.
+ */
 const NewsletterForm = () => {
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState<"idle" | "success" | "already_subscribed" | "error">("idle")
-  const [message, setMessage] = useState("")
+  const pathname = usePathname() || ""
+  const { countryCode } = useParams()
+  const { email, setEmail, loading, status, message, submit } = useNewsletterSignup()
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
-    setStatus("idle")
-    setMessage("")
-    
-    try {
-      const result = await subscribeToNewsletter(email)
-      
-      if (result.success) {
-        if (result.alreadySubscribed) {
-          setStatus("already_subscribed")
-          setMessage("You have already subscribed to our newsletter online or at our store!")
-          toast.info("You are already subscribed!")
-        } else {
-          setStatus("success")
-          setMessage("Thank you for subscribing! You will receive a confirmation email shortly.")
-          setEmail("")
-          toast.success("Thanks for subscribing!")
-        }
-      } else {
-        setStatus("error")
-        setMessage(result.message || "An error occurred.")
-        toast.error(result.message || "An error occurred.")
-      }
-    } catch (error) {
-      console.error(error)
-      setStatus("error")
-      setMessage("Please enter a valid email address. If you are sure your address is correct, please contact us via our contact form. We are happy to help!")
-      toast.error("Please enter a valid email address.")
-    } finally {
-      setLoading(false)
-    }
-  }
+  if (pathname === `/${countryCode}` || /\/(cart|account)(\/|$)/.test(pathname)) return null
 
   return (
-    <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-      <div className="flex-1 max-w-md">
-        <h3 className="txt-compact-large-plus mb-2 text-ui-fg-base">Subscribe to our newsletter</h3>
-        <p className="text-base-regular text-ui-fg-subtle">
-          Receive updates on our latest products and exclusive offers.
-        </p>
-      </div>
-      <div className="flex-1 max-w-md w-full">
-        {/* Status Messages */}
-        {status === "success" && (
-          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-4">
-            {message}
+    <div className="border-t border-stone-700" data-testid="footer-newsletter">
+      <div className="content-container py-7">
+        <div className="flex flex-col small:flex-row small:items-center small:justify-between gap-4 small:gap-12">
+          <div>
+            {/* eigene Größe, sonst greift die globale Überschriften-Größe */}
+            <h2 className="font-serif lining-nums text-xl font-medium leading-tight tracking-normal text-white">
+              10 % auf Ihre erste Bestellung
+            </h2>
+            <p className="mt-1 text-sm text-stone-400">
+              Abonnieren Sie unseren Newsletter. Ihren persönlichen Gutscheincode senden wir Ihnen per E-Mail.
+            </p>
           </div>
-        )}
-        
-        {status === "already_subscribed" && (
-          <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-4">
-            {message}
+
+          <div className="small:w-[440px] small:flex-shrink-0">
+            {status !== "idle" && (
+              <p
+                className={cn(
+                  "mb-2 text-sm px-3 py-2 rounded-lg",
+                  status === "error" ? "bg-red-50 text-red-800" : "bg-green-50 text-green-800"
+                )}
+                role="status"
+              >
+                {message}
+              </p>
+            )}
+
+            <form onSubmit={submit} className="flex gap-2">
+              <input
+                type="email"
+                placeholder="Ihre E-Mail-Adresse"
+                aria-label="E-Mail-Adresse für den Newsletter"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                className="flex-1 min-w-0 h-11 px-4 text-base small:text-sm rounded-lg bg-stone-700 border border-stone-600 text-white placeholder:text-stone-400 focus:outline-none focus:border-stone-400 transition-colors disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="h-11 px-4 rounded-lg bg-white text-stone-800 text-sm font-medium hover:bg-stone-100 transition-colors disabled:opacity-50"
+              >
+                {loading ? "…" : "Abonnieren"}
+              </button>
+            </form>
+
+            <p className="mt-2 text-xs text-stone-500">
+              Der Code gilt 30 Tage. Es gilt unsere{" "}
+              <LocalizedClientLink href="/privacy" className="underline hover:text-white">
+                Datenschutzerklärung
+              </LocalizedClientLink>
+              , Abmelden jederzeit möglich.
+            </p>
           </div>
-        )}
-        
-        {status === "error" && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4">
-            {message}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="flex gap-x-2">
-          <div className="flex-1">
-            <Input
-              label="Email"
-              name="email"
-              type="email"
-              autoComplete="off"
-              required
-              data-testid="newsletter-email-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-          <div className="flex items-end">
-            <SubmitButton data-testid="newsletter-submit-button">
-              Subscribe
-            </SubmitButton>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   )
 }
 
 export default NewsletterForm
-
