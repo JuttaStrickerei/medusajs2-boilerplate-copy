@@ -25,6 +25,20 @@ export const isShipmentSentTemplateData = (data: any): data is ShipmentSentTempl
 export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
   PreviewProps: ShipmentSentPreviewProps
 } = ({ order, fulfillment, shippingAddress, preview = 'Your order has been shipped!', companyLogo }) => {
+  // Ländername auf Deutsch aus dem Ländercode ("at" → "Österreich"), wie in order-placed.
+  // Unbekannte oder fehlerhafte Codes bleiben als Code in Großbuchstaben stehen.
+  const countryName = (code?: string | null) => {
+    if (!code) {
+      return ''
+    }
+    const upper = code.toUpperCase()
+    try {
+      return new (Intl as any).DisplayNames(['de'], { type: 'region' }).of(upper) || upper
+    } catch {
+      return upper
+    }
+  }
+
   return (
  <Base preview={preview}>
   <Section>
@@ -372,7 +386,7 @@ export const ShipmentSentTemplate: React.FC<ShipmentSentTemplateProps> & {
                     margin: '0',
                     lineHeight: '20px'
                   }}>
-                    {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{shippingAddress.country_code}
+                    {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{countryName(shippingAddress.country_code)}
                   </Text>
                 </td>
               </tr>
