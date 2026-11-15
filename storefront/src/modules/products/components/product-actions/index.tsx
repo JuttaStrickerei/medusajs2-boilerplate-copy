@@ -5,13 +5,16 @@ import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { cn } from "@lib/utils"
 import { Button } from "@components/ui"
-import OptionSelect from "@modules/products/components/product-actions/option-select"
+import OptionSelect, {
+  isSizeOption,
+} from "@modules/products/components/product-actions/option-select"
 import { useParams } from "next/navigation"
 import { useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import MobileActions from "./mobile-actions"
 import FertigungHinweis from "./fertigung-hinweis"
+import PurchaseInfo from "../purchase-info"
 import {
   ShoppingBag,
   Heart,
@@ -153,6 +156,20 @@ export default function ProductActions({
                   title={option.title ?? ""}
                   data-testid="product-options"
                   disabled={!!disabled || isAdding}
+                  labelAction={
+                    isSizeOption(option.title ?? "") ? (
+                      <a
+                        href={`/${countryCode}/size-guide`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm text-stone-600 underline underline-offset-2 hover:text-stone-900"
+                        data-testid="size-guide-link"
+                      >
+                        <Ruler size={15} />
+                        Größenberatung
+                      </a>
+                    ) : undefined
+                  }
                 />
               </div>
             ))}
@@ -244,8 +261,11 @@ export default function ProductActions({
             </p>
           )}
 
-          {/* Secondary Actions — drei gleich breite Felder, Gesamtbreite wie „Bitte … wählen“-Button */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Lieferdatum, Versandkosten, Zahlungsarten, Telefon: direkt am Kaufknopf */}
+          <PurchaseInfo />
+
+          {/* Secondary Actions — zwei gleich breite Felder. Die Größenberatung steht bei der Größenwahl. */}
+          <div className="grid grid-cols-2 gap-3">
             <Button
               variant="secondary"
               onClick={handleWishlistToggle}
@@ -280,27 +300,6 @@ export default function ProductActions({
             >
               Teilen
             </Button>
-            <a
-              href={`/${countryCode}/size-guide`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                "inline-flex items-center justify-center font-medium w-full min-w-0",
-                "transition-all duration-200 ease-out",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2",
-                "active:scale-[0.98]",
-                "bg-transparent text-stone-800 border border-stone-300",
-                "hover:bg-stone-50 hover:border-stone-400",
-                "active:bg-stone-100",
-                "h-10 px-2 sm:px-3 text-xs sm:text-sm rounded-lg gap-2",
-                "text-center"
-              )}
-            >
-              <span className="flex-shrink-0" aria-hidden>
-                <Ruler size={18} />
-              </span>
-              <span className="leading-tight">Größenberatung</span>
-            </a>
           </div>
         </div>
 

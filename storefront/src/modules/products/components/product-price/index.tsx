@@ -1,6 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { cn, formatPrice, calculateDiscount } from "@lib/utils"
+import { SHIPPING_FLAT_EUR } from "@lib/util/shop-facts"
 
 interface ProductPriceProps {
   product: HttpTypes.StoreProduct
@@ -65,8 +66,9 @@ export default function ProductPrice({
       <p className="text-xs text-stone-500">
         inkl. MwSt., zzgl.{" "}
         <a href="/shipping" className="underline hover:text-stone-700">
-          Versandkosten
-        </a>
+          {formatPrice(SHIPPING_FLAT_EUR, price.currency_code)} Versand
+        </a>{" "}
+        in Österreich
       </p>
     </div>
   )

@@ -9,6 +9,8 @@ type OptionSelectProps = {
   updateOption: (title: string, value: string) => void
   title: string
   disabled: boolean
+  /** Kleiner Link rechts neben der Überschrift, z. B. „Größenberatung“ bei der Größe */
+  labelAction?: React.ReactNode
   "data-testid"?: string
   // Optional: Lagerstatus je Wert anzeigen (ausverkauft, nur noch X, …)
   availability?: Record<string, OptionValueAvailability>
@@ -68,6 +70,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   "data-testid": dataTestId,
   disabled,
   availability,
+  labelAction,
 }) => {
   const optionValues = (option.values ?? []).map((v) => v.value)
   // FIX: Analysis result - storefront rendered API option order as-is; enforce deterministic size ordering in frontend.
@@ -86,7 +89,10 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
 
   return (
     <div className="flex flex-col gap-y-3">
-      <span className="text-sm font-medium text-stone-700">{title}</span>
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-sm font-medium text-stone-700">{title}</span>
+        {labelAction}
+      </div>
       <div
         className="flex flex-wrap justify-between gap-2"
         data-testid={dataTestId}

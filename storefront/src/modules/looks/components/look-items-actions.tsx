@@ -5,6 +5,7 @@ import { triggerCartRefresh } from "@lib/context/cart-context"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import { sumLookPrices } from "@lib/util/look-price"
 import { cn, formatPrice, shouldReduceMotion } from "@lib/utils"
+import { SHIPPING_FLAT_EUR } from "@lib/util/shop-facts"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@components/ui"
 import {
@@ -702,8 +703,9 @@ export default function LookItemsActions({
           href={`/${countryCode}/shipping`}
           className="underline hover:text-stone-700"
         >
-          Versandkosten
-        </a>
+          {formatPrice(SHIPPING_FLAT_EUR, "eur")} Versand
+        </a>{" "}
+        in Österreich
       </p>
 
       <LookBuyBar
