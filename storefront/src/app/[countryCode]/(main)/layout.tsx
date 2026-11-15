@@ -15,6 +15,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
 }
 
+// Das Newsletter-Kärtchen am Rand („10 % auf Ihre erste Bestellung“) ist ausgeschaltet,
+// solange NEXT_PUBLIC_NEWSLETTER_POPUP nicht auf "1" steht. Die Formulare auf der
+// Startseite und in der Fußzeile hängen nicht an diesem Schalter. Der Wert wird beim
+// Bauen eingesetzt: nach dem Setzen der Variable neu bauen (Railway macht das von selbst).
+const NEWSLETTER_POPUP_ON = process.env.NEXT_PUBLIC_NEWSLETTER_POPUP === "1"
+
 export default async function PageLayout(props: { children: React.ReactNode }) {
   const customer = await retrieveCustomer()
   const cart = await retrieveCart()
@@ -35,7 +41,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
       {props.children}
       <Footer />
-      <NewsletterTeaser isLoggedIn={!!customer} />
+      {NEWSLETTER_POPUP_ON && <NewsletterTeaser isLoggedIn={!!customer} />}
       <VoucherLink />
       <Toaster />
     </>
