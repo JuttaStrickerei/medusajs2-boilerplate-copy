@@ -13,12 +13,6 @@ type OrderWithSummary = OrderDTO & {
   discount_total?: number
   tax_total?: number
   billing_address?: OrderAddressDTO | null
-  payment_collections?: Array<{
-    payment_sessions?: Array<{
-      is_selected?: boolean
-      provider_id?: string
-    }>
-  }>
 }
 
 export interface AdminOrderNotificationTemplateProps {
@@ -69,14 +63,6 @@ const formatAddress = (address?: OrderAddressDTO | null) => {
   return lines.join(", ")
 }
 
-const getPaymentMethod = (order: OrderWithSummary) => {
-  const selectedSession = order.payment_collections
-    ?.flatMap((collection) => collection.payment_sessions || [])
-    .find((session) => session.is_selected)
-
-  return selectedSession?.provider_id || "Nicht verfugbar"
-}
-
 export const AdminOrderNotificationTemplate: React.FC<
   AdminOrderNotificationTemplateProps
 > = ({
@@ -89,7 +75,6 @@ export const AdminOrderNotificationTemplate: React.FC<
   const displayId = order.display_id ?? order.id
   const createdAt = new Date(order.created_at).toLocaleString("de-AT")
   const customerAddress = shippingAddress || order.billing_address || null
-  const paymentMethod = getPaymentMethod(order)
   // Wie in der Mail an die Kundin: Produkte (vor Abzug) − Rabatt + Versand = Gesamtbetrag.
   // Versand vor Abzug, weil discount_total jeden Rabatt enthält, auch einen auf den Versand.
   const shippingTotal = Number(
@@ -153,7 +138,9 @@ export const AdminOrderNotificationTemplate: React.FC<
         <Text><strong>Versand:</strong> {formatCurrency(shippingTotal, currencyCode)}</Text>
         <Text><strong>Steuern:</strong> {formatCurrency(taxTotal, currencyCode)}</Text>
         <Text><strong>Gesamtbetrag:</strong> {formatCurrency(grandTotal, currencyCode)}</Text>
-        <Text><strong>Zahlungsmethode:</strong> {paymentMethod}</Text>
+        {/* Keine Zeile „Zahlungsmethode“: Alle Zahlungen laufen über Stripe, und Medusa
+            speichert nur die erlaubten Arten (Karte, EPS, Klarna, Link, PayPal), nicht
+            die tatsächlich gewählte. Die steht im Stripe-Dashboard. */}
       </Section>
 
       <Hr />

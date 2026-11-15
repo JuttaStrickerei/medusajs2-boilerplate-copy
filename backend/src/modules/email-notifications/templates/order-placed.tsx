@@ -56,6 +56,20 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
     return `${formatted} ${currencyCode}`
   }
 
+  // Ländername auf Deutsch aus dem Ländercode ("at" → "Österreich").
+  // Unbekannte oder fehlerhafte Codes bleiben als Code in Großbuchstaben stehen.
+  const countryName = (code?: string | null) => {
+    if (!code) {
+      return ''
+    }
+    const upper = code.toUpperCase()
+    try {
+      return new (Intl as any).DisplayNames(['de'], { type: 'region' }).of(upper) || upper
+    } catch {
+      return upper
+    }
+  }
+
   // Summen wie im Shop (cart-totals): Artikel (vor Abzug) − Rabatt + Versand = Gesamt.
   // In Medusa v2 totals are already in major currency units (e.g. Euro),
   // so we must NOT divide by 100 anywhere here.
@@ -126,9 +140,10 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               {isPickup
                 ? ' und benachrichtigen Sie, sobald sie zur Abholung im Shop bereitsteht.'
                 : ' und versenden sie, sobald sie fertig ist.'}{' '}
-              Da wir unsere Strickwaren oft eigens für Sie neu anfertigen, kann
-              die {isPickup ? 'Vorbereitung' : 'Vorbereitung und der Versand'}{' '}
-              1–2 Wochen dauern.
+              Da wir unsere Strickwaren oft eigens für Sie neu anfertigen,{' '}
+              {isPickup
+                ? 'kann die Vorbereitung 2 Wochen ab Bestellung dauern.'
+                : 'beträgt die Lieferzeit 2 Wochen ab Bestellung.'}
             </Text>
           </td>
         </tr>
@@ -511,7 +526,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                       margin: '0',
                       lineHeight: '20px'
                     }}>
-                      {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{shippingAddress.country_code}
+                      {shippingAddress.province ? `${shippingAddress.province}, ` : ''}{countryName(shippingAddress.country_code)}
                     </Text>
                   </td>
                 </tr>
