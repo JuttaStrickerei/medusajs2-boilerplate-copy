@@ -117,7 +117,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               key={v}
               className={clx(
                 // 44 px hoch: gut zu treffen. Die gewählte Größe ist gefüllt, nicht nur umrandet.
-                "border text-small-regular h-11 min-w-11 rounded-rounded p-2 flex-1 transition-colors duration-150",
+                "border text-small-regular h-11 rounded-rounded p-2 flex-1 transition-colors duration-150",
                 v === current
                   ? "border-stone-800 bg-stone-800 text-white"
                   : "border-ui-border-base bg-ui-bg-subtle hover:border-stone-400"
