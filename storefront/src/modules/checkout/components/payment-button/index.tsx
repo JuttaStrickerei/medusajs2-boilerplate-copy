@@ -6,7 +6,7 @@ import { saveMetaAttribution } from "@lib/data/meta-attribution"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
-import { useParams } from "next/navigation"
+import { useParams, usePathname, useRouter } from "next/navigation"
 import React, { useEffect, useState, useCallback } from "react"
 import ErrorMessage from "../error-message"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
@@ -75,11 +75,33 @@ const PaymentButton: React.FC<{
     )
   }
 
-  // Fallback for when no supported payment method is available.
+  // Keine Zahlungssitzung (mehr): zurück zur Zahlungsart statt eines toten Knopfes.
+  return <PaymentSessionMissing />
+}
+
+/**
+ * Medusa löscht die Zahlungssitzung, sobald sich der Betrag ändert (Gutschein
+ * eingelöst oder entfernt, Menge oder Versand geändert). Im Schritt „Zahlung“
+ * entsteht sie neu, deshalb führt der Knopf dorthin zurück.
+ */
+const PaymentSessionMissing = () => {
+  const router = useRouter()
+  const pathname = usePathname()
+
   return (
-    <Button disabled data-testid="submit-order-button">
-      Select a payment method
-    </Button>
+    <div className="space-y-3" data-testid="payment-session-missing">
+      <p className="text-sm text-stone-600">
+        Ihr Betrag hat sich geändert. Bitte bestätigen Sie Ihre Zahlungsart noch
+        einmal, dann können Sie die Bestellung abgeben.
+      </p>
+      <Button
+        size="large"
+        onClick={() => router.push(`${pathname}?step=payment`, { scroll: false })}
+        data-testid="back-to-payment-button"
+      >
+        Zur Zahlungsart
+      </Button>
+    </div>
   )
 }
 

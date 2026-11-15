@@ -2,8 +2,16 @@ import ItemsPreviewTemplate from "@modules/cart/templates/preview"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import CartTotals from "@modules/common/components/cart-totals"
 import { Shield, Truck, RefreshCw } from "@components/icons"
+import { SHOP_PHONE, SHOP_PHONE_HREF } from "@lib/util/shop-facts"
+import type { ShippingPreview } from "@lib/data/fulfillment"
 
-const CheckoutSummary = ({ cart }: { cart: any }) => {
+const CheckoutSummary = ({
+  cart,
+  shippingPreview = null,
+}: {
+  cart: any
+  shippingPreview?: ShippingPreview | null
+}) => {
   return (
     <div className="space-y-6">
       {/* Order Summary Card */}
@@ -33,6 +41,8 @@ const CheckoutSummary = ({ cart }: { cart: any }) => {
           <CartTotals 
             totals={cart} 
             taxIncluded={cart?.region?.automatic_taxes !== false}
+            shippingPreview={shippingPreview}
+            hidePickupNote
           />
         </div>
       </div>
@@ -51,9 +61,15 @@ const CheckoutSummary = ({ cart }: { cart: any }) => {
       {/* Help Text */}
       <div className="text-center text-sm text-stone-500">
         <p>Fragen zu Ihrer Bestellung?</p>
-        <a href="mailto:office@strickerei-jutta.at" className="text-stone-800 hover:underline">
-          office@strickerei-jutta.at
-        </a>
+        <p className="flex flex-wrap justify-center gap-x-2">
+          <a href={SHOP_PHONE_HREF} className="text-stone-800 hover:underline whitespace-nowrap">
+            {SHOP_PHONE}
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href="mailto:office@strickerei-jutta.at" className="text-stone-800 hover:underline">
+            office@strickerei-jutta.at
+          </a>
+        </p>
       </div>
     </div>
   )
