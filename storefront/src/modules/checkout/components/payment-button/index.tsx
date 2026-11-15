@@ -1,14 +1,15 @@
 "use client"
 
 import { isStripe, isManual } from "@lib/constants"
-import { placeOrder } from "@lib/data/cart"
+import { initiatePaymentSession, placeOrder } from "@lib/data/cart"
 import { saveMetaAttribution } from "@lib/data/meta-attribution"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
 import { useParams, usePathname, useRouter } from "next/navigation"
-import React, { useEffect, useState, useCallback } from "react"
+import React, { useContext, useEffect, useState, useCallback } from "react"
 import ErrorMessage from "../error-message"
+import { StripeContext } from "../payment-wrapper"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 // Meta attribution (lib/data/meta-attribution.ts) is saved right before the
@@ -49,9 +50,12 @@ const PaymentButton: React.FC<{
     (cart.shipping_methods?.length ?? 0) < 1
 
   const paymentSession = cart.payment_collection?.payment_sessions?.[0]
+  const stripeReady = useContext(StripeContext)
 
-  // Render the Stripe button if the payment provider is Stripe-based.
-  if (isStripe(paymentSession?.provider_id)) {
+  // Render the Stripe button if the payment provider is Stripe-based. Without a
+  // session (Medusa deletes it whenever the total changes) the Stripe fields
+  // still hold the payment details, and the button creates the session on click.
+  if (stripeReady && (isStripe(paymentSession?.provider_id) || !paymentSession)) {
     return (
       <StripePaymentButton
         notReady={notReady}
@@ -131,7 +135,11 @@ const StripePaymentButton = ({
 
   const stripe = useStripe()
   const elements = useElements()
-  const paymentSession = cart.payment_collection?.payment_sessions?.[0]
+  const router = useRouter()
+  const pathname = usePathname()
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (session) => session.status === "pending"
+  )
 
   // A memoized function to handle order completion.
   // It only runs after Stripe has taken the payment (capture: true), so a
@@ -161,13 +169,48 @@ const StripePaymentButton = ({
    */
   const handlePayment = async () => {
     // Abort if Stripe.js has not loaded or the cart is not ready.
-    if (!stripe || !elements || !cart || !paymentSession || notReady) {
+    if (!stripe || !elements || !cart || notReady) {
       return
     }
 
     setSubmitting(true)
+    setErrorMessage(null)
 
-    const clientSecret = paymentSession.data.client_secret as string
+    // Check the payment details first (Stripe requires this before the payment
+    // is created). After a page reload the fields are empty: back to the
+    // payment step, where they are visible.
+    const { error: submitError } = await elements.submit()
+    if (submitError) {
+      setSubmitting(false)
+      setErrorMessage(
+        "Bitte geben Sie Ihre Zahlungsdaten im Schritt „Zahlung“ noch einmal ein."
+      )
+      router.push(`${pathname}?step=payment`, { scroll: false })
+      return
+    }
+
+    // The payment session for the current total. Medusa deletes it whenever the
+    // total changes (voucher, quantity, shipping), so create it again if needed.
+    let clientSecret = paymentSession?.data?.client_secret as string | undefined
+    if (!clientSecret) {
+      try {
+        const response = await initiatePaymentSession(cart, {
+          provider_id: "pp_stripe_stripe",
+        })
+        clientSecret = response?.payment_collection?.payment_sessions?.find(
+          (session) => session.status === "pending"
+        )?.data?.client_secret as string | undefined
+      } catch (err) {
+        console.error("Payment session could not be created:", err)
+      }
+    }
+    if (!clientSecret) {
+      setSubmitting(false)
+      setErrorMessage(
+        "Die Zahlung konnte nicht vorbereitet werden. Bitte versuchen Sie es noch einmal."
+      )
+      return
+    }
 
     // The `return_url` is crucial for redirect-based payment methods.
     // For off-site payments (PayPal, etc.), redirect to a loading page that

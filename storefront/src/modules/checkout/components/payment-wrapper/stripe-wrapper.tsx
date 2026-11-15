@@ -2,23 +2,32 @@
 
 import { Stripe, StripeElementsOptions } from "@stripe/stripe-js"
 import { Elements } from "@stripe/react-stripe-js"
-import { HttpTypes } from "@medusajs/types"
 
 type StripeWrapperProps = {
-  paymentSession: HttpTypes.StorePaymentSession
+  /** Betrag des Warenkorbs in Euro (Medusa rechnet in der Hauptwährung: 168 = € 168,00) */
+  amount: number
+  currencyCode: string
   stripeKey?: string
   stripePromise: Promise<Stripe | null> | null
   children: React.ReactNode
 }
 
 const StripeWrapper: React.FC<StripeWrapperProps> = ({
-  paymentSession,
+  amount,
+  currencyCode,
   stripeKey,
   stripePromise,
   children,
 }) => {
   const options: StripeElementsOptions = {
-    clientSecret: paymentSession!.data?.client_secret as string | undefined,
+    // Ohne clientSecret: Die Zahlung (PaymentIntent) entsteht erst mit der
+    // Zahlungssitzung, die der Knopf „Bestellung abgeben“ verwendet. Bis dahin
+    // kennt Stripe nur Betrag und Währung. Ändert sich der Betrag, gibt
+    // react-stripe-js ihn an die Felder weiter (elements.update), ohne sie zu leeren.
+    mode: "payment",
+    // Stripe erwartet Cent. Der Shop rechnet nur in Euro.
+    amount: Math.round(amount * 100),
+    currency: currencyCode.toLowerCase(),
     appearance: {
       theme: "stripe",
       variables: {
@@ -34,10 +43,6 @@ const StripeWrapper: React.FC<StripeWrapperProps> = ({
 
   if (!stripePromise) {
     throw new Error("Stripe promise is missing")
-  }
-
-  if (!paymentSession?.data?.client_secret) {
-    throw new Error("Stripe client secret is missing")
   }
 
   return (
