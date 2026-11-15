@@ -2,6 +2,7 @@
 
 import { addToCart } from "@lib/data/cart"
 import { triggerCartRefresh } from "@lib/context/cart-context"
+import { cartPathAfterAdd, currentBackPath } from "@lib/util/added-to-cart"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { hasPriceRange as productHasPriceRange } from "@lib/util/look-price"
@@ -18,7 +19,7 @@ import {
   useVariantSelection,
 } from "@modules/products/hooks/use-variant-selection"
 import Image from "next/image"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { getProductDetails } from "@modules/products/components/product-tabs"
 import ImageLightbox from "./image-lightbox"
@@ -86,6 +87,7 @@ export default function LookItemCard({
   preferredColor,
 }: LookItemCardProps) {
   const countryCode = useParams().countryCode as string
+  const router = useRouter()
   const rowRef = useRef<HTMLElement>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
@@ -275,6 +277,14 @@ export default function LookItemCard({
 
       setAddedToCart(true)
       setTimeout(() => setAddedToCart(false), 2000)
+
+      // Wie überall im Shop: nach dem Hinzufügen direkt in den Warenkorb
+      router.push(
+        `/${countryCode}${cartPathAfterAdd(
+          [selectedVariant.id],
+          currentBackPath(countryCode)
+        )}`
+      )
     } catch {
       // Feste deutsche Meldung: Server-Actions liefern in Produktion nur
       // eine generische englische Fehlermeldung

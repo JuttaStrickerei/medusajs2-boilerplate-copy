@@ -8,11 +8,12 @@ import { Button } from "@components/ui"
 import OptionSelect, {
   isSizeOption,
 } from "@modules/products/components/product-actions/option-select"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import { findColorOption } from "@lib/util/product-colors"
+import { cartPathAfterAdd, currentBackPath } from "@lib/util/added-to-cart"
 import { useProductColor } from "./product-color-context"
 import MobileActions from "./mobile-actions"
 import FertigungHinweis from "./fertigung-hinweis"
@@ -48,6 +49,7 @@ export default function ProductActions({
   const [addedToCart, setAddedToCart] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const countryCode = useParams().countryCode as string
+  const router = useRouter()
 
   // Wishlist hook - consume items directly for reliable reactivity
   const { items: wishlistItems, toggleWishlist } = useWishlist()
@@ -116,6 +118,15 @@ export default function ProductActions({
 
       // Reset the "added" state after 2 seconds
       setTimeout(() => setAddedToCart(false), 2000)
+
+      // Direkt in den Warenkorb: Dort stehen das Stück, die Summe und „Zur Kasse“.
+      // Ohne diesen Schritt blieb die Kundin nach dem grünen Knopf auf der Seite stehen.
+      router.push(
+        `/${countryCode}${cartPathAfterAdd(
+          [selectedVariant.id],
+          currentBackPath(countryCode)
+        )}`
+      )
     } catch (e) {
       console.error("Add to cart failed:", e)
       setAddError(

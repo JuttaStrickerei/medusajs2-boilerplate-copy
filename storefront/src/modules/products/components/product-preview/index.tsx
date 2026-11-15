@@ -16,6 +16,7 @@ import { triggerCartRefresh } from "@lib/context/cart-context"
 import { useWishlist } from "@lib/context/wishlist-context"
 import { yarnDotBackground } from "@lib/util/yarn-colors"
 import { productPath } from "@lib/util/product-colors"
+import { cartPathAfterAdd } from "@lib/util/added-to-cart"
 import PreviewPrice from "./price"
 import { cardSlides, type CardSlide } from "./card-slides"
 import {
@@ -171,12 +172,14 @@ export default function ProductPreview({
       return
     }
 
+    const countryCode = region.countries?.[0]?.iso_2 || "at"
+
     startTransition(async () => {
       try {
         await addToCart({
           variantId: firstVariant.id,
           quantity: 1,
-          countryCode: region.countries?.[0]?.iso_2 || "at",
+          countryCode,
         })
 
         // Show success state
@@ -194,6 +197,11 @@ export default function ProductPreview({
 
         // Reset after 2 seconds
         setTimeout(() => setIsAdded(false), 2000)
+
+        // Wie überall im Shop: nach dem Hinzufügen direkt in den Warenkorb
+        router.push(
+          `/${countryCode}${cartPathAfterAdd([firstVariant.id], href)}`
+        )
       } catch (error) {
         console.error("Error adding to cart:", error)
       }

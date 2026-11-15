@@ -8,6 +8,7 @@ import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import PageHeader from "@modules/common/components/page-header"
 import CheckoutButton from "@modules/checkout/components/checkout-button"
 import StickyCheckoutBar from "../components/sticky-checkout-bar"
+import AddedNotice from "../components/added-notice"
 import { convertToLocale } from "@lib/util/money"
 import type { ShippingPreview } from "@lib/data/fulfillment"
 
@@ -15,10 +16,13 @@ const CartTemplate = ({
   cart,
   customer,
   shippingPreview = null,
+  added,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
   shippingPreview?: ShippingPreview | null
+  /** gerade hinzugefügte Varianten und die Seite, von der die Kundin kam */
+  added?: { variantIds: string[]; backPath?: string }
 }) => {
   const hasItems = cart?.items && cart.items.length > 0
   const itemCount = cart?.items?.length ?? 0
@@ -30,6 +34,13 @@ const CartTemplate = ({
   return (
     <div className="bg-stone-50 min-h-screen">
       <PageBreadcrumb items={[{ label: "Warenkorb" }]} />
+      {hasItems && cart && added && added.variantIds.length > 0 && (
+        <AddedNotice
+          cart={cart}
+          variantIds={added.variantIds}
+          backPath={added.backPath}
+        />
+      )}
       {/* Kopf nur mit Artikeln; der leere Warenkorb hat eine eigene Überschrift */}
       {hasItems && (
         <PageHeader

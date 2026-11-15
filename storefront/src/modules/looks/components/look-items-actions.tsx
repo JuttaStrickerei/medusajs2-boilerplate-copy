@@ -2,6 +2,7 @@
 
 import { addLookToCart } from "@lib/data/looks"
 import { triggerCartRefresh } from "@lib/context/cart-context"
+import { cartPathAfterAdd, currentBackPath } from "@lib/util/added-to-cart"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
 import { sumLookPrices } from "@lib/util/look-price"
 import { cn, formatPrice, shouldReduceMotion } from "@lib/utils"
@@ -364,6 +365,14 @@ export default function LookItemsActions({
       setAddedNotice(true)
       later(() => setAdded(false), 2500)
       later(() => setAddedNotice(false), 6000)
+
+      // Direkt in den Warenkorb: Dort stehen Summe und „Zur Kasse“
+      router.push(
+        `/${countryCode}${cartPathAfterAdd(
+          chosen.map((c) => c.variant.id),
+          currentBackPath(countryCode)
+        )}`
+      )
     } catch {
       setError(ADD_ERROR)
     } finally {

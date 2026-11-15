@@ -1,6 +1,7 @@
 import { retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getShippingPreview } from "@lib/data/fulfillment"
+import { readAddedParams } from "@lib/util/added-to-cart"
 import CartTemplate from "@modules/cart/templates"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
@@ -11,7 +12,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function Cart() {
+export default async function Cart(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  // Kommt die Kundin gerade von „In den Warenkorb“, steht in der Adresse, was dazukam
+  const added = readAddedParams(await props.searchParams)
+
   const cart = await retrieveCart().catch((error) => {
     console.error(error)
     return notFound()
@@ -28,6 +34,7 @@ export default async function Cart() {
       cart={cart}
       customer={customer}
       shippingPreview={shippingPreview}
+      added={added}
     />
   )
 }
