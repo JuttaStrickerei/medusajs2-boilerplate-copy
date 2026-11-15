@@ -154,6 +154,12 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
   const SHOP_URL = `${shopUrl.replace(/\/+$/, '')}/`
   // Logo als PNG (WebP zeigt Outlook nicht): storefront/public/images/logo/logo-jutta-mail.png
   const LOGO_URL = `${SHOP_URL}images/logo/logo-jutta-mail.png`
+  // Mit Gutscheincode tragen alle Links in den Shop den Code mit (?gutschein=…). Der
+  // Shop merkt ihn sich und löst ihn im Warenkorb von selbst ein (storefront: voucher-link).
+  const withVoucher = (url: string) =>
+    discountCode
+      ? `${url}${url.includes('?') ? '&' : '?'}gutschein=${encodeURIComponent(discountCode)}`
+      : url
 
   const pieces = (Array.isArray(products) ? products : [])
     .filter((piece) => piece && piece.title && piece.url && piece.image)
@@ -290,8 +296,9 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                                     Nicht mit anderen Gutscheincodes kombinierbar.
                                   </p>
                                   <p className="jw-sans" style={{ ...small, margin: '8px 0 0 0' }}>
-                                    So lösen Sie ihn ein: Geben Sie den Code im Warenkorb unter
-                                    „Gutscheincode hinzufügen“ ein.
+                                    So lösen Sie ihn ein: Tippen Sie auf „Gutschein einlösen“, dann
+                                    ziehen wir ihn im Warenkorb von selbst ab. Oder geben Sie den Code
+                                    dort unter „Gutscheincode hinzufügen“ ein.
                                   </p>
                                 </td>
                               </tr>
@@ -312,7 +319,7 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                                 style={{ backgroundColor: INK, borderRadius: '8px', msoPaddingAlt: '15px 36px' } as React.CSSProperties}
                               >
                                 <a
-                                  href={SHOP_URL}
+                                  href={withVoucher(`${SHOP_URL}at`)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="jw-sans"
@@ -329,7 +336,7 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                                     textDecoration: 'none',
                                   }}
                                 >
-                                  Zum Onlineshop
+                                  {discountCode ? 'Gutschein einlösen' : 'Zum Onlineshop'}
                                 </a>
                               </td>
                             </tr>
@@ -378,7 +385,7 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                                       className="jw-look"
                                       style={{ padding: '0 4px' }}
                                     >
-                                      <a href={look.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
+                                      <a href={withVoucher(look.url)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
                                         <Img
                                           src={look.image}
                                           alt={look.title}
@@ -428,7 +435,7 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                                     className="jw-piece"
                                     style={{ padding: '0 3px' }}
                                   >
-                                    <a href={piece.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
+                                    <a href={withVoucher(piece.url)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
                                       <Img
                                         src={piece.image}
                                         alt={piece.title}

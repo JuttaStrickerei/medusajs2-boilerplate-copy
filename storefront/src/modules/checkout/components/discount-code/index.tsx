@@ -5,6 +5,7 @@ import React from "react"
 import { applyPromotions } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
 import { SHOP_ERRORS } from "@lib/util/shop-errors"
+import { clearPendingVoucher, readPendingVoucher } from "@lib/util/pending-voucher"
 import { HttpTypes } from "@medusajs/types"
 import ErrorMessage from "../error-message"
 import { SubmitButton } from "../submit-button"
@@ -22,6 +23,31 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [errorMessage, setErrorMessage] = React.useState("")
 
   const { promotions = [] } = cart
+
+  // Gutschein aus einem Link (?gutschein=…, z. B. Willkommens-Mail): einmal von
+  // selbst einlösen, sobald etwas im Warenkorb liegt und noch kein Code gesetzt ist
+  const itemCount = cart?.items?.length ?? 0
+  const hasManualCode = promotions.some((promotion) => !promotion.is_automatic)
+  React.useEffect(() => {
+    if (!itemCount || hasManualCode) return
+    const pending = readPendingVoucher()
+    if (!pending) return
+    clearPendingVoucher()
+    applyPromotions([pending])
+      .then((applied) => {
+        if (
+          Array.isArray(applied) &&
+          !applied.some((c) => c.toLowerCase() === pending.toLowerCase())
+        ) {
+          setIsOpen(true)
+          setErrorMessage(SHOP_ERRORS.PROMO_NOT_APPLIED)
+        }
+      })
+      .catch(() => {
+        setIsOpen(true)
+        setErrorMessage(SHOP_ERRORS.PROMO_INVALID)
+      })
+  }, [itemCount, hasManualCode])
   const removePromotionCode = async (code: string) => {
     const validPromotions = promotions.filter(
       (promotion) => promotion.code !== code
@@ -44,7 +70,14 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
     try {
       // Pro Bestellung gilt ein Gutscheincode: Der neue Code ersetzt den bisherigen.
       // Sonst ließen sich Codes stapeln (z. B. zwei Mal 10 %).
-      await applyPromotions([code.toString().trim()])
+      const wanted = code.toString().trim()
+      const applied = await applyPromotions([wanted])
+      if (
+        Array.isArray(applied) &&
+        !applied.some((c) => c.toLowerCase() === wanted.toLowerCase())
+      ) {
+        setErrorMessage(SHOP_ERRORS.PROMO_NOT_APPLIED)
+      }
     } catch {
       // Im Produktions-Build kommt hier nur ein allgemeiner englischer Text an;
       // häufigste Ursache ist ein falscher oder abgelaufener Code

@@ -8,6 +8,8 @@
 export const SHOP_ERRORS = {
   PROMO_INVALID:
     "Dieser Code ist leider nicht gültig. Bitte prüfen Sie die Schreibweise.",
+  PROMO_NOT_APPLIED:
+    "Dieser Code lässt sich nicht mehr einlösen. Er wurde bereits verwendet oder ist abgelaufen.",
   ADDRESS_COUNTRY:
     "Wir liefern derzeit nur nach Österreich. Bitte wählen Sie Österreich als Land.",
   ADDRESS_EMAIL: "Bitte prüfen Sie Ihre E-Mail-Adresse.",

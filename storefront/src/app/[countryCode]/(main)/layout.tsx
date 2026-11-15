@@ -8,6 +8,7 @@ import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import NewsletterTeaser from "@modules/layout/components/newsletter-teaser"
+import VoucherLink from "@modules/layout/components/voucher-link"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -27,6 +28,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       {props.children}
       <Footer />
       <NewsletterTeaser isLoggedIn={!!customer} />
+      <VoucherLink />
       <Toaster />
     </>
   )
