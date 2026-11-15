@@ -9,9 +9,11 @@ import OptionSelect, {
   isSizeOption,
 } from "@modules/products/components/product-actions/option-select"
 import { useParams } from "next/navigation"
-import { useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import { gaCurrency, productToItem, trackEvent } from "@lib/util/analytics"
+import { findColorOption } from "@lib/util/product-colors"
+import { useProductColor } from "./product-color-context"
 import MobileActions from "./mobile-actions"
 import FertigungHinweis from "./fertigung-hinweis"
 import PurchaseInfo from "../purchase-info"
@@ -51,6 +53,15 @@ export default function ProductActions({
   const { items: wishlistItems, toggleWishlist } = useWishlist()
   const isWishlisted = wishlistItems.some((item) => item.id === product.id)
 
+  // Bei mehreren Farben ist immer eine gewählt (aus der Adresse, sonst die des
+  // ersten Galeriebilds). Sie gehört der Seite, weil auch die Galerie ihr folgt.
+  const { color, selectColor } = useProductColor()
+  const colorOptionId = findColorOption(product)?.id
+  const colorSelection = useMemo(
+    () => (color && colorOptionId ? { [colorOptionId]: color } : undefined),
+    [color, colorOptionId]
+  )
+
   const {
     orderedOptions,
     options,
@@ -60,7 +71,19 @@ export default function ProductActions({
     inStock,
     missingOptions,
     allOptionsSelected,
-  } = useVariantSelection(product)
+  } = useVariantSelection(product, undefined, colorSelection)
+
+  // Farbwechsel geht an die Seite (Galerie und Adresse), alles andere bleibt hier
+  const updateOption = useCallback(
+    (optionId: string, value: string) => {
+      if (colorSelection && optionId === colorOptionId) {
+        selectColor(value)
+      } else {
+        setOptionValue(optionId, value)
+      }
+    },
+    [colorSelection, colorOptionId, selectColor, setOptionValue]
+  )
 
   const actionsRef = useRef<HTMLDivElement>(null)
   const inView = useIntersection(actionsRef, "0px")
@@ -152,7 +175,7 @@ export default function ProductActions({
                 <OptionSelect
                   option={option}
                   current={options[option.id]}
-                  updateOption={setOptionValue}
+                  updateOption={updateOption}
                   title={option.title ?? ""}
                   data-testid="product-options"
                   disabled={!!disabled || isAdding}
@@ -308,7 +331,7 @@ export default function ProductActions({
           product={product}
           variant={selectedVariant}
           options={options}
-          updateOptions={setOptionValue}
+          updateOptions={updateOption}
           inStock={inStock}
           handleAddToCart={handleAddToCart}
           isAdding={isAdding}

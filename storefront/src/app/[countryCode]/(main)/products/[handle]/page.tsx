@@ -108,7 +108,8 @@ export default async function ProductPage(props: Props) {
 
   const pricedProduct = await listProducts({
     countryCode: params.countryCode,
-    // Kategorie für den Brotkrümel „Alle Produkte / Pullover / …“
+    // Kategorie für den Brotkrümel „Alle Produkte / Pullover / …“.
+    // Die Farbwahl braucht variants.images.id; das steht in PRODUCT_LIST_FIELDS.
     queryParams: {
       handle: params.handle,
       fields: `${PRODUCT_LIST_FIELDS},*categories`,

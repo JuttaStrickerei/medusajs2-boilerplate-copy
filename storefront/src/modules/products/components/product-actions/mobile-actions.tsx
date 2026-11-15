@@ -10,7 +10,10 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
 import { HttpTypes } from "@medusajs/types"
 import { isSimpleProduct } from "@lib/util/product"
-import { sortProductOptions } from "@modules/products/hooks/use-variant-selection"
+import {
+  sortProductOptions,
+  translateOptionTitle,
+} from "@modules/products/hooks/use-variant-selection"
 
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
@@ -54,6 +57,14 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   }, [price])
 
   const isSimple = isSimpleProduct(product)
+
+  // Gewählte Werte in fester Reihenfolge (Farbe, Größe). Die vorgewählte Farbe
+  // steht schon in der Leiste, bevor die Größe gewählt ist.
+  const orderedOptions = sortProductOptions(product.options)
+  const chosenValues = orderedOptions
+    .map((option) => options[option.id])
+    .filter(Boolean)
+  const missingOption = orderedOptions.find((option) => !options[option.id])
 
   return (
     <>
@@ -112,9 +123,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
               >
                 <div className="flex items-center justify-between w-full">
                   <span>
-                    {variant
-                      ? Object.values(options).join(" / ")
-                      : "Optionen wählen"}
+                    {chosenValues.join(" / ") || "Optionen wählen"}
                   </span>
                   <ChevronDown />
                 </div>
@@ -127,7 +136,9 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 data-testid="mobile-cart-button"
               >
                 {!variant
-                  ? "Variante wählen"
+                  ? missingOption
+                    ? `${translateOptionTitle(missingOption.title ?? "Option")} wählen`
+                    : "Variante wählen"
                   : !inStock
                   ? "Ausverkauft"
                   : "In den Warenkorb"}
