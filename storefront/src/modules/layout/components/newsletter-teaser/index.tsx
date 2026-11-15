@@ -6,6 +6,7 @@ import {
   useNewsletterSignup,
 } from "@lib/hooks/use-newsletter-signup"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { hasConsentFor } from "@lib/util/consent"
 import { X } from "@components/icons"
 import { cn } from "@lib/utils"
 import { usePathname } from "next/navigation"
@@ -56,8 +57,10 @@ export default function NewsletterTeaser({ isLoggedIn = false }: { isLoggedIn?: 
       }
       const waitedLongEnough =
         Date.now() - firstSeen >= (aboveBuyBar ? SHOW_AFTER_MS_PRODUCT : SHOW_AFTER_MS)
-      // Nicht gleichzeitig mit der Cookie-Frage: erst zeigen, wenn sie beantwortet ist
-      const cookieAnswered = document.cookie.includes("cc_cookie=")
+      // Nicht gleichzeitig mit der Cookie-Frage: erst zeigen, wenn sie beantwortet ist.
+      // Eine Antwort auf eine ältere Fassung der Frage zählt nicht, dann fragt das Banner
+      // noch einmal ("necessary" steht in jeder gültigen Antwort).
+      const cookieAnswered = hasConsentFor("necessary")
       // Kurze Seiten lassen sich nicht weit genug nach unten schieben
       const pageIsShort =
         document.documentElement.scrollHeight - window.innerHeight < MIN_SCROLL_PX
