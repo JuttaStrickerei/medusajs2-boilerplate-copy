@@ -16,11 +16,16 @@ type CartTotalsProps = {
     discount_subtotal?: number | null
     discount_total?: number | null
     items?: Array<{ total?: number | null }>
+    shipping_methods?: Array<unknown> | null
   }
   taxIncluded?: boolean
+  /** Versandkosten vorab, solange noch keine Versandart gewählt ist (Warenkorb, Kasse Schritt 1) */
+  shippingPreview?: { amount: number; hasFreePickup: boolean } | null
+  /** In der Kasse steht die Abholung im Schritt „Lieferung“, der Hinweis wäre doppelt */
+  hidePickupNote?: boolean
 }
 
-const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) => {
+const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true, shippingPreview = null, hidePickupNote = false }) => {
   const {
     currency_code,
     total,
@@ -50,10 +55,22 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
   
   // Use shipping_total if available (includes tax), otherwise shipping_subtotal
   // Use ?? null to preserve null state (means "not yet calculated")
-  const displayShipping = shipping_total ?? shipping_subtotal ?? null
+  // Solange keine Versandart gewählt ist, steht die Lieferung nach Hause schon in der Summe.
+  // Sonst zeigt der Warenkorb „Versand € 0,00“ und der Betrag kommt erst in der Kasse dazu.
+  const preview = !totals.shipping_methods?.length ? shippingPreview : null
+  const displayShipping = preview ? preview.amount : shipping_total ?? shipping_subtotal ?? null
+  const displayTotal = (total ?? 0) + (preview ? preview.amount : 0)
   
   // Use discount_total if available, otherwise discount_subtotal
   const displayDiscount = discount_total || discount_subtotal || 0
+
+  // Mit Rabatt zeigt „Artikel“ den Preis vor dem Abzug. Sonst stünde dort schon der
+  // reduzierte Betrag und darunter noch einmal „Rabatt“, als würde doppelt abgezogen.
+  // So gilt immer: Artikel − Rabatt + Versand = Gesamt.
+  const shownItems =
+    displayDiscount > 0
+      ? (total ?? 0) - (shipping_total ?? shipping_subtotal ?? 0) + displayDiscount
+      : displayItemsSubtotal
 
   return (
     <div className="space-y-3">
@@ -62,8 +79,8 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
         {/* Subtotal - Items */}
         <div className="flex items-center justify-between text-stone-600">
           <span>Artikel</span>
-          <span data-testid="cart-subtotal" data-value={displayItemsSubtotal}>
-            {formatAmount(displayItemsSubtotal)}
+          <span data-testid="cart-subtotal" data-value={shownItems}>
+            {formatAmount(shownItems)}
           </span>
         </div>
         
@@ -83,7 +100,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
         
         {/* Shipping */}
         <div className="flex items-center justify-between text-stone-600">
-          <span>Versand</span>
+          <span>{preview ? "Versand in Österreich" : "Versand"}</span>
           <span data-testid="cart-shipping" data-value={displayShipping ?? 0}>
             {displayShipping !== null
               ? formatAmount(displayShipping)
@@ -93,7 +110,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
         </div>
         
         {/* Tax breakdown - only show if tax exists */}
-        {(tax_total ?? 0) > 0 && (
+        {(tax_total ?? 0) > 0 && !preview && (
           <div className="flex items-center justify-between text-stone-500 text-xs pt-1">
             <span>davon MwSt. (20%)</span>
             <span data-testid="cart-taxes" data-value={tax_total || 0}>
@@ -115,9 +132,9 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
           <span
             className="text-xl font-bold text-stone-800"
             data-testid="cart-total"
-            data-value={total || 0}
+            data-value={displayTotal}
           >
-            {formatAmount(total ?? 0)}
+            {formatAmount(displayTotal)}
           </span>
           <span className="text-xs text-stone-500 block">
             inkl. MwSt.
@@ -125,6 +142,12 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxIncluded = true }) =
         </div>
       </div>
       
+      {preview?.hasFreePickup && !hidePickupNote && (
+        <p className="text-xs text-stone-500" data-testid="cart-pickup-note">
+          Abholung in Draßburg im Burgenland: kostenlos, in der Kasse wählbar.
+        </p>
+      )}
+
       {/* Additional info */}
       {displayShipping === null && (
         <p className="text-xs text-stone-400 italic">
