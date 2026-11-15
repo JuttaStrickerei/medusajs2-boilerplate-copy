@@ -6,6 +6,10 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import PageBreadcrumb from "@modules/common/components/page-breadcrumb"
 import PageHeader from "@modules/common/components/page-header"
 import { PRODUCT_GRID_WIDE } from "@modules/products/components/product-preview/card-styles"
+import {
+  cardSlides,
+  withoutVariantImages,
+} from "@modules/products/components/product-preview/card-slides"
 import { Search } from "@components/icons"
 
 type Props = {
@@ -53,7 +57,8 @@ export default async function SearchResultsPage({ params }: Props) {
               products.map((product) => (
                 <ProductPreview
                   key={product.id}
-                  product={product}
+                  product={withoutVariantImages(product)}
+                  slides={cardSlides(product)}
                   region={region}
                 />
               ))}
