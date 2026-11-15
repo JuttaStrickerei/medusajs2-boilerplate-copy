@@ -56,20 +56,23 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
     return `${formatted} ${currencyCode}`
   }
 
-  // Calculate items total
+  // Summen wie im Shop (cart-totals): Artikel (vor Abzug) − Rabatt + Versand = Gesamt.
   // In Medusa v2 totals are already in major currency units (e.g. Euro),
   // so we must NOT divide by 100 anywhere here.
-  // Prefer the line total; fall back to unit_price * quantity if needed.
-  const itemsTotal =
-    order.items?.reduce((acc, item) => {
-      const lineTotal =
-        typeof (item as any).total === "number"
-          ? Number((item as any).total)
-          : Number((item as any).unit_price || 0) * Number(item.quantity || 1)
-
-      return acc + lineTotal
-    }, 0) || 0
-  const shippingTotal = (order as any).shipping_total || 0
+  const grandTotal = Number(
+    order.summary?.raw_current_order_total?.value ?? order.total ?? 0
+  )
+  // Versand und Zeilenpreise vor Abzug: discount_total enthält jeden Rabatt,
+  // auch einen auf den Versand.
+  const shippingTotal = Number(
+    (order as any).original_shipping_total ?? (order as any).shipping_total ?? 0
+  )
+  const discountTotal = Number((order as any).discount_total || 0)
+  const itemsTotal = grandTotal - shippingTotal + discountTotal
+  const lineTotal = (item: any) =>
+    typeof item.original_total === "number"
+      ? Number(item.original_total)
+      : Number(item.unit_price || 0) * Number(item.quantity || 1)
 
   return (
   <Base preview={preview}>
@@ -358,17 +361,11 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                         margin: "0",
                       }}
                     >
-                      {/* 
-                        Zeige den Zeilenpreis (Gesamtpreis für die Menge) in Hauptwährung.
+                      {/*
+                        Zeige den Zeilenpreis (Gesamtpreis für die Menge, vor Rabatt) in Hauptwährung.
                         Medusa v2 liefert Beträge bereits in Hauptwährung, daher keine Division durch 100.
                       */}
-                      {formatCurrency(
-                        typeof (item as any).total === "number"
-                          ? Number((item as any).total)
-                          : Number((item as any).unit_price || 0) *
-                            Number(item.quantity || 1),
-                        order.currency_code
-                      )}
+                      {formatCurrency(lineTotal(item), order.currency_code)}
                     </Text>
                   </td>
                 </tr>
@@ -395,20 +392,32 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                   </Text>
                 </td>
               </tr>
-              {shippingTotal > 0 && (
+              {discountTotal > 0 && (
                 <tr>
                   <td style={{ paddingTop: '8px' }}>
                     <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
-                      Versand
+                      Rabatt
                     </Text>
                   </td>
                   <td align="right" style={{ paddingTop: '8px' }}>
-                    <Text style={{ fontSize: '14px', color: '#1c1917', margin: '0' }}>
-                      {formatCurrency(shippingTotal, order.currency_code)}
+                    <Text style={{ fontSize: '14px', fontWeight: '500', color: '#16a34a', margin: '0' }}>
+                      −{formatCurrency(discountTotal, order.currency_code)}
                     </Text>
                   </td>
                 </tr>
               )}
+              <tr>
+                <td style={{ paddingTop: '8px' }}>
+                  <Text style={{ fontSize: '14px', color: '#57534e', margin: '0' }}>
+                    {isPickup ? 'Abholung' : 'Versand'}
+                  </Text>
+                </td>
+                <td align="right" style={{ paddingTop: '8px' }}>
+                  <Text style={{ fontSize: '14px', color: '#1c1917', margin: '0' }}>
+                    {formatCurrency(shippingTotal, order.currency_code)}
+                  </Text>
+                </td>
+              </tr>
             </table>
             <table width="100%" cellPadding="0" cellSpacing="0" style={{ paddingTop: '12px', borderTop: '1px solid #e7e5e4' }}>
               <tr>
@@ -419,7 +428,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                 </td>
                 <td align="right">
                   <Text style={{ fontSize: '20px', fontWeight: '700', color: '#1c1917', margin: '0' }}>
-                    {formatCurrency(order.summary.raw_current_order_total.value, order.currency_code)}
+                    {formatCurrency(grandTotal, order.currency_code)}
                   </Text>
                   <Text style={{ fontSize: '12px', color: '#57534e', margin: '4px 0 0 0', display: 'block' }}>
                     inkl. MwSt.

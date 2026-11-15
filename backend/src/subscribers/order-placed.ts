@@ -1,4 +1,4 @@
-import { Modules } from '@medusajs/framework/utils'
+import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService, Logger } from '@medusajs/framework/types'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
@@ -21,9 +21,36 @@ export default async function orderPlacedHandler({
   logger.info(`[OrderPlaced] Processing order: ${data.id}`)
 
   try {
-    const order = await orderModuleService.retrieveOrder(data.id, { 
-      relations: ['items', 'summary', 'shipping_address'] 
+    // Bestellung mit Summen laden. retrieveOrder ohne Summenfelder liefert weder
+    // Versand noch Rabatt, die Zeilen in den Mails gingen dann nicht auf.
+    const query = container.resolve(ContainerRegistrationKeys.QUERY)
+    const {
+      data: [orderWithTotals],
+    } = await query.graph({
+      entity: 'order',
+      fields: [
+        'id',
+        'display_id',
+        'email',
+        'currency_code',
+        'created_at',
+        'total',
+        'tax_total',
+        'discount_total',
+        'shipping_total',
+        'original_shipping_total',
+        'summary',
+        'items.*',
+        'shipping_address.*',
+      ],
+      filters: { id: data.id },
     })
+    if (!orderWithTotals) {
+      throw new Error(`Order ${data.id} not found`)
+    }
+    // query.graph liefert Beträge und Mengen als BigNumber-Objekte. Die Vorlagen
+    // brauchen einfache Zahlen, sonst bricht das Rendern der Mail ab.
+    const order = JSON.parse(JSON.stringify(orderWithTotals))
     logger.debug(`[OrderPlaced] Order data loaded for order ${data.id}`)
     
     // Null-check for shipping_address (e.g., digital products may not have one)
