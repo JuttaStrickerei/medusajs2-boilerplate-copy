@@ -194,3 +194,4 @@ Rules: start only what the current task needs, and stop dev again at the end of 
 - Next 15 + React 19 RC: some libraries need `overrides` in `package.json` to resolve correctly.
 - Images from the prod MinIO bucket need the hostname added to `next.config.js` `remotePatterns`.
 - When switching buckets (dev ↔ prod), clear `.next/` cache and restart.
+- Tax settings are data, not code, and their order matters. Shop prices are gross (incl. 20 % Austrian VAT). Medusa only treats a price as tax-inclusive if the currency (Store → Currencies → EUR) is set to tax-inclusive pricing; product prices are plain EUR prices without a region rule, so the region's own tax-inclusive switch does not cover them. Turning on the region's "Automatic taxes" while EUR is still tax-exclusive adds 20 % to every price at checkout. Always: EUR tax-inclusive first, then the AT tax region (20 %) / automatic taxes. Shipping option prices are gross too.
