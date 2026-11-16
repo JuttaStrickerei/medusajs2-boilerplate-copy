@@ -400,7 +400,9 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                   ...(Number(params.order.discount_total) > 0 ? [[
                     { text: "Rabatt", style: "totalLabel" },
                     { 
-                      text: await this.formatAmount(
+                      // Abzug mit Minus, wie in Kasse und Bestellmail. Halbgeviertstrich statt des
+                      // echten Minuszeichens (U+2212): Das kennt die Schrift der Rechnung nicht.
+                      text: "–" + await this.formatAmount(
                         Number(params.order.discount_total), 
                         params.order.currency_code), 
                       style: "totalValue",
