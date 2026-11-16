@@ -136,8 +136,12 @@ export const AdminOrderNotificationTemplate: React.FC<
           <Text><strong>Rabatt:</strong> −{formatCurrency(discountTotal, currencyCode)}</Text>
         )}
         <Text><strong>Versand:</strong> {formatCurrency(shippingTotal, currencyCode)}</Text>
-        <Text><strong>Steuern:</strong> {formatCurrency(taxTotal, currencyCode)}</Text>
         <Text><strong>Gesamtbetrag:</strong> {formatCurrency(grandTotal, currencyCode)}</Text>
+        {/* Die MwSt. ist im Gesamtbetrag enthalten, kein Aufschlag: darum unter dem Gesamtbetrag
+            und nur, wenn die Bestellung eine Steuer gespeichert hat. */}
+        {taxTotal > 0 && (
+          <Text>darin enthaltene MwSt.: {formatCurrency(taxTotal, currencyCode)}</Text>
+        )}
         {/* Keine Zeile „Zahlungsmethode“: Alle Zahlungen laufen über Stripe, und Medusa
             speichert nur die erlaubten Arten (Karte, EPS, Klarna, Link, PayPal), nicht
             die tatsächlich gewählte. Die steht im Stripe-Dashboard. */}
