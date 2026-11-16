@@ -10,6 +10,13 @@ import {
 import axios from "axios"
 import { georgiaNormal, georgiaBold, georgiaItalic, georgiaBoldItalic } from "../../fonts/georgia-base64"
 
+// Österreich: ein Steuersatz für alles, was der Shop verkauft. Die Preise im Shop sind Bruttopreise.
+const VAT_RATE_PERCENT = 20
+// Wie im Impressum des Shops (storefront: imprint/page.tsx)
+const COMPANY_UID = "ATU 20913304"
+
+const roundCents = (amount: number): number => Math.round(amount * 100) / 100
+
 // Helper function to convert Base64 string to Buffer for pdfmake
 const base64ToBuffer = (base64: string): Buffer => {
   if (!base64) return Buffer.from("")
@@ -132,6 +139,15 @@ class InvoiceGeneratorService extends MedusaService({
     const invoiceId = `RE-${invoice.display_id.toString().padStart(6, "0")}`
     const invoiceDate = new Date(invoice.created_at).toLocaleDateString("de-DE")
 
+    // Enthaltene MwSt.: der Betrag, den die Bestellung gespeichert hat. Hat sie keine Steuerzeilen
+    // (automatische Steuern an der Region aus), aus dem Bruttobetrag herausgerechnet.
+    const orderTotal = Number(params.order.total)
+    const storedTax = Number(params.order.tax_total || 0)
+    const includedTax = roundCents(
+      storedTax > 0 ? storedTax : (orderTotal * VAT_RATE_PERCENT) / (100 + VAT_RATE_PERCENT)
+    )
+    const netTotal = roundCents(orderTotal - includedTax)
+
     // return the PDF content structure
     return {
       pageSize: "A4",
@@ -198,6 +214,11 @@ class InvoiceGeneratorService extends MedusaService({
                 },
                 config.company_email && {
                   text: `E-Mail: ${config.company_email}`,
+                  style: "companyContact",
+                  margin: [0, 0, 0, 3],
+                },
+                {
+                  text: `UID: ${COMPANY_UID}`,
                   style: "companyContact",
                   margin: [0, 0, 0, 0],
                 },
@@ -399,6 +420,22 @@ ${params.order.shipping_address.province || ""} ${params.order.shipping_address.
                         Number(params.order.total), 
                         params.order.currency_code), 
                       style: "grandTotalValue",
+                      alignment: "right",
+                    },
+                  ],
+                  [
+                    { text: `darin enthalten: ${VAT_RATE_PERCENT} % MwSt.`, style: "totalLabel" },
+                    {
+                      text: await this.formatAmount(includedTax, params.order.currency_code),
+                      style: "totalValue",
+                      alignment: "right",
+                    },
+                  ],
+                  [
+                    { text: "Nettobetrag", style: "totalLabel" },
+                    {
+                      text: await this.formatAmount(netTotal, params.order.currency_code),
+                      style: "totalValue",
                       alignment: "right",
                     },
                   ],
