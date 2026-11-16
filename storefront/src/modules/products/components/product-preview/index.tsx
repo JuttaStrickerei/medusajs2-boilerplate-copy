@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
@@ -15,7 +15,10 @@ import { Heart, ShoppingBag, Check } from "@components/icons"
 import { triggerCartRefresh } from "@lib/context/cart-context"
 import { useWishlist } from "@lib/context/wishlist-context"
 import { yarnDotBackground } from "@lib/util/yarn-colors"
+import { productPath } from "@lib/util/product-colors"
+import { cartPathAfterAdd } from "@lib/util/added-to-cart"
 import PreviewPrice from "./price"
+import { cardSlides, type CardSlide } from "./card-slides"
 import {
   CARD_BODY,
   CARD_MAT,
@@ -30,6 +33,11 @@ interface ProductPreviewProps {
   isFeatured?: boolean
   region: HttpTypes.StoreRegion
   className?: string
+  /**
+   * Fotos zum Wischen, von der Server-Komponente ausgerechnet (cardSlides).
+   * Ohne Angabe rechnet die Karte sie aus dem Produkt selbst aus.
+   */
+  slides?: CardSlide[]
 }
 
 /** Feste Breite des Hover-Fotos; es erscheint erst ab 1280px (Karte ≤ 300px) */
@@ -37,15 +45,69 @@ const HOVER_IMAGE_WIDTH = 300
 const HOVER_IMAGE_HEIGHT = 450
 const MAX_COLOR_DOTS = 5
 
+// Unter 1280px ein kleiner Schieber: natürliches Scrollen mit Einrasten, ein
+// Foto je Wisch (snap-always). Senkrechtes Wischen scrollt weiter die Seite.
+// Ab 1280px steht er still und zeigt das erste Foto wie bisher.
+const CARD_SLIDER =
+  "no-scrollbar absolute inset-0 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain medium:overflow-x-hidden"
+/** Eigene getönte Fläche je Foto, damit das Multiplizieren auch im Schieber stimmt */
+const CARD_SLIDE =
+  "relative isolate h-full w-full shrink-0 snap-start snap-always bg-stone-100"
+
 export default function ProductPreview({
   product,
   isFeatured,
   region,
   className,
+  slides: slidesProp,
 }: ProductPreviewProps) {
   const [isAdded, setIsAdded] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+
+  const slides = useMemo(
+    () => slidesProp ?? cardSlides(product),
+    [slidesProp, product]
+  )
+  const sliderRef = useRef<HTMLSpanElement>(null)
+  const slidesKey = slides.map((slide) => slide.url).join("|")
+  // Stand des Schiebers, gemerkt mit den Fotos, zu denen er gehört. Kommen
+  // andere Fotos (z. B. nach einem Farbfilter), gilt er nicht mehr: die Karte
+  // beginnt wieder vorn, und der Schieber (gleicher Schlüssel) entsteht neu.
+  // loaded: nur das erste Foto lädt sofort, die weiteren kommen erst ins
+  // Dokument, wenn gewischt wird, und dann immer eines voraus.
+  const [sliderState, setSliderState] = useState({
+    key: slidesKey,
+    active: 0,
+    loaded: 1,
+  })
+  const { active: activeSlide, loaded: loadedSlides } =
+    sliderState.key === slidesKey ? sliderState : { active: 0, loaded: 1 }
+
+  const syncSlide = () => {
+    const slider = sliderRef.current
+    if (!slider || slider.clientWidth === 0) return
+    const position = slider.scrollLeft / slider.clientWidth
+    // begrenzt, weil iOS am Rand über das Ende hinaus federt
+    const active = Math.min(Math.max(Math.round(position), 0), slides.length - 1)
+    setSliderState((state) => {
+      const loaded = Math.max(
+        state.key === slidesKey ? state.loaded : 1,
+        position > 0 ? active + 2 : 1
+      )
+      return state.key === slidesKey &&
+        state.active === active &&
+        state.loaded === loaded
+        ? state
+        : { key: slidesKey, active, loaded }
+    })
+  }
+
+  // Falls schon gewischt wurde, bevor die Seite fertig geladen war
+  useEffect(() => {
+    syncSlide()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Wishlist hook - consume items directly for reliable reactivity
   const { items: wishlistItems, toggleWishlist } = useWishlist()
@@ -57,9 +119,12 @@ export default function ProductPreview({
   // Check if product has a sale price
   const hasSale = cheapestPrice?.price_type === "sale"
 
-  // Get secondary image for hover effect
-  const primaryImage = product.thumbnail || product.images?.[0]?.url
-  const secondaryImage = product.images?.[1]?.url
+  // Foto beim Überfahren: wie bisher das zweite der Galerie; zeigt das erste
+  // Foto eine bestimmte Farbe, dann das zweite Foto dieser Farbe
+  const firstSlide = slides[0]
+  const secondaryImage = firstSlide?.color
+    ? firstSlide.hover
+    : product.images?.[1]?.url
 
   const colors = getColorOptions(product)
   // Punkte nur für Farben mit bekanntem Farbwert; unbekannte zählen ins „+N“
@@ -70,7 +135,9 @@ export default function ProductPreview({
   const badgeLabel = [isNew && "Neu", hasSale && "Sale"]
     .filter(Boolean)
     .join(", ")
-  const href = `/products/${product.handle}`
+  // Bei mehreren Farben führt die Karte zur Farbe des sichtbaren Fotos
+  const shownSlide = slides[Math.min(activeSlide, slides.length - 1)]
+  const href = productPath(product.handle ?? "", shownSlide?.color)
 
   // Get the first available variant for quick add
   const firstVariant = product.variants?.[0]
@@ -95,22 +162,24 @@ export default function ProductPreview({
 
     if (!firstVariant) {
       // Navigate to product page if no variant or multiple variants
-      router.push(`/products/${product.handle}`)
+      router.push(href)
       return
     }
 
     // If multiple variants, go to product page to select
     if (product.variants && product.variants.length > 1) {
-      router.push(`/products/${product.handle}`)
+      router.push(href)
       return
     }
+
+    const countryCode = region.countries?.[0]?.iso_2 || "at"
 
     startTransition(async () => {
       try {
         await addToCart({
           variantId: firstVariant.id,
           quantity: 1,
-          countryCode: region.countries?.[0]?.iso_2 || "at",
+          countryCode,
         })
 
         // Show success state
@@ -128,6 +197,11 @@ export default function ProductPreview({
 
         // Reset after 2 seconds
         setTimeout(() => setIsAdded(false), 2000)
+
+        // Wie überall im Shop: nach dem Hinzufügen direkt in den Warenkorb
+        router.push(
+          `/${countryCode}${cartPathAfterAdd([firstVariant.id], href)}`
+        )
       } catch (error) {
         console.error("Error adding to cart:", error)
       }
@@ -145,15 +219,39 @@ export default function ProductPreview({
           aria-hidden
           className={CARD_MEDIA}
         >
-          {primaryImage ? (
-            <Image
-              src={primaryImage}
-              alt={product.title || "Produktbild"}
-              fill
-              sizes={CARD_SIZES}
-              priority={isFeatured}
-              className="object-contain mix-blend-multiply"
-            />
+          {firstSlide ? (
+            <span
+              key={slidesKey}
+              ref={sliderRef}
+              onScroll={syncSlide}
+              className={CARD_SLIDER}
+            >
+              {slides.map((slide, index) => (
+                <span key={slide.url} className={CARD_SLIDE}>
+                  {index === 0 ? (
+                    <Image
+                      src={slide.url}
+                      alt={product.title || "Produktbild"}
+                      fill
+                      sizes={CARD_SIZES}
+                      priority={isFeatured}
+                      className="object-contain mix-blend-multiply"
+                    />
+                  ) : (
+                    index < loadedSlides && (
+                      <Image
+                        src={slide.url}
+                        alt=""
+                        fill
+                        sizes={CARD_SIZES}
+                        loading="eager"
+                        className="object-contain mix-blend-multiply"
+                      />
+                    )
+                  )}
+                </span>
+              ))}
+            </span>
           ) : (
             <span className="absolute inset-0 flex items-center justify-center text-stone-300">
               <PlaceholderImage size={24} aria-hidden />
@@ -191,6 +289,23 @@ export default function ProductPreview({
                   Sale
                 </Badge>
               )}
+            </span>
+          )}
+
+          {/* Anzeige, welches Foto zu sehen ist; nur wo gewischt wird */}
+          {slides.length > 1 && (
+            <span className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex justify-center medium:hidden">
+              <span className="flex items-center gap-1.5 rounded-full bg-white/90 px-1.5 py-1 ring-1 ring-black/5">
+                {slides.map((slide, index) => (
+                  <span
+                    key={slide.url}
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full transition-colors",
+                      index === activeSlide ? "bg-stone-800" : "bg-stone-400"
+                    )}
+                  />
+                ))}
+              </span>
             </span>
           )}
         </LocalizedClientLink>

@@ -3,6 +3,7 @@ import type { LookSeason } from "@modules/looks/lib/seasons"
 import { listProducts } from "@lib/data/products"
 import ProductPreview from "@modules/products/components/product-preview"
 import { PRODUCT_GRID } from "@modules/products/components/product-preview/card-styles"
+import { cardSlides } from "@modules/products/components/product-preview/card-slides"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ArrowRight } from "@components/icons"
 import { toCardProduct } from "@modules/home/lib/card-product"
@@ -96,6 +97,8 @@ export default async function FeaturedProducts({
               key={product.id}
               // nur die Felder der Karte: sonst ~21 KB je Produkt im HTML
               product={toCardProduct(product)}
+              // Fotos zum Wischen aus dem vollen Produkt, toCardProduct kürzt sie weg
+              slides={cardSlides(product)}
               region={region}
               className="animate-fade-in-up"
             />

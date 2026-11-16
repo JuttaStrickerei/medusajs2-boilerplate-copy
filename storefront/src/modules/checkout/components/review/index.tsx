@@ -1,5 +1,6 @@
 "use client"
 
+import { convertToLocale } from "@lib/util/money"
 import { Button, clx } from "@medusajs/ui"
 import { useState } from "react"
 import Spinner from "@modules/common/icons/spinner"
@@ -164,7 +165,7 @@ const Review = ({ cart }: { cart: any }) => {
               />
               <div className="text-sm text-stone-600">
                 <p>
-                  Mit dem Klick auf &quot;Bestellung aufgeben&quot; bestätigen
+                  Mit dem Klick auf &quot;Zahlungspflichtig bestellen&quot; bestätigen
                   Sie, dass Sie unsere{" "}
                   <LocalizedClientLink
                     href="/terms"
@@ -199,6 +200,22 @@ const Review = ({ cart }: { cart: any }) => {
           <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
             <Shield size={16} />
             <span>Sichere SSL-verschlüsselte Übertragung</span>
+          </div>
+
+          {/* Betrag direkt am Knopf: Am Handy steht die Bestellübersicht erst darunter */}
+          <div
+            className="flex items-baseline justify-between gap-4 border-t border-stone-200 pt-5"
+            data-testid="review-total"
+          >
+            <span className="text-sm text-stone-600">
+              Gesamtbetrag <span className="text-stone-500">inkl. MwSt.</span>
+            </span>
+            <span className="text-xl font-semibold text-stone-800 whitespace-nowrap">
+              {convertToLocale({
+                amount: cart.total ?? 0,
+                currency_code: cart.currency_code,
+              })}
+            </span>
           </div>
 
           {/* Payment Button */}

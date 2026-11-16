@@ -5,7 +5,6 @@ import React from "react"
 import StripeWrapper from "./stripe-wrapper"
 import { createContext } from "react"
 import { HttpTypes } from "@medusajs/types"
-import { isStripe } from "@lib/constants"
 
 type WrapperProps = {
   cart: HttpTypes.StoreCart
@@ -18,19 +17,18 @@ const stripeKey = process.env.NEXT_PUBLIC_STRIPE_KEY
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null
 
 const Wrapper: React.FC<WrapperProps> = ({ cart, children }) => {
-  const paymentSession = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
-  )
+  // Die Stripe-Felder hängen am Betrag des Warenkorbs, nicht an einer
+  // Zahlungssitzung (siehe stripe-wrapper.tsx). Medusa löscht die Sitzung bei
+  // jeder Betragsänderung (Gutschein, Menge, Versand); so bleiben die
+  // eingegebenen Zahlungsdaten trotzdem stehen.
+  const total = cart.total ?? 0
 
-  if (
-    isStripe(paymentSession?.provider_id) &&
-    paymentSession &&
-    stripePromise
-  ) {
+  if (stripePromise && total > 0 && cart.currency_code) {
     return (
       <StripeContext.Provider value={true}>
         <StripeWrapper
-          paymentSession={paymentSession}
+          amount={total}
+          currencyCode={cart.currency_code}
           stripeKey={stripeKey}
           stripePromise={stripePromise}
         >

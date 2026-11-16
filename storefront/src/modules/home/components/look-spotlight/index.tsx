@@ -13,6 +13,7 @@ import LookTile from "@modules/looks/components/overview/look-tile"
 import styles from "@modules/looks/components/overview/looks-overview.module.css"
 import { toGaItem } from "@modules/looks/lib/overview"
 import ProductPreview from "@modules/products/components/product-preview"
+import { cardSlides } from "@modules/products/components/product-preview/card-slides"
 import { SPOTLIGHT_GRID } from "../section-styles"
 import SpotlightSummary from "./spotlight-summary"
 
@@ -110,6 +111,7 @@ export default async function LookSpotlight({
               <li key={product.id}>
                 <ProductPreview
                   product={toCardProduct(product)}
+                  slides={cardSlides(product)}
                   region={region}
                 />
               </li>

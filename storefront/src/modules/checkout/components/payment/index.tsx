@@ -38,8 +38,11 @@ const Payment = ({
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
+  // Die Zahlungsdaten stehen in den Stripe-Feldern; die Sitzung fehlt kurz,
+  // wenn Medusa sie nach einer Betragsänderung gelöscht hat
   const paymentReady =
-    (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
+    ((activeSession || stripeComplete) && cart?.shipping_methods.length !== 0) ||
+    paidByGiftcard
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -215,7 +218,7 @@ const Payment = ({
         </div>
       ) : (
         <div>
-          {cart && paymentReady && activeSession && selectedPaymentMethod ? (
+          {cart && paymentReady && selectedPaymentMethod ? (
             <div className="flex items-center gap-3">
               <CreditCard size={18} className="text-stone-400" />
               <div>

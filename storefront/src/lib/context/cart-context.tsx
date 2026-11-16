@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react"
 import { HttpTypes } from "@medusajs/types"
-import { retrieveCart } from "@lib/data/cart"
 
 type CartContextType = {
   cart: HttpTypes.StoreCart | null
@@ -10,6 +9,9 @@ type CartContextType = {
   refreshCart: () => Promise<void>
   clearCart: () => void
   itemCount: number
+  // Zeitpunkt (Browser-Uhr), zu dem der Warenkorb zuletzt geladen wurde. Damit
+  // erkennen Warenkorb und Kasse, ob ihre Anzeige älter ist (cart-freshness).
+  lastFetchedAt: number
   // Angemeldet ja/nein, aus dem Login-Cookie (Root-Layout), nicht aus dem
   // Warenkorb: cart.customer_id fehlt bei einem vor dem Login geladenen
   // Warenkorb und ist auch bei Gästen gesetzt, sobald sie eine E-Mail angeben.
@@ -30,6 +32,7 @@ export function CartProvider({
 }) {
   const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [lastFetchedAt, setLastFetchedAt] = useState(0)
 
   // Request deduplication: track if a refresh is in progress
   const refreshInProgressRef = useRef(false)
@@ -50,8 +53,21 @@ export function CartProvider({
     refreshInProgressRef.current = true
     
     try {
-      const cartData = await retrieveCart()
+      // Normale Abfrage statt Server-Action, siehe app/api/cart/route.ts: Eine
+      // Server-Action direkt nach einer Änderung im Warenkorb kann deren Antwort
+      // überholen, und die Seite zeigt den neuen Stand dann erst nach dem Neuladen.
+      const response = await fetch("/api/cart", {
+        cache: "no-store",
+        credentials: "same-origin",
+      })
+      if (!response.ok) {
+        throw new Error(`Cart request failed: ${response.status}`)
+      }
+      const { cart: cartData } = (await response.json()) as {
+        cart: HttpTypes.StoreCart | null
+      }
       setCart(cartData)
+      setLastFetchedAt(Date.now())
     } catch (error) {
       console.error("Error fetching cart:", error)
     } finally {
@@ -140,6 +156,7 @@ export function CartProvider({
         refreshCart,
         clearCart,
         itemCount,
+        lastFetchedAt,
         isAuthenticated,
       }}
     >

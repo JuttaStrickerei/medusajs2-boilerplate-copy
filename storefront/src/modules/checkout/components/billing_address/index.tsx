@@ -48,23 +48,27 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           required
           data-testid="billing-last-name-input"
         />
-        <Input
-          label="Adresse"
-          name="billing_address.address_1"
-          autoComplete="address-line1"
-          value={formData["billing_address.address_1"]}
-          onChange={handleChange}
-          required
-          data-testid="billing-address-input"
-        />
-        <Input
-          label="Firma (optional)"
-          name="billing_address.company"
-          value={formData["billing_address.company"]}
-          onChange={handleChange}
-          autoComplete="organization"
-          data-testid="billing-company-input"
-        />
+        <div className="col-span-2 xsmall:col-span-1">
+          <Input
+            label="Adresse"
+            name="billing_address.address_1"
+            autoComplete="address-line1"
+            value={formData["billing_address.address_1"]}
+            onChange={handleChange}
+            required
+            data-testid="billing-address-input"
+          />
+        </div>
+        <div className="col-span-2 xsmall:col-span-1">
+          <Input
+            label="Firma (optional)"
+            name="billing_address.company"
+            value={formData["billing_address.company"]}
+            onChange={handleChange}
+            autoComplete="organization"
+            data-testid="billing-company-input"
+          />
+        </div>
         <Input
           label="PLZ"
           name="billing_address.postal_code"

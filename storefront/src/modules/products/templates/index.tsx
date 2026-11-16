@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import ImageGallery from "@modules/products/components/image-gallery"
 import ProductActions from "@modules/products/components/product-actions"
+import { ProductColorProvider } from "@modules/products/components/product-actions/product-color-context"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
 import ProductTabs from "@modules/products/components/product-tabs"
 import RelatedProducts from "@modules/products/components/related-products"
@@ -170,6 +171,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           data-testid="product-container"
         >
           <div className="grid grid-cols-1 medium:grid-cols-[1fr_1fr] gap-6 medium:gap-10 large:gap-14 items-start">
+            {/* Gewählte Farbe: Galerie und Kaufbereich teilen sie sich */}
+            <ProductColorProvider product={product}>
             {/* Image Gallery */}
             <div className="medium:sticky medium:top-20 medium:self-start">
               <ImageGallery
@@ -260,6 +263,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                 />
               </div>
             </div>
+            </ProductColorProvider>
           </div>
         </div>
       </section>

@@ -1,6 +1,7 @@
 "use client"
 
 import { subscribeToNewsletter } from "@lib/data/newsletter"
+import { markNewsletterTeaserHandled } from "@lib/hooks/use-newsletter-signup"
 import { Button } from "@components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useState } from "react"
@@ -22,12 +23,14 @@ export default function NewsletterForm() {
       const result = await subscribeToNewsletter(email)
       
       if (result.success) {
+        // Der kleine Hinweis am Rand muss danach nicht mehr kommen
+        markNewsletterTeaserHandled("angemeldet")
         if (result.alreadySubscribed) {
           setStatus("already_subscribed")
           setMessage("Sie haben sich bereits online oder in der Strickerei für den Newsletter angemeldet. Wir freuen uns, dass Sie dabei sind!")
         } else {
           setStatus("success")
-          setMessage("Vielen Dank für Ihre Anmeldung! Sie erhalten in Kürze eine Bestätigungs-E-Mail.")
+          setMessage(result.message || "Vielen Dank für Ihre Anmeldung! Sie erhalten in Kürze eine Bestätigungs-E-Mail.")
           setEmail("")
           toast.success("Vielen Dank für Ihre Anmeldung!")
         }
@@ -48,12 +51,13 @@ export default function NewsletterForm() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h2 className="font-serif text-3xl small:text-4xl font-medium">
-        Bleiben Sie informiert
+      <h2 className="font-serif lining-nums text-3xl small:text-4xl font-medium">
+        10 % auf Ihre erste Bestellung
       </h2>
       <p className="text-stone-300 leading-relaxed">
-        Erhalten Sie exklusive Einblicke in neue Kollektionen, 
-        Pflegetipps für Ihre Strickwaren und besondere Angebote.
+        Melden Sie sich für unseren Newsletter an. Ihren persönlichen
+        Gutscheincode schicken wir Ihnen per E-Mail, dazu Einblicke in neue
+        Kollektionen und Pflegetipps für Ihre Strickwaren.
       </p>
       
       {/* Status Messages */}
@@ -94,7 +98,7 @@ export default function NewsletterForm() {
         </Button>
       </form>
       <p className="text-xs text-stone-500">
-        Mit der Anmeldung stimmen Sie unseren{" "}
+        Der Code gilt 30 Tage für eine Bestellung. Mit der Anmeldung stimmen Sie unseren{" "}
         <LocalizedClientLink href="/privacy" className="underline hover:text-white">
           Datenschutzrichtlinien
         </LocalizedClientLink>{" "}

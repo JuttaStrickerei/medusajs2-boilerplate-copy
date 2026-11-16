@@ -272,14 +272,21 @@ export async function applyPromotions(codes: string[]) {
     ...(await getAuthHeaders()),
   }
 
+  // Antwort: die Codes, die danach am Warenkorb hängen. Medusa nimmt einen
+  // verbrauchten oder abgelaufenen Code ohne Fehler an und wendet ihn nur nicht an.
   return sdk.store.cart
-    .update(cartId, { promo_codes: codes }, {}, headers)
-    .then(async () => {
+    .update(cartId, { promo_codes: codes }, { fields: "*promotions" }, headers)
+    .then(async ({ cart }) => {
       const cartCacheTag = await getCacheTag("cart")
       revalidateTag(cartCacheTag)
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
       revalidateTag(fulfillmentCacheTag)
+
+      const promotions = (cart as { promotions?: { code?: string }[] })?.promotions
+      return (promotions ?? [])
+        .map((promotion) => promotion.code)
+        .filter((code): code is string => !!code)
     })
     .catch(medusaError)
 }

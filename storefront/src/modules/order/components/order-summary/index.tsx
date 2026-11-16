@@ -20,6 +20,13 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
   const itemsTotal =
     order.items?.reduce((acc, item) => acc + (item.total || 0), 0) || 0
 
+  // Mit Rabatt zeigt „Artikel“ den Preis vor dem Abzug (wie in cart-totals). Sonst
+  // stünde dort schon der reduzierte Betrag und darunter noch einmal „Rabatt“.
+  const shownItems =
+    order.discount_total > 0
+      ? (order.total ?? 0) - (order.shipping_total ?? 0) + order.discount_total
+      : itemsTotal
+
   return (
     <div className="pt-6 border-t border-stone-200">
       <h2 className="font-serif text-xl font-medium text-stone-800 mb-4">
@@ -30,7 +37,7 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
         {/* Item Subtotal - use calculated items total for clarity */}
         <div className="flex items-center justify-between text-stone-600">
           <span>Artikel</span>
-          <span>{getAmount(itemsTotal)}</span>
+          <span>{getAmount(shownItems)}</span>
         </div>
 
         {/* Discounts */}

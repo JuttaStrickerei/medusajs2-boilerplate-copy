@@ -193,7 +193,8 @@ export const searchProducts = async (
           limit: 20,
           region_id: region.id,
           ...(taxCountryCode && { country_code: taxCountryCode }),
-          fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+          // wie die Listen, damit die Karten der Suche dieselben Fotos je Farbe haben
+          fields: PRODUCT_LIST_FIELDS,
         },
         headers,
         cache: "no-store",
@@ -223,7 +224,7 @@ export const searchProducts = async (
         limit: 20,
         region_id: region.id,
         ...(taxCountryCode && { country_code: taxCountryCode }),
-        fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+        fields: PRODUCT_LIST_FIELDS,
       },
       headers,
       cache: "no-store",

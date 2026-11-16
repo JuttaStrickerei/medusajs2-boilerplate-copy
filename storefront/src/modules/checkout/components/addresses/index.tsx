@@ -5,13 +5,13 @@ import compareAddresses from "@lib/util/compare-addresses"
 import { HttpTypes } from "@medusajs/types"
 import { useToggleState } from "@medusajs/ui"
 import Spinner from "@modules/common/icons/spinner"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useActionState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
-import { CheckCircle, MapPin, Phone, Mail } from "@components/icons"
+import { CheckCircle, MapPin, Phone, Mail, User } from "@components/icons"
 
 const Addresses = ({
   cart,
@@ -23,6 +23,12 @@ const Addresses = ({
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+
+  const { countryCode } = useParams()
+  // Kundinnen mit Konto melden sich hier an und landen wieder in der Kasse
+  const loginUrl = `/${countryCode}/account?redirect_url=${encodeURIComponent(
+    `/${countryCode}/checkout`
+  )}`
 
   const checkoutStep = searchParams.get("step")
   // FIX: Keep the address section open on initial checkout load, even when no explicit step query exists.
@@ -43,7 +49,7 @@ const Addresses = ({
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-6">
         <div className="flex items-center gap-3">
           <div className={`
             w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
@@ -62,6 +68,16 @@ const Addresses = ({
             Lieferadresse
           </h3>
         </div>
+        {isOpen && !customer && (
+          <a
+            href={loginUrl}
+            className="inline-flex items-center gap-1.5 text-sm text-stone-600 hover:text-stone-800 transition-colors underline underline-offset-4"
+            data-testid="checkout-login-link"
+          >
+            <User size={15} />
+            Mit Kundenkonto anmelden
+          </a>
+        )}
         {!isOpen && cart?.shipping_address && (
           <button
             onClick={handleEdit}
