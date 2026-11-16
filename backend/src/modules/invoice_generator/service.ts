@@ -139,13 +139,11 @@ class InvoiceGeneratorService extends MedusaService({
     const invoiceId = `RE-${invoice.display_id.toString().padStart(6, "0")}`
     const invoiceDate = new Date(invoice.created_at).toLocaleDateString("de-DE")
 
-    // Enthaltene MwSt.: der Betrag, den die Bestellung gespeichert hat. Hat sie keine Steuerzeilen
-    // (automatische Steuern an der Region aus), aus dem Bruttobetrag herausgerechnet.
+    // Enthaltene MwSt.: immer der Anteil am Bruttobetrag. Der Steuerbetrag der Bestellung taugt dafür
+    // nicht verlässlich: Ohne automatische Steuern an der Region speichert sie keinen, und ein Warenkorb,
+    // der beim Umstellen der Steuer-Einstellungen offen war, nur einen Teil (z. B. nur den Versand).
     const orderTotal = Number(params.order.total)
-    const storedTax = Number(params.order.tax_total || 0)
-    const includedTax = roundCents(
-      storedTax > 0 ? storedTax : (orderTotal * VAT_RATE_PERCENT) / (100 + VAT_RATE_PERCENT)
-    )
+    const includedTax = roundCents((orderTotal * VAT_RATE_PERCENT) / (100 + VAT_RATE_PERCENT))
     const netTotal = roundCents(orderTotal - includedTax)
 
     // return the PDF content structure
