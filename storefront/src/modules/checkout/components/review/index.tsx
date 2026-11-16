@@ -165,7 +165,7 @@ const Review = ({ cart }: { cart: any }) => {
               />
               <div className="text-sm text-stone-600">
                 <p>
-                  Mit dem Klick auf &quot;Bestellung abgeben&quot; bestätigen
+                  Mit dem Klick auf &quot;Zahlungspflichtig bestellen&quot; bestätigen
                   Sie, dass Sie unsere{" "}
                   <LocalizedClientLink
                     href="/terms"

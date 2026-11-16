@@ -21,7 +21,7 @@ const StripeWrapper: React.FC<StripeWrapperProps> = ({
 }) => {
   const options: StripeElementsOptions = {
     // Ohne clientSecret: Die Zahlung (PaymentIntent) entsteht erst mit der
-    // Zahlungssitzung, die der Knopf „Bestellung abgeben“ verwendet. Bis dahin
+    // Zahlungssitzung, die der Knopf „Zahlungspflichtig bestellen“ verwendet. Bis dahin
     // kennt Stripe nur Betrag und Währung. Ändert sich der Betrag, gibt
     // react-stripe-js ihn an die Felder weiter (elements.update), ohne sie zu leeren.
     mode: "payment",
