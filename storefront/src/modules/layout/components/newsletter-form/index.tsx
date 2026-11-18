@@ -13,7 +13,7 @@ import { useParams, usePathname } from "next/navigation"
 const NewsletterForm = () => {
   const pathname = usePathname() || ""
   const { countryCode } = useParams()
-  const { email, setEmail, loading, status, message, submit } = useNewsletterSignup()
+  const { email, setEmail, loading, status, message, signupUrl, submit } = useNewsletterSignup()
 
   if (pathname === `/${countryCode}` || /\/(cart|account)(\/|$)/.test(pathname)) return null
 
@@ -27,7 +27,7 @@ const NewsletterForm = () => {
               10 % auf Ihre erste Bestellung
             </h2>
             <p className="mt-1 text-sm text-stone-400">
-              Abonnieren Sie unseren Newsletter. Ihren persönlichen Gutscheincode senden wir Ihnen per E-Mail.
+              Neu bei unserem Newsletter? Dann senden wir Ihnen Ihren persönlichen Gutscheincode per E‑Mail.
             </p>
           </div>
 
@@ -36,11 +36,23 @@ const NewsletterForm = () => {
               <p
                 className={cn(
                   "mb-2 text-sm px-3 py-2 rounded-lg",
-                  status === "error" ? "bg-red-50 text-red-800" : "bg-green-50 text-green-800"
+                  status === "error"
+                    ? "bg-red-50 text-red-800"
+                    : status === "not_subscribed"
+                      ? "bg-stone-100 text-stone-800"
+                      : "bg-green-50 text-green-800"
                 )}
                 role="status"
               >
                 {message}
+                {status === "not_subscribed" && signupUrl && (
+                  <>
+                    {" "}
+                    <a href={signupUrl} target="_blank" rel="noopener noreferrer" className="underline font-medium">
+                      Wieder anmelden
+                    </a>
+                  </>
+                )}
               </p>
             )}
 

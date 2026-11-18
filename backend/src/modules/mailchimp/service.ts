@@ -8,6 +8,7 @@ import {
   Logger,
 } from "@medusajs/framework/types"
 import mailchimpMarketingApi from "@mailchimp/mailchimp_marketing"
+import { createHash } from "crypto"
 
 type Options = {
   apiKey: string
@@ -30,11 +31,18 @@ type InjectedDependencies = {
 // unterscheidbar (Segmente, spätere Abläufe). Mailchimp legt den Tag beim ersten Mal an.
 const SHOP_SIGNUP_TAG = "Online Shop"
 
+// Antworten an die Newsletter-Route (api/store/newsletter), wenn die Adresse schon in der
+// Liste steht. NOT_SUBSCRIBED trägt nach einem Leerzeichen den Link zum Anmeldeformular.
+const ALREADY_SUBSCRIBED = "ALREADY_SUBSCRIBED"
+const NOT_SUBSCRIBED = "NOT_SUBSCRIBED"
+
 class MailchimpNotificationProviderService extends AbstractNotificationProviderService {
   static identifier = "mailchimp"
   protected options: Options
   protected mailchimp: typeof mailchimpMarketingApi
   protected logger_: Logger
+  // Link zum Anmeldeformular der Liste, einmal nachgeschlagen
+  protected signupFormUrl_: string | null = null
 
   constructor(container: InjectedDependencies, options: Options) {
     super()
@@ -109,17 +117,16 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
 
       this.logger_.debug(`[Mailchimp] API error: title=${errorTitle}, status=${errorStatus}`)
 
-      // "Member Exists" Fehler - E-Mail ist bereits in der Liste
+      // "Member Exists" Fehler - E-Mail ist bereits in der Liste. "Member In Compliance State":
+      // Die Adresse ist dort abgemeldet oder unzustellbar und lässt sich so nicht anmelden.
+      // Der Eintrag bleibt in beiden Fällen unverändert (kein Name, kein Tag, kein Status).
       if (
         errorTitle === "Member Exists" ||
+        errorTitle === "Member In Compliance State" ||
         (errorStatus === 400 && errorDetail.includes("already a list member"))
       ) {
-        this.logger_.debug(`[Mailchimp] Email already subscribed - returning special status`)
-        
-        // WICHTIG: Speziellen Identifier zurückgeben (großgeschrieben für Konsistenz)
-        return {
-          id: "ALREADY_SUBSCRIBED",
-        }
+        this.logger_.debug(`[Mailchimp] Email already in the list - checking its status`)
+        return this.existingMemberResult(to, errorTitle === "Member In Compliance State")
       }
 
       // "Invalid Resource" Fehler - Ungültige E-Mail-Adresse
@@ -138,6 +145,54 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
         `Newsletter-Anmeldung fehlgeschlagen: ${errorDetail}`
       )
     }
+  }
+
+  // Steht die Adresse schon in der Liste, entscheidet ihr Status: "subscribed" heißt schon
+  // dabei. Abgemeldet, unzustellbar oder unbestätigt lässt sich über die Schnittstelle nicht
+  // wieder anmelden; dafür gibt es das Anmeldeformular der Liste, das Mailchimp mit
+  // Bestätigung führt. Ist der Status nicht lesbar, gilt das alte Verhalten (schon dabei).
+  private async existingMemberResult(
+    email: string,
+    complianceState: boolean
+  ): Promise<ProviderSendNotificationResultsDTO> {
+    let status: string | undefined
+    try {
+      const hash = createHash("md5").update(email.trim().toLowerCase()).digest("hex")
+      const member = (await this.mailchimp.lists.getListMember(this.options.listId, hash, {
+        fields: ["status"],
+      } as any)) as { status?: string }
+      status = member?.status
+    } catch {
+      this.logger_.warn(`[Mailchimp] Status of an existing list member could not be read`)
+    }
+
+    if (status === "subscribed" || (status === undefined && !complianceState)) {
+      return { id: ALREADY_SUBSCRIBED }
+    }
+
+    this.logger_.info(`[Mailchimp] Signup for an address that is not subscribed (status: ${status || "unknown"})`)
+    const url = await this.getSignupFormUrl()
+    return { id: url ? `${NOT_SUBSCRIBED} ${url}` : NOT_SUBSCRIBED }
+  }
+
+  private async getSignupFormUrl(): Promise<string | null> {
+    if (this.signupFormUrl_) {
+      return this.signupFormUrl_
+    }
+    try {
+      // getList fehlt in den Typen der Bibliothek, ist dort aber vorhanden
+      const list = (await (this.mailchimp.lists as any).getList(this.options.listId, {
+        fields: ["subscribe_url_long"],
+      })) as { subscribe_url_long?: string }
+      const url = list?.subscribe_url_long
+      if (typeof url === "string" && /^https:\/\/[^\s]+$/.test(url)) {
+        this.signupFormUrl_ = url
+        return url
+      }
+    } catch {
+      this.logger_.warn(`[Mailchimp] Signup form link of the list could not be read`)
+    }
+    return null
   }
 
   private async getNewProductsHtmlContent(data: any): Promise<string> {
@@ -276,7 +331,8 @@ class MailchimpNotificationProviderService extends AbstractNotificationProviderS
     const { template } = notification
 
     // Debug: Log that send method was called
-    this.logger_.info(`[Mailchimp] send() method called - template: ${template}, to: ${notification.to}, channel: ${notification.channel}`)
+    // ohne Empfänger-Adresse: Mail-Adressen gehören nicht ins Server-Protokoll
+    this.logger_.info(`[Mailchimp] send() method called - template: ${template}, channel: ${notification.channel}`)
 
     switch (template) {
       case "newsletter-signup":

@@ -10,24 +10,30 @@ import { toast } from "@medusajs/ui"
 export default function NewsletterForm() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState<"idle" | "success" | "already_subscribed" | "error">("idle")
+  const [status, setStatus] = useState<"idle" | "success" | "already_subscribed" | "not_subscribed" | "error">("idle")
   const [message, setMessage] = useState("")
+  const [signupUrl, setSignupUrl] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setStatus("idle")
     setMessage("")
+    setSignupUrl(null)
     
     try {
       const result = await subscribeToNewsletter(email)
       
       if (result.success) {
         // Der kleine Hinweis am Rand muss danach nicht mehr kommen
-        markNewsletterTeaserHandled("angemeldet")
+        markNewsletterTeaserHandled(result.notSubscribed ? "geschlossen" : "angemeldet")
         if (result.alreadySubscribed) {
           setStatus("already_subscribed")
-          setMessage("Sie haben sich bereits online oder in der Strickerei für den Newsletter angemeldet. Wir freuen uns, dass Sie dabei sind!")
+          setMessage(result.message || "Sie sind schon bei unserem Newsletter dabei, danke!")
+        } else if (result.notSubscribed) {
+          setStatus("not_subscribed")
+          setMessage(result.message || "Diese Adresse ist bei unserem Newsletter derzeit nicht angemeldet.")
+          setSignupUrl(result.signupUrl || null)
         } else {
           setStatus("success")
           setMessage(result.message || "Vielen Dank für Ihre Anmeldung! Sie erhalten in Kürze eine Bestätigungs-E-Mail.")
@@ -55,9 +61,9 @@ export default function NewsletterForm() {
         10 % auf Ihre erste Bestellung
       </h2>
       <p className="text-stone-300 leading-relaxed">
-        Melden Sie sich für unseren Newsletter an. Ihren persönlichen
-        Gutscheincode schicken wir Ihnen per E-Mail, dazu Einblicke in neue
-        Kollektionen und Pflegetipps für Ihre Strickwaren.
+        Neu bei unserem Newsletter? Dann schicken wir Ihnen Ihren persönlichen
+        Gutscheincode per E-Mail, dazu Einblicke in neue Kollektionen und
+        Pflegetipps für Ihre Strickwaren.
       </p>
       
       {/* Status Messages */}
@@ -70,6 +76,20 @@ export default function NewsletterForm() {
       {status === "already_subscribed" && (
         <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg max-w-md mx-auto">
           {message}
+        </div>
+      )}
+
+      {status === "not_subscribed" && (
+        <div className="bg-stone-100 border border-stone-200 text-stone-800 px-4 py-3 rounded-lg max-w-md mx-auto">
+          {message}
+          {signupUrl && (
+            <>
+              {" "}
+              <a href={signupUrl} target="_blank" rel="noopener noreferrer" className="underline font-medium">
+                Wieder anmelden
+              </a>
+            </>
+          )}
         </div>
       )}
       
