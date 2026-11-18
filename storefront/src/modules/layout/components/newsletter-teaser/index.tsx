@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  cameFromOurEmail,
   isNewsletterTeaserHandled,
   markNewsletterTeaserHandled,
   useNewsletterSignup,
@@ -15,15 +16,18 @@ import { useEffect, useState } from "react"
 /**
  * Hinweis „10 % auf Ihre erste Bestellung“. Die Regel:
  *
- * - Wer: Besucherinnen ohne Anmeldung. Angemeldete Kundinnen sehen ihn nicht.
+ * - Wer: neue Besucherinnen. Nicht für angemeldete Kundinnen und nicht für Besucherinnen,
+ *   die über einen Link aus dem Newsletter oder unseren Shop-Mails kommen (Stammkundinnen,
+ *   schon im Newsletter). Der Code gilt nur für neue Anmeldungen, das steht auf der Karte.
  * - Wo: Startseite, Kollektion, Looks, Produktseiten und Infoseiten, am Handy und am
  *   Computer. Nicht im Warenkorb, in der Kasse, im Konto und auf Rechtstexten.
  * - Wann: frühestens 12 Sekunden nach dem ersten Seitenaufruf (auf Produktseiten 30
  *   Sekunden: Dort schaut sich jemand gerade ein Stück an), erst wenn die Cookie-Frage
  *   beantwortet ist und erst, wenn jemand ein Stück nach unten gegangen ist. So liegt
  *   die Karte nie über dem ersten Bild einer Seite (Titel, Knopf „Looks entdecken“).
- * - Wie oft: einmal pro Besuch. Nach dem Schließen oder nach der Anmeldung kommt er
- *   nicht wieder, auch nicht nach dem Neuladen.
+ * - Wie oft: einmal. Nach dem Schließen kommt er 30 Tage nicht wieder, nach der
+ *   Anmeldung (oder „schon dabei“) gar nicht mehr. Gemerkt im Browser, siehe
+ *   markNewsletterTeaserHandled.
  * - Wie: kleine Karte am unteren Rand, kein Fenster über der ganzen Seite. Der Code
  *   kommt per E-Mail, er steht nirgends auf der Seite.
  */
@@ -41,10 +45,18 @@ export default function NewsletterTeaser({ isLoggedIn = false }: { isLoggedIn?: 
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
-  const { email, setEmail, loading, status, message, submit } = useNewsletterSignup()
+  const { email, setEmail, loading, status, message, signupUrl, submit } = useNewsletterSignup()
   const hidden = isLoggedIn || HIDDEN_ON.test(pathname || "")
   // Am Handy liegt auf Produktseiten die Kaufleiste am unteren Rand
   const aboveBuyBar = /\/products\//.test(pathname || "")
+
+  // Wer über einen Link aus unseren E-Mails kommt, kennt den Newsletter schon. Gelesen
+  // wird die Adresse beim ersten Aufruf, darum vor der Prüfung unten.
+  useEffect(() => {
+    if (cameFromOurEmail(window.location.search)) {
+      markNewsletterTeaserHandled("newsletter")
+    }
+  }, [])
 
   useEffect(() => {
     if (hidden || isNewsletterTeaserHandled()) return
@@ -97,7 +109,14 @@ export default function NewsletterTeaser({ isLoggedIn = false }: { isLoggedIn?: 
 
   if (!open || hidden) return null
 
-  const done = status === "success" || status === "already_subscribed"
+  const done =
+    status === "success" || status === "already_subscribed" || status === "not_subscribed"
+  const title =
+    status === "already_subscribed"
+      ? "Schön, dass Sie dabei sind"
+      : status === "not_subscribed"
+        ? "Newsletter"
+        : "10 % auf Ihre erste Bestellung"
 
   return (
     <div
@@ -123,18 +142,27 @@ export default function NewsletterTeaser({ isLoggedIn = false }: { isLoggedIn?: 
         </button>
 
         <p className="font-serif lining-nums text-xl font-medium leading-tight text-stone-800 pr-10">
-          10 % auf Ihre erste Bestellung
+          {title}
         </p>
 
         {done ? (
           <p className="mt-2 text-sm text-stone-700" role="status">
             {message}
+            {status === "not_subscribed" && signupUrl && (
+              <>
+                {" "}
+                <a href={signupUrl} target="_blank" rel="noopener noreferrer" className="underline font-medium">
+                  Wieder anmelden
+                </a>
+              </>
+            )}
           </p>
         ) : (
           <>
             <p className="mt-1.5 text-sm text-stone-600 leading-relaxed">
-              Abonnieren Sie unseren Newsletter. Ihren persönlichen Gutscheincode
-              senden wir Ihnen per E-Mail.
+              {/* geschützter Bindestrich in „E‑Mail“: kein Umbruch mitten im Wort */}
+              Neu bei unserem Newsletter? Dann senden wir Ihnen Ihren persönlichen
+              Gutscheincode per E‑Mail.
             </p>
             <form onSubmit={submit} className="mt-3 flex gap-2">
               <input

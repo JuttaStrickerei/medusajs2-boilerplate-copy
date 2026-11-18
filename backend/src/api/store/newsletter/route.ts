@@ -58,13 +58,33 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const externalId = notificationResult?.external_id || ""
     const isAlreadySubscribed = externalId === "ALREADY_SUBSCRIBED"
 
+    // Schon in der Liste und angemeldet (online, auf der Website oder in der Strickerei):
+    // kein zweiter Eintrag, kein Code. Der Willkommens-Code ist für neue Anmeldungen.
     if (isAlreadySubscribed) {
       logger.debug(`[Newsletter API] Subscriber already exists`)
       
       return res.status(200).json({
         success: true,
-        message: "Sie haben sich bereits online oder in der Strickerei für den Newsletter angemeldet. Wir freuen uns, dass Sie dabei sind!",
+        message: "Sie sind schon bei unserem Newsletter dabei, danke! Der Willkommens-Code gilt für neue Anmeldungen.",
         alreadySubscribed: true,
+      })
+    }
+
+    // In der Liste, aber abgemeldet oder unzustellbar: Mailchimp lässt die Schnittstelle
+    // nicht wieder anmelden. Der Link führt zum Anmeldeformular der Liste.
+    if (externalId.startsWith("NOT_SUBSCRIBED")) {
+      const candidate = externalId.split(" ")[1]
+      const signupUrl = candidate && /^https:\/\/\S+$/.test(candidate) ? candidate : undefined
+      logger.debug(`[Newsletter API] Address is in the list but not subscribed`)
+
+      return res.status(200).json({
+        success: true,
+        alreadySubscribed: false,
+        notSubscribed: true,
+        signupUrl,
+        message: signupUrl
+          ? "Diese Adresse ist bei unserem Newsletter derzeit nicht angemeldet. Über den Link können Sie sich wieder anmelden."
+          : "Diese Adresse ist bei unserem Newsletter derzeit nicht angemeldet. Schreiben Sie uns gern an office@strickerei-jutta.at, wir helfen Ihnen weiter.",
       })
     }
 

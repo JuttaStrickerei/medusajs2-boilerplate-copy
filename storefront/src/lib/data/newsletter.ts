@@ -7,6 +7,8 @@ export const subscribeToNewsletter = async (email: string) => {
     success: boolean
     message?: string
     alreadySubscribed?: boolean
+    notSubscribed?: boolean
+    signupUrl?: string
   }>(`/store/newsletter`, {
     method: "POST",
     body: {
