@@ -22,8 +22,11 @@ export const metadata: Metadata = {
 const NEWSLETTER_POPUP_ON = process.env.NEXT_PUBLIC_NEWSLETTER_POPUP === "1"
 
 export default async function PageLayout(props: { children: React.ReactNode }) {
-  const customer = await retrieveCustomer()
-  const cart = await retrieveCart()
+  // Parallel statt nacheinander: Die beiden Abfragen hängen nicht voneinander ab
+  const [customer, cart] = await Promise.all([
+    retrieveCustomer(),
+    retrieveCart(),
+  ])
 
   return (
     <>
