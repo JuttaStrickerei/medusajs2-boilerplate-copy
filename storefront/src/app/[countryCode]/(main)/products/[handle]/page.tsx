@@ -10,6 +10,12 @@ type Props = {
   params: Promise<{ countryCode: string; handle: string }>
 }
 
+// Metadaten und Seite fragen das Produkt mit denselben Feldern ab, damit Next
+// beide Aufrufe zu einer Backend-Abfrage zusammenlegt.
+// *categories: Kategorie für den Brotkrümel „Alle Produkte / Pullover / …“.
+// Die Farbwahl braucht variants.images.id; das steht in PRODUCT_LIST_FIELDS.
+const PRODUCT_PAGE_FIELDS = `${PRODUCT_LIST_FIELDS},*categories`
+
 export async function generateStaticParams() {
   try {
     const countryCodes = await listRegions().then((regions) =>
@@ -63,7 +69,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const product = await listProducts({
     countryCode: params.countryCode,
-    queryParams: { handle },
+    queryParams: { handle, fields: PRODUCT_PAGE_FIELDS },
   }).then(({ response }) => response.products[0])
 
   if (!product) {
@@ -108,11 +114,9 @@ export default async function ProductPage(props: Props) {
 
   const pricedProduct = await listProducts({
     countryCode: params.countryCode,
-    // Kategorie für den Brotkrümel „Alle Produkte / Pullover / …“.
-    // Die Farbwahl braucht variants.images.id; das steht in PRODUCT_LIST_FIELDS.
     queryParams: {
       handle: params.handle,
-      fields: `${PRODUCT_LIST_FIELDS},*categories`,
+      fields: PRODUCT_PAGE_FIELDS,
     },
   }).then(({ response }) => response.products[0])
 
