@@ -206,9 +206,13 @@ export async function getProductFilterOptions(
   countryCode: string,
   scope?: FilterScope
 ): Promise<DynamicFilterOptions> {
+  // Bewusst ohne eigene Feldliste: Mit den Standardfeldern (PRODUCT_LIST_FIELDS)
+  // ist das dieselbe Abfrage wie die der Produktliste darunter
+  // (paginated-products.tsx). Next legt beide zu einer Backend-Abfrage und einem
+  // Cache-Eintrag zusammen, statt 100 Produkte samt Preisen zweimal zu laden.
+  // collection_id und material gehören zu den Standardfeldern von Medusa.
   const productQuery: Record<string, unknown> = {
     limit: 100,
-    fields: "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+collection_id",
   }
 
   if (scope?.categoryId) {
