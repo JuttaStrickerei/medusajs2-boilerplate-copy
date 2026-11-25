@@ -15,6 +15,8 @@ type ClearMetaAttributionWorkflowInput = {
   cart_id?: string | null
   // e.g. { meta_capi_sent_at: "…" } or { meta_capi_error: "…" }
   result: Record<string, string>
+  // more order metadata in the same update, e.g. { herkunft: … } (lib/herkunft)
+  extra?: Record<string, unknown>
 }
 
 // Deletes the Meta attribution (IP, browser, _fbp/_fbc) from the order and
@@ -26,7 +28,9 @@ export const clearMetaAttributionWorkflow = createWorkflow(
   function (input: ClearMetaAttributionWorkflowInput) {
     const orderUpdate = transform({ input }, ({ input }) => ({
       selector: { id: input.order_id },
-      update: { metadata: { [ATTRIBUTION_KEY]: "", ...input.result } },
+      update: {
+        metadata: { [ATTRIBUTION_KEY]: "", ...input.result, ...(input.extra ?? {}) },
+      },
     }))
     updateOrdersStep(orderUpdate)
 

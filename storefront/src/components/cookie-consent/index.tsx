@@ -7,6 +7,11 @@ import { CONSENT_REVISION } from "@lib/util/consent"
 import { disableGoogleAds, enableGoogleAds } from "@lib/util/google-ads"
 import { loadGoogleAnalytics } from "@lib/util/google-analytics"
 import {
+  captureLanding,
+  HERKUNFT_COOKIE,
+  persistHerkunft,
+} from "@lib/util/herkunft"
+import {
   disableMetaPixel,
   enableMetaPixel,
   MARKETING_CATEGORY,
@@ -41,6 +46,7 @@ const googleAdsCookies = (domain = pixelCookieDomain()) => [
 ]
 
 const marketingCookies = () => [
+  { name: HERKUNFT_COOKIE },
   ...(hasMeta ? pixelCookies() : []),
   ...(hasGoogleAds ? googleAdsCookies() : []),
 ]
@@ -70,6 +76,12 @@ const marketingSection = {
       exp: "Ablauf",
     },
     body: [
+      {
+        name: HERKUNFT_COOKIE,
+        domain: "shop.strickerei-jutta.at",
+        desc: "Über welche Anzeige oder Kampagne Sie zu uns gekommen sind (Kennungen aus der Adresse, Ankunftsseite, Uhrzeit), damit wir das einer späteren Newsletter-Anmeldung zuordnen können",
+        exp: "30 Tage",
+      },
       ...(hasGoogleAds
         ? [
             {
@@ -143,6 +155,7 @@ const config: CookieConsentConfig = {
     if (cookie.categories.includes(MARKETING_CATEGORY)) {
       enableMetaPixel()
       enableGoogleAds()
+      persistHerkunft()
     }
   },
 
@@ -158,6 +171,7 @@ const config: CookieConsentConfig = {
       if (cookie.categories.includes(MARKETING_CATEGORY)) {
         enableMetaPixel()
         enableGoogleAds()
+        persistHerkunft()
       } else {
         disableMetaPixel()
         disableGoogleAds()
@@ -262,6 +276,8 @@ const config: CookieConsentConfig = {
 
 export default function CookieConsent() {
   useEffect(() => {
+    // Ankunftsadresse merken, bevor jemand weiterklickt (gespeichert erst mit Zustimmung)
+    captureLanding()
     import("vanilla-cookieconsent").then((cc) => {
       cc.run(config)
     })

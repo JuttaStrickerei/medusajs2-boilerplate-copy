@@ -8,6 +8,7 @@ import {
   createWelcomePromotionWorkflow,
   WELCOME_DISCOUNT_PERCENT,
 } from "../../../workflows/create-welcome-promotion"
+import { HERKUNFT_KEY, herkunftSchema } from "../../../lib/herkunft"
 
 // Stücke, die die Willkommens-Mail zeigt (Bild, Name, Link, ohne Preise), in dieser Reihenfolge
 const WELCOME_MAIL_PRODUCT_HANDLES = ["mantel-rouga", "mantel-bruna", "mantel-nera"]
@@ -20,6 +21,9 @@ export const newsletterSignupSchema = z.object({
   email: z.string().email(),
   first_name: z.string().max(100).optional(),
   last_name: z.string().max(100).optional(),
+  // Herkunft aus der Storefront (nur mit „Marketing“-Zustimmung). Ungültige Angaben
+  // fallen weg, die Anmeldung gilt trotzdem.
+  herkunft: herkunftSchema.optional().catch(undefined),
 })
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -28,7 +32,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   
   try {
     // Use Zod validation (same pattern as contact route)
-    const { email, first_name, last_name } = newsletterSignupSchema.parse(req.body)
+    const { email, first_name, last_name, herkunft } = newsletterSignupSchema.parse(req.body)
     
     // Extra check for email (should be caught by Zod, but defense in depth)
     if (!email) {
@@ -93,7 +97,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // Schlägt das Anlegen fehl, bleibt die Anmeldung gültig und die E-Mail geht ohne Code hinaus.
     let welcomeCode: { code: string; ends_at: string } | null = null
     try {
-      const { result } = await createWelcomePromotionWorkflow(req.scope).run()
+      const { result } = await createWelcomePromotionWorkflow(req.scope).run({
+        input: herkunft && Object.keys(herkunft).length
+          ? {
+              metadata: {
+                [HERKUNFT_KEY]: { ...herkunft, angemeldet_at: new Date().toISOString() },
+              },
+            }
+          : {},
+      })
       welcomeCode = result
     } catch (promotionError) {
       logger.warn(
