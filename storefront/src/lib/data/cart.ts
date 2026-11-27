@@ -55,7 +55,14 @@ export async function retrieveCart(cartId?: string, fields?: string) {
       cache: "no-store",
     })
     .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
-    .catch(() => null)
+    .catch((e) => {
+      // 404 = Warenkorb weg (z. B. nach dem Bestellen), das ist normal. Alles
+      // andere heißt: Backend nicht erreichbar, und der Warenkorb wirkt nur leer
+      if (e?.status !== 404) {
+        console.error("[retrieveCart] Warenkorb nicht ladbar:", e?.status, e?.message)
+      }
+      return null
+    })
 }
 
 export async function getOrSetCart(countryCode: string) {

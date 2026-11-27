@@ -8,6 +8,9 @@ import {
   createWelcomePromotionWorkflow,
   WELCOME_DISCOUNT_PERCENT,
 } from "../../../workflows/create-welcome-promotion"
+import { filledHerkunft, herkunftSchema, shortError } from "../../../lib/herkunft"
+import { HERKUNFT_MODULE } from "../../../modules/herkunft"
+import type HerkunftModuleService from "../../../modules/herkunft/service"
 
 // Stücke, die die Willkommens-Mail zeigt (Bild, Name, Link, ohne Preise), in dieser Reihenfolge
 const WELCOME_MAIL_PRODUCT_HANDLES = ["mantel-rouga", "mantel-bruna", "mantel-nera"]
@@ -20,6 +23,10 @@ export const newsletterSignupSchema = z.object({
   email: z.string().email(),
   first_name: z.string().max(100).optional(),
   last_name: z.string().max(100).optional(),
+  // Herkunft aus der Storefront (lib/data/newsletter schickt sie nur mit „Marketing“-
+  // Zustimmung, prüfen kann die Route das nicht). Ungültige Angaben fallen weg,
+  // die Anmeldung gilt trotzdem.
+  herkunft: herkunftSchema.optional().catch(undefined),
 })
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -28,7 +35,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   
   try {
     // Use Zod validation (same pattern as contact route)
-    const { email, first_name, last_name } = newsletterSignupSchema.parse(req.body)
+    const { email, first_name, last_name, herkunft } = newsletterSignupSchema.parse(req.body)
     
     // Extra check for email (should be caught by Zod, but defense in depth)
     if (!email) {
@@ -191,6 +198,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       logger.warn(`[Newsletter API] Confirmation email failed, but subscription succeeded`)
       // Ohne E-Mail hat die Kundin den Code nicht bekommen
       welcomeCode = null
+    }
+
+    // 5. Herkunft zum Code ablegen, wenn sie mitkam und der Code per E-Mail hinausging.
+    // Fehler bremsen die Anmeldung nicht.
+    const signupHerkunft = filledHerkunft(herkunft)
+    if (welcomeCode && signupHerkunft) {
+      try {
+        const herkunftModule: HerkunftModuleService = req.scope.resolve(HERKUNFT_MODULE)
+        await herkunftModule.createNewsletterHerkunfts({
+          code: welcomeCode.code,
+          data: { ...signupHerkunft, angemeldet_at: new Date().toISOString() },
+        })
+      } catch (herkunftError) {
+        logger.warn(`[Newsletter API] Herkunft not saved: ${shortError(herkunftError)}`)
+      }
     }
 
     logger.info(`[Newsletter API] Subscription completed successfully`)

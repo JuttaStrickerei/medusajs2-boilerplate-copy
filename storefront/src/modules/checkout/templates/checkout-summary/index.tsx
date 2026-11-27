@@ -44,6 +44,9 @@ const CheckoutSummary = ({
             shippingPreview={shippingPreview}
             hidePickupNote
           />
+          <p className="mt-3 text-xs text-stone-500" data-testid="shipping-austria-only">
+            Versand nur innerhalb Österreichs.
+          </p>
         </div>
       </div>
 

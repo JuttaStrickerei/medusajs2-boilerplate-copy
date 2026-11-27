@@ -1,5 +1,5 @@
-Zahlungs-Symbole (visa.svg, mastercard.svg, paypal.svg, klarna.svg)
-Quelle: https://github.com/activemerchant/payment_icons (Stand fd43f66c1733, unverändert übernommen; master.svg heißt hier mastercard.svg)
+Zahlungs-Symbole (visa.svg, mastercard.svg, apple-pay.svg, google-pay.svg, paypal.svg, klarna.svg)
+Quelle: https://github.com/activemerchant/payment_icons (Stand fd43f66c1733, unverändert übernommen; master.svg heißt hier mastercard.svg, apple_pay.svg und google_pay.svg heißen apple-pay.svg und google-pay.svg)
 Die Marken gehören ihren Inhabern und zeigen nur, womit im Shop bezahlt werden kann.
 
 Copyright 2015 Shopify Inc

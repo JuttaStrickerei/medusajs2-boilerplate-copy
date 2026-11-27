@@ -225,7 +225,8 @@ export default function ContactPage() {
                 Welche Zahlungsmöglichkeiten gibt es?
               </h3>
               <p className="text-stone-600">
-                Wir akzeptieren alle gängigen Kreditkarten, PayPal und Klarna.
+                Wir akzeptieren alle gängigen Kreditkarten, Apple Pay und Google
+                Pay (auf unterstützten Geräten), PayPal und Klarna.
               </p>
             </div>
           </div>

@@ -6,7 +6,9 @@ import { CheckCircle, CreditCard } from "@components/icons"
 import { Button } from "@components/ui"
 import { clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
+import CheckoutNotice from "@modules/checkout/components/checkout-notice"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
+import { selectedPaymentType } from "@modules/checkout/components/payment-wrapper/selected-payment-type"
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { StripePaymentElementChangeEvent } from "@stripe/stripe-js"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -37,6 +39,11 @@ const Payment = ({
   )
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
+
+  const paymentUnavailable =
+    !paidByGiftcard &&
+    (cart?.total ?? 0) > 0 &&
+    (!stripeReady || !availablePaymentMethods?.length)
 
   // Die Zahlungsdaten stehen in den Stripe-Feldern; die Sitzung fehlt kurz,
   // wenn Medusa sie nach einer Betragsänderung gelöscht hat
@@ -69,6 +76,9 @@ const Payment = ({
     if (event.value.type) {
       setSelectedPaymentMethod(event.value.type)
     }
+    // Für den Knopf „Zahlungspflichtig bestellen“ (Meldung nach geschlossenem
+    // Apple-Pay- oder Google-Pay-Fenster)
+    selectedPaymentType.current = event.value.type
     setStripeComplete(event.complete)
 
     if (event.complete) {
@@ -86,14 +96,11 @@ const Payment = ({
         return
       }
 
-      // Stripe's elements.submit() resolves with { error } on validation
-      // failure — it does not reject — so a .catch() would silently miss it.
-      const { error: submitError } = await elements.submit()
-      if (submitError) {
-        setError(submitError.message || "Zahlungsfehler")
-        return
-      }
-
+      // Bewusst kein elements.submit() hier: Bei Apple Pay und Google Pay
+      // öffnet submit() das Wallet-Fenster. Das darf erst der Knopf
+      // „Zahlungspflichtig bestellen“ tun (§ 8 Abs 2 FAGG, und Apple verlangt
+      // dafür einen direkten Klick). Dieser Knopf ist ohnehin gesperrt, bis das
+      // Zahlungsfeld vollständig ist (stripeComplete); geprüft wird beim Bestellen.
       router.push(pathname + "?" + createQueryString("step", "review"), {
         scroll: false,
       })
@@ -163,7 +170,7 @@ const Payment = ({
       </div>
 
       {/* PaymentElement muss immer gemountet bleiben, auch wenn nicht sichtbar */}
-      {!paidByGiftcard && availablePaymentMethods?.length && stripeReady && (
+      {!paidByGiftcard && availablePaymentMethods?.length > 0 && stripeReady && (
         <div
           style={
             isOpen
@@ -194,6 +201,21 @@ const Payment = ({
               <p className="font-medium text-stone-800 mb-1">Zahlungsmethode</p>
               <p data-testid="payment-method-summary">Geschenkgutschein</p>
             </div>
+          )}
+
+          {/* Ohne Stripe-Schlüssel oder ohne Zahlungsanbieter im Backend bleibt das
+              Zahlungsfeld leer und der Knopf grau: dann wenigstens sagen, was los ist */}
+          {paymentUnavailable && (
+            <CheckoutNotice
+              title="Die Zahlung ist gerade nicht möglich."
+              reload
+              data-testid="payment-unavailable"
+            >
+              <p>
+                Ihr Warenkorb und Ihre Angaben bleiben gespeichert. Bitte
+                versuchen Sie es etwas später noch einmal.
+              </p>
+            </CheckoutNotice>
           )}
 
           <ErrorMessage

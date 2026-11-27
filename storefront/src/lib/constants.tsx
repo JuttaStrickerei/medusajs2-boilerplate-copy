@@ -11,7 +11,10 @@ export const paymentInfoMap: Record<
   { title: string; icon: React.JSX.Element }
 > = {
   pp_stripe_stripe: {
-    title: "Kreditkarte",
+    // Alle Stripe-Arten (Karte, Apple Pay, Google Pay, PayPal, Klarna) laufen
+    // über diesen Provider; die tatsächliche Art liefert
+    // getOrderPaymentMethod (lib/data/orders.ts)
+    title: "Online-Zahlung",
     icon: <CreditCard />,
   },
   "pp_stripe-ideal_stripe": {
@@ -31,7 +34,38 @@ export const paymentInfoMap: Record<
     icon: <CreditCard />,
   },
   // Add more payment providers here
+
+  // Zahlungsarten im Stripe Payment Element (event.value.type im Schritt
+  // „Zahlung“). Alle laufen über denselben Provider pp_stripe_stripe.
+  card: {
+    title: "Kreditkarte",
+    icon: <CreditCard />,
+  },
+  apple_pay: {
+    title: "Apple Pay",
+    icon: <CreditCard />,
+  },
+  google_pay: {
+    title: "Google Pay",
+    icon: <CreditCard />,
+  },
+  klarna: {
+    title: "Klarna",
+    icon: <CreditCard />,
+  },
+  paypal: {
+    title: "PayPal",
+    icon: <PayPal />,
+  },
+  link: {
+    title: "Link",
+    icon: <CreditCard />,
+  },
 }
+
+/** Wallets öffnen ihr eigenes Fenster, das die Kundin auch schließen kann */
+export const isWalletPaymentType = (type?: string) =>
+  type === "apple_pay" || type === "google_pay"
 
 // This only checks if it is native stripe for card payments, it ignores the other stripe-based providers
 export const isStripe = (providerId?: string) => {

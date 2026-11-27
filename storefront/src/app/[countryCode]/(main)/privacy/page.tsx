@@ -39,7 +39,7 @@ export default function PrivacyPage() {
                   Zwecke und die Rechtsgrundlagen der Datenverarbeitung im
                   Rahmen unseres Webshops auf.
                 </p>
-                <p className="text-stone-600 mb-6">Stand: Oktober 2026</p>
+                <p className="text-stone-600 mb-6">Stand: November 2026</p>
 
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
                   1. Identität und Kontaktdaten des Verantwortlichen
@@ -132,7 +132,8 @@ export default function PrivacyPage() {
                   Vorname, Nachname, vollständige Rechnungs- und Lieferadresse,
                   E-Mail-Adresse, Telefonnummer für Rückfragen zur Zustellung
                   sowie die von Ihnen gewählten Zahlungsdaten (z. B. Kontodaten,
-                  Kreditkarteninformationen, PayPal-Kennungen). Zweck und
+                  Kreditkarteninformationen, PayPal-Kennungen, bei Apple Pay
+                  oder Google Pay ein Zahlungstoken Ihres Wallets). Zweck und
                   Rechtsgrundlage: Die Bereitstellung und Verarbeitung dieser
                   Daten ist zur Vertragserfüllung bzw. zur Durchführung
                   vorvertraglicher Maßnahmen zwingend erforderlich. Ohne diese
@@ -149,7 +150,10 @@ export default function PrivacyPage() {
                   <li>
                     Von Ihnen gewählte Bankinstitute bzw. externe
                     Zahlungsdienstleister zum Zwecke der sicheren Abbuchung des
-                    Einkaufspreises.
+                    Einkaufspreises. Zahlungen per Kreditkarte, Apple Pay,
+                    Google Pay, PayPal und Klarna wickeln wir über den
+                    Zahlungsdienstleister Stripe ab (Einzelheiten unten unter
+                    „Zahlungsabwicklung über Stripe“).
                   </li>
                   <li>
                     Von uns beauftragte Transport- und Logistikunternehmen (z.
@@ -163,6 +167,58 @@ export default function PrivacyPage() {
                     lit. c DSGVO als Rechtsgrundlage.
                   </li>
                 </ul>
+
+                <h3 className="font-medium text-stone-800 mt-6 mb-2 text-base">
+                  Zahlungsabwicklung über Stripe
+                </h3>
+                <p className="text-stone-600 mb-4">
+                  Für Zahlungen per Kreditkarte, Apple Pay, Google Pay, PayPal
+                  und Klarna nutzen wir den Zahlungsdienstleister Stripe (Stripe
+                  Payments Europe, Limited, Irland, „Stripe“). Nur in unserer
+                  Kasse lädt Ihr Browser die für die Zahlung technisch
+                  notwendigen Programmteile von Stripe (Stripe.js). Dabei werden
+                  Ihre IP-Adresse sowie Angaben zu Ihrem Browser und Endgerät an
+                  Stripe übermittelt, und Stripe setzt zur Betrugsvermeidung die
+                  Cookies __stripe_mid und __stripe_sid. Bei der Zahlung
+                  verarbeitet Stripe Ihre Zahlungsdaten, insbesondere die
+                  Kartennummer bzw. das Zahlungstoken Ihres Wallets, Name,
+                  E-Mail-Adresse, Rechnungsadresse und den Betrag. Wir erhalten
+                  von Stripe das Ergebnis der Zahlung und die Zahlungsart, bei
+                  Karten die Kartenmarke und die letzten vier Ziffern, nie die
+                  vollständige Kartennummer. Rechtsgrundlage ist Art. 6 Abs. 1
+                  lit. b DSGVO (Vertragserfüllung).
+                </p>
+                <p className="text-stone-600 mb-4">
+                  Für die Abwicklung der Zahlung verarbeitet Stripe diese Daten
+                  in unserem Auftrag (Art. 28 DSGVO). Für eigene Zwecke,
+                  insbesondere zur Erkennung und Verhinderung von Betrug sowie
+                  zur Erfüllung gesetzlicher Pflichten (z. B. Geldwäscheprävention
+                  und Identitätsprüfung), ist Stripe selbst Verantwortlicher;
+                  dafür gilt die Datenschutzerklärung von Stripe:{" "}
+                  <a
+                    href="https://stripe.com/en-at/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={LINK_CLASS}
+                  >
+                    https://stripe.com/en-at/privacy
+                  </a>
+                  . Stripe kann Daten an Gesellschaften der Stripe-Gruppe in den
+                  USA übermitteln. Diese Übermittlung stützt sich auf den
+                  Angemessenheitsbeschluss der Europäischen Kommission zum
+                  EU-US Data Privacy Framework, nach dem Stripe, LLC zertifiziert
+                  ist, und ergänzend auf die Standardvertragsklauseln der
+                  Europäischen Kommission.
+                </p>
+                <p className="text-stone-600 mb-4">
+                  Apple Pay und Google Pay: Wenn Sie mit Apple Pay oder Google
+                  Pay bezahlen, verarbeiten Apple (Apple Distribution
+                  International Ltd., Irland) bzw. Google (Google Ireland
+                  Limited, Irland) die in Ihrem Wallet hinterlegten Daten nach
+                  ihren eigenen Nutzungsbedingungen und Datenschutzhinweisen.
+                  Wir erhalten von Apple oder Google keine Kartendaten, sondern
+                  nur das über Stripe übermittelte Ergebnis der Zahlung.
+                </p>
                 <p className="text-stone-600 mb-4">
                   Speicherdauer und gesetzliche Fristen: Nach einem
                   vollständigen Abbruch des Einkaufsvorganges werden die
@@ -277,8 +333,9 @@ export default function PrivacyPage() {
                   keine Viren. Technisch notwendige Cookies: Einige Cookies sind
                   technisch zwingend erforderlich, um Grundfunktionen unserer
                   E-Commerce-Plattform (wie beispielsweise die Verwaltung Ihrer
-                  Session, das reibungslose Funktionieren des Warenkorbs oder
-                  die sichere Speicherung Ihrer im Consent-Banner getroffenen
+                  Session, das reibungslose Funktionieren des Warenkorbs, die
+                  Betrugsvermeidung bei der Zahlung durch Stripe in der Kasse
+                  oder die sichere Speicherung Ihrer im Consent-Banner getroffenen
                   Datenschutzeinstellungen) überhaupt zu gewährleisten. Diese
                   essenziellen Cookies setzen wir auf Basis unseres
                   überwiegenden berechtigten Interesses an einer funktionalen
@@ -421,7 +478,23 @@ export default function PrivacyPage() {
                       E-Mail-Adresse, Telefonnummer, Vor- und Nachname, Ort,
                       Bundesland, Postleitzahl, Land und Ihre Kundennummer,
                       ebenfalls nur als Hashwert. Straße und Hausnummer
-                      übermitteln wir nicht. Sind Sie bei Facebook oder Instagram
+                      übermitteln wir nicht. Newsletter-Anmeldung: Haben Sie in
+                      „Marketing“ eingewilligt und kommen Sie über eine Anzeige
+                      oder einen Kampagnen-Link zu uns, merken wir uns im Cookie
+                      jutta_herkunft die Kennungen aus der
+                      Adresse (z. B. utm_source, utm_campaign, fbclid), die
+                      Ankunftsseite und die Uhrzeit. Melden Sie sich dann zum
+                      Newsletter an, speichern wir diese Angaben und die
+                      Kennung des Cookies _fbc zu Ihrem persönlichen
+                      Gutscheincode. Lösen Sie den Code später ein, auch in einem
+                      anderen Browser oder auf einem anderen Gerät, ordnen wir
+                      Ihre Bestellung dieser Herkunft zu. Haben Sie auch beim
+                      Kauf in „Marketing“ eingewilligt, verwenden wir bei der
+                      Meldung des Kaufs an Meta die Kennung _fbc aus der
+                      Anmeldung, wenn Ihr Browser beim Kauf keine eigene oder
+                      nur eine ältere hat und der Klick höchstens 7 Tage
+                      zurückliegt.
+                      Sind Sie bei Facebook oder Instagram
                       angemeldet, kann Meta Ihren Besuch Ihrem
                       Nutzerkonto zuordnen. Gemeinsame Verantwortlichkeit: Für
                       die Erhebung der Daten auf unserer Website und ihre
@@ -462,14 +535,20 @@ export default function PrivacyPage() {
                       Übermittlung durch unseren Server (IP-Adresse, Angaben zum
                       Browser, Kennungen der Cookies _fbp und _fbc) speichern wir
                       zu Ihrer Bestellung nur, bis der Kauf an Meta gemeldet ist,
-                      und löschen sie danach. Zielgruppen aus
+                      und löschen sie danach. Das Cookie jutta_herkunft wird nach
+                      30 Tagen gelöscht. Die Angaben zu Ihrem Gutscheincode
+                      (Herkunft und die Kennung _fbc) löschen wir,
+                      sobald Sie den Code eingelöst haben, sonst spätestens 32
+                      Tage nach der Anmeldung (der Code gilt 30 Tage). Woher eine
+                      Bestellung kam (Quelle, Kampagne, Anzeige, Ankunftsseite,
+                      Uhrzeit), bleibt bei der Bestellung gespeichert. Zielgruppen aus
                       Besucherinnen und Besuchern unserer Website legen wir bei
                       Meta mit einer Laufzeit von höchstens 180 Tagen an.
                       Widerrufsmöglichkeit: Sie können Ihre Einwilligung
                       jederzeit mit Wirkung für die Zukunft widerrufen, indem Sie
                       in den Cookie-Einstellungen (Link am unteren Rand der
                       Website) die Kategorie „Marketing“ abwählen; die Cookies
-                      _fbp und _fbc werden dann gelöscht. Ihre
+                      _fbp, _fbc und jutta_herkunft werden dann gelöscht. Ihre
                       Werbeeinstellungen bei Meta können Sie außerdem unter{" "}
                       <a
                         href="https://accountscenter.facebook.com/ad_preferences"

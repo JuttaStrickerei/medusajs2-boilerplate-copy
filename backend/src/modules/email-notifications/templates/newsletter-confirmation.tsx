@@ -156,10 +156,18 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
   const LOGO_URL = `${SHOP_URL}images/logo/logo-jutta-mail.png`
   // Mit Gutscheincode tragen alle Links in den Shop den Code mit (?gutschein=…). Der
   // Shop merkt ihn sich und löst ihn im Warenkorb von selbst ein (storefront: voucher-link).
-  const withVoucher = (url: string) =>
-    discountCode
-      ? `${url}${url.includes('?') ? '&' : '?'}gutschein=${encodeURIComponent(discountCode)}`
-      : url
+  // Dazu die Kennung der Mail, damit Analytics den Besuch „newsletter / email“
+  // zuordnet statt „Direct“ (welche Stelle der Mail: utm_content).
+  const withVoucher = (url: string, place: string) => {
+    const params = new URLSearchParams({
+      ...(discountCode ? { gutschein: discountCode } : {}),
+      utm_source: 'newsletter',
+      utm_medium: 'email',
+      utm_campaign: 'willkommen',
+      utm_content: place,
+    })
+    return `${url}${url.includes('?') ? '&' : '?'}${params.toString()}`
+  }
 
   const pieces = (Array.isArray(products) ? products : [])
     .filter((piece) => piece && piece.title && piece.url && piece.image)
@@ -209,7 +217,7 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                         className="jw-top"
                         style={{ backgroundColor: PAPER, padding: '20px 20px 16px 20px', borderBottom: `1px solid ${RULE_SOFT}` }}
                       >
-                        <a href={SHOP_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
+                        <a href={withVoucher(`${SHOP_URL}at`, 'logo')} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
                           <Img
                             src={LOGO_URL}
                             alt="Jutta Strickerei"
@@ -319,7 +327,7 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                                 style={{ backgroundColor: INK, borderRadius: '8px', msoPaddingAlt: '15px 36px' } as React.CSSProperties}
                               >
                                 <a
-                                  href={withVoucher(`${SHOP_URL}at`)}
+                                  href={withVoucher(`${SHOP_URL}at`, 'knopf')}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="jw-sans"
@@ -385,7 +393,7 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                                       className="jw-look"
                                       style={{ padding: '0 4px' }}
                                     >
-                                      <a href={withVoucher(look.url)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
+                                      <a href={withVoucher(look.url, 'look')} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
                                         <Img
                                           src={look.image}
                                           alt={look.title}
@@ -435,7 +443,7 @@ export const NewsletterConfirmationTemplate: React.FC<NewsletterConfirmationTemp
                                     className="jw-piece"
                                     style={{ padding: '0 3px' }}
                                   >
-                                    <a href={withVoucher(piece.url)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
+                                    <a href={withVoucher(piece.url, 'stueck')} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: INK }}>
                                       <Img
                                         src={piece.image}
                                         alt={piece.title}
