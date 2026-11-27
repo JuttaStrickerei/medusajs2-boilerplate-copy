@@ -90,11 +90,11 @@ async function findSignupHerkunft(
   return null
 }
 
-// Another order.placed subscriber (payment-method-label) also merges into
-// order.metadata. Medusa merges in the application (read, merge, write), so an
-// update running at the same moment can drop our key. Each update takes
-// milliseconds: after a short wait any overlapping one has committed, then read
-// once more and write again if needed.
+// Other code also merges into order.metadata, e.g. save-order-source when the
+// survey on the thank-you page is answered right away. Medusa merges in the
+// application (read, merge, write), so an update running at the same moment can
+// drop our key. Each update takes milliseconds: after a short wait any
+// overlapping one has committed, then read once more and write again if needed.
 const SETTLE_MS = 1500
 const settle = () => new Promise((resolve) => setTimeout(resolve, SETTLE_MS))
 
