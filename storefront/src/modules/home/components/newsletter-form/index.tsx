@@ -2,6 +2,7 @@
 
 import { subscribeToNewsletter } from "@lib/data/newsletter"
 import { markNewsletterTeaserHandled } from "@lib/hooks/use-newsletter-signup"
+import { trackNewsletterSignup } from "@lib/util/analytics"
 import { Button } from "@components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useState } from "react"
@@ -39,6 +40,7 @@ export default function NewsletterForm() {
           setMessage(result.message || "Vielen Dank für Ihre Anmeldung! Sie erhalten in Kürze eine Bestätigungs-E-Mail.")
           setEmail("")
           toast.success("Vielen Dank für Ihre Anmeldung!")
+          trackNewsletterSignup()
         }
       } else {
         setStatus("error")

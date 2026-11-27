@@ -42,6 +42,22 @@ export const herkunftSchema = z.object({
 
 export type Herkunft = z.infer<typeof herkunftSchema>
 
+// _fbp: fb.<Unterdomain-Index>.<Zeit in ms>.<Zufallszahl>[.<Anhang>]
+const FBP_PATTERN = /^fb\.\d\.\d{10,16}\.\d+(\.[\w-]+)?$/
+
+/**
+ * Browser-Angaben für das Meta-Ereignis „Lead“ bei der Newsletter-Anmeldung
+ * (storefront lib/data/newsletter, nur mit „Marketing“-Zustimmung). Wird nicht
+ * gespeichert, nur an Meta gemeldet (modules/meta-capi/lead-event).
+ */
+export const leadSignalSchema = z.object({
+  event_source_url: optionalText(1024, /^https?:\/\//),
+  fbc: optionalText(600, FBC_PATTERN),
+  fbp: optionalText(200, FBP_PATTERN),
+  client_ip_address: optionalText(64, /^[0-9a-fA-F:.]+$/),
+  client_user_agent: optionalText(512),
+})
+
 export type StoredHerkunft = Herkunft & { angemeldet_at: string }
 
 /** Nur die gesetzten Felder (zum Speichern) */

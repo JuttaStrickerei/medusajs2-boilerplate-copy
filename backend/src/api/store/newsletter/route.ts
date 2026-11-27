@@ -8,7 +8,10 @@ import {
   createWelcomePromotionWorkflow,
   WELCOME_DISCOUNT_PERCENT,
 } from "../../../workflows/create-welcome-promotion"
-import { filledHerkunft, herkunftSchema, shortError } from "../../../lib/herkunft"
+import { filledHerkunft, herkunftSchema, leadSignalSchema, shortError } from "../../../lib/herkunft"
+import { META_CAPI_MODULE } from "../../../modules/meta-capi"
+import type MetaCapiModuleService from "../../../modules/meta-capi/service"
+import { buildLeadEvent } from "../../../modules/meta-capi/lead-event"
 import { HERKUNFT_MODULE } from "../../../modules/herkunft"
 import type HerkunftModuleService from "../../../modules/herkunft/service"
 
@@ -27,6 +30,8 @@ export const newsletterSignupSchema = z.object({
   // Zustimmung, prüfen kann die Route das nicht). Ungültige Angaben fallen weg,
   // die Anmeldung gilt trotzdem.
   herkunft: herkunftSchema.optional().catch(undefined),
+  // Angaben für das Meta-Ereignis „Lead“ (nur mit „Marketing“-Zustimmung, wird nicht gespeichert)
+  meta_lead: leadSignalSchema.optional().catch(undefined),
 })
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -35,7 +40,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   
   try {
     // Use Zod validation (same pattern as contact route)
-    const { email, first_name, last_name, herkunft } = newsletterSignupSchema.parse(req.body)
+    const { email, first_name, last_name, herkunft, meta_lead } = newsletterSignupSchema.parse(req.body)
     
     // Extra check for email (should be caught by Zod, but defense in depth)
     if (!email) {
@@ -213,6 +218,27 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       } catch (herkunftError) {
         logger.warn(`[Newsletter API] Herkunft not saved: ${shortError(herkunftError)}`)
       }
+    }
+
+    // 6. Neue Anmeldung an Meta melden („Lead“ mit gehashter E-Mail, nur vom Server).
+    // meta_lead kommt nur mit „Marketing“-Zustimmung. Läuft nach der Antwort weiter,
+    // Fehler bremsen die Anmeldung nicht.
+    if (meta_lead?.event_source_url && req.scope.hasRegistration(META_CAPI_MODULE)) {
+      const metaCapi: MetaCapiModuleService = req.scope.resolve(META_CAPI_MODULE)
+      const event = buildLeadEvent(email, {
+        ...meta_lead,
+        event_source_url: meta_lead.event_source_url,
+      })
+      void metaCapi
+        .sendEvents([event])
+        .then((received) =>
+          logger.info(
+            `[MetaCapi] Lead for newsletter signup sent (received: ${received}${metaCapi.isTestMode ? ", test event" : ""})`
+          )
+        )
+        .catch((leadError) =>
+          logger.warn(`[MetaCapi] Lead not sent: ${shortError(leadError)}`)
+        )
     }
 
     logger.info(`[Newsletter API] Subscription completed successfully`)

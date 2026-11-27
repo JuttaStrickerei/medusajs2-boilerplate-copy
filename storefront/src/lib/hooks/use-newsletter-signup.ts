@@ -1,6 +1,7 @@
 "use client"
 
 import { subscribeToNewsletter } from "@lib/data/newsletter"
+import { trackNewsletterSignup } from "@lib/util/analytics"
 import { useState } from "react"
 
 export type NewsletterStatus = "idle" | "success" | "already_subscribed" | "not_subscribed" | "error"
@@ -92,6 +93,7 @@ export function useNewsletterSignup() {
         )
         setEmail("")
         markNewsletterTeaserHandled("angemeldet")
+        trackNewsletterSignup()
       }
     } catch {
       setStatus("error")
