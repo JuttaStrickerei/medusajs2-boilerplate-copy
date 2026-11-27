@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { isStripe, paymentInfoMap } from "@lib/constants"
 import { getOrderPaymentMethod } from "@lib/data/orders"
 import { convertToLocale } from "@lib/util/money"
@@ -16,29 +17,49 @@ const PAYMENT_TYPE_ICONS: Record<string, string> = {
   klarna: "/images/payment/klarna.svg",
 }
 
-// Ist die Art noch nicht bekannt (Stripe antwortet nicht), lieber neutral als
+// Ist die Art nicht bekannt (Stripe antwortet nicht), lieber neutral als
 // falsch: Früher stand hier für jede Stripe-Zahlung „Kreditkarte“, auch bei
 // Apple Pay, PayPal oder Klarna.
 const STRIPE_FALLBACK_LABEL = "Online-Zahlung"
 
-const PaymentDetails = async ({ order }: PaymentDetailsProps) => {
+const NeutralIcon = ({ icon }: { icon?: React.ReactNode }) => (
+  <div className="w-8 h-8 rounded bg-stone-100 flex items-center justify-center">
+    {icon || <CreditCard size={16} className="text-stone-500" />}
+  </div>
+)
+
+/**
+ * Wartet auf Stripe (über GET /store/orders/:id/payment-method). Steht in
+ * <Suspense>: Die übrige Bestellbestätigung erscheint sofort, nur diese Zeile
+ * kommt nach, wenn Stripe einmal langsam ist.
+ */
+const StripePaymentMethod = async ({ orderId }: { orderId: string }) => {
+  const method = await getOrderPaymentMethod(orderId)
+  const icon = method?.type ? PAYMENT_TYPE_ICONS[method.type] : undefined
+
+  return (
+    <>
+      {icon ? (
+        /* Statische SVG-Datei wie in PaymentMethods: ohne next/image */
+        <img
+          src={icon}
+          alt=""
+          width={38}
+          height={24}
+          className="block h-6 w-auto"
+        />
+      ) : (
+        <NeutralIcon />
+      )}
+      <span className="text-sm text-stone-600" data-testid="payment-method">
+        {method?.label ?? STRIPE_FALLBACK_LABEL}
+      </span>
+    </>
+  )
+}
+
+const PaymentDetails = ({ order }: PaymentDetailsProps) => {
   const payment = order.payment_collections?.[0].payments?.[0]
-
-  // Alle Stripe-Arten laufen über denselben Provider (pp_stripe_stripe); die
-  // tatsächliche Art (Apple Pay, Google Pay, Kreditkarte …) kennt nur Stripe
-  const stripeMethod =
-    payment && isStripe(payment.provider_id)
-      ? await getOrderPaymentMethod(order.id)
-      : null
-
-  const methodLabel = payment
-    ? isStripe(payment.provider_id)
-      ? stripeMethod?.label ?? STRIPE_FALLBACK_LABEL
-      : paymentInfoMap[payment.provider_id]?.title || payment.provider_id
-    : null
-  const methodIcon = stripeMethod?.type
-    ? PAYMENT_TYPE_ICONS[stripeMethod.type]
-    : undefined
 
   const formatPaymentDate = (dateStr: string | Date) => {
     return new Date(dateStr).toLocaleDateString("de-AT", {
@@ -64,29 +85,31 @@ const PaymentDetails = async ({ order }: PaymentDetailsProps) => {
               Zahlungsart
             </h3>
             <div className="flex items-center gap-2">
-              {methodIcon ? (
-                /* Statische SVG-Datei wie in PaymentMethods: ohne next/image */
-                <img
-                  src={methodIcon}
-                  alt=""
-                  width={38}
-                  height={24}
-                  className="block h-6 w-auto"
-                />
+              {/* Alle Stripe-Arten laufen über denselben Provider
+                  (pp_stripe_stripe); die tatsächliche Art kennt nur Stripe */}
+              {isStripe(payment.provider_id) ? (
+                <Suspense
+                  fallback={
+                    <>
+                      <NeutralIcon />
+                      <span className="text-sm text-stone-400">…</span>
+                    </>
+                  }
+                >
+                  <StripePaymentMethod orderId={order.id} />
+                </Suspense>
               ) : (
-                <div className="w-8 h-8 rounded bg-stone-100 flex items-center justify-center">
-                  {(!isStripe(payment.provider_id) &&
-                    paymentInfoMap[payment.provider_id]?.icon) || (
-                    <CreditCard size={16} className="text-stone-500" />
-                  )}
-                </div>
+                <>
+                  <NeutralIcon icon={paymentInfoMap[payment.provider_id]?.icon} />
+                  <span
+                    className="text-sm text-stone-600"
+                    data-testid="payment-method"
+                  >
+                    {paymentInfoMap[payment.provider_id]?.title ||
+                      payment.provider_id}
+                  </span>
+                </>
               )}
-              <span
-                className="text-sm text-stone-600"
-                data-testid="payment-method"
-              >
-                {methodLabel}
-              </span>
             </div>
           </div>
 
