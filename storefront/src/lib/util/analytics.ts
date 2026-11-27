@@ -51,6 +51,17 @@ export function trackEvent(name: string, params: Record<string, unknown>) {
   gtag("event", name, withoutGroupIds(params))
 }
 
+/**
+ * Neue Newsletter-Anmeldung: GA4 „generate_lead“ (nur mit „Statistik“-Zustimmung,
+ * trackEvent prüft das). Das Pixel kennt das Ereignis nicht: das Meta-„Lead“
+ * meldet nur der Server (api/store/newsletter), weil nur er die E-Mail-Adresse
+ * (gehasht) mitschickt. Käme dasselbe Ereignis auch vom Browser, nähme Meta die
+ * Browser-Meldung ohne E-Mail.
+ */
+export function trackNewsletterSignup() {
+  trackEvent("generate_lead", { lead_source: "newsletter" })
+}
+
 // GA4 gets the same items as before, without the Meta-only item_group_id
 function withoutGroupIds(params: Record<string, unknown>) {
   if (!Array.isArray(params.items)) return params
