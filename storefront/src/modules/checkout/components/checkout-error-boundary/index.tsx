@@ -2,6 +2,7 @@
 
 import React, { Component, ReactNode } from "react"
 import { Button } from "@medusajs/ui"
+import { isNextRouterError } from "next/dist/client/components/is-next-router-error"
 
 interface Props {
   children: ReactNode
@@ -27,6 +28,13 @@ export class CheckoutErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): State {
+    // redirect() und notFound() von Next.js werfen intern einen „Fehler“
+    // (NEXT_REDIRECT), z. B. nach dem Speichern der Adresse. Den muss Next.js
+    // selbst auffangen; hier würde er die Kasse mit „Ein Fehler ist
+    // aufgetreten“ blockieren.
+    if (isNextRouterError(error)) {
+      throw error
+    }
     return { hasError: true, error }
   }
 

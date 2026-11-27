@@ -21,6 +21,7 @@ import React, {
 } from "react"
 import ErrorMessage from "../error-message"
 import { StripeContext } from "../payment-wrapper"
+import { selectedPaymentType } from "../payment-wrapper/selected-payment-type"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 // Meta attribution (lib/data/meta-attribution.ts) is saved right before the
@@ -168,23 +169,6 @@ const StripePaymentButton = ({
 
   // Sperrt einen zweiten Klick, bevor React den Ladezustand gezeichnet hat
   const paymentInFlight = useRef(false)
-  // Die im Payment Element gewählte Art (card, apple_pay, google_pay, …).
-  // Das Element bleibt im Schritt „Übersicht“ unsichtbar gemountet.
-  const selectedTypeRef = useRef<string | undefined>(undefined)
-
-  useEffect(() => {
-    const paymentElement = elements?.getElement("payment")
-    if (!paymentElement) {
-      return
-    }
-    const onChange = (event: { value?: { type?: string } }) => {
-      selectedTypeRef.current = event.value?.type
-    }
-    paymentElement.on("change", onChange)
-    return () => {
-      paymentElement.off("change", onChange)
-    }
-  }, [elements])
 
   // A memoized function to handle order completion.
   // It only runs after Stripe has taken the payment (capture: true), so a
@@ -225,7 +209,9 @@ const StripePaymentButton = ({
       setSubmitting(false)
     }
 
-    const selectedType = selectedTypeRef.current
+    // Im Schritt „Zahlung“ gewählt (payment/index.tsx setzt den Wert im
+    // onChange des Payment Elements); dieser Knopf entsteht erst danach
+    const selectedType = selectedPaymentType.current
     const isWallet = isWalletPaymentType(selectedType)
 
     // elements.submit() MUSS der erste Aufruf nach dem Klick sein, vor jedem

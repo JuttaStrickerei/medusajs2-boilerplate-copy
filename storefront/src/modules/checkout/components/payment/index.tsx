@@ -8,6 +8,7 @@ import { clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import CheckoutNotice from "@modules/checkout/components/checkout-notice"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
+import { selectedPaymentType } from "@modules/checkout/components/payment-wrapper/selected-payment-type"
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { StripePaymentElementChangeEvent } from "@stripe/stripe-js"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -75,6 +76,9 @@ const Payment = ({
     if (event.value.type) {
       setSelectedPaymentMethod(event.value.type)
     }
+    // Für den Knopf „Zahlungspflichtig bestellen“ (Meldung nach geschlossenem
+    // Apple-Pay- oder Google-Pay-Fenster)
+    selectedPaymentType.current = event.value.type
     setStripeComplete(event.complete)
 
     if (event.complete) {
