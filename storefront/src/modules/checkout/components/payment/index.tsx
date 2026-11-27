@@ -6,6 +6,7 @@ import { CheckCircle, CreditCard } from "@components/icons"
 import { Button } from "@components/ui"
 import { clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
+import CheckoutNotice from "@modules/checkout/components/checkout-notice"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { StripePaymentElementChangeEvent } from "@stripe/stripe-js"
@@ -37,6 +38,11 @@ const Payment = ({
   )
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
+
+  const paymentUnavailable =
+    !paidByGiftcard &&
+    (cart?.total ?? 0) > 0 &&
+    (!stripeReady || !availablePaymentMethods?.length)
 
   // Die Zahlungsdaten stehen in den Stripe-Feldern; die Sitzung fehlt kurz,
   // wenn Medusa sie nach einer Betragsänderung gelöscht hat
@@ -160,7 +166,7 @@ const Payment = ({
       </div>
 
       {/* PaymentElement muss immer gemountet bleiben, auch wenn nicht sichtbar */}
-      {!paidByGiftcard && availablePaymentMethods?.length && stripeReady && (
+      {!paidByGiftcard && availablePaymentMethods?.length > 0 && stripeReady && (
         <div
           style={
             isOpen
@@ -191,6 +197,21 @@ const Payment = ({
               <p className="font-medium text-stone-800 mb-1">Zahlungsmethode</p>
               <p data-testid="payment-method-summary">Geschenkgutschein</p>
             </div>
+          )}
+
+          {/* Ohne Stripe-Schlüssel oder ohne Zahlungsanbieter im Backend bleibt das
+              Zahlungsfeld leer und der Knopf grau: dann wenigstens sagen, was los ist */}
+          {paymentUnavailable && (
+            <CheckoutNotice
+              title="Die Zahlung ist gerade nicht möglich."
+              reload
+              data-testid="payment-unavailable"
+            >
+              <p>
+                Ihr Warenkorb und Ihre Angaben bleiben gespeichert. Bitte
+                versuchen Sie es etwas später noch einmal.
+              </p>
+            </CheckoutNotice>
           )}
 
           <ErrorMessage

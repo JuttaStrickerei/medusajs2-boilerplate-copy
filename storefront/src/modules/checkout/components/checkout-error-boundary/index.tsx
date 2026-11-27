@@ -42,9 +42,9 @@ export class CheckoutErrorBoundary extends Component<Props, State> {
   }
 
   private handleGoToCart = () => {
-    // Extract country code from URL or default to 'de'
+    // Extract country code from URL or default to 'at'
     const pathParts = window.location.pathname.split("/")
-    const countryCode = pathParts[1] || "de"
+    const countryCode = pathParts[1] || "at"
     window.location.href = `/${countryCode}/cart`
   }
 
@@ -74,10 +74,19 @@ export class CheckoutErrorBoundary extends Component<Props, State> {
               <h2 className="font-serif text-xl text-stone-800">
                 Ein Fehler ist aufgetreten
               </h2>
+              {/* Umschließt die ganze Kasse, nicht nur das Bestellen: nicht pauschal
+                  „Zahlung wurde möglicherweise durchgeführt“ behaupten */}
               <p className="text-stone-600 text-sm">
-                Bei der Verarbeitung Ihrer Bestellung ist ein technischer Fehler aufgetreten. 
-                Ihre Zahlung wurde möglicherweise bereits durchgeführt. 
-                Bitte überprüfen Sie Ihren Account oder kontaktieren Sie uns.
+                In der Kasse ist ein technischer Fehler aufgetreten. Ihr
+                Warenkorb ist gespeichert. Falls Sie gerade schon bezahlt haben,
+                schreiben Sie uns bitte an{" "}
+                <a
+                  href="mailto:office@strickerei-jutta.at"
+                  className="text-stone-800 underline underline-offset-2"
+                >
+                  office@strickerei-jutta.at
+                </a>
+                , bevor Sie noch einmal bestellen.
               </p>
             </div>
 

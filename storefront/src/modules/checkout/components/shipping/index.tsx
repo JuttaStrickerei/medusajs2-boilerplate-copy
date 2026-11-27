@@ -8,10 +8,11 @@ import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@components/ui"
 import { CheckCircle, Truck, MapPin } from "@components/icons"
 import Spinner from "@modules/common/icons/spinner"
+import CheckoutNotice from "@modules/checkout/components/checkout-notice"
 
 const PICKUP_OPTION_ON = "__PICKUP_ON"
 const PICKUP_OPTION_OFF = "__PICKUP_OFF"
@@ -148,6 +149,20 @@ const Shipping: React.FC<ShippingProps> = ({
     setError(null)
   }, [isOpen])
 
+  // Gibt es nur eine Versandart nach Hause (DPD, 6 €), gleich auswählen: ein Klick weniger
+  const autoSelectedRef = useRef(false)
+  useEffect(() => {
+    if (!isOpen || autoSelectedRef.current) return
+    if (cart.shipping_methods?.length || shippingMethodId) return
+    if (_shippingMethods?.length !== 1) return
+    const only = _shippingMethods[0]
+    if (only.price_type !== "flat" || only.insufficient_inventory) return
+    autoSelectedRef.current = true
+    handleSetShippingMethod(only.id, "shipping")
+  }, [isOpen, availableShippingMethods])
+
+  const noShippingOptions = !_shippingMethods?.length && !hasPickupOptions
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -203,6 +218,28 @@ const Shipping: React.FC<ShippingProps> = ({
                 Lieferung in Österreich: 2 Wochen nach Ihrer Bestellung.
               </p>
             </div>
+
+            {/* Keine Versandart für diese Adresse: sagen warum, statt leerer Liste und grauem Knopf */}
+            {noShippingOptions && (
+              <CheckoutNotice
+                title="Für diese Adresse finden wir leider keine Versandart."
+                data-testid="no-shipping-options"
+              >
+                <p>
+                  Wir liefern nur innerhalb Österreichs. Bitte prüfen Sie Ihre
+                  Lieferadresse.
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(pathname + "?step=address", { scroll: false })
+                  }
+                  className="font-medium text-stone-800 underline underline-offset-4 hover:text-stone-600"
+                >
+                  Adresse ändern
+                </button>
+              </CheckoutNotice>
+            )}
 
             <div data-testid="delivery-options-container" className="space-y-3">
               {/* Pickup Option */}

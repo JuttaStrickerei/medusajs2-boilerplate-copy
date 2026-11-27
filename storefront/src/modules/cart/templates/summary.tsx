@@ -63,6 +63,9 @@ const Summary = ({ cart, isAuthenticated = false, shippingPreview = null }: Summ
       {/* Liefertermin und Zahlungsarten schon hier, nicht erst im dritten Kassenschritt */}
       <div className="space-y-2.5">
         <DeliveryLine className="text-xs text-stone-500 text-center [text-wrap:balance]" />
+        <p className="text-xs text-stone-500 text-center" data-testid="shipping-austria-only">
+          Versand nur innerhalb Österreichs.
+        </p>
         <PaymentMethods label="" large className="justify-center" />
       </div>
     </div>
