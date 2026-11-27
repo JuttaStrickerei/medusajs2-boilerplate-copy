@@ -11,7 +11,10 @@ export const paymentInfoMap: Record<
   { title: string; icon: React.JSX.Element }
 > = {
   pp_stripe_stripe: {
-    title: "Kreditkarte",
+    // Alle Stripe-Arten (Karte, Apple Pay, Google Pay, PayPal, Klarna) laufen
+    // über diesen Provider; die tatsächliche Art liefert
+    // getOrderPaymentMethod (lib/data/orders.ts)
+    title: "Online-Zahlung",
     icon: <CreditCard />,
   },
   "pp_stripe-ideal_stripe": {

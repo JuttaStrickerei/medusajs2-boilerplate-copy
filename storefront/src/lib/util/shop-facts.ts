@@ -14,6 +14,8 @@ export const SHOP_PHONE_HREF = "tel:+4326862259"
 export const PAYMENT_METHODS = [
   { name: "Visa", icon: "/images/payment/visa.svg" },
   { name: "Mastercard", icon: "/images/payment/mastercard.svg" },
+  { name: "Apple Pay", icon: "/images/payment/apple-pay.svg" },
+  { name: "Google Pay", icon: "/images/payment/google-pay.svg" },
   { name: "PayPal", icon: "/images/payment/paypal.svg" },
   { name: "Klarna", icon: "/images/payment/klarna.svg" },
 ] as const

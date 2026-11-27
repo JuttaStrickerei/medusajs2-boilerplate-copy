@@ -105,6 +105,8 @@ Fehlerfälle:
 
 ## c) Textentwürfe (zur Prüfung, keine Rechtsberatung)
 
+**Stand 27.11.2026, auf Wunsch eingebaut:** FAQ-Antwort, Kontaktseite, Beispielliste in den AGB (Punkt Vertragsschluss), Datenschutz Abschnitt 4 (Zahlungsdaten um das Wallet-Token ergänzt, Empfänger um Stripe sowie Apple/Google). Die Symbole Apple Pay und Google Pay stehen in `PAYMENT_METHODS` (Produktseite, Warenkorb, Versandseite, Fußzeile). Auf Wunsch ebenfalls eingebaut: eigener Abschnitt „Zahlungsabwicklung über Stripe“ in Abschnitt 4 (Stripe.js nur in der Kasse, Cookies `__stripe_mid`/`__stripe_sid`, Auftragsverarbeitung plus eigene Verantwortlichkeit für Betrugsvermeidung und Geldwäscheprävention, USA-Übermittlung nach EU-US Data Privacy Framework (Stripe, LLC) und Standardvertragsklauseln, Apple/Google), „Stand: November 2026“ in Datenschutz und AGB. Geprüft gegen stripe.com/en-at/privacy und Stripes DPF-Richtlinie. **Nicht** bestätigt: die genaue Schreibweise der Vertragsgesellschaft (Stripe-Seite schreibt teils „Stripe Payment Europe, Limited“) und deren Postanschrift; daher nur „Irland“. Keine Rechtsberatung, vor dem Live-Gang prüfen lassen.
+
 **Entwurf** – FAQ „Welche Zahlungsmethoden akzeptieren Sie?“ (ersetzt den Satz „Andere Zahlungsarten werden derzeit nicht angeboten.“):
 
 > Sie können bequem per Kreditkarte (Visa, Mastercard), über PayPal und Klarna bezahlen sowie mit Apple Pay und Google Pay auf unterstützten Geräten.
@@ -119,7 +121,16 @@ Fehlerfälle:
 
 Vor Veröffentlichung prüfen: Stripe-Gesellschaft laut eurem Stripe-Vertrag, DPF-Zertifizierung von Stripe (dataprivacyframework.gov), ob PayPal/Klarna über Stripe oder direkt abgerechnet werden, und ob die Cookie-Einstellungen Stripe als „unbedingt erforderlich“ nennen.
 
-## Schritt 4 – Anzeige der Zahlungsart (nur Vorschlag, nicht umgesetzt)
+## Schritt 4 – Anzeige der Zahlungsart
+
+**Umgesetzt am 27.11.2026 (Option A)**, nachdem der Testkauf mit Apple Pay auf der Bestellbestätigung „Kreditkarte“ zeigte:
+
+- Backend: `src/lib/stripe-payment-method.ts` (Charge → Anzeigetext), `src/lib/order-payment-method.ts`, Workflow `save-payment-method-label`, Subscriber `payment-method-label` (`order.placed`) und Route `GET /store/orders/:id/payment-method`. Ergebnis steht in `order.metadata.payment_method_label` / `payment_method_type`.
+- Storefront: `order/components/payment-details` zeigt dieses Label samt Symbol; ohne Antwort von Stripe „Online-Zahlung“ statt „Kreditkarte“.
+- Geprüft auf dev: Bestellung #103 → „Apple Pay“, #102 → „Kreditkarte (Visa •••• 4242)“.
+- Noch offen: Admin-Mail und Rechnung könnten dasselbe Feld zeigen (nicht umgesetzt).
+
+Ursprüngliche Analyse:
 
 Ist-Zustand:
 

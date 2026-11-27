@@ -26,6 +26,24 @@ export const retrieveOrder = async (id: string) => {
     .catch((err) => medusaError(err))
 }
 
+/**
+ * Tatsächlich genutzte Zahlungsart („Apple Pay“, „Kreditkarte (Visa •••• 4242)“,
+ * „PayPal“ …). Das Backend liest sie bei Stripe nach und merkt sie sich an der
+ * Bestellung. null, wenn sie (noch) nicht bekannt ist; die Seite zeigt dann
+ * einen neutralen Text.
+ */
+export const getOrderPaymentMethod = async (
+  orderId: string
+): Promise<{ label: string; type: string } | null> => {
+  return sdk.client
+    .fetch<{ payment_method: { label: string; type: string } | null }>(
+      `/store/orders/${orderId}/payment-method`,
+      { method: "GET", cache: "no-store" }
+    )
+    .then(({ payment_method }) => payment_method)
+    .catch(() => null)
+}
+
 export const listOrders = async (
   limit: number = 10,
   offset: number = 0,
