@@ -10,7 +10,7 @@ export const BUCKET_RULES: Array<{ bucket: number; pattern: RegExp }> = [
   {
     bucket: 0,
     pattern:
-      /(rot|red|bordeaux|weinrot|kirsch|cherry|crimson|burgund|burgundy|scarlet)/,
+      /(rot|red|bordeaux|weinrot|kirsch|cherry|crimson|burgund|burgundy|scarlet|magenta)/,
   },
   {
     bucket: 1,
@@ -45,7 +45,7 @@ export const BUCKET_RULES: Array<{ bucket: number; pattern: RegExp }> = [
   {
     bucket: 7,
     pattern:
-      /(lila|lilac|purple|violet|flieder|mauve|aubergine|plum|pflaume|magenta|amethyst|orchid)/,
+      /(lila|lilac|purple|violet|flieder|mauve|aubergine|plum|pflaume|amethyst|orchid)/,
   },
   {
     bucket: 8,
