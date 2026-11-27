@@ -123,12 +123,13 @@ Vor Veröffentlichung prüfen: Stripe-Gesellschaft laut eurem Stripe-Vertrag, DP
 
 ## Schritt 4 – Anzeige der Zahlungsart
 
-**Umgesetzt am 27.11.2026 (Option A)**, nachdem der Testkauf mit Apple Pay auf der Bestellbestätigung „Kreditkarte“ zeigte:
+**Umgesetzt am 27.11.2026**, nachdem der Testkauf mit Apple Pay auf der Bestellbestätigung „Kreditkarte“ zeigte. Nach dem Code-Review umgebaut auf **nur lesend**:
 
-- Backend: `src/lib/stripe-payment-method.ts` (Charge → Anzeigetext), `src/lib/order-payment-method.ts`, Workflow `save-payment-method-label`, Subscriber `payment-method-label` (`order.placed`) und Route `GET /store/orders/:id/payment-method`. Ergebnis steht in `order.metadata.payment_method_label` / `payment_method_type`.
-- Storefront: `order/components/payment-details` zeigt dieses Label samt Symbol; ohne Antwort von Stripe „Online-Zahlung“ statt „Kreditkarte“.
-- Geprüft auf dev: Bestellung #103 → „Apple Pay“, #102 → „Kreditkarte (Visa •••• 4242)“.
-- Noch offen: Admin-Mail und Rechnung könnten dasselbe Feld zeigen (nicht umgesetzt).
+- Backend: Route `GET /store/orders/:id/payment-method` ruft den Workflow `get-order-payment-method` auf (`useQueryGraphStep` + ein Schritt, der Stripe mit `expand[]=latest_charge` fragt, `src/lib/stripe-payment-method.ts`). Es wird **nichts gespeichert**, kein Subscriber: So gibt es keinen zweiten Schreiber auf `order.metadata` neben `meta-capi-purchase` (der löscht dort die Meta-Zuordnung; zwei gleichzeitige Schreiber hätten sie wiederherstellen können).
+- Kosten: eine Stripe-Abfrage pro Aufruf der Bestellbestätigung (meist 1–2 pro Bestellung), sonst nirgends.
+- Storefront: `order/components/payment-details` zeigt Label und Symbol; nur diese Zeile steht in `<Suspense>`, die übrige Seite erscheint sofort. Ohne Antwort von Stripe „Online-Zahlung“ statt „Kreditkarte“.
+- Geprüft lokal gegen dev: #104 → „Google Pay“, #103 → „Apple Pay“, #102 → „Kreditkarte (Visa •••• 4242)“, unbekannte Bestellung → neutral.
+- Nicht umgesetzt: Admin-Mail und Rechnung zeigen die Zahlungsart weiterhin nicht (bräuchte wieder ein Speichern).
 
 Ursprüngliche Analyse:
 
