@@ -38,11 +38,25 @@ export default function CompletePaymentPage() {
 
   const cartId = searchParams?.get("cart_id")
   const countryCode = searchParams?.get("country_code")
+  // Von Stripe angehängt: succeeded, pending oder failed
+  const redirectStatus = searchParams?.get("redirect_status")
 
   useEffect(() => {
     if (!cartId) {
       setStatus("error")
       setErrorMessage("Cart ID fehlt. Bitte versuchen Sie es erneut.")
+      return
+    }
+
+    // Abgebrochen oder abgelehnt (z. B. bei Klarna oder PayPal auf „Abbrechen“
+    // getippt): Es gibt nichts abzuschließen. Ohne diese Prüfung versucht die
+    // Seite den Warenkorb abzuschließen und zeigt danach eine englische
+    // Fehlermeldung von Medusa.
+    if (redirectStatus === "failed") {
+      setStatus("error")
+      setErrorMessage(
+        "Die Zahlung wurde abgebrochen oder abgelehnt. Es wurde nichts abgebucht. Sie können im Checkout eine andere Zahlungsart wählen und es noch einmal versuchen."
+      )
       return
     }
 
@@ -92,7 +106,7 @@ export default function CompletePaymentPage() {
 
           // Redirect to confirmation page after brief delay
           setTimeout(() => {
-            window.location.href = `/${countryCode || "de"}/order/${order.id}/confirmed`
+            window.location.href = `/${countryCode || "at"}/order/${order.id}/confirmed`
           }, 800)
         } else if (response?.type === "cart" && response.error) {
           // Cart completion failed - check if we should retry
@@ -113,7 +127,9 @@ export default function CompletePaymentPage() {
 
           // Non-retryable error or max retries reached
           setStatus("error")
-          setErrorMessage(response.error?.message || "Die Zahlung konnte nicht verarbeitet werden.")
+          // Medusa-Meldungen sind englisch und technisch
+          console.error("Cart completion failed:", response.error?.message)
+          setErrorMessage("Die Zahlung konnte nicht verarbeitet werden. Bitte versuchen Sie es im Checkout noch einmal.")
         } else {
           // Unexpected response format
           setStatus("error")
@@ -150,19 +166,19 @@ export default function CompletePaymentPage() {
           await clearCartCookie()
           setStatus("success")
           setTimeout(() => {
-            window.location.href = `/${countryCode || "de"}/order/${existingOrder.id}/confirmed`
+            window.location.href = `/${countryCode || "at"}/order/${existingOrder.id}/confirmed`
           }, 800)
           return
         }
 
         // No order found - show error
         setStatus("error")
-        setErrorMessage(error?.message || "Ein technischer Fehler ist aufgetreten.")
+        setErrorMessage("Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es im Checkout noch einmal.")
       }
     }
 
     completeCartWithRetry()
-  }, [cartId, countryCode])
+  }, [cartId, countryCode, redirectStatus])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
@@ -267,13 +283,13 @@ export default function CompletePaymentPage() {
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
               <a
-                href={`/${countryCode || "de"}/checkout`}
+                href={`/${countryCode || "at"}/checkout?step=payment`}
                 className="inline-flex items-center justify-center px-6 py-3 border border-stone-300 text-stone-700 font-medium rounded-lg hover:bg-stone-50 transition-colors"
               >
                 Zurück zum Checkout
               </a>
               <a
-                href={`/${countryCode || "de"}/cart`}
+                href={`/${countryCode || "at"}/cart`}
                 className="inline-flex items-center justify-center px-6 py-3 bg-stone-800 text-white font-medium rounded-lg hover:bg-stone-700 transition-colors"
               >
                 Zum Warenkorb
