@@ -24,8 +24,9 @@ Stand: 27.11.2026, Branch `feat/stripe-wallets`. Nicht im Umfang: Express-Checko
 ### Stripe-Dashboard (Sandbox **und** Live)
 
 - [x] Apple Pay und Google Pay aktiv (laut Andre am 27.11.2026 erledigt).
-- [ ] **EPS ausschalten** (Einstellungen → Zahlungsmethoden). In der Sandbox ist EPS aktiv und erscheint in der Kasse (lokaler Test 27.11.2026). Im Code lässt es sich nicht ausblenden, ohne `paymentMethodTypes` zu setzen (ab Stripe.js „Endive“ ein Fehler, daher bewusst nicht verwendet). Live ebenfalls prüfen.
-- [ ] **Klarna und PayPal im Live-Konto prüfen.** Stripe.js meldet in der Sandbox: „The following payment method types are not activated: klarna, paypal. They will be displayed in test mode, but hidden in live mode.“ Der Shop bewirbt beide; falls sie auch live nicht aktiviert sind, fehlen sie Kundinnen heute schon.
+- [x] **Live (Konto `acct_1PQrts…`), Screenshot 27.11.2026:** EPS deaktiviert, PayPal „Aktiviert (benutzerdefiniert)“, Klarna aktiviert.
+- [ ] **Sandbox angleichen** (nur für Tests auf dev wichtig): Die lokalen/dev-Testschlüssel gehören zu einer **eigenen Sandbox** (anderes Konto, eigene Einstellungen). Dort ist EPS aktiv und erscheint in der Kasse; Klarna und PayPal meldet Stripe.js dort als „not activated … hidden in live mode“. EPS dort ausschalten, sonst sieht der Gerätetest auf dev anders aus als live. Im Code lässt sich EPS nicht ausblenden, ohne `paymentMethodTypes` zu setzen (ab Stripe.js „Endive“ ein Fehler, daher bewusst nicht verwendet).
+- [ ] **Standard-Konfiguration prüfen:** Die PaymentIntents nennen keine `payment_method_configuration`, Stripe nimmt also die **Standard**-Konfiguration. Gibt es live mehrere (`pmc_…`), muss die mit EPS aus / Wallets an die Standard-Konfiguration sein.
 - [ ] Übrige aktive Zahlungsarten durchsehen: Der Shop bewirbt Visa, Mastercard, PayPal und Klarna (`shop-facts.ts`, FAQ). Alles andere, das aktiv ist (Link, Sofort, giropay …), erscheint ebenfalls in der Kasse. Entweder ausschalten oder FAQ/Symbole ergänzen.
 - [ ] **Zahlungsmethoden-Domains** registrieren (Einstellungen → Zahlungsmethoden → Zahlungsmethoden-Domains). Pflicht für Apple Pay und Google Pay im Payment Element:
   - Live: `shop.strickerei-jutta.at`, zusätzlich `www.shop.strickerei-jutta.at` nur falls verwendet.
