@@ -4,6 +4,8 @@ import { retrieveCustomer } from "@lib/data/customer"
 import { getShippingPreview } from "@lib/data/fulfillment"
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
+import CheckoutErrorBoundary from "@modules/checkout/components/checkout-error-boundary"
+import CartPending from "@modules/checkout/components/checkout-notice/cart-pending"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
@@ -46,7 +48,7 @@ export default async function Checkout({
     // instead of throwing a 500 or flashing a redirect to /cart.
     return (
       <div className="content-container py-8 small:py-12 flex items-center justify-center min-h-[200px]">
-        <p className="text-stone-600">Weiterleitung zur Bestellbestätigung…</p>
+        <CartPending />
       </div>
     )
   }
@@ -100,7 +102,10 @@ export default async function Checkout({
             items={(cart.items ?? []).map(lineItemToItem)}
           />
           <PaymentWrapper cart={cart}>
-            <CheckoutForm cart={cart} customer={customer} />
+            {/* fängt Render-Fehler im Formular ab: Hinweis mit Weg weiter statt kaputter Seite */}
+            <CheckoutErrorBoundary>
+              <CheckoutForm cart={cart} customer={customer} />
+            </CheckoutErrorBoundary>
           </PaymentWrapper>
         </div>
         
