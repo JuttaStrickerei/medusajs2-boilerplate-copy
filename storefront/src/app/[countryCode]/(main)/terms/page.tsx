@@ -21,7 +21,7 @@ export default function TermsPage() {
               </h1>
 
               <div className="prose prose-stone max-w-none">
-                <p className="text-stone-600 mb-6">Stand: April 2026</p>
+                <p className="text-stone-600 mb-6">Stand: November 2026</p>
 
                 <h2 className="font-serif text-xl font-medium text-stone-800 mt-8 mb-4">
                   1. Geltungsbereich
