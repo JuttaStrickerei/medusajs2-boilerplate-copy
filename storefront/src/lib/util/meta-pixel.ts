@@ -1,6 +1,7 @@
 import type { GaItem } from "./analytics"
 import { hasConsentFor } from "./consent"
 import { META_PIXEL_ID } from "./meta-pixel-id"
+import { trackingAllowedHere } from "./tracking-hosts"
 
 /**
  * Meta Pixel (Facebook / Instagram ads). Nothing is loaded and nothing is
@@ -49,6 +50,10 @@ function installFbq(w: MetaWindow): Fbq {
   fbq.queue = []
   w.fbq = fbq
   if (!w._fbq) w._fbq = fbq
+
+  // Off the live shop (tracking-hosts.ts) the stub only queues: fbevents.js
+  // never loads, so no test visit or test order reaches Jutta's dataset
+  if (!trackingAllowedHere()) return fbq
 
   const script = document.createElement("script")
   script.async = true
