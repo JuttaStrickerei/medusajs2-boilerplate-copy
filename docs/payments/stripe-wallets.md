@@ -24,7 +24,8 @@ Stand: 27.11.2026, Branch `feat/stripe-wallets`. Nicht im Umfang: Express-Checko
 ### Stripe-Dashboard (Sandbox **und** Live)
 
 - [x] Apple Pay und Google Pay aktiv (laut Andre am 27.11.2026 erledigt).
-- [ ] **EPS ausschalten**, falls aktiv (Einstellungen → Zahlungsmethoden). Das Payment Element zeigt sonst EPS an; im Code lässt es sich nicht ausblenden, ohne `paymentMethodTypes` zu setzen (ab Stripe.js „Endive“ ein Fehler, daher bewusst nicht verwendet). Ein Code-Kommentar im Admin-Mail-Template nennt „Karte, EPS, Klarna, Link, PayPal“ als erlaubte Arten.
+- [ ] **EPS ausschalten** (Einstellungen → Zahlungsmethoden). In der Sandbox ist EPS aktiv und erscheint in der Kasse (lokaler Test 27.11.2026). Im Code lässt es sich nicht ausblenden, ohne `paymentMethodTypes` zu setzen (ab Stripe.js „Endive“ ein Fehler, daher bewusst nicht verwendet). Live ebenfalls prüfen.
+- [ ] **Klarna und PayPal im Live-Konto prüfen.** Stripe.js meldet in der Sandbox: „The following payment method types are not activated: klarna, paypal. They will be displayed in test mode, but hidden in live mode.“ Der Shop bewirbt beide; falls sie auch live nicht aktiviert sind, fehlen sie Kundinnen heute schon.
 - [ ] Übrige aktive Zahlungsarten durchsehen: Der Shop bewirbt Visa, Mastercard, PayPal und Klarna (`shop-facts.ts`, FAQ). Alles andere, das aktiv ist (Link, Sofort, giropay …), erscheint ebenfalls in der Kasse. Entweder ausschalten oder FAQ/Symbole ergänzen.
 - [ ] **Zahlungsmethoden-Domains** registrieren (Einstellungen → Zahlungsmethoden → Zahlungsmethoden-Domains). Pflicht für Apple Pay und Google Pay im Payment Element:
   - Live: `shop.strickerei-jutta.at`, zusätzlich `www.shop.strickerei-jutta.at` nur falls verwendet.
@@ -87,6 +88,19 @@ Fehlerfälle:
 - [ ] Klarna oder PayPal: auf der Seite des Anbieters abbrechen → Rückkehr auf `/at/complete-payment`, deutsche Meldung „Die Zahlung wurde abgebrochen oder abgelehnt …“, Link „Zurück zum Checkout“ führt zum Schritt „Zahlung“.
 - [ ] Android Chrome: Google Pay erscheint mit dem neuen `Permissions-Policy`-Header (siehe unten). Falls nicht: Header testweise auf Stripes exakten Wert ohne `*.js.stripe.com` setzen.
 - [ ] Browser-Konsole in der Kasse ohne Fehler.
+
+### Lokaler Test 27.11.2026 (headless Chrome, localhost, dev-Datenbank, Stripe-Sandbox, ohne Zahlung)
+
+- Adresse → Versand → Zahlung → Übersicht durchgeklickt; kein Klick auf „Zahlungspflichtig bestellen“ mit Karte (CLAUDE.md: vor der Zahlung stoppen).
+- `Permissions-Policy` kommt auf `/at/checkout`, nicht auf anderen Seiten.
+- Payment Element deutsch („Kartennummer“, „Ablaufdatum“, „Sicherheitscode“), Farben und hellgrauer Platzhalter wie geplant. Angezeigt: Karte (mit Link), Klarna, PayPal, EPS.
+- Apple Pay fehlt lokal, Stripe.js meldet „You have not registered or verified the domain … apple_pay“ (erwartet auf localhost; bestätigt, dass Apple Pay in der Sandbox aktiv ist und nur die Domain fehlt). Google Pay erscheint im headless Chrome ohne Wallet nicht (erwartet).
+- „Weiter zur Übersicht“ öffnet kein Fenster; in der Übersicht steht „Kreditkarte“, der Knopf „Zahlungspflichtig bestellen“, AGB/Widerruf/Datenschutz und der Gesamtbetrag inkl. MwSt.
+- Übersicht neu geladen (Stripe-Felder leer) und doppelt auf „Zahlungspflichtig bestellen“ geklickt: zurück zum Schritt „Zahlung“, keine Zahlungsbestätigung an Stripe (per Netzwerksperre geprüft). Die Hinweismeldung des Knopfs verschwindet dabei mit dem Schritt (wie vorher).
+- `/at/complete-payment?…&redirect_status=failed`: deutsche Meldung, „Zurück zum Checkout“ → `/at/checkout?step=payment`.
+- Konsole: keine Fehler; nur Stripe-Hinweise (HTTP, Domain, Klarna/PayPal nicht aktiviert) und zwei bestehende Next.js-Hinweise.
+- `pnpm build` (Storefront) und `medusa build` (Backend) erfolgreich; `tsc --noEmit` vorher und nachher je 29 Fehler (alle vorbestehend).
+- Nicht getestet (braucht Zahlung oder Gerät): abgelehnte Karte, 3-D-Secure, Wallet-Fenster und dessen Abbruch, Klarna/PayPal-Abbruch beim Anbieter, Webhook nach geschlossenem Browser.
 
 ## c) Textentwürfe (zur Prüfung, keine Rechtsberatung)
 
