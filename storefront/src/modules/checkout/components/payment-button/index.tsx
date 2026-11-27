@@ -1,13 +1,24 @@
 "use client"
 
-import { isStripe, isManual } from "@lib/constants"
+import {
+  isStripe,
+  isManual,
+  isWalletPaymentType,
+  paymentInfoMap,
+} from "@lib/constants"
 import { initiatePaymentSession, placeOrder } from "@lib/data/cart"
 import { saveMetaAttribution } from "@lib/data/meta-attribution"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
 import { useParams, usePathname, useRouter } from "next/navigation"
-import React, { useContext, useEffect, useState, useCallback } from "react"
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react"
 import ErrorMessage from "../error-message"
 import { StripeContext } from "../payment-wrapper"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
@@ -20,7 +31,21 @@ const saveAttributionBriefly = () =>
   Promise.race([
     saveMetaAttribution(),
     new Promise<void>((resolve) => setTimeout(resolve, ATTRIBUTION_TIMEOUT_MS)),
-  ])
+  ]).catch(() => undefined)
+
+const PAYMENT_FAILED_MESSAGE =
+  "Die Zahlung ist leider nicht durchgegangen. Bitte versuchen Sie es noch einmal oder wählen Sie eine andere Zahlungsart."
+
+/**
+ * Stripe-Fehler für die Kundin. Mit locale „de“ (stripe-wrapper.tsx) sind
+ * Karten- und Eingabefehler schon deutsch; technische Fehler (API, Netz)
+ * kommen auf Englisch und ohne Nutzen für die Kundin, darum ersetzen wir sie.
+ */
+const customerPaymentError = (error: { type?: string; message?: string }) =>
+  (error.type === "card_error" || error.type === "validation_error") &&
+  error.message
+    ? error.message
+    : PAYMENT_FAILED_MESSAGE
 
 /**
  * @name PaymentButton
@@ -141,6 +166,26 @@ const StripePaymentButton = ({
     (session) => session.status === "pending"
   )
 
+  // Sperrt einen zweiten Klick, bevor React den Ladezustand gezeichnet hat
+  const paymentInFlight = useRef(false)
+  // Die im Payment Element gewählte Art (card, apple_pay, google_pay, …).
+  // Das Element bleibt im Schritt „Übersicht“ unsichtbar gemountet.
+  const selectedTypeRef = useRef<string | undefined>(undefined)
+
+  useEffect(() => {
+    const paymentElement = elements?.getElement("payment")
+    if (!paymentElement) {
+      return
+    }
+    const onChange = (event: { value?: { type?: string } }) => {
+      selectedTypeRef.current = event.value?.type
+    }
+    paymentElement.on("change", onChange)
+    return () => {
+      paymentElement.off("change", onChange)
+    }
+  }, [elements])
+
   // A memoized function to handle order completion.
   // It only runs after Stripe has taken the payment (capture: true), so a
   // failure here means "charged, but no order yet". Review shows the message
@@ -168,20 +213,47 @@ const StripePaymentButton = ({
    * Stripe and handles the outcome, including redirects for off-site payments.
    */
   const handlePayment = async () => {
-    // Abort if Stripe.js has not loaded or the cart is not ready.
-    if (!stripe || !elements || !cart || notReady) {
+    // Abort if Stripe.js has not loaded, the cart is not ready, or a payment
+    // is already running (double click / double tap).
+    if (!stripe || !elements || !cart || notReady || paymentInFlight.current) {
       return
     }
+    paymentInFlight.current = true
+
+    const stopSubmitting = () => {
+      paymentInFlight.current = false
+      setSubmitting(false)
+    }
+
+    const selectedType = selectedTypeRef.current
+    const isWallet = isWalletPaymentType(selectedType)
+
+    // elements.submit() MUSS der erste Aufruf nach dem Klick sein, vor jedem
+    // await: Bei Apple Pay und Google Pay öffnet er das Wallet-Fenster, und
+    // Apple lässt das nur direkt aus dem Klick heraus zu. Damit ist dieser
+    // Klick auf „Zahlungspflichtig bestellen“ auch der, der die Zahlung auslöst.
+    const submitPromise = elements.submit()
+    // Läuft parallel, während das Wallet-Fenster offen ist (vorher: danach)
+    const attributionPromise = saveAttributionBriefly()
 
     setSubmitting(true)
     setErrorMessage(null)
 
-    // Check the payment details first (Stripe requires this before the payment
-    // is created). After a page reload the fields are empty: back to the
-    // payment step, where they are visible.
-    const { error: submitError } = await elements.submit()
+    const { error: submitError } = await submitPromise
     if (submitError) {
-      setSubmitting(false)
+      stopSubmitting()
+      if (isWallet) {
+        // Meist hat die Kundin das Wallet-Fenster geschlossen. Die Daten sind
+        // nicht verloren, sie kann einfach noch einmal klicken.
+        setErrorMessage(
+          `Die Zahlung mit ${
+            paymentInfoMap[selectedType as string]?.title ?? "dem Wallet"
+          } wurde nicht abgeschlossen. Sie können es noch einmal versuchen oder im Schritt „Zahlung“ eine andere Zahlungsart wählen.`
+        )
+        return
+      }
+      // Felder unvollständig, z. B. nach einem Neuladen der Seite: zurück zum
+      // Schritt „Zahlung“, wo sie sichtbar sind.
       setErrorMessage(
         "Bitte geben Sie Ihre Zahlungsdaten im Schritt „Zahlung“ noch einmal ein."
       )
@@ -205,7 +277,7 @@ const StripePaymentButton = ({
       }
     }
     if (!clientSecret) {
-      setSubmitting(false)
+      stopSubmitting()
       setErrorMessage(
         "Die Zahlung konnte nicht vorbereitet werden. Bitte versuchen Sie es noch einmal."
       )
@@ -223,13 +295,13 @@ const StripePaymentButton = ({
       setErrorMessage(
         "Zahlungselement ist nicht verfügbar. Bitte zurück zur Zahlungsseite."
       )
-      setSubmitting(false)
+      stopSubmitting()
       return
     }
 
-    // Before a possible redirect (Klarna, PayPal, EPS): afterwards only the
-    // backend can report the purchase to Meta
-    await saveAttributionBriefly()
+    // Before a possible redirect (Klarna, PayPal): afterwards only the backend
+    // can report the purchase to Meta. Started above, at most 2 s.
+    await attributionPromise
 
     const { error } = await stripe.confirmPayment({
       elements,
@@ -246,8 +318,8 @@ const StripePaymentButton = ({
       // Card declined, validation failed, or any other Stripe-side error.
       // Do NOT show the parent's full-page overlay – the button is still mounted
       // so the user sees the error inline and can retry with a different card.
-      setSubmitting(false)
-      setErrorMessage(error.message ?? "An unknown error occurred")
+      stopSubmitting()
+      setErrorMessage(customerPaymentError(error))
       return
     }
 

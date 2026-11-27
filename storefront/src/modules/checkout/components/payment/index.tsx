@@ -86,14 +86,11 @@ const Payment = ({
         return
       }
 
-      // Stripe's elements.submit() resolves with { error } on validation
-      // failure — it does not reject — so a .catch() would silently miss it.
-      const { error: submitError } = await elements.submit()
-      if (submitError) {
-        setError(submitError.message || "Zahlungsfehler")
-        return
-      }
-
+      // Bewusst kein elements.submit() hier: Bei Apple Pay und Google Pay
+      // öffnet submit() das Wallet-Fenster. Das darf erst der Knopf
+      // „Zahlungspflichtig bestellen“ tun (§ 8 Abs 2 FAGG, und Apple verlangt
+      // dafür einen direkten Klick). Dieser Knopf ist ohnehin gesperrt, bis das
+      // Zahlungsfeld vollständig ist (stripeComplete); geprüft wird beim Bestellen.
       router.push(pathname + "?" + createQueryString("step", "review"), {
         scroll: false,
       })
