@@ -11,7 +11,7 @@ const NewsletterHerkunft = model.define("newsletter_herkunft", {
   id: model.id({ prefix: "nlh" }).primaryKey(),
   // WILLKOMMEN-XXXXXXXX
   code: model.text().unique(),
-  // Herkunft (utm_*, Ankunftsseite, Uhrzeit, _fbc, _fbp) und angemeldet_at
+  // Herkunft (utm_*, Ankunftsseite, Uhrzeit, _fbc) und angemeldet_at
   data: model.json(),
 })
 

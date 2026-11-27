@@ -8,7 +8,7 @@ import { z } from "zod"
  *
  * Die Storefront schickt das nur mit „Marketing“-Zustimmung. Gespeichert wird
  * es im Modul herkunft (eigene Tabelle, über keine Shop-Schnittstelle lesbar):
- * Kennungen der Ankunftsadresse und die Meta-Kennungen (_fbc, _fbp). Beim Kauf
+ * Kennungen der Ankunftsadresse und die Meta-Klickkennung (_fbc). Beim Kauf
  * mit dem Code kommt eine Zusammenfassung ohne Meta-Kennungen an die Bestellung
  * (metadata.herkunft), der Eintrag wird gelöscht (Subscriber meta-capi-purchase,
  * Job herkunft-aufraeumen für Codes, die nie eingelöst werden).
@@ -27,8 +27,6 @@ const optionalText = (max: number, pattern?: RegExp) => {
 
 // _fbc: fb.<Unterdomain-Index>.<Zeit in ms>.<fbclid>[.<Anhang>]
 const FBC_PATTERN = /^fb\.\d\.\d{10,16}\.[\w-]+(\.[\w-]+)?$/
-// _fbp: fb.<Unterdomain-Index>.<Zeit in ms>.<Zufallszahl>[.<Anhang>]
-const FBP_PATTERN = /^fb\.\d\.\d{10,16}\.\d+(\.[\w-]+)?$/
 
 export const herkunftSchema = z.object({
   utm_source: optionalText(200),
@@ -40,7 +38,6 @@ export const herkunftSchema = z.object({
   landing_path: optionalText(200, /^\//),
   landing_at: z.number().int().positive().optional().catch(undefined),
   fbc: optionalText(600, FBC_PATTERN),
-  fbp: optionalText(200, FBP_PATTERN),
 })
 
 export type Herkunft = z.infer<typeof herkunftSchema>

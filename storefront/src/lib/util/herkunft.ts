@@ -17,6 +17,8 @@ const MAX_AGE_SECONDS = 30 * 24 * 60 * 60
 const MAX_TEXT = 120
 const MAX_CLICK_ID = 500
 const CLICK_IDS = new Set(["fbclid", "gclid"])
+// Browser nehmen Cookies bis rund 4 KB an, ein zu großes fiele still weg
+const MAX_COOKIE_VALUE = 3500
 
 export type Herkunft = {
   utm_source?: string
@@ -47,7 +49,8 @@ const clean = (key: string, value: string | null): string | undefined => {
   return text.length <= MAX_CLICK_ID && /^[\w-]+$/.test(text) ? text : undefined
 }
 
-// Ankunft in diesem Tab (einmal je vollem Seitenaufruf)
+// Ankunft in diesem Tab: gelesen einmal je vollem Seitenaufruf (Anzeigen-Links laden die
+// Seite neu, Links innerhalb des Shops tragen keine Kennungen)
 let landing: Herkunft | null = null
 
 /** Liest die Ankunftsadresse. Nur Besuche mit Kampagnen- oder Klickkennung zählen. */
@@ -79,9 +82,9 @@ export function captureLanding(): void {
 export function persistHerkunft(): void {
   if (typeof document === "undefined" || !landing) return
   if (!hasConsentFor(MARKETING_CATEGORY)) return
-  document.cookie = `${HERKUNFT_COOKIE}=${encodeURIComponent(
-    JSON.stringify(landing)
-  )}; Max-Age=${MAX_AGE_SECONDS}; Path=/; SameSite=Lax${
+  const value = encodeURIComponent(JSON.stringify(landing))
+  if (value.length > MAX_COOKIE_VALUE) return
+  document.cookie = `${HERKUNFT_COOKIE}=${value}; Max-Age=${MAX_AGE_SECONDS}; Path=/; SameSite=Lax${
     window.location.protocol === "https:" ? "; Secure" : ""
   }`
 }

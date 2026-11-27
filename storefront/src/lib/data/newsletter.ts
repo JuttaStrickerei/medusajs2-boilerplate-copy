@@ -7,7 +7,7 @@ import { MARKETING_CATEGORY } from "@lib/util/meta-pixel"
 import { cookies as nextCookies } from "next/headers"
 
 // Herkunft für den persönlichen Willkommens-Code (Backend: api/store/newsletter).
-// Nur mit „Marketing“-Zustimmung: Kennungen der Ankunftsadresse und die Meta-Kennungen.
+// Nur mit „Marketing“-Zustimmung: Kennungen der Ankunftsadresse und die Meta-Klickkennung.
 // Fehlt _fbc, obwohl die Ankunft ein fbclid hatte (Zustimmung erst nach dem
 // Weiterklicken), entsteht die Kennung so, wie Meta sie beschreibt: fb.1.<Zeit>.<fbclid>
 async function readHerkunft(): Promise<Record<string, unknown> | undefined> {
@@ -25,9 +25,8 @@ async function readHerkunft(): Promise<Record<string, unknown> | undefined> {
       (fbclid && landing?.landing_at
         ? `fb.1.${landing.landing_at}.${fbclid}`
         : undefined)
-    const fbp = cookies.get("_fbp")?.value
 
-    const herkunft = { ...source, fbc, fbp }
+    const herkunft = { ...source, fbc }
     const filled = Object.fromEntries(
       Object.entries(herkunft).filter(([, value]) => value !== undefined)
     )

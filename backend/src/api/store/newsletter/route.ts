@@ -23,8 +23,9 @@ export const newsletterSignupSchema = z.object({
   email: z.string().email(),
   first_name: z.string().max(100).optional(),
   last_name: z.string().max(100).optional(),
-  // Herkunft aus der Storefront (nur mit „Marketing“-Zustimmung). Ungültige Angaben
-  // fallen weg, die Anmeldung gilt trotzdem.
+  // Herkunft aus der Storefront (lib/data/newsletter schickt sie nur mit „Marketing“-
+  // Zustimmung, prüfen kann die Route das nicht). Ungültige Angaben fallen weg,
+  // die Anmeldung gilt trotzdem.
   herkunft: herkunftSchema.optional().catch(undefined),
 })
 
@@ -199,8 +200,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       welcomeCode = null
     }
 
-    // 5. Herkunft zum Code ablegen (nur wenn die Storefront sie mit Marketing-Zustimmung
-    // geschickt hat und der Code per E-Mail hinausging). Fehler bremsen die Anmeldung nicht.
+    // 5. Herkunft zum Code ablegen, wenn sie mitkam und der Code per E-Mail hinausging.
+    // Fehler bremsen die Anmeldung nicht.
     const signupHerkunft = filledHerkunft(herkunft)
     if (welcomeCode && signupHerkunft) {
       try {

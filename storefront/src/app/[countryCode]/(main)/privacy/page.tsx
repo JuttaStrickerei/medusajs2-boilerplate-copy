@@ -485,7 +485,7 @@ export default function PrivacyPage() {
                       Adresse (z. B. utm_source, utm_campaign, fbclid), die
                       Ankunftsseite und die Uhrzeit. Melden Sie sich dann zum
                       Newsletter an, speichern wir diese Angaben und die
-                      Kennungen der Cookies _fbp und _fbc zu Ihrem persönlichen
+                      Kennung des Cookies _fbc zu Ihrem persönlichen
                       Gutscheincode. Lösen Sie den Code später ein, auch in einem
                       anderen Browser oder auf einem anderen Gerät, ordnen wir
                       Ihre Bestellung dieser Herkunft zu. Haben Sie auch beim
@@ -537,7 +537,7 @@ export default function PrivacyPage() {
                       zu Ihrer Bestellung nur, bis der Kauf an Meta gemeldet ist,
                       und löschen sie danach. Das Cookie jutta_herkunft wird nach
                       30 Tagen gelöscht. Die Angaben zu Ihrem Gutscheincode
-                      (Herkunft und die Kennungen _fbp und _fbc) löschen wir,
+                      (Herkunft und die Kennung _fbc) löschen wir,
                       sobald Sie den Code eingelöst haben, sonst spätestens 32
                       Tage nach der Anmeldung (der Code gilt 30 Tage). Woher eine
                       Bestellung kam (Quelle, Kampagne, Anzeige, Ankunftsseite,

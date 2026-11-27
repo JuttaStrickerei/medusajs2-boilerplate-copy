@@ -90,9 +90,15 @@ async function findSignupHerkunft(
 }
 
 // Another order.placed subscriber (payment-method-label) also merges into
-// order.metadata. Medusa merges in the application (read, merge, write), so a
-// write at the same moment can drop our key. Read once more and write again.
+// order.metadata. Medusa merges in the application (read, merge, write), so an
+// update running at the same moment can drop our key. Each update takes
+// milliseconds: after a short wait any overlapping one has committed, then read
+// once more and write again if needed.
+const SETTLE_MS = 1500
+const settle = () => new Promise((resolve) => setTimeout(resolve, SETTLE_MS))
+
 async function orderShowsHerkunft(query: Query, orderId: string): Promise<boolean> {
+  await settle()
   const {
     data: [order],
   } = await query.graph({ entity: "order", fields: ["id", "metadata"], filters: { id: orderId } })
@@ -138,7 +144,6 @@ export default async function metaCapiPurchaseHandler({
       ? {
           ...stored,
           fbc: pickFbc(stored.fbc, signup.herkunft, new Date(order.created_at)),
-          fbp: stored.fbp || signup.herkunft.fbp,
         }
       : stored
 
