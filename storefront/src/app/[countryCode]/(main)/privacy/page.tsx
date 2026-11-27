@@ -132,7 +132,8 @@ export default function PrivacyPage() {
                   Vorname, Nachname, vollständige Rechnungs- und Lieferadresse,
                   E-Mail-Adresse, Telefonnummer für Rückfragen zur Zustellung
                   sowie die von Ihnen gewählten Zahlungsdaten (z. B. Kontodaten,
-                  Kreditkarteninformationen, PayPal-Kennungen). Zweck und
+                  Kreditkarteninformationen, PayPal-Kennungen, bei Apple Pay
+                  oder Google Pay ein Zahlungstoken Ihres Wallets). Zweck und
                   Rechtsgrundlage: Die Bereitstellung und Verarbeitung dieser
                   Daten ist zur Vertragserfüllung bzw. zur Durchführung
                   vorvertraglicher Maßnahmen zwingend erforderlich. Ohne diese
@@ -149,7 +150,14 @@ export default function PrivacyPage() {
                   <li>
                     Von Ihnen gewählte Bankinstitute bzw. externe
                     Zahlungsdienstleister zum Zwecke der sicheren Abbuchung des
-                    Einkaufspreises.
+                    Einkaufspreises. Zahlungen per Kreditkarte, Apple Pay,
+                    Google Pay, PayPal und Klarna wickeln wir über den
+                    Zahlungsdienstleister Stripe (Stripe Payments Europe, Ltd.,
+                    Dublin, Irland) ab. Wenn Sie mit Apple Pay oder Google Pay
+                    bezahlen, verarbeiten zusätzlich Apple bzw. Google die in
+                    Ihrem Wallet hinterlegten Daten nach ihren eigenen
+                    Bedingungen und Datenschutzhinweisen; wir erhalten dabei
+                    keine vollständigen Kartendaten.
                   </li>
                   <li>
                     Von uns beauftragte Transport- und Logistikunternehmen (z.

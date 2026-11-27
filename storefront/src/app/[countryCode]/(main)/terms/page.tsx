@@ -76,7 +76,8 @@ export default function TermsPage() {
                   Der Vertrag kommt zustande, wenn wir Ihre Bestellung durch
                   eine Auftragsbestätigung per E-Mail unmittelbar annehmen oder,
                   bei Auswahl einer sofortigen Online-Zahlungsmethode (z. B.
-                  PayPal, Kreditkarte, Sofortüberweisung), bereits mit der von
+                  PayPal, Kreditkarte, Apple Pay, Google Pay,
+                  Sofortüberweisung), bereits mit der von
                   Ihnen angewiesenen Zahlungsbestätigung.
                 </p>
 

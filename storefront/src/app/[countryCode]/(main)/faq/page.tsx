@@ -16,7 +16,7 @@ const faqs = [
     questions: [
       {
         q: "Welche Zahlungsmethoden akzeptieren Sie?",
-        a: "Sie können bequem per Kreditkarte bezahlen sowie über PayPal und Klarna. Andere Zahlungsarten werden derzeit nicht angeboten.",
+        a: "Sie können bequem per Kreditkarte (Visa, Mastercard), mit Apple Pay und Google Pay (auf unterstützten Geräten) sowie über PayPal und Klarna bezahlen. Andere Zahlungsarten werden derzeit nicht angeboten.",
       },
       {
         q: "Kann ich meine Bestellung ändern oder stornieren?",
