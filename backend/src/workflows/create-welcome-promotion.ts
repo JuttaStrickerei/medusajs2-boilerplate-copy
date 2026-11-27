@@ -37,23 +37,17 @@ const generateWelcomeCodeStep = createStep("generate-welcome-code", async () => 
   })
 })
 
-type CreateWelcomePromotionInput = {
-  // e.g. { herkunft: … } (lib/herkunft): where the subscriber came from
-  metadata?: Record<string, unknown>
-}
-
 // Creates one promotion with its own campaign: 10 % on the order, usable once
 // (campaign budget "usage", limit 1), valid for 30 days. Same shape as the codes
 // made in the admin (percentage, target "order", allocation "across").
 export const createWelcomePromotionWorkflow = createWorkflow(
   "create-welcome-promotion",
-  function (input: CreateWelcomePromotionInput) {
+  function () {
     const generated = generateWelcomeCodeStep()
 
-    const promotions = transform({ generated, input }, ({ generated, input }) => [
+    const promotions = transform({ generated }, ({ generated }) => [
       {
         code: generated.code,
-        ...(input?.metadata ? { metadata: input.metadata } : {}),
         type: "standard" as const,
         status: "active" as const,
         is_automatic: false,

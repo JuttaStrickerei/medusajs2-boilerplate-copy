@@ -13,7 +13,10 @@ import { MARKETING_CATEGORY } from "./meta-pixel"
 
 export const HERKUNFT_COOKIE = "jutta_herkunft"
 const MAX_AGE_SECONDS = 30 * 24 * 60 * 60
-const MAX_LENGTH = 120
+// Kampagnen-Kennungen werden gekürzt, Klickkennungen nie: gekürzt wären sie falsch
+const MAX_TEXT = 120
+const MAX_CLICK_ID = 500
+const CLICK_IDS = new Set(["fbclid", "gclid"])
 
 export type Herkunft = {
   utm_source?: string
@@ -37,9 +40,11 @@ const PARAMS = [
   "gclid",
 ] as const
 
-const clean = (value: string | null): string | undefined => {
+const clean = (key: string, value: string | null): string | undefined => {
   const text = value?.trim()
-  return text ? text.slice(0, MAX_LENGTH) : undefined
+  if (!text) return undefined
+  if (!CLICK_IDS.has(key)) return text.slice(0, MAX_TEXT)
+  return text.length <= MAX_CLICK_ID && /^[\w-]+$/.test(text) ? text : undefined
 }
 
 // Ankunft in diesem Tab (einmal je vollem Seitenaufruf)
@@ -58,13 +63,13 @@ export function captureLanding(): void {
   }
   const found: Herkunft = {}
   for (const key of PARAMS) {
-    const value = clean(params.get(key))
+    const value = clean(key, params.get(key))
     if (value) found[key] = value
   }
   if (!Object.keys(found).length) return
   landing = {
     ...found,
-    landing_path: window.location.pathname.slice(0, MAX_LENGTH),
+    landing_path: window.location.pathname.slice(0, MAX_TEXT),
     landing_at: Date.now(),
   }
   persistHerkunft()
@@ -93,7 +98,7 @@ export function parseHerkunft(value: string | undefined): Herkunft | null {
     const result: Herkunft = {}
     for (const key of [...PARAMS, "landing_path"] as const) {
       if (typeof raw[key] === "string") {
-        const text = clean(raw[key])
+        const text = clean(key, raw[key])
         if (text) result[key] = text
       }
     }

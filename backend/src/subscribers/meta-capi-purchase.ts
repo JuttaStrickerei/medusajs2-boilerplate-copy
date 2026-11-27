@@ -1,5 +1,6 @@
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { META_CAPI_MODULE } from "../modules/meta-capi"
 import MetaCapiModuleService from "../modules/meta-capi/service"
 import {
@@ -7,14 +8,15 @@ import {
   readAttribution,
   type PurchaseOrder,
 } from "../modules/meta-capi/purchase-event"
+import { HERKUNFT_MODULE } from "../modules/herkunft"
+import type HerkunftModuleService from "../modules/herkunft/service"
 import { clearMetaAttributionWorkflow } from "../workflows/clear-meta-attribution"
 import { WELCOME_CODE_PREFIX } from "../workflows/create-welcome-promotion"
 import {
   HERKUNFT_KEY,
   orderHerkunft,
+  pickFbc,
   readStoredHerkunft,
-  usableFbc,
-  clearHerkunftUpdate,
   type StoredHerkunft,
 } from "../lib/herkunft"
 
@@ -42,16 +44,19 @@ type Logger = {
   error: (msg: string) => void
 }
 
+type Query = { graph: (args: any) => Promise<{ data: any[] }> }
+
 type SignupHerkunft = {
-  promotionId: string
+  entryId: string
   code: string
   herkunft: StoredHerkunft
 }
 
-// Herkunft am eingelösten Willkommens-Code (lib/herkunft). Own small query:
+// Herkunft zum eingelösten Willkommens-Code (Modul herkunft). Own small query:
 // the order query above must stay as it is.
 async function findSignupHerkunft(
-  query: { graph: (args: any) => Promise<{ data: any[] }> },
+  container: MedusaContainer,
+  query: Query,
   orderId: string,
   logger: Logger
 ): Promise<SignupHerkunft | null> {
@@ -60,26 +65,38 @@ async function findSignupHerkunft(
       data: [order],
     } = await query.graph({
       entity: "order",
-      fields: ["id", "promotions.id", "promotions.code", "promotions.metadata"],
+      fields: ["id", "promotions.code"],
       filters: { id: orderId },
     })
-    for (const promotion of order?.promotions ?? []) {
-      if (!promotion?.code?.startsWith(WELCOME_CODE_PREFIX)) continue
-      const herkunft = readStoredHerkunft(promotion.metadata)
-      if (herkunft) {
-        return {
-          promotionId: promotion.id,
-          code: promotion.code,
-          herkunft,
-        }
-      }
+    const codes: string[] = (order?.promotions ?? [])
+      .map((promotion: { code?: string | null }) => promotion?.code)
+      .filter((code: unknown): code is string =>
+        typeof code === "string" && code.startsWith(WELCOME_CODE_PREFIX)
+      )
+    if (!codes.length) return null
+
+    const herkunftModule: HerkunftModuleService = container.resolve(HERKUNFT_MODULE)
+    const entries = await herkunftModule.listNewsletterHerkunfts({ code: codes })
+    for (const entry of entries) {
+      const herkunft = readStoredHerkunft(entry.data)
+      if (herkunft) return { entryId: entry.id, code: entry.code, herkunft }
     }
   } catch (error) {
     logger.warn(
-      `[Herkunft] Promotions of order ${orderId} not read: ${(error as Error).message}`
+      `[Herkunft] Signup of order ${orderId} not read: ${(error as Error).message}`
     )
   }
   return null
+}
+
+// Another order.placed subscriber (payment-method-label) also merges into
+// order.metadata. Medusa merges in the application (read, merge, write), so a
+// write at the same moment can drop our key. Read once more and write again.
+async function orderShowsHerkunft(query: Query, orderId: string): Promise<boolean> {
+  const {
+    data: [order],
+  } = await query.graph({ entity: "order", fields: ["id", "metadata"], filters: { id: orderId } })
+  return !!(order?.metadata as Record<string, unknown> | null)?.[HERKUNFT_KEY]
 }
 
 /**
@@ -90,10 +107,11 @@ async function findSignupHerkunft(
  * order and the cart, also when the module is off (no access token) or Meta
  * refused the event.
  *
- * Paid with a newsletter welcome code that carries a Herkunft (the ad she came
+ * Paid with a newsletter welcome code that has a Herkunft (the ad she came
  * from when she signed up, maybe in another browser): the order gets a summary
  * of it (metadata.herkunft), and the Meta event gets the click id from the
- * signup when this browser has none. The Herkunft is then deleted at the code.
+ * signup when it is newer than this browser's own (at most 7 days old). The
+ * Herkunft entry is deleted once the order shows the summary.
  */
 export default async function metaCapiPurchaseHandler({
   event: { data },
@@ -111,16 +129,18 @@ export default async function metaCapiPurchaseHandler({
   })
   if (!order) return
 
-  const signup = await findSignupHerkunft(query, order.id, logger)
-  const attribution = readAttribution(order?.metadata)
-  if (!attribution && !signup) return
+  const signup = await findSignupHerkunft(container, query, order.id, logger)
+  const stored = readAttribution(order.metadata)
+  if (!stored && !signup) return
 
-  // Klick aus der Anmeldung nur, wenn dieser Browser keinen eigenen hat (der neuere zählt)
-  if (attribution && signup) {
-    const signupFbc = usableFbc(signup.herkunft, new Date(order.created_at))
-    if (!attribution.fbc && signupFbc) attribution.fbc = signupFbc
-    if (!attribution.fbp && signup.herkunft.fbp) attribution.fbp = signup.herkunft.fbp
-  }
+  const attribution =
+    stored && signup
+      ? {
+          ...stored,
+          fbc: pickFbc(stored.fbc, signup.herkunft, new Date(order.created_at)),
+          fbp: stored.fbp || signup.herkunft.fbp,
+        }
+      : stored
 
   const result: Record<string, string> = !attribution
     ? {}
@@ -128,34 +148,39 @@ export default async function metaCapiPurchaseHandler({
       ? await sendPurchase(container.resolve(META_CAPI_MODULE), order, attribution, logger)
       : { meta_capi_skipped: "module off" }
 
+  const input = {
+    order_id: order.id,
+    cart_id: order.cart?.id,
+    result,
+    ...(signup
+      ? { extra: { [HERKUNFT_KEY]: orderHerkunft(signup.herkunft, signup.code) } }
+      : {}),
+  }
   try {
-    await clearMetaAttributionWorkflow(container).run({
-      input: {
-        order_id: order.id,
-        cart_id: order.cart?.id,
-        result,
-        ...(signup
-          ? { extra: { [HERKUNFT_KEY]: orderHerkunft(signup.herkunft, signup.code) } }
-          : {}),
-      },
-    })
+    await clearMetaAttributionWorkflow(container).run({ input })
   } catch (error) {
     logger.error(
       `[MetaCapi] Attribution of order ${order.id} not deleted: ${(error as Error).message}`
     )
   }
 
-  if (signup) {
-    try {
-      await container
-        .resolve(Modules.PROMOTION)
-        .updatePromotions([clearHerkunftUpdate(signup.promotionId)])
-      logger.info(`[Herkunft] Order ${order.id} linked to its newsletter signup`)
-    } catch (error) {
-      logger.error(
-        `[Herkunft] Herkunft at promotion ${signup.promotionId} not deleted: ${(error as Error).message}`
-      )
+  if (!signup) return
+  try {
+    if (!(await orderShowsHerkunft(query, order.id))) {
+      await clearMetaAttributionWorkflow(container).run({ input })
     }
+    if (!(await orderShowsHerkunft(query, order.id))) {
+      // Eintrag bleibt, der Job löscht ihn nach Ablauf des Codes
+      logger.error(`[Herkunft] Order ${order.id} does not show its Herkunft`)
+      return
+    }
+    const herkunftModule: HerkunftModuleService = container.resolve(HERKUNFT_MODULE)
+    await herkunftModule.deleteNewsletterHerkunfts([signup.entryId])
+    logger.info(`[Herkunft] Order ${order.id} linked to its newsletter signup`)
+  } catch (error) {
+    logger.error(
+      `[Herkunft] Herkunft of order ${order.id} not finished: ${(error as Error).message}`
+    )
   }
 }
 

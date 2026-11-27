@@ -8,7 +8,9 @@ import {
   createWelcomePromotionWorkflow,
   WELCOME_DISCOUNT_PERCENT,
 } from "../../../workflows/create-welcome-promotion"
-import { HERKUNFT_KEY, herkunftSchema } from "../../../lib/herkunft"
+import { filledHerkunft, herkunftSchema } from "../../../lib/herkunft"
+import { HERKUNFT_MODULE } from "../../../modules/herkunft"
+import type HerkunftModuleService from "../../../modules/herkunft/service"
 
 // Stücke, die die Willkommens-Mail zeigt (Bild, Name, Link, ohne Preise), in dieser Reihenfolge
 const WELCOME_MAIL_PRODUCT_HANDLES = ["mantel-rouga", "mantel-bruna", "mantel-nera"]
@@ -97,15 +99,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // Schlägt das Anlegen fehl, bleibt die Anmeldung gültig und die E-Mail geht ohne Code hinaus.
     let welcomeCode: { code: string; ends_at: string } | null = null
     try {
-      const { result } = await createWelcomePromotionWorkflow(req.scope).run({
-        input: herkunft && Object.keys(herkunft).length
-          ? {
-              metadata: {
-                [HERKUNFT_KEY]: { ...herkunft, angemeldet_at: new Date().toISOString() },
-              },
-            }
-          : {},
-      })
+      const { result } = await createWelcomePromotionWorkflow(req.scope).run()
       welcomeCode = result
     } catch (promotionError) {
       logger.warn(
@@ -203,6 +197,25 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       logger.warn(`[Newsletter API] Confirmation email failed, but subscription succeeded`)
       // Ohne E-Mail hat die Kundin den Code nicht bekommen
       welcomeCode = null
+    }
+
+    // 5. Herkunft zum Code ablegen (nur wenn die Storefront sie mit Marketing-Zustimmung
+    // geschickt hat und der Code per E-Mail hinausging). Fehler bremsen die Anmeldung nicht.
+    const signupHerkunft = filledHerkunft(herkunft)
+    if (welcomeCode && signupHerkunft) {
+      try {
+        const herkunftModule: HerkunftModuleService = req.scope.resolve(HERKUNFT_MODULE)
+        await herkunftModule.createNewsletterHerkunfts({
+          code: welcomeCode.code,
+          data: { ...signupHerkunft, angemeldet_at: new Date().toISOString() },
+        })
+      } catch (herkunftError) {
+        logger.warn(
+          `[Newsletter API] Herkunft not saved: ${
+            herkunftError instanceof Error ? herkunftError.message : "unknown error"
+          }`
+        )
+      }
     }
 
     logger.info(`[Newsletter API] Subscription completed successfully`)

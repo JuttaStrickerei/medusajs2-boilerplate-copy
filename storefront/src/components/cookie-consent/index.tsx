@@ -62,6 +62,7 @@ const marketingSection = {
   description: [
     hasMeta ? metaDescription : "",
     hasGoogleAds ? googleAdsDescription : "",
+    "Außerdem merken wir uns in einem eigenen Cookie, über welche Anzeige oder Kampagne Sie zu uns gekommen sind. Melden Sie sich zum Newsletter an, ordnen wir das Ihrem persönlichen Gutscheincode zu, auch wenn Sie später in einem anderen Browser bestellen.",
     "Das geschieht nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie jederzeit widerrufen können.",
   ]
     .filter(Boolean)
