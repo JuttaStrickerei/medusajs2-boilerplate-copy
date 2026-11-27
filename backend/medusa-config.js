@@ -113,6 +113,9 @@ const medusaConfig = {
     },
     {resolve: './src/modules/revocation',
     },
+    // Herkunft zum Newsletter-Code (Anzeige → Anmeldung → Kauf in anderem Browser)
+    {resolve: './src/modules/herkunft',
+    },
     ...(SENDCLOUD_PUBLIC_KEY && SENDCLOUD_SECRET_KEY ? [{
       resolve: './src/modules/sendcloud-shipment',
     }] : []),
