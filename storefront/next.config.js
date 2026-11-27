@@ -51,6 +51,21 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Google Pay in Chrome für Android braucht die Payment-Request-API in
+        // Stripes iframes (https://docs.stripe.com/google-pay?platform=web).
+        // Nur in der Kasse, wo Stripe.js geladen wird. *.js.stripe.com
+        // zusätzlich zu Stripes Beispiel: Die Elements-iframes können von
+        // Unterdomains kommen (vgl. frame-src in Stripes CSP-Liste).
+        source: "/:countryCode/checkout",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value:
+              'payment=(self "https://js.stripe.com" "https://*.js.stripe.com" "https://checkout.stripe.com")',
+          },
+        ],
+      },
     ]
   },
   logging: {

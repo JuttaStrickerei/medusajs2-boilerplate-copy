@@ -40,6 +40,17 @@ import {
 
 loadEnv(process.env.NODE_ENV, process.cwd());
 
+// Ohne Webhook-Secret wird Stripe unten gar nicht geladen. Dann fehlt jede
+// Kartenzahlung, und Bestellungen nach geschlossenem Browser (Apple Pay, EPS)
+// entstehen nicht mehr über den Webhook. Das soll im Log auffallen.
+if (STRIPE_API_KEY && !STRIPE_WEBHOOK_SECRET) {
+  console.warn(
+    '[medusa-config] STRIPE_API_KEY ist gesetzt, STRIPE_WEBHOOK_SECRET fehlt: ' +
+      'Stripe ist deaktiviert. Webhook-Secret aus dem Stripe-Dashboard setzen ' +
+      '(Endpoint /hooks/payment/stripe_stripe).'
+  );
+}
+
 /** @type {import('@medusajs/types').MedusaConfig} */
 const medusaConfig = {
   projectConfig: {
@@ -209,6 +220,12 @@ const medusaConfig = {
               apiKey: STRIPE_API_KEY,
               webhookSecret: STRIPE_WEBHOOK_SECRET,
               capture: true,
+              // Setzt automatic_payment_methods: { enabled: true } am
+              // PaymentIntent: Stripe bietet alles an, was im Dashboard aktiv
+              // ist (Karte, Apple Pay, Google Pay, EPS …). Muss camelCase sein,
+              // `automatic_payment_methods` ignoriert der Provider still.
+              // Niemals payment_method_types setzen (ab Stripe-API „Endive“ HTTP 400).
+              automaticPaymentMethods: true,
             },
           },
         ],
