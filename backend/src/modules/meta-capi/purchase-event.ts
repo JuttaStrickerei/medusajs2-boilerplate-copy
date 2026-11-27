@@ -98,14 +98,14 @@ export function readAttribution(metadata: unknown): Attribution | null {
   }
 }
 
-const sha256 = (value: string) =>
+export const sha256 = (value: string) =>
   createHash("sha256").update(value, "utf8").digest("hex")
 
 // Lower case, letters only (umlauts stay, Meta takes UTF-8)
 const lettersOnly = (value?: string | null) =>
   value?.toLowerCase().replace(/[^\p{L}]/gu, "") || undefined
 
-function normalizeEmail(email?: string | null): string | undefined {
+export function normalizeEmail(email?: string | null): string | undefined {
   const value = email?.trim().toLowerCase()
   return value && value.includes("@") ? value : undefined
 }

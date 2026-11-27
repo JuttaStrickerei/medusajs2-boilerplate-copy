@@ -478,7 +478,15 @@ export default function PrivacyPage() {
                       E-Mail-Adresse, Telefonnummer, Vor- und Nachname, Ort,
                       Bundesland, Postleitzahl, Land und Ihre Kundennummer,
                       ebenfalls nur als Hashwert. Straße und Hausnummer
-                      übermitteln wir nicht. Newsletter-Anmeldung: Haben Sie in
+                      übermitteln wir nicht. Eine neue Anmeldung zum Newsletter
+                      meldet nur unser Server an Meta (als Ereignis „Lead“).
+                      Dabei übermitteln wir Ihre E-Mail-Adresse (nur als
+                      Hashwert), Ihre IP-Adresse, Angaben zu Ihrem Browser, die
+                      Seite der Anmeldung und die Kennungen der Cookies _fbp und
+                      _fbc. So kann Meta auch einen späteren Kauf mit derselben
+                      E-Mail-Adresse, etwa in einem anderen Browser, der Anzeige
+                      zuordnen, über die Sie gekommen sind. Herkunft am
+                      Gutscheincode: Haben Sie in
                       „Marketing“ eingewilligt und kommen Sie über eine Anzeige
                       oder einen Kampagnen-Link zu uns, merken wir uns im Cookie
                       jutta_herkunft die Kennungen aus der
@@ -535,7 +543,8 @@ export default function PrivacyPage() {
                       Übermittlung durch unseren Server (IP-Adresse, Angaben zum
                       Browser, Kennungen der Cookies _fbp und _fbc) speichern wir
                       zu Ihrer Bestellung nur, bis der Kauf an Meta gemeldet ist,
-                      und löschen sie danach. Das Cookie jutta_herkunft wird nach
+                      und löschen sie danach. Für die Meldung der
+                      Newsletter-Anmeldung speichern wir sie nicht. Das Cookie jutta_herkunft wird nach
                       30 Tagen gelöscht. Die Angaben zu Ihrem Gutscheincode
                       (Herkunft und die Kennung _fbc) löschen wir,
                       sobald Sie den Code eingelöst haben, sonst spätestens 32
