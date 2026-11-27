@@ -93,6 +93,15 @@ export function pickFbc(
   return signupClick! > ownClick ? herkunft.fbc : ownFbc
 }
 
+/**
+ * Fehlermeldung fürs Protokoll ohne die Daten: Datenbankfehler enthalten die ganze
+ * Abfrage samt Werten (Code, Klickkennung), davon bleibt nur der Grund am Ende.
+ */
+export function shortError(error: unknown): string {
+  const message = error instanceof Error ? error.message : "unknown error"
+  return (message.split(" - ").pop() ?? message).slice(0, 160)
+}
+
 /** Was an der Bestellung stehen bleibt: woher sie kam, ohne Meta-Kennungen */
 export function orderHerkunft(
   herkunft: StoredHerkunft,

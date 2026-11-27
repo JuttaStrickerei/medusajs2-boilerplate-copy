@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { shortError } from "../lib/herkunft"
 import { HERKUNFT_MODULE } from "../modules/herkunft"
 import type HerkunftModuleService from "../modules/herkunft/service"
 import { WELCOME_CODE_VALID_DAYS } from "../workflows/create-welcome-promotion"
@@ -34,7 +35,7 @@ export default async function herkunftAufraeumen(container: MedusaContainer) {
     }
     if (removed) logger.info(`[Herkunft] Removed ${removed} entries of expired welcome codes`)
   } catch (error) {
-    logger.error(`[Herkunft] Clean-up failed: ${(error as Error).message}`)
+    logger.error(`[Herkunft] Clean-up failed: ${shortError(error)}`)
   }
 }
 

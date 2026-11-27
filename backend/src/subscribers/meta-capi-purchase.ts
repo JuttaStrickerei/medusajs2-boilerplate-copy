@@ -17,6 +17,7 @@ import {
   orderHerkunft,
   pickFbc,
   readStoredHerkunft,
+  shortError,
   type StoredHerkunft,
 } from "../lib/herkunft"
 
@@ -83,7 +84,7 @@ async function findSignupHerkunft(
     }
   } catch (error) {
     logger.warn(
-      `[Herkunft] Signup of order ${orderId} not read: ${(error as Error).message}`
+      `[Herkunft] Signup of order ${orderId} not read: ${shortError(error)}`
     )
   }
   return null
@@ -184,7 +185,7 @@ export default async function metaCapiPurchaseHandler({
     logger.info(`[Herkunft] Order ${order.id} linked to its newsletter signup`)
   } catch (error) {
     logger.error(
-      `[Herkunft] Herkunft of order ${order.id} not finished: ${(error as Error).message}`
+      `[Herkunft] Herkunft of order ${order.id} not finished: ${shortError(error)}`
     )
   }
 }

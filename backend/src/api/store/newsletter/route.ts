@@ -8,7 +8,7 @@ import {
   createWelcomePromotionWorkflow,
   WELCOME_DISCOUNT_PERCENT,
 } from "../../../workflows/create-welcome-promotion"
-import { filledHerkunft, herkunftSchema } from "../../../lib/herkunft"
+import { filledHerkunft, herkunftSchema, shortError } from "../../../lib/herkunft"
 import { HERKUNFT_MODULE } from "../../../modules/herkunft"
 import type HerkunftModuleService from "../../../modules/herkunft/service"
 
@@ -211,11 +211,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           data: { ...signupHerkunft, angemeldet_at: new Date().toISOString() },
         })
       } catch (herkunftError) {
-        logger.warn(
-          `[Newsletter API] Herkunft not saved: ${
-            herkunftError instanceof Error ? herkunftError.message : "unknown error"
-          }`
-        )
+        logger.warn(`[Newsletter API] Herkunft not saved: ${shortError(herkunftError)}`)
       }
     }
 
